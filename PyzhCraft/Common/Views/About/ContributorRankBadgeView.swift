@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 贡献者排名徽章视图
+/// Contributor ranking badge view
 struct ContributorRankBadgeView: View {
     let rank: Int
 

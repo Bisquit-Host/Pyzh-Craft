@@ -2,7 +2,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 // MARK: - Window Delegate
-// 已移除 NSWindowDelegate 相关代码，纯 SwiftUI 不再需要
+// NSWindowDelegate related code has been removed and is no longer needed for pure SwiftUI
 
 // MARK: - Views
 struct GameInfoDetailView: View {
@@ -25,14 +25,14 @@ struct GameInfoDetailView: View {
     @StateObject private var cacheManager = CacheManager()
     @State private var localRefreshToken = UUID()
 
-    // 扫描结果：detailId Set，用于快速查找（O(1)）
+    // Scan results: detailId Set, used for fast search (O(1))
     @State private var scannedResources: Set<String> = []
 
-    // 使用稳定的 header，避免因 cacheInfo 更新导致重建
+    // Use stable headers to avoid rebuilds caused by cacheInfo updates
     @State private var remoteHeader: AnyView?
     @State private var localHeader: AnyView?
 
-    // 文件选择器状态
+    // File picker status
     @State private var showIconFilePicker = false
 
     var body: some View {
@@ -68,40 +68,40 @@ struct GameInfoDetailView: View {
                 )
             }
         }
-        // 刷新逻辑：
-        // 1. 游戏名变化时刷新
-        // 2. gameType 变化且游戏名不变时刷新
+        // Refresh logic:
+        // 1. Refresh when the game name changes
+        // 2. Refresh when the gameType changes and the game name remains unchanged
         .onChange(of: game.gameName) { _, _ in
-            // 游戏名变化时刷新
+            // Refresh when game name changes
             performRefresh()
         }
         .onChange(of: gameType) { _, _ in
             performRefresh()
         }
-        // 4. 详情关闭时（selectedProjectId 从非 nil 变为 nil），重新扫描已安装资源，
-        //    用于刷新远程列表中的安装状态（安装按钮）
+        // 4. When the details are closed (selectedProjectId changes from non-nil to nil), the installed resources are rescanned
+        //    Used to refresh the installation status in the remote list (install button)
         .onChange(of: selectedProjectId) { oldValue, newValue in
             if oldValue != nil && newValue == nil {
                 resetScanState()
                 scanAllResources()
             }
         }
-        // 3. 资源类型（query）变化时，重新扫描已安装资源，用于更新安装状态
+        // 3. When the resource type (query) changes, the installed resources are rescanned to update the installation status
         .onChange(of: query) { _, _ in
             resetScanState()
             scanAllResources()
         }
         .onAppear {
-            // 初始化 header
+            // initialize header
             updateHeaders()
             cacheManager.calculateGameCacheInfo(game.gameName)
         }
         .onChange(of: cacheManager.cacheInfo) { _, _ in
-            // 当 cacheInfo 更新时，更新 header（但不重建整个视图）
+            // When cacheInfo is updated, update the header (but don't rebuild the entire view)
             updateHeaders()
         }
         .onDisappear {
-            // 页面关闭后清除所有数据
+            // Clear all data after closing the page
             clearAllData()
         }
         .fileImporter(
@@ -113,30 +113,30 @@ struct GameInfoDetailView: View {
         }
     }
 
-    // MARK: - 刷新逻辑
-    /// 执行刷新操作（游戏名变化或 gameType 变化且游戏名不变时调用）
+    // MARK: - Refresh logic
+    /// Perform refresh operation (called when the game name changes or gameType changes and the game name remains unchanged)
     private func performRefresh() {
         updateHeaders()
         cacheManager.calculateGameCacheInfo(game.gameName)
-        // 仅在本地视图时刷新本地资源
+        // Refresh local resources only when viewed locally
         if !gameType {
             triggerLocalRefresh()
         }
-        // 重新扫描资源
+        // Rescan resources
         resetScanState()
         scanAllResources()
     }
 
     private func triggerLocalRefresh() {
-        // 仅在本地视图时更新刷新令牌
+        // Only update refresh token when viewing locally
         guard !gameType else { return }
         localRefreshToken = UUID()
     }
 
-    // MARK: - 更新 Header
-    /// 更新 header 视图，但不重建整个 GameRemoteResourceView
+    // MARK: - Update Header
+    /// Update the header view without rebuilding the entire GameRemoteResourceView
     private func updateHeaders() {
-        // 尝试从 gameRepository 获取最新的游戏信息，如果找不到则使用传入的 game
+        // Try to get the latest game information from gameRepository, if not found use the passed in game
         let currentGame = gameRepository.games.first { $0.id == game.id } ?? game
 
         remoteHeader = AnyView(
@@ -167,27 +167,27 @@ struct GameInfoDetailView: View {
         )
     }
 
-    // MARK: - 清除数据
-    /// 清除页面所有数据
+    // MARK: - clear data
+    /// Clear all data on the page
     private func clearAllData() {
-        // 重置缓存信息为默认值
+        // Reset cache information to default values
         cacheManager.cacheInfo = CacheInfo(fileCount: 0, totalSize: 0)
-        // 仅在本地视图时重置刷新令牌
+        // Reset refresh token only when viewing locally
         if !gameType {
             localRefreshToken = UUID()
         }
-        // 重置扫描结果
+        // Reset scan results
         scannedResources = []
     }
 
-    // MARK: - 重置扫描状态
-    /// 重置扫描状态，准备重新扫描
+    // MARK: - Reset scan status
+    /// Reset scan status and prepare to scan again
     private func resetScanState() {
         scannedResources = []
     }
 
-    // MARK: - 扫描所有资源
-    /// 异步扫描所有资源，收集 detailId（不阻塞视图渲染）
+    // MARK: - Scan all resources
+    /// Asynchronously scan all resources and collect detailId (without blocking view rendering)
     private func scanAllResources() {
         // Modpacks don't have a local directory to scan
         if query.lowercased() == "modpack" {
@@ -203,21 +203,21 @@ struct GameInfoDetailView: View {
             return
         }
 
-        // 检查目录是否存在且可访问
+        // Check if the directory exists and is accessible
         guard FileManager.default.fileExists(atPath: resourceDir.path) else {
-            // 目录不存在，直接返回
+            // The directory does not exist, return directly
             scannedResources = []
             return
         }
 
-        // 使用 Task 创建异步任务，确保不阻塞视图渲染
-        // 所有耗时操作在后台线程执行，只有更新状态时才回到主线程
+        // Use Task to create asynchronous tasks to ensure that view rendering is not blocked
+        // All time-consuming operations are performed on the background thread and only return to the main thread when the status is updated
         Task {
             do {
-                // 调用新的异步接口，只获取 detailId（直接返回 Set）
+                // Call the new asynchronous interface and only get the detailId (return Set directly)
                 let detailIds = try await ModScanner.shared.scanAllDetailIdsThrowing(in: resourceDir)
 
-                // 回到主线程更新状态
+                // Return to main thread update status
                 await MainActor.run {
                     scannedResources = detailIds
                 }
@@ -226,7 +226,7 @@ struct GameInfoDetailView: View {
                 Logger.shared.error("扫描所有资源失败: \(globalError.chineseMessage)")
                 GlobalErrorHandler.shared.handle(globalError)
 
-                // 回到主线程更新状态
+                // Return to main thread update status
                 await MainActor.run {
                     scannedResources = []
                 }
@@ -234,8 +234,8 @@ struct GameInfoDetailView: View {
         }
     }
 
-    // MARK: - 处理图标文件选择
-    /// 处理用户选择的图标文件
+    // MARK: - Handles icon file selection
+    /// Process user-selected icon files
     private func handleIconFileSelection(_ result: Result<[URL], Error>) {
         switch result {
         case .success(let urls):

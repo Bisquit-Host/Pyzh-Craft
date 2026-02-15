@@ -82,11 +82,11 @@ enum PlayerSkinService {
         enum SkinModel: String, Codable, CaseIterable { case classic, slim }
     }
 
-    /// 更新玩家皮肤信息到数据管理器
+    /// Update player skin information to data manager
     /// - Parameters:
-    ///   - uuid: 玩家UUID
-    ///   - skinInfo: 皮肤信息
-    /// - Returns: 是否更新成功
+    ///   - uuid: player UUID
+    ///   - skinInfo: skin information
+    /// - Returns: Whether the update is successful
     private static func updatePlayerSkinInfo(uuid: String, skinInfo: PublicSkinInfo) async -> Bool {
         do {
             let dataManager = PlayerDataManager()
@@ -97,7 +97,7 @@ enum PlayerSkinService {
                 return false
             }
 
-            // 创建更新后的玩家对象
+            // Create updated player object
             let updatedProfile = UserProfile(
                 id: player.profile.id,
                 name: player.profile.name,
@@ -110,10 +110,10 @@ enum PlayerSkinService {
 
             let updatedPlayer = Player(profile: updatedProfile, credential: updatedCredential)
 
-            // 使用 dataManager 更新数据
+            // Update data using dataManager
             try dataManager.updatePlayer(updatedPlayer)
 
-            // 通知ViewModel更新当前玩家
+            // Notify ViewModel to update the current player
             notifyPlayerUpdated(updatedPlayer)
 
             return true
@@ -123,20 +123,20 @@ enum PlayerSkinService {
         }
     }
 
-    /// 使用 Minecraft Services API 获取当前玩家的皮肤信息（更准确，无缓存延迟）
-    /// - Parameter player: 玩家信息
-    /// - Returns: 皮肤信息，如果获取失败返回nil
+    /// Get the current player's skin information using the Minecraft Services API (more accurate, no caching delays)
+    /// - Parameter player: player information
+    /// - Returns: Skin information, if the acquisition fails, return nil
     static func fetchCurrentPlayerSkinFromServices(player: Player) async -> PublicSkinInfo? {
         do {
             let profile = try await fetchPlayerProfileThrowing(player: player)
 
-            // 从 Minecraft Services API 响应中提取皮肤信息
+            // Extract skin information from Minecraft Services API response
             guard !profile.skins.isEmpty else {
                 Logger.shared.warning("玩家没有皮肤信息")
                 return nil
             }
 
-            // 找到当前激活的皮肤
+            // Find the currently active skin
             let activeSkin = profile.skins.first { $0.state == "ACTIVE" } ?? profile.skins.first
 
             guard let skin = activeSkin else {
@@ -147,7 +147,7 @@ enum PlayerSkinService {
             let skinInfo = PublicSkinInfo(
                 skinURL: skin.url,
                 model: skin.variant == "SLIM" ? .slim : .classic,
-                capeURL: nil, // Minecraft Services API 不直接提供斗篷信息
+                capeURL: nil, // The Minecraft Services API does not provide cloak information directly
                 fetchedAt: Date()
             )
 
@@ -183,20 +183,20 @@ enum PlayerSkinService {
         }
     }
 
-    /// 刷新皮肤信息（公共方法）
-    /// - Parameter player: 玩家信息
+    /// Refresh skin information (public method)
+    /// - Parameter player: player information
     private static func refreshSkinInfo(player: Player) async {
         if let newSkinInfo = await fetchCurrentPlayerSkinFromServices(player: player) {
             _ = await updatePlayerSkinInfo(uuid: player.id, skinInfo: newSkinInfo)
         }
     }
 
-    /// 处理皮肤上传后的完整流程（包括数据更新和通知）
+    /// Handle the complete process after skin upload (including data updates and notifications)
     /// - Parameters:
-    ///   - imageData: 皮肤图片数据
-    ///   - model: 皮肤模型
-    ///   - player: 玩家信息
-    /// - Returns: 是否成功
+    ///   - imageData: skin image data
+    ///   - model: skin model
+    ///   - player: player information
+    /// - Returns: Success or not
     static func uploadSkinAndRefresh(
         imageData: Data,
         model: PublicSkinInfo.SkinModel,
@@ -209,9 +209,9 @@ enum PlayerSkinService {
         return success
     }
 
-    /// 重置皮肤并刷新数据
-    /// - Parameter player: 玩家信息
-    /// - Returns: 是否成功
+    /// Reset skin and refresh data
+    /// - Parameter player: player information
+    /// - Returns: Success or not
     static func resetSkinAndRefresh(player: Player) async -> Bool {
         let success = await resetSkin(player: player)
         if success {
@@ -229,7 +229,7 @@ enum PlayerSkinService {
     ) async throws {
         try validateAccessToken(player)
 
-        // 使用字符串插值而非字符串拼接
+        // Use string interpolation instead of string concatenation
         let boundary = "Boundary-\(UUID().uuidString)"
         var body = Data()
         func appendField(name: String, value: String) {
@@ -287,7 +287,7 @@ enum PlayerSkinService {
         request.httpBody = body
         request.timeoutInterval = 30
 
-        // 使用统一的 API 客户端（需要处理非 200 状态码）
+        // Use unified API client (needs to handle non-200 status codes)
         let (_, http) = try await APIClient.performRequestWithResponse(request: request)
         switch http.statusCode {
         case 200, 204:
@@ -319,35 +319,35 @@ enum PlayerSkinService {
 
     // MARK: - Common Helper Methods
 
-    /// 获取当前激活的披风ID
-    /// - Parameter profile: 玩家配置文件
-    /// - Returns: 激活的披风ID，如果没有则返回nil
+    /// Get the currently active cloak ID
+    /// - Parameter profile: player profile
+    /// - Returns: ID of the activated cloak, or nil if there is none
     static func getActiveCapeId(from profile: MinecraftProfileResponse?) -> String? {
         return profile?.capes?.first { $0.state == "ACTIVE" }?.id
     }
 
-    /// 检查是否有皮肤变化
+    /// Check for skin changes
     /// - Parameters:
-    ///   - selectedSkinData: 选中的皮肤数据
-    ///   - currentModel: 当前模型
-    ///   - originalModel: 原始模型（可选，nil表示没有现有皮肤）
-    /// - Returns: 是否有皮肤变化
+    ///   - selectedSkinData: selected skin data
+    ///   - currentModel: current model
+    ///   - originalModel: original model (optional, nil means there is no existing skin)
+    /// - Returns: Whether there are skin changes
     static func hasSkinChanges(
         selectedSkinData: Data?,
         currentModel: PublicSkinInfo.SkinModel,
         originalModel: PublicSkinInfo.SkinModel?
     ) -> Bool {
-        // 如果有选中的皮肤数据，则有变化
+        // If there is selected skin data, there are changes
         if selectedSkinData != nil {
             return true
         }
 
-        // 如果没有原始模型信息（没有现有皮肤），但当前模型不是默认的classic，则有变化
+        // If there is no original model information (no existing skin), but the current model is not the default classic, there are changes
         if originalModel == nil && currentModel != .classic {
             return true
         }
 
-        // 如果有原始模型信息，比较当前模型和原始模型
+        // If original model information is available, compare the current model with the original model
         if let original = originalModel {
             return currentModel != original
         }
@@ -355,11 +355,11 @@ enum PlayerSkinService {
         return false
     }
 
-    /// 检查是否有披风变化
+    /// Check for cape changes
     /// - Parameters:
-    ///   - selectedCapeId: 选中的披风ID
-    ///   - currentActiveCapeId: 当前激活的披风ID
-    /// - Returns: 是否有披风变化
+    ///   - selectedCapeId: selected cape ID
+    ///   - currentActiveCapeId: currently active cape ID
+    /// - Returns: Whether there are cape changes
     static func hasCapeChanges(selectedCapeId: String?, currentActiveCapeId: String?) -> Bool {
         selectedCapeId != currentActiveCapeId
     }
@@ -392,7 +392,7 @@ enum PlayerSkinService {
         )
         request.timeoutInterval = 30
 
-        // 使用统一的 API 客户端（需要处理非 200 状态码）
+        // Use unified API client (needs to handle non-200 status codes)
         let (data, http) = try await APIClient.performRequestWithResponse(request: request)
         switch http.statusCode {
         case 200:
@@ -451,7 +451,7 @@ enum PlayerSkinService {
         request.httpBody = jsonData
         request.timeoutInterval = 30
 
-        // 使用统一的 API 客户端（需要处理非 200 状态码）
+        // Use unified API client (needs to handle non-200 status codes)
         let (_, http) = try await APIClient.performRequestWithResponse(request: request)
         switch http.statusCode {
         case 200, 204:
@@ -518,7 +518,7 @@ enum PlayerSkinService {
         )
         request.timeoutInterval = 30
 
-        // 使用统一的 API 客户端（需要处理非 200 状态码）
+        // Use unified API client (needs to handle non-200 status codes)
         let (_, http) = try await APIClient.performRequestWithResponse(request: request)
         switch http.statusCode {
         case 200, 204:
@@ -549,7 +549,7 @@ enum PlayerSkinService {
             "Bearer \(player.authAccessToken)",
             forHTTPHeaderField: "Authorization"
         )
-        // 使用统一的 API 客户端（需要处理非 200 状态码）
+        // Use unified API client (needs to handle non-200 status codes)
         let (_, http) = try await APIClient.performRequestWithResponse(request: request)
         switch http.statusCode {
         case 200, 204:

@@ -13,7 +13,7 @@ struct LauncherImportView: View {
     @Environment(\.dismiss)
     private var dismiss
 
-    // 文件选择器状态
+    // File picker status
     @State private var showFolderPicker = false
 
     // MARK: - Initializer
@@ -33,19 +33,19 @@ struct LauncherImportView: View {
                 viewModel.setup(gameRepository: gameRepository, playerListViewModel: playerListViewModel)
             }
             .onDisappear {
-                // Sheet 关闭时清理缓存
+                // Clear cache when Sheet is closed
                 viewModel.cleanup()
             }
             .gameFormStateListeners(viewModel: viewModel, triggerConfirm: triggerConfirm, triggerCancel: triggerCancel)
             .onChange(of: viewModel.selectedLauncherType) { _, _ in
-                // 启动器类型改变时，清除之前的选择
+                // Clear previous selection when launcher type changes
                 viewModel.selectedInstancePath = nil
             }
             .onChange(of: viewModel.selectedInstancePath) { _, newValue in
-                // 当选中实例路径变化时，自动填充游戏名到输入框
+                // When the selected instance path changes, automatically fill in the game name into the input box
                 if newValue != nil {
                     viewModel.autoFillGameNameIfNeeded()
-                    // 检查 Mod Loader 是否支持，如果不支持则显示通知
+                    // Check if Mod Loader supports it and display notification if not
                     viewModel.checkAndNotifyUnsupportedModLoader()
                 }
             }
@@ -71,11 +71,11 @@ struct LauncherImportView: View {
             gameNameInputSection
             if viewModel.shouldShowProgress {
                 VStack(spacing: 16) {
-                    // 显示复制进度（如果正在复制）
+                    // Show copy progress (if copying is in progress)
                     if viewModel.isImporting, let progress = viewModel.importProgress {
                         importProgressSection(progress: progress)
                     }
-                    // 显示下载进度
+                    // Show download progress
                     downloadProgressSection
                 }
                 .padding(.top, 10)
@@ -133,7 +133,7 @@ struct LauncherImportView: View {
             FormSection {
                 VStack(alignment: .leading, spacing: 12) {
                     VStack(alignment: .leading, spacing: 8) {
-                        // 游戏名称
+                        // Game name
                         HStack {
                             Text("game.form.name".localized())
                                 .font(.subheadline)
@@ -144,7 +144,7 @@ struct LauncherImportView: View {
                                 .foregroundColor(.secondary)
                         }
 
-                        // 游戏版本
+                        // game version
                         HStack {
                             Text("game.form.version".localized())
                                 .font(.subheadline)
@@ -155,7 +155,7 @@ struct LauncherImportView: View {
                                 .foregroundColor(.secondary)
                         }
 
-                        // Mod 加载器
+                        // Mod loader
                         if !info.modLoader.isEmpty && info.modLoader != "vanilla" {
                             HStack {
                                 Text("game.form.modloader".localized())
@@ -198,7 +198,7 @@ struct LauncherImportView: View {
     }
 
     private var downloadProgressSection: some View {
-        // 获取选中实例的 modLoader，如果没有则使用 "vanilla"
+        // Get the modLoader of the selected instance, or use "vanilla" if there is none
         let selectedModLoader: String = {
             if let info = viewModel.currentInstanceInfo {
                 return info.modLoader
@@ -233,13 +233,13 @@ struct LauncherImportView: View {
         showFolderPicker = true
     }
 
-    /// 处理通过 fileImporter 选择的文件夹
+    /// Handles folders selected via fileImporter
     private func handleFolderSelection(_ result: Result<[URL], Error>) {
         switch result {
         case .success(let urls):
             guard let url = urls.first else { return }
 
-            // 保持安全作用域资源访问权限
+            // Maintain security-scoped resource access
             guard url.startAccessingSecurityScopedResource() else {
                 GlobalErrorHandler.shared.handle(
                     GlobalError.fileSystem(
@@ -253,7 +253,7 @@ struct LauncherImportView: View {
 
             defer { url.stopAccessingSecurityScopedResource() }
 
-            // 验证选择的文件夹是否为有效实例
+            // Verify that the selected folder is a valid instance
             guard viewModel.validateInstance(at: url) else {
                 let launcherName = viewModel.selectedLauncherType.rawValue
                 GlobalErrorHandler.shared.handle(
@@ -266,10 +266,10 @@ struct LauncherImportView: View {
                 return
             }
 
-            // 直接使用选择的实例路径
+            // Directly use the selected instance path
             viewModel.selectedInstancePath = url
 
-            // 自动填充游戏名到输入框
+            // Automatically fill in the game name into the input box
             viewModel.autoFillGameNameIfNeeded()
 
             Logger.shared.info("成功选择 \(viewModel.selectedLauncherType.rawValue) 实例路径: \(url.path)")

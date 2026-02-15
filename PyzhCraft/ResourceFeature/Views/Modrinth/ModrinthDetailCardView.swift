@@ -10,20 +10,20 @@ struct ModrinthDetailCardView: View {
     let type: Bool  // false = local, true = server
     @Binding var selectedItem: SidebarItem
     var onResourceChanged: (() -> Void)?
-    /// 本地资源启用/禁用状态变更回调（仅 local 列表使用）
+    /// Local resource enable/disable state change callback (only used by local list)
     var onLocalDisableStateChanged: ((ModrinthProject, Bool) -> Void)?
-    /// 更新成功回调：仅更新当前条目的 hash 与列表项，不全局扫描。参数 (projectId, oldFileName, newFileName, newHash)
+    /// Update success callback: Only the hash and list items of the current entry are updated, and no global scan is performed. Parameters (projectId, oldFileName, newFileName, newHash)
     var onResourceUpdated: ((String, String, String, String?) -> Void)?
-    @Binding var scannedDetailIds: Set<String> // 已扫描资源的 detailId Set，用于快速查找
+    @Binding var scannedDetailIds: Set<String> // detailId Set of scanned resources for quick lookup
     @State private var addButtonState: AddButtonState = .idle
     @State private var showDeleteAlert = false
-    @State private var isResourceDisabled: Bool = false  // 资源是否被禁用（用于置灰效果）
+    @State private var isResourceDisabled: Bool = false  // Whether the resource is disabled (for graying effect)
     @EnvironmentObject private var gameRepository: GameRepository
 
     // MARK: - Enums
     enum AddButtonState {
         case idle, loading, installed,
-             update  // 有新版本可用
+             update  // A new version is available
     }
 
     // MARK: - Body
@@ -39,9 +39,9 @@ struct ModrinthDetailCardView: View {
             infoView
         }
         .frame(maxWidth: .infinity)
-        .opacity(isResourceDisabled ? 0.5 : 1.0)  // 禁用时置灰
+        .opacity(isResourceDisabled ? 0.5 : 1.0)  // Grayed out when disabled
         .onAppear {
-            // 从数据源同步禁用状态，避免列表滚动复用行时显示错误
+            // Synchronize disabled status from data source to avoid displaying errors when list scrolling reuses rows
             isResourceDisabled = ResourceEnableDisableManager.isDisabled(fileName: project.fileName)
         }
         .onChange(of: project.fileName) { _, newFileName in
@@ -52,9 +52,9 @@ struct ModrinthDetailCardView: View {
     // MARK: - View Components
     private var iconView: some View {
         Group {
-            // 使用 id 前缀判断本地资源，更可靠
+            // Use id prefix to determine local resources, which is more reliable
             if project.projectId.hasPrefix("local_") || project.projectId.hasPrefix("file_") {
-                // 本地资源显示 questionmark.circle 图标
+                // Local resources display questionmark.circle icon
                 localResourceIcon
             } else if let iconUrl = project.iconUrl,
                 let url = URL(string: iconUrl) {

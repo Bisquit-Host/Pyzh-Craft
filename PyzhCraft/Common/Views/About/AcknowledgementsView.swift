@@ -21,7 +21,7 @@ public struct AcknowledgementsView: View {
             .padding(.vertical, 8)
         }
         .onAppear {
-            // 每次打开都重新加载数据
+            // Reload data every time you open it
             loadLibraries()
         }
         .onDisappear {
@@ -79,25 +79,25 @@ public struct AcknowledgementsView: View {
     // MARK: - Library Row Content
     private func libraryRowContent(_ library: OpenSourceLibrary) -> some View {
         HStack(spacing: 12) {
-            // 头像
+            // avatar
             libraryAvatar(library)
 
-            // 信息部分
+            // Information section
             VStack(alignment: .leading, spacing: 4) {
-                // 库名称
+                // library name
                 Text(library.name)
                     .font(.body)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
 
-                // 描述（带 popover）
+                // Description (with popover)
                 if let description = library.description, !description.isEmpty {
                     DescriptionTextWithPopover(description: description)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            // 箭头图标
+            // arrow icon
             Image(systemName: "globe")
                 .font(.system(size: 16, weight: .medium))
                 .foregroundColor(.secondary)
@@ -111,7 +111,7 @@ public struct AcknowledgementsView: View {
     private func libraryAvatar(_ library: OpenSourceLibrary) -> some View {
         Group {
             if let avatarURL = library.avatar {
-                // 优化后的头像 URL（使用缩略图参数）
+                // Optimized avatar URL (using thumbnail parameter)
                 let optimizedURL = optimizedAvatarURL(from: avatarURL, size: 40)
                 AsyncImage(url: optimizedURL) { phase in
                     switch phase {
@@ -161,20 +161,20 @@ public struct AcknowledgementsView: View {
         }
     }
 
-    /// 获取优化后的头像 URL（使用缩略图参数减少下载大小）
+    /// Get optimized avatar URL (use thumbnail parameter to reduce download size)
     /// - Parameters:
-    ///   - avatarURL: 原始头像 URL
-    ///   - size: 显示大小（像素）
-    /// - Returns: 优化后的 URL
+    ///   - avatarURL: original avatar URL
+    ///   - size: display size (pixels)
+    /// - Returns: optimized URL
     private func optimizedAvatarURL(from avatarURL: String, size: CGFloat) -> URL? {
         guard let url = URL(string: avatarURL) else { return nil }
 
-        // 如果已经是 GitHub 头像 URL，添加大小参数
-        // GitHub 头像 URL 格式: https://avatars.githubusercontent.com/u/xxx 或 https://github.com/identicons/xxx.png
+        // If it is already a GitHub avatar URL, add the size parameter
+        // GitHub avatar URL format: https://avatars.githubusercontent.com/u/xxx or https://github.com/identicons/xxx.png
         if url.host?.contains("github.com") == true || url.host?.contains("avatars.githubusercontent.com") == true {
-            // 计算需要的像素大小（@2x 屏幕需要 2 倍）
+            // Calculate required pixel size (@2x screen requires 2x)
             let pixelSize = Int(size * 2)
-            // 移除现有的查询参数（如果有）
+            // Remove existing query parameters (if any)
             var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
             components?.queryItems = [URLQueryItem(name: "s", value: "\(pixelSize)")]
             return components?.url
@@ -199,25 +199,25 @@ public struct AcknowledgementsView: View {
 
     // MARK: - Load Libraries
     private func loadLibraries() {
-        // 取消之前的任务（如果存在）
+        // Cancel the previous task (if it exists)
         loadTask?.cancel()
 
-        // 重置状态
+        // reset state
         isLoading = true
         loadFailed = false
 
         loadTask = Task {
             do {
-                // 在异步操作开始前检查取消状态
+                // Check cancellation status before async operation starts
                 try Task.checkCancellation()
 
                 let decodedLibraries: [OpenSourceLibrary] = try await gitHubService.fetchAcknowledgements()
 
-                // 在更新 UI 前再次检查取消状态
+                // Check cancellation status again before updating UI
                 try Task.checkCancellation()
 
                 await MainActor.run {
-                    // 最后一次检查取消状态（因为可能在 await 期间被取消）
+                    // One last check for cancellation status (because it may have been canceled during await)
                     guard !Task.isCancelled else { return }
 
                     libraries = decodedLibraries
@@ -230,14 +230,14 @@ public struct AcknowledgementsView: View {
                     )
                 }
             } catch is CancellationError {
-                // 任务被取消，静默处理（不需要日志，这是正常的清理行为）
+                // The task is canceled and processed silently (no log is required, this is normal cleanup behavior)
             } catch {
-                // 检查任务是否已被取消（避免在取消后更新状态）
+                // Check if the task has been canceled (avoid updating status after cancellation)
                 guard !Task.isCancelled else { return }
 
                 Logger.shared.error("Failed to load libraries from GitHubService:", error)
                 await MainActor.run {
-                    // 最后一次检查取消状态
+                    // Last check for cancellation status
                     guard !Task.isCancelled else { return }
 
                     loadFailed = true
@@ -249,7 +249,7 @@ public struct AcknowledgementsView: View {
 
     // MARK: - Clear Libraries Data
     private func clearLibrariesData() {
-        // 取消正在运行的加载任务
+        // Cancel a running load task
         loadTask?.cancel()
         loadTask = nil
 
@@ -259,7 +259,7 @@ public struct AcknowledgementsView: View {
         Logger.shared.info("Libraries data cleared")
     }
 
-    /// 清理所有数据
+    /// Clean all data
     private func clearAllData() {
         clearLibrariesData()
     }
@@ -286,7 +286,7 @@ private struct DescriptionTextWithPopover: View {
 
     var body: some View {
         Button {
-            // 点击时也显示 popover
+            // Also show popover when clicked
             showPopover.toggle()
         } label: {
             Text(description)
@@ -298,13 +298,13 @@ private struct DescriptionTextWithPopover: View {
         .buttonStyle(.plain)
         .onHover { hovering in
             isHovering = hovering
-            // 取消之前的任务
+            // Cancel previous task
             hoverTask?.cancel()
 
             if hovering {
-                // 延迟显示 popover，避免鼠标快速移动时频繁显示
+                // Delay the display of popover to avoid frequent display when the mouse moves quickly
                 hoverTask = Task {
-                    try? await Task.sleep(nanoseconds: 500_000_000) // 0.5秒
+                    try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
                     if !Task.isCancelled && isHovering {
                         await MainActor.run {
                             showPopover = true

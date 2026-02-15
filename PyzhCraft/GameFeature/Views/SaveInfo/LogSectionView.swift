@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - 日志信息区域视图
+// MARK: - Log information area view
 struct LogSectionView: View {
     // MARK: - Properties
     let logs: [LogInfo]
@@ -35,7 +35,7 @@ struct LogSectionView: View {
     }
 
     // MARK: - Actions
-    /// 使用Console应用打开日志文件
+    /// Open the log file using the Console app
     private func openLogInConsole(log: LogInfo) {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/open")

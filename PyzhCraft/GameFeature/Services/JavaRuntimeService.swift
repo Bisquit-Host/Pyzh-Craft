@@ -1,17 +1,17 @@
 import Foundation
 import ZIPFoundation
 
-/// Java运行时下载器
+/// Java runtime downloader
 class JavaRuntimeService {
     static let shared = JavaRuntimeService()
     private let downloadSession = URLSession.shared
 
-    // 进度回调 - 使用actor来确保线程安全
+    // Progress callbacks - using actors to ensure thread safety
     private let progressActor = ProgressActor()
-    // 取消检查回调 - 使用actor来确保线程安全
+    // Uncheck callbacks - use actors to ensure thread safety
     private let cancelActor = CancelActor()
 
-    // 公共接口方法
+    // public interface methods
     func setProgressCallback(_ callback: @escaping (String, Int, Int) -> Void) {
         Task {
             await progressActor.setCallback(callback)
@@ -24,21 +24,21 @@ class JavaRuntimeService {
         }
     }
 
-    /// ARM平台专用版本的Zulu JDK配置
+    /// Zulu JDK configuration for ARM platform specific version
     private static let armJavaVersions: [String: URL] = [
         "jre-legacy": URLConfig.API.JavaRuntimeARM.jreLegacy,
         "java-runtime-alpha": URLConfig.API.JavaRuntimeARM.javaRuntimeAlpha,
         "java-runtime-beta": URLConfig.API.JavaRuntimeARM.javaRuntimeBeta,
     ]
 
-    /// Intel平台专用版本的Zulu JDK配置
+    /// Intel platform-specific version of Zulu JDK configuration
     private static let intelJavaVersions: [String: URL] = [
         "jre-legacy": URLConfig.API.JavaRuntimeIntel.jreLegacy,
         "java-runtime-alpha": URLConfig.API.JavaRuntimeIntel.javaRuntimeAlpha,
         "java-runtime-beta": URLConfig.API.JavaRuntimeIntel.javaRuntimeBeta,
     ]
 
-    /// 获取当前架构对应的特供运行时URL
+    /// Get the special runtime URL corresponding to the current architecture
     private func specialJavaRuntimeURL(for version: String) -> URL? {
         switch Architecture.current {
         case .arm64:
@@ -47,7 +47,7 @@ class JavaRuntimeService {
             return Self.intelJavaVersions[version]
         }
     }
-    /// 解析Java运行时API并获取gamecore平台支持的版本名称
+    /// Parse the Java runtime API and obtain the version name supported by the gamecore platform
     func getGamecoreSupportedVersions() async throws -> [String] {
         let json = try await fetchJavaRuntimeAPI()
         guard let gamecore = json["gamecore"] as? [String: Any] else {
@@ -61,7 +61,7 @@ class JavaRuntimeService {
         let versionNames = Array(gamecore.keys)
         return versionNames
     }
-    /// 根据当前系统（macOS）和CPU架构获取对应的Java运行时数据
+    /// Get the corresponding Java runtime data based on the current system (macOS) and CPU architecture
     func getMacJavaRuntimeData() async throws -> [String: Any] {
         let json = try await fetchJavaRuntimeAPI()
         let platform = getCurrentMacPlatform()
@@ -75,7 +75,7 @@ class JavaRuntimeService {
 
         return platformData
     }
-    /// 根据传入的版本名称获取对应的Java运行时数据
+    /// Get the corresponding Java runtime data based on the passed version name
     func getMacJavaRuntimeData(for version: String) async throws -> [[String: Any]] {
         let platformData = try await getMacJavaRuntimeData()
         guard let versionData = platformData[version] as? [[String: Any]] else {
@@ -89,10 +89,10 @@ class JavaRuntimeService {
 
         return versionData
     }
-    /// 获取指定版本的manifest URL
+    /// Get the manifest URL of the specified version
     func getManifestURL(for version: String) async throws -> String {
         let versionData = try await getMacJavaRuntimeData(for: version)
-        // 版本数据是一个数组，取第一个元素
+        // Version data is an array, take the first element
         guard let firstVersion = versionData.first,
               let manifest = firstVersion["manifest"] as? [String: Any],
               let manifestURL = manifest["url"] as? String else {
@@ -107,16 +107,16 @@ class JavaRuntimeService {
         Logger.shared.info("找到版本 \(version) 的manifest URL: \(manifestURL)")
         return manifestURL
     }
-    /// 下载指定版本的Java运行时
+    /// Download the specified version of Java runtime
     func downloadJavaRuntime(for version: String) async throws {
-        // 检查是否为当前架构的特供版本（Zulu JDK）
+        // Check whether it is a special version of the current architecture (Zulu JDK)
         if let bundledVersionURL = specialJavaRuntimeURL(for: version) {
             try await downloadBundledJavaRuntime(version: version, url: bundledVersionURL)
             return
         }
 
         let manifestURL = try await getManifestURL(for: version)
-        // 下载manifest.json
+        // Download manifest.json
         let manifestData = try await fetchDataFromURL(manifestURL)
         guard let manifest = try JSONSerialization.jsonObject(with: manifestData) as? [String: Any],
               let files = manifest["files"] as? [String: Any] else {
@@ -127,11 +127,11 @@ class JavaRuntimeService {
             )
         }
 
-        // 创建目标目录
+        // Create target directory
         let targetDirectory = AppPaths.runtimeDirectory.appendingPathComponent(version)
         try FileManager.default.createDirectory(at: targetDirectory, withIntermediateDirectories: true)
 
-        // 计算总文件数 - 只统计type为file且实际需要下载的项目
+        // Calculate the total number of files - only count items whose type is file and actually need to be downloaded
         let totalFiles = files
             .compactMap { filePath, fileInfo -> Int? in
                 guard let fileData = fileInfo as? [String: Any],
@@ -140,28 +140,28 @@ class JavaRuntimeService {
                     return nil
                 }
 
-                // 检查文件是否已存在
+                // Check if the file already exists
                 let localFilePath = targetDirectory.appendingPathComponent(filePath)
                 let fileExists = FileManager.default.fileExists(atPath: localFilePath.path)
 
-                // 只有不存在的文件才计入总数
+                // Only files that do not exist are counted in the total
                 return fileExists ? nil : 1
             }
             .reduce(0, +)
 
-        // 创建信号量控制并发数量
+        // Create a semaphore to control the number of concurrencies
         let semaphore = AsyncSemaphore(
             value: GeneralSettingsManager.shared.concurrentDownloads
         )
 
-        // 创建计数器用于进度跟踪
+        // Create counters for progress tracking
         let counter = Counter()
 
-        // 使用并发下载所有文件
+        // Download all files using concurrent
         try await withThrowingTaskGroup(of: Void.self) { group in
             for (filePath, fileInfo) in files {
                 group.addTask { [progressActor, cancelActor, self] in
-                    // 检查是否应该取消
+                    // Check if it should be canceled
                     if await cancelActor.shouldCancel() {
                         Logger.shared.info("Java下载已被取消")
                         throw GlobalError.download(
@@ -176,11 +176,11 @@ class JavaRuntimeService {
                         return
                     }
 
-                    // 获取文件类型和可执行属性
+                    // Get file type and executable attributes
                     let fileType = fileData["type"] as? String
                     let isExecutable = fileData["executable"] as? Bool ?? false
 
-                    // 只使用raw格式
+                    // Only use raw format
                     guard let raw = downloads["raw"] as? [String: Any] else {
                         Logger.shared.warning("文件 \(filePath) 没有RAW格式，跳过")
                         return
@@ -190,35 +190,35 @@ class JavaRuntimeService {
                         return
                     }
 
-                    // 获取期望的SHA1值
+                    // Get the expected SHA1 value
                     let expectedSHA1 = raw["sha1"] as? String
 
-                    // 确定本地文件路径
+                    // Determine local file path
                     let localFilePath = targetDirectory.appendingPathComponent(filePath)
 
-                    // 等待信号量
+                    // Wait for semaphore
                     await semaphore.wait()
                     defer { Task { await semaphore.signal() } }
 
-                    // 检查文件是否已存在
+                    // Check if the file already exists
                     let fileExistsBefore = FileManager.default.fileExists(atPath: localFilePath.path)
 
-                    // 使用DownloadManager下载文件，它已经包含了文件存在性检查和SHA1校验
+                    // Use DownloadManager to download files, which already includes file existence check and SHA1 verification
                     _ = try await DownloadManager.downloadFile(
                         urlString: fileURL,
                         destinationURL: localFilePath,
                         expectedSha1: expectedSHA1
                     )
 
-                    // 如果文件类型为"file"且executable为true，给文件添加执行权限
+                    // If the file type is "file" and executable is true, add execution permissions to the file
                     if fileType == "file" && isExecutable {
                         try setExecutablePermission(for: localFilePath)
                     }
 
-                    // 只有type为file的项目才计入完成文件数
-                    // 并且只有在文件真正被下载时才增加计数（文件之前不存在）
+                    // Only projects with type file are counted in the number of completed files
+                    // and only increment the count when the file is actually downloaded (the file didn't exist before)
                     if fileType == "file" && !fileExistsBefore {
-                        // 验证文件确实存在且有内容
+                        // Verify that the file exists and has content
                         do {
                             let fileAttributes = try FileManager.default.attributesOfItem(atPath: localFilePath.path)
                             if let fileSize = fileAttributes[.size] as? Int64, fileSize > 0 {
@@ -234,7 +234,7 @@ class JavaRuntimeService {
             try await group.waitForAll()
         }
     }
-    /// 获取Java运行时API数据
+    /// Get Java runtime API data
     private func fetchJavaRuntimeAPI() async throws -> [String: Any] {
         let url = URLConfig.API.JavaRuntime.allRuntimes
         let data = try await fetchDataFromURL(url.absoluteString)
@@ -250,9 +250,9 @@ class JavaRuntimeService {
         return json
     }
 
-    /// 下载指定URL的数据
-    /// - Parameter urlString: URL字符串
-    /// - Returns: 下载的数据
+    /// Download data from specified URL
+    /// - Parameter urlString: URL string
+    /// - Returns: downloaded data
     private func fetchDataFromURL(_ urlString: String) async throws -> Data {
         guard let url = URL(string: urlString) else {
             throw GlobalError.validation(
@@ -275,72 +275,72 @@ class JavaRuntimeService {
 
         return data
     }
-    /// 获取当前macOS平台标识
+    /// Get the current macOS platform identification
     private func getCurrentMacPlatform() -> String {
         Architecture.current.macPlatformId
     }
 
-    /// 为文件设置执行权限
-    /// - Parameter filePath: 文件路径
+    /// Set execution permissions for files
+    /// - Parameter filePath: file path
     private func setExecutablePermission(for filePath: URL) throws {
         let fileManager = FileManager.default
 
-        // 获取当前文件权限
+        // Get current file permissions
         let currentAttributes = try fileManager.attributesOfItem(atPath: filePath.path)
         var currentPermissions = currentAttributes[.posixPermissions] as? UInt16 ?? 0o644
 
-        // 添加执行权限 (owner, group, other)
+        // Add execution permissions (owner, group, other)
         currentPermissions |= 0o111
 
-        // 设置新的权限
+        // Set new permissions
         try fileManager.setAttributes([.posixPermissions: currentPermissions], ofItemAtPath: filePath.path)
     }
 
-    /// 下载当前架构的特供Java运行时（从Zulu JDK）
+    /// Download the special Java runtime for your current architecture (from Zulu JDK)
     /// - Parameters:
-    ///   - version: 版本名称
-    ///   - url: 下载URL
+    ///   - version: version name
+    ///   - url: download URL
     private func downloadBundledJavaRuntime(version: String, url: URL) async throws {
-        // 创建目标目录
+        // Create target directory
         let targetDirectory = AppPaths.runtimeDirectory.appendingPathComponent(version)
         try FileManager.default.createDirectory(at: targetDirectory, withIntermediateDirectories: true)
 
-        // 下载zip文件到临时位置
+        // Download the zip file to a temporary location
         let tempZipPath = targetDirectory.appendingPathComponent("temp_java.zip")
 
-        // 下载zip文件（带字节大小进度）
+        // Download zip file (with byte size progress)
         try await downloadZipWithProgress(
             from: url,
             to: tempZipPath,
             fileName: "\(version).zip"
         )
 
-        // 解压zip文件
+        // Unzip the zip file
         try await extractAndProcessBundledJavaRuntime(
             zipPath: tempZipPath,
             targetDirectory: targetDirectory
         )
 
-        // 更新进度 - 完成
+        // Update Progress - Complete
         await progressActor.callProgressUpdate("Java运行时 \(version) 安装完成", 1, 1)
     }
 
-    /// 解压并处理特供Java运行时zip文件
+    /// Unzip and process the special Java runtime zip file
     /// - Parameters:
-    ///   - zipPath: zip文件路径
-    ///   - targetDirectory: 目标目录
+    ///   - zipPath: zip file path
+    ///   - targetDirectory: target directory
     private func extractAndProcessBundledJavaRuntime(zipPath: URL, targetDirectory: URL) async throws {
         let fileManager = FileManager.default
 
-        // 最终的jre.bundle路径
+        // The final jre.bundle path
         let finalJreBundlePath = targetDirectory.appendingPathComponent("jre.bundle")
 
-        // 如果目标位置已存在，先删除
+        // If the target location already exists, delete it first
         if fileManager.fileExists(atPath: finalJreBundlePath.path) {
             try fileManager.removeItem(at: finalJreBundlePath)
         }
 
-        // 选择性解压zip文件中的JRE文件夹
+        // Selectively unzip the JRE folder in the zip file
         do {
             try extractSpecificFolderFromZip(
                 zipPath: zipPath,
@@ -356,18 +356,18 @@ class JavaRuntimeService {
             )
         }
 
-        // 删除下载的压缩包
+        // Delete the downloaded compressed package
         try? fileManager.removeItem(at: zipPath)
     }
 
-    /// 从zip文件中选择性解压zulu文件夹
+    /// Selectively extract zulu folder from zip file
     /// - Parameters:
-    ///   - zipPath: zip文件路径
-    ///   - destinationPath: 解压后的目标路径
+    ///   - zipPath: zip file path
+    ///   - destinationPath: destination path after decompression
     private func extractSpecificFolderFromZip(zipPath: URL, destinationPath: URL) throws {
         let fileManager = FileManager.default
 
-        // 打开zip文件
+        // Open zip file
         let archive: Archive
         do {
             archive = try Archive(url: zipPath, accessMode: .read)
@@ -379,21 +379,21 @@ class JavaRuntimeService {
             )
         }
 
-        // 查找zulu文件夹的条目
+        // Find the entry for the zulu folder
         var targetFolderEntries: [Entry] = []
         var targetFolderPrefix: String?
 
         for entry in archive {
             let path = entry.path
 
-            // 查找以"zulu-"开头的文件夹
+            // Find folders starting with "zulu-"
             let pathComponents = path.split(separator: "/")
 
             for (index, component) in pathComponents.enumerated() {
                 let componentStr = String(component)
                 if componentStr.hasPrefix("zulu-") && componentStr.contains(".jre") {
                     if targetFolderPrefix == nil {
-                        // 找到zulu文件夹，构建完整前缀路径
+                        // Find the zulu folder and build the complete prefix path
                         let prefixComponents = pathComponents[0...index]
                         targetFolderPrefix = prefixComponents.joined(separator: "/")
                         if let prefix = targetFolderPrefix, !prefix.isEmpty {
@@ -404,7 +404,7 @@ class JavaRuntimeService {
                 }
             }
 
-            // 如果找到了目标前缀，收集所有匹配的条目
+            // If the target prefix is ​​found, collect all matching entries
             if let prefix = targetFolderPrefix, path.hasPrefix(prefix) {
                 targetFolderEntries.append(entry)
             }
@@ -418,87 +418,87 @@ class JavaRuntimeService {
             )
         }
 
-        // 解压目标文件夹的所有条目
+        // Extract all entries of the target folder
         for entry in targetFolderEntries {
-            // 计算相对于目标文件夹的路径
+            // Calculate path relative to target folder
             let relativePath = String(entry.path.dropFirst(prefix.count))
             let outputPath = destinationPath.appendingPathComponent(relativePath)
 
-            // 跳过符号链接条目
+            // Skip symbolic link entries
             if entry.type == .symlink {
                 continue
             }
 
             do {
-                // 如果是目录，创建目录
+                // If it is a directory, create the directory
                 if entry.type == .directory {
                     try fileManager.createDirectory(at: outputPath, withIntermediateDirectories: true)
                 } else if entry.type == .file {
-                    // 确保父目录存在
+                    // Make sure the parent directory exists
                     let parentDir = outputPath.deletingLastPathComponent()
                     try fileManager.createDirectory(at: parentDir, withIntermediateDirectories: true)
 
-                    // 解压文件
+                    // Unzip the file
                     _ = try archive.extract(entry, to: outputPath)
                 } else {
                     continue
                 }
             } catch {
-                // 检查具体的ZIPFoundation错误
+                // Check for specific ZIPFoundation errors
                 if let archiveError = error as? Archive.ArchiveError {
-                    // 特殊处理符号链接错误
+                    // Special handling of symbolic link errors
                     if String(describing: archiveError) == "uncontainedSymlink" {
-                        continue // 跳过这个条目，继续处理下一个
+                        continue // Skip this entry and continue with the next one
                     }
                 }
 
-                // 对于其他错误，记录并抛出
+                // For other errors, log and throw
                 Logger.shared.error("解压失败: \(entry.path) - \(error.localizedDescription)")
                 throw error
             }
         }
     }
 
-    /// 下载ZIP文件并显示字节大小进度
+    /// Download ZIP file and display byte size progress
     /// - Parameters:
-    ///   - url: 下载URL
-    ///   - destinationURL: 目标文件路径
-    ///   - fileName: 显示的文件名
+    ///   - url: download URL
+    ///   - destinationURL: destination file path
+    ///   - fileName: displayed file name
     private func downloadZipWithProgress(from url: URL, to destinationURL: URL, fileName: String) async throws {
-        // 先获取文件大小
+        // Get the file size first
         let fileSize = try await getFileSize(from: url)
 
-        // 设置初始进度
+        // Set initial progress
         await progressActor.callProgressUpdate(fileName, 0, Int(fileSize))
 
-        // 创建进度跟踪器
+        // Create a progress tracker
         let progressCallback: (Int64, Int64) -> Void = { [progressActor] downloadedBytes, totalBytes in
-            // 传递实际字节数用于字节大小进度显示
+            // Pass actual number of bytes for byte size progress display
             Task {
                 await progressActor.callProgressUpdate(fileName, Int(downloadedBytes), Int(totalBytes))
             }
         }
         let progressTracker = DownloadProgressTracker(totalSize: fileSize, progressCallback: progressCallback)
 
-        // 创建URLSession配置
+        // Create URLSession configuration
         let config = URLSessionConfiguration.default
         let session = URLSession(configuration: config, delegate: progressTracker, delegateQueue: nil)
 
-        // 使用downloadTask方式下载，配合进度回调
+        // Use the downloadTask method to download and cooperate with the progress callback
         return try await withCheckedThrowingContinuation { continuation in
-            // 设置完成回调
+            // Set completion callback
             progressTracker.completionHandler = { result in
                 switch result {
                 case .success(let tempURL):
                     do {
                         let fileManager = FileManager.default
 
-                        // 如果目标文件已存在，先删除
+                        // If the target file already exists, delete it first
                         if fileManager.fileExists(atPath: destinationURL.path) {
                             try fileManager.removeItem(at: destinationURL)
                         }
 
-                        // 移动临时文件到目标位置
+                        // Move temporary files to destination
                         try fileManager.moveItem(at: tempURL, to: destinationURL)
                         continuation.resume()
                     } catch {
@@ -511,18 +511,18 @@ class JavaRuntimeService {
                 }
             }
 
-            // 创建下载任务并开始
+            // Create download task and start
             let downloadTask = session.downloadTask(with: url)
             downloadTask.resume()
         }
     }
 
-    /// 获取远程文件大小
+    /// Get remote file size
     private func getFileSize(from url: URL) async throws -> Int64 {
         var request = URLRequest(url: url)
         request.httpMethod = "HEAD"
 
-        // 使用统一的 API 客户端（HEAD 请求需要返回响应头）
+        // Use a unified API client (HEAD requests need to return response headers)
         let (_, httpResponse) = try await APIClient.performRequestWithResponse(request: request)
 
         guard httpResponse.statusCode == 200 else {
@@ -546,7 +546,7 @@ class JavaRuntimeService {
     }
 }
 
-/// 下载进度跟踪器
+/// Download progress tracker
 private class DownloadProgressTracker: NSObject, URLSessionDownloadDelegate {
     private let progressCallback: (Int64, Int64) -> Void
     private let totalFileSize: Int64
@@ -558,11 +558,11 @@ private class DownloadProgressTracker: NSObject, URLSessionDownloadDelegate {
     }
 
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
-        // 使用真实的下载进度
+        // Use real download progress
         let actualTotalSize = totalBytesExpectedToWrite > 0 ? totalBytesExpectedToWrite : totalFileSize
 
         if actualTotalSize > 0 {
-            // 确保在主线程调用进度回调
+            // Make sure to call the progress callback on the main thread
             DispatchQueue.main.async { [weak self] in
                 self?.progressCallback(totalBytesWritten, actualTotalSize)
             }
@@ -570,7 +570,7 @@ private class DownloadProgressTracker: NSObject, URLSessionDownloadDelegate {
     }
 
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
-        // 调用完成回调
+        // Call completion callback
         completionHandler?(.success(location))
     }
 
@@ -581,7 +581,7 @@ private class DownloadProgressTracker: NSObject, URLSessionDownloadDelegate {
     }
 }
 
-/// 线程安全的计数器，用于跟踪并发下载进度
+/// Thread-safe counter for tracking concurrent download progress
 private actor Counter {
     private var value = 0
 
@@ -591,7 +591,7 @@ private actor Counter {
     }
 }
 
-/// 线程安全的进度回调actor
+/// Thread-safe progress callback actors
 private actor ProgressActor {
     private var callback: ((String, Int, Int) -> Void)?
 
@@ -604,7 +604,7 @@ private actor ProgressActor {
     }
 }
 
-/// 线程安全的取消检查actor
+/// Thread-safe unchecking of actors
 private actor CancelActor {
     private var callback: (() -> Bool)?
 

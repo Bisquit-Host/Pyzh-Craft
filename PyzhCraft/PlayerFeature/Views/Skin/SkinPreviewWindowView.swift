@@ -1,7 +1,7 @@
 import SwiftUI
 import SkinRenderKit
 
-/// 皮肤预览窗口视图
+/// Skin preview window view
 struct SkinPreviewWindowView: View {
     let skinImage: NSImage?
     let skinPath: String?
@@ -9,7 +9,7 @@ struct SkinPreviewWindowView: View {
     let playerModel: PlayerModel
 
     @State private var capeBinding: NSImage?
-    // 使用 @State 管理数据，以便在窗口关闭时清理
+    // Use @State to manage data so it can be cleaned up when the window is closed
     @State private var currentSkinImage: NSImage?
     @State private var currentSkinPath: String?
 
@@ -24,7 +24,7 @@ struct SkinPreviewWindowView: View {
         self.capeImage = capeImage
         self.playerModel = playerModel
         self._capeBinding = State(initialValue: capeImage)
-        // 初始化时设置当前值
+        // Set the current value during initialization
         self._currentSkinImage = State(initialValue: skinImage)
         self._currentSkinPath = State(initialValue: skinPath)
     }
@@ -56,9 +56,9 @@ struct SkinPreviewWindowView: View {
         }
     }
 
-    /// 清理所有数据
+    /// Clean all data
     private func clearAllData() {
-        // 清空皮肤数据，这会导致 SkinRenderView 被移除，从而触发其清理逻辑
+        // Clear the skin data, which will cause the SkinRenderView to be removed, triggering its cleanup logic
         currentSkinImage = nil
         currentSkinPath = nil
         capeBinding = nil

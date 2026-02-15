@@ -2,23 +2,23 @@ import SwiftUI
 
 // MARK: - Constants
 enum SectionViewConstants {
-    // 布局常量
+    // Layout constants
     static let defaultMaxHeight: CGFloat = 235
     static let defaultVerticalPadding: CGFloat = 4
     static let defaultHeaderBottomPadding: CGFloat = 4
 
-    // 占位符常量
+    // placeholder constant
     static let defaultPlaceholderCount: Int = 5
 
-    // 弹窗常量
+    // Pop-up window constants
     static let defaultPopoverWidth: CGFloat = 320
     static let defaultPopoverMaxHeight: CGFloat = 320
 
-    // 项目显示常量
+    // Item display constants
     static let defaultMaxItems: Int = 6
     static let defaultMaxWidth: CGFloat = 320
 
-    // Chip 相关常量（用于行计算）
+    // Chip related constants (used in row calculations)
     static let defaultChipPadding: CGFloat = 16
     static let defaultEstimatedCharWidth: CGFloat = 10
     static let defaultMaxRows: Int = 5
@@ -142,14 +142,14 @@ struct ContentWithOverflow<Item: Identifiable, Content: View>: View {
 
 // MARK: - Array Extension
 extension Array {
-    /// 基于最大项目数计算可见和溢出项
+    /// Calculate visible and overflow items based on maximum number of items
     func computeVisibleAndOverflowItems(maxItems: Int) -> ([Element], [Element]) {
         let visibleItems = Array(prefix(maxItems))
         let overflowItems = Array(dropFirst(maxItems))
         return (visibleItems, overflowItems)
     }
 
-    /// 基于行数和宽度计算可见和溢出项（用于 CategorySectionView）
+    /// Calculate visible and overflow items based on row count and width (for CategorySectionView)
     func computeVisibleAndOverflowItemsByRows(
         maxRows: Int = SectionViewConstants.defaultMaxRows,
         maxWidth: CGFloat = SectionViewConstants.defaultMaxWidth,

@@ -6,7 +6,7 @@ struct FilterChip: View {
     let isSelected: Bool
     let action: () -> Void
 
-    // 可选参数
+    // Optional parameters
     let iconName: String?
     let isLoading: Bool
     let customBackgroundColor: Color?

@@ -19,7 +19,8 @@ struct AuthorizationCodeResponse {
               let queryItems = components.queryItems else { return nil }
         self.code = queryItems.first { $0.name == "code" }?.value
         self.error = queryItems.first { $0.name == "error" }?.value
-        // 解码 error_description
+        
+        // Decode error_description
         if let encodedDescription = queryItems.first(where: { $0.name == "error_description" })?.value {
             self.errorDescription = encodedDescription.removingPercentEncoding
         } else {
@@ -34,8 +35,8 @@ struct TokenResponse: Codable {
     let refreshToken: String?
 
     enum CodingKeys: String, CodingKey {
-        case accessToken = "access_token"
-        case refreshToken = "refresh_token"
+        case accessToken = "access_token",
+             refreshToken = "refresh_token"
     }
 }
 
@@ -45,8 +46,8 @@ struct XboxLiveTokenResponse: Codable {
     let displayClaims: DisplayClaims
 
     enum CodingKeys: String, CodingKey {
-        case token = "Token"
-        case displayClaims = "DisplayClaims"
+        case token = "Token",
+             displayClaims = "DisplayClaims"
     }
 }
 
@@ -78,7 +79,7 @@ struct MinecraftProfileResponse: Codable, Equatable {
 
     enum CodingKeys: String, CodingKey {
         case id, name, skins, capes
-        // accessToken 和 authXuid 不参与解码，因为它们不是从 API 响应中获取的
+        // accessToken and authXuid are not involved in decoding because they are not obtained from the API response
     }
 
     init(from decoder: Decoder) throws {
@@ -87,7 +88,7 @@ struct MinecraftProfileResponse: Codable, Equatable {
         name = try container.decode(String.self, forKey: .name)
         skins = try container.decode([Skin].self, forKey: .skins)
         capes = try container.decodeIfPresent([Cape].self, forKey: .capes)
-        // 这些字段将在外部设置
+        // These fields will be set externally
         accessToken = ""
         authXuid = ""
         refreshToken = ""
@@ -136,19 +137,17 @@ enum MinecraftEntitlement: String, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .productMinecraft:
-            return "Minecraft Product License"
-        case .gameMinecraft:
-            return "Minecraft Game License"
+        case .productMinecraft: "Minecraft Product License"
+        case .gameMinecraft: "Minecraft Game License"
         }
     }
 }
 
 // MARK: - Authentication State
 enum AuthenticationState: Equatable {
-    case notAuthenticated
-    case waitingForBrowserAuth          // 等待用户在浏览器中完成授权
-    case processingAuthCode             // 处理授权码
-    case authenticated(profile: MinecraftProfileResponse)
-    case error(String)
+    case notAuthenticated,
+         waitingForBrowserAuth,          // Wait for the user to complete authorization in the browser
+         processingAuthCode,             // Process authorization code
+         authenticated(profile: MinecraftProfileResponse),
+         error(String)
 }

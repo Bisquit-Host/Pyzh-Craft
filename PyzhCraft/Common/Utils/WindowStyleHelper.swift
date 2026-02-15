@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// 窗口样式配置工具
+/// Window style configuration tool
 enum WindowStyleHelper {
-    /// 配置标准窗口样式（禁用缩小和放大）
+    /// Configure standard window styles (disable shrink and zoom)
     static func configureStandardWindow(_ window: NSWindow) {
         window.styleMask.remove([.miniaturizable, .resizable])
         window.collectionBehavior.insert(.fullScreenNone)
@@ -10,7 +10,7 @@ enum WindowStyleHelper {
     }
 }
 
-/// 窗口样式配置修饰符
+/// Window style configuration modifiers
 struct WindowStyleConfig: ViewModifier {
     let windowID: WindowID
 
@@ -18,12 +18,12 @@ struct WindowStyleConfig: ViewModifier {
         content
             .background(
                 WindowAccessor(synchronous: false) { window in
-                    // 确保窗口 identifier 被正确设置（用于单例查找）
+                    // Make sure the window identifier is set correctly (for singleton lookup)
                     if window.identifier?.rawValue != windowID.rawValue {
                         window.identifier = NSUserInterfaceItemIdentifier(windowID.rawValue)
                     }
 
-                    // 统一使用标准窗口样式
+                    // Uniform use of standard window styles
                     WindowStyleHelper.configureStandardWindow(window)
                 }
             )
@@ -31,13 +31,13 @@ struct WindowStyleConfig: ViewModifier {
 }
 
 extension View {
-    /// 应用窗口样式配置
+    /// Apply window style configuration
     func windowStyleConfig(for windowID: WindowID) -> some View {
         modifier(WindowStyleConfig(windowID: windowID))
     }
 }
 
-/// 窗口清理修饰符
+/// window cleanup modifier
 struct WindowCleanup: ViewModifier {
     let windowID: WindowID
 
@@ -50,7 +50,7 @@ struct WindowCleanup: ViewModifier {
 }
 
 extension View {
-    /// 应用窗口清理配置
+    /// Apply window cleaning configuration
     func windowCleanup(for windowID: WindowID) -> some View {
         modifier(WindowCleanup(windowID: windowID))
     }

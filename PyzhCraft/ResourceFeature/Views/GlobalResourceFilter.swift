@@ -1,6 +1,6 @@
 import Foundation
 
-// MARK: - 兼容游戏过滤（按照完整流程：过滤兼容 -> 查询版本信息 -> 检查hash是否安装）
+// MARK: - Compatible game filtering (follow the complete process: filtering for compatibility -> query version information -> check whether hash is installed)
 func filterCompatibleGames(
     detail: ModrinthProjectDetail,
     gameRepository: GameRepository,
@@ -11,7 +11,7 @@ func filterCompatibleGames(
     let supportedLoaders = Set(detail.loaders.map { $0.lowercased() })
     let resourceTypeLowercased = resourceType.lowercased()
 
-    // 第一步：根据资源兼容版本和本地游戏列表过滤，过滤出兼容的游戏版本
+    // Step 1: Filter out compatible game versions based on resource compatible versions and local game lists
     let compatibleGames = gameRepository.games.compactMap { game -> GameVersionInfo? in
         let localLoader = game.modLoader.lowercased()
         
@@ -36,42 +36,42 @@ func filterCompatibleGames(
         return match ? game : nil
     }
 
-    // 对于mod，需要检查hash是否已安装
+    // For mods, you need to check if hash is installed
     guard resourceTypeLowercased == "mod" else {
-        // 对于其他资源类型，暂时不检查是否已安装，返回所有兼容的游戏
+        // For other resource types, it does not check whether it is installed yet and returns all compatible games
         return compatibleGames
     }
 
-    // 第二步和第三步：使用兼容的游戏列表的版本信息和资源信息查询该资源的版本信息，判断每个版本的hash是否安装
+    // Step 2 and Step 3: Use the version information and resource information of the compatible game list to query the version information of the resource and determine whether the hash of each version is installed
     return await withTaskGroup(of: GameVersionInfo?.self) { group in
         for game in compatibleGames {
             group.addTask {
-                // 使用兼容的游戏列表的版本信息和资源信息查询该资源的版本信息
+                // Use the version information and resource information of the compatible game list to query the version information of the resource
                 guard let versions = try? await ModrinthService.fetchProjectVersionsFilter(
                     id: projectId,
                     selectedVersions: [game.gameVersion],
                     selectedLoaders: [game.modLoader],
                     type: resourceType
                 ), let firstVersion = versions.first else {
-                    // 如果无法获取版本信息，返回该游戏（认为未安装）
+                    // If version information cannot be obtained, return to the game (think it is not installed)
                     return game
                 }
 
-                // 获取主文件的hash
+                // Get the hash of the main file
                 guard let primaryFile = ModrinthService.filterPrimaryFiles(from: firstVersion.files) else {
-                    // 如果没有主文件，返回该游戏（认为未安装）
+                    // If there is no main file, return to the game (assumed not installed)
                     return game
                 }
 
-                // 判断该版本的hash是否安装
+                // Determine whether this version of hash is installed
                 let modsDir = AppPaths.modsDirectory(gameName: game.gameName)
                 let resourceHash = primaryFile.hashes.sha1
                 if ModScanner.shared.isModInstalledSync(hash: resourceHash, in: modsDir) {
-                    // 已安装，不返回
+                    // Installed, do not return
                     return nil
                 }
 
-                // 未安装，返回该游戏
+                // Not installed, return to this game
                 return game
             }
         }

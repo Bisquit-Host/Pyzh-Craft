@@ -1,27 +1,27 @@
 import Foundation
 
-/// 启动器实例解析器协议
-/// 每个启动器都需要实现此协议来解析其实例信息
+/// Launcher instance resolver protocol
+/// Every launcher needs to implement this protocol to resolve its instance information
 protocol LauncherInstanceParser {
-    /// 启动器类型
+    /// Launcher type
     var launcherType: ImportLauncherType { get }
 
-    /// 验证实例是否有效
-    /// - Parameter instancePath: 实例文件夹路径
-    /// - Returns: 是否为有效实例
+    /// Verify that the instance is valid
+    /// - Parameter instancePath: instance folder path
+    /// - Returns: Whether it is a valid instance
     func isValidInstance(at instancePath: URL) -> Bool
 
-    /// 解析实例信息
+    /// Parse instance information
     /// - Parameters:
-    ///   - instancePath: 实例文件夹路径
-    ///   - basePath: 启动器基础路径
-    /// - Returns: 解析出的实例信息，如果解析失败返回 nil
+    ///   - instancePath: instance folder path
+    ///   - basePath: launcher base path
+    /// - Returns: parsed instance information, if parsing fails, nil is returned
     func parseInstance(at instancePath: URL, basePath: URL) throws -> ImportInstanceInfo?
 }
 
-/// 启动器实例解析器工厂
+/// Launcher instance resolver factory
 enum LauncherInstanceParserFactory {
-    /// 根据启动器类型创建对应的解析器
+    /// Create a corresponding parser based on the launcher type
     static func createParser(for launcherType: ImportLauncherType) -> LauncherInstanceParser {
         switch launcherType {
         case .multiMC, .prismLauncher:

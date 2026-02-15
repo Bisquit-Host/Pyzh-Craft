@@ -1,16 +1,16 @@
 import Foundation
 
-/// Litematica 投影文件服务
-/// 负责读取和解析 Litematica 投影文件
+/// Litematica Projection File Service
+/// Responsible for reading and parsing Litematica projection files
 @MainActor
 class LitematicaService {
     static let shared = LitematicaService()
 
     private init() {}
 
-    /// 从游戏目录读取 Litematica 投影文件列表
-    /// - Parameter gameName: 游戏名称
-    /// - Returns: Litematica 投影文件列表
+    /// Read the Litematica projection file list from the game directory
+    /// - Parameter gameName: game name
+    /// - Returns: Litematica projection file list
     func loadLitematicaFiles(for gameName: String) async throws -> [LitematicaInfo] {
         let schematicsDir = AppPaths.schematicsDirectory(gameName: gameName)
         do {
@@ -27,18 +27,18 @@ class LitematicaService {
         }
     }
 
-    /// 解析 Litematica 文件的元数据（用于列表显示）
-    /// - Parameter filePath: 文件路径
-    /// - Returns: 元数据信息
+    /// Parse metadata of Litematica files (for list display)
+    /// - Parameter filePath: file path
+    /// - Returns: metadata information
     private func parseLitematicaMetadata(filePath: URL) async throws -> LitematicaMetadata? {
         try await Task.detached(priority: .userInitiated) {
             try parseLitematicaMetadataSync(filePath: filePath)
         }.value
     }
 
-    /// 读取完整的 Litematica 投影元数据
-    /// - Parameter filePath: 文件路径
-    /// - Returns: 完整的元数据信息
+    /// Read complete Litematica projection metadata
+    /// - Parameter filePath: file path
+    /// - Returns: complete metadata information
     func loadFullMetadata(filePath: URL) async throws -> LitematicMetadata? {
         do {
             return try await Task.detached(priority: .userInitiated) {
@@ -51,7 +51,7 @@ class LitematicaService {
     }
 }
 
-// MARK: - 文件内同步辅助（在 Task.detached 中调用，避免主线程文件 I/O）
+// MARK: - In-file synchronization assist (called in Task.detached to avoid main thread file I/O)
 private func parseLitematicaMetadataSync(filePath: URL) throws -> LitematicaMetadata? {
     let data = try Data(contentsOf: filePath)
     let parser = NBTParser(data: data)

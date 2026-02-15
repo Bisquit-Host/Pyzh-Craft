@@ -10,11 +10,11 @@ private enum ServerAddressSectionConstants {
     static let popoverMaxHeight: CGFloat = 320
     static let chipPadding: CGFloat = 16
     static let estimatedCharWidth: CGFloat = 10
-    static let maxItems: Int = 4  // 最多显示4个
+    static let maxItems: Int = 4  // Display up to 4
     static let maxWidth: CGFloat = 320
 }
 
-// MARK: - 服务器地址区域视图
+// MARK: - Server address area view
 struct ServerAddressSectionView: View {
     // MARK: - Properties
     let servers: [ServerAddress]
@@ -110,7 +110,7 @@ struct ServerAddressSectionView: View {
         VStack(alignment: .leading, spacing: 0) {
             ScrollView {
                 FlowLayout {
-                    // 显示所有服务器
+                    // Show all servers
                     ForEach(servers) { server in
                         ServerAddressChip(
                             title: server.name,
@@ -191,25 +191,25 @@ struct ServerAddressSectionView: View {
     private func computeVisibleAndOverflowItems() -> (
         [ServerAddress], [ServerAddress]
     ) {
-        // 最多显示4个
+        // Display up to 4
         let visibleItems = Array(servers.prefix(ServerAddressSectionConstants.maxItems))
         let overflowItems = Array(servers.dropFirst(ServerAddressSectionConstants.maxItems))
 
         return (visibleItems, overflowItems)
     }
 
-    /// 并发检测所有服务器的连接状态
+    /// Concurrently detect the connection status of all servers
     private func checkAllServers() {
         guard !servers.isEmpty else { return }
 
-        // 初始化所有服务器状态为检测中
+        // Initialize all server status to detecting
         var initialStatuses: [String: ServerConnectionStatus] = [:]
         for server in servers {
             initialStatuses[server.id] = .checking
         }
         serverStatuses = initialStatuses
 
-        // 并发检测所有服务器
+        // Concurrent detection of all servers
         Task {
             await withTaskGroup(of: (String, ServerConnectionStatus).self) { group in
                 for server in servers {
@@ -303,7 +303,7 @@ struct ServerAddressChip: View {
         .disabled(isLoading)
     }
 
-    /// 根据连接状态返回图标颜色
+    /// Return icon color based on connection status
     private var iconColor: Color {
         switch connectionStatus {
         case .success:
@@ -380,7 +380,7 @@ struct ServerAddressEditView: View {
         if let server = server {
             _serverName = State(initialValue: server.name)
             _serverAddress = State(initialValue: server.address)
-            // 如果端口为0，表示未设置，显示为空
+            // If the port is 0, it means it is not set and is displayed as empty
             _serverPort = State(initialValue: server.port > 0 ? String(server.port) : "")
             _isHidden = State(initialValue: server.hidden)
             _acceptTextures = State(initialValue: server.acceptTextures)
@@ -430,7 +430,7 @@ struct ServerAddressEditView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// 当前服务器的分享文本（优先使用正在编辑的地址和端口）
+    /// The shared text of the current server (the address and port being edited are used first)
     private var shareTextForServer: String? {
         let address = serverAddress.trimmingCharacters(in: .whitespaces)
         let port = serverPort.trimmingCharacters(in: .whitespaces)
@@ -463,11 +463,11 @@ struct ServerAddressEditView: View {
                     TextField("saveinfo.server.address".localized(), text: $serverAddress)
                         .textFieldStyle(.roundedBorder)
                         .onChange(of: serverAddress) { _, newValue in
-                            // 如果地址包含端口，自动分离到端口字段
+                            // If the address contains a port, it is automatically separated into the port field
                             if let colonIndex = newValue.lastIndex(of: ":") {
                                 let afterColon = String(newValue[newValue.index(after: colonIndex)...])
                                 if let port = Int(afterColon), port > 0 && port <= 65535 {
-                                    // 地址包含有效端口
+                                    // The address contains a valid port
                                     let addressOnly = String(newValue[..<colonIndex])
                                     if serverAddress != addressOnly {
                                         serverAddress = addressOnly
@@ -525,12 +525,12 @@ struct ServerAddressEditView: View {
         let trimmedAddress = serverAddress.trimmingCharacters(in: .whitespaces)
         let trimmedPort = serverPort.trimmingCharacters(in: .whitespaces)
 
-        // 名称和地址必填，端口可选
+        // Name and address are required, port is optional
         guard !trimmedName.isEmpty && !trimmedAddress.isEmpty else {
             return false
         }
 
-        // 如果端口不为空，则必须是有效数字
+        // Must be a valid number if port is not empty
         if !trimmedPort.isEmpty {
             return Int(trimmedPort) != nil
         }
@@ -538,7 +538,7 @@ struct ServerAddressEditView: View {
         return true
     }
 
-    /// 获取端口号，如果为空则返回 nil
+    /// Get the port number, or nil if empty
     private var portValue: Int? {
         let trimmedPort = serverPort.trimmingCharacters(in: .whitespaces)
         if trimmedPort.isEmpty {
@@ -557,18 +557,18 @@ struct ServerAddressEditView: View {
             return
         }
 
-        // 端口可选，如果为空则不保存端口（保存为0，表示未设置）
+        // Port is optional. If it is empty, the port will not be saved (saved as 0, indicating not set)
         let port = portValue ?? 0
 
         isSaving = true
 
         Task {
             do {
-                // 获取当前服务器列表
+                // Get current server list
                 var currentServers = try await ServerAddressService.shared.loadServerAddresses(for: gameName)
 
                 if let existingServer = server {
-                    // 编辑模式：更新现有服务器
+                    // Edit Mode: Update an existing server
                     let updatedServer = ServerAddress(
                         id: existingServer.id,
                         name: trimmedName,
@@ -579,15 +579,15 @@ struct ServerAddressEditView: View {
                         acceptTextures: acceptTextures
                     )
 
-                    // 找到并更新服务器
+                    // Find and update servers
                     if let index = currentServers.firstIndex(where: { $0.id == existingServer.id }) {
                         currentServers[index] = updatedServer
                     } else {
-                        // 如果找不到，添加新的
+                        // If not found, add new
                         currentServers.append(updatedServer)
                     }
                 } else {
-                    // 新增模式：添加新服务器
+                    // New mode: Add new server
                     let newServer = ServerAddress(
                         name: trimmedName,
                         address: trimmedAddress,
@@ -599,13 +599,13 @@ struct ServerAddressEditView: View {
                     currentServers.append(newServer)
                 }
 
-                // 保存服务器列表
+                // Save server list
                 try await ServerAddressService.shared.saveServerAddresses(currentServers, for: gameName)
 
                 await MainActor.run {
                     isSaving = false
                     dismiss()
-                    // 刷新服务器列表
+                    // Refresh server list
                     onRefresh?()
                 }
             } catch {
@@ -618,7 +618,7 @@ struct ServerAddressEditView: View {
         }
     }
 
-    /// 删除服务器
+    /// Delete server
     private func deleteServer() {
         guard let serverToDelete = server else {
             return
@@ -628,19 +628,19 @@ struct ServerAddressEditView: View {
 
         Task {
             do {
-                // 获取当前服务器列表
+                // Get current server list
                 var currentServers = try await ServerAddressService.shared.loadServerAddresses(for: gameName)
 
-                // 移除要删除的服务器
+                // Remove the server to be deleted
                 currentServers.removeAll { $0.id == serverToDelete.id }
 
-                // 保存服务器列表
+                // Save server list
                 try await ServerAddressService.shared.saveServerAddresses(currentServers, for: gameName)
 
                 await MainActor.run {
                     isDeleting = false
                     dismiss()
-                    // 刷新服务器列表
+                    // Refresh server list
                     onRefresh?()
                 }
             } catch {

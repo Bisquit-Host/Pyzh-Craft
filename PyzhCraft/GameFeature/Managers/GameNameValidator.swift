@@ -12,7 +12,7 @@ class GameNameValidator: ObservableObject {
         self.gameSetupService = gameSetupService
     }
 
-    /// 验证游戏名称是否重复
+    /// Verify if game name is duplicate
     func validateGameName() async {
         guard !gameName.isEmpty else {
             isGameNameDuplicate = false
@@ -25,7 +25,7 @@ class GameNameValidator: ObservableObject {
         }
     }
 
-    /// 设置默认游戏名称（仅在当前名称为空时设置）
+    /// Set the default game name (only set if the current name is empty)
     func setDefaultName(_ name: String) {
         if gameName.isEmpty {
             gameName = name
@@ -37,7 +37,7 @@ class GameNameValidator: ObservableObject {
         isGameNameDuplicate = false
     }
 
-    /// 检查表单是否有效
+    /// Check if the form is valid
     var isFormValid: Bool {
         !gameName.isEmpty && !isGameNameDuplicate
     }

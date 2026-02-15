@@ -1,29 +1,29 @@
 import Foundation
 import Combine
 
-/// 图标刷新通知管理器
-/// 图标更新后通知视图刷新
+/// Icon refresh notification manager
+/// Notification view refreshes after icon update
 final class IconRefreshNotifier: ObservableObject {
     static let shared = IconRefreshNotifier()
 
-    /// 图标刷新通知发布者
-    /// 发送游戏名称，nil 表示刷新所有图标
+    /// Icon refresh notification to publisher
+    /// Send the game name, nil means refresh all icons
     private let refreshSubject = PassthroughSubject<String?, Never>()
 
-    /// 图标刷新通知的发布者
+    /// Publisher of icon refresh notification
     var refreshPublisher: AnyPublisher<String?, Never> {
         refreshSubject.eraseToAnyPublisher()
     }
 
     private init() {}
 
-    /// 通知刷新特定游戏的图标
-    /// - Parameter gameName: 游戏名称，nil 表示刷新所有图标
+    /// Notification to refresh the icon of a specific game
+    /// - Parameter gameName: game name, nil means refresh all icons
     func notifyRefresh(for gameName: String?) {
         refreshSubject.send(gameName)
     }
 
-    /// 通知刷新所有图标
+    /// Notification refresh all icons
     func notifyRefreshAll() {
         refreshSubject.send(nil)
     }

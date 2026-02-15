@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - 存档信息主视图
+// MARK: - Main view of archived information
 struct SaveInfoView: View {
     let gameId: String
     let gameName: String
@@ -14,7 +14,7 @@ struct SaveInfoView: View {
 
     var body: some View {
         VStack {
-            // 世界信息区域（只显示存在的类型）
+            // World information area (only existing types are displayed)
             if manager.hasWorldsType {
                 WorldInfoSectionView(
                     worlds: manager.worlds,
@@ -23,7 +23,7 @@ struct SaveInfoView: View {
                 )
             }
 
-            // 截图信息区域（只显示存在的类型）
+            // Screenshot information area (only existing types are displayed)
             if manager.hasScreenshotsType {
                 ScreenshotSectionView(
                     screenshots: manager.screenshots,
@@ -32,7 +32,7 @@ struct SaveInfoView: View {
                 )
             }
 
-            // 服务器地址区域（始终显示，即使没有检测到服务器）
+            // Server address area (always shown, even if no server is detected)
             if manager.hasServersType {
                 ServerAddressSectionView(
                     servers: manager.servers,
@@ -45,7 +45,7 @@ struct SaveInfoView: View {
                 }
             }
 
-            // Litematica 投影文件区域（只显示存在的类型）
+            // Litematica projected file area (only existing types are shown)
             if manager.hasLitematicaType {
                 LitematicaSectionView(
                     litematicaFiles: manager.litematicaFiles,
@@ -54,7 +54,7 @@ struct SaveInfoView: View {
                 )
             }
 
-            // 日志信息区域（只显示存在的类型）
+            // Log information area (only existing types are displayed)
             if manager.hasLogsType {
                 LogSectionView(
                     logs: manager.logs,
@@ -62,7 +62,7 @@ struct SaveInfoView: View {
                 )
             }
 
-            // 当没有任何可用信息类型时显示空状态
+            // Show empty status when no information type is available
             if !manager.isLoading && !manager.hasWorldsType && !manager.hasScreenshotsType && !manager.hasServersType && !manager.hasLitematicaType && !manager.hasLogsType {
                 Text("saveinfo.no_available_info".localized())
                     .foregroundStyle(.secondary)

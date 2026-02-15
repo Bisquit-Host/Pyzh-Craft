@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 资源/游戏详情与导航相关状态（可观测）
+/// Resource/game details and navigation related status (observable)
 public final class ResourceDetailState: ObservableObject {
 
     @Published public var selectedItem: SidebarItem
@@ -32,7 +32,7 @@ public final class ResourceDetailState: ObservableObject {
         self.loadedProjectDetail = loadedProjectDetail
     }
 
-    // MARK: - 便捷方法
+    // MARK: - Convenience method
 
     public func selectGame(id: String?) {
         gameId = id
@@ -42,13 +42,13 @@ public final class ResourceDetailState: ObservableObject {
         gameResourcesType = type
     }
 
-    /// 清空项目/游戏选中状态（用于切换回列表等）
+    /// Clear the project/game selected state (used to switch back to the list, etc.)
     public func clearSelection() {
         selectedProjectId = nil
         loadedProjectDetail = nil
     }
 
-    // MARK: - Bindings（供子视图与 GameActionManager 等使用）
+    // MARK: - Bindings (for use by subviews, GameActionManager, etc.)
 
     public var selectedItemBinding: Binding<SidebarItem> {
         Binding(get: { [weak self] in self?.selectedItem ?? .resource(.mod) }, set: { [weak self] value in
@@ -57,7 +57,7 @@ public final class ResourceDetailState: ObservableObject {
         })
     }
 
-    /// 用于 List(selection:) 等需要 Optional 的 API
+    /// Used for APIs that require Optional such as List(selection:)
     public var selectedItemOptionalBinding: Binding<SidebarItem?> {
         Binding(get: { [weak self] in self?.selectedItem }, set: { [weak self] value in
             guard let self else { return }

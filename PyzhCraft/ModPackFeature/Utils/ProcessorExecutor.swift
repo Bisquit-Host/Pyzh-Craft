@@ -1,16 +1,16 @@
 import Foundation
 import ZIPFoundation
 
-/// Forge/NeoForge Processor执行器
+/// Forge/NeoForge Processor executor
 enum ProcessorExecutor {
 
-    /// 执行单个processor
+    /// Execute a single processor
     /// - Parameters:
-    ///   - processor: 处理器配置
-    ///   - librariesDir: 库目录
-    ///   - gameVersion: 游戏版本（用于占位符替换）
-    ///   - data: 数据字段，用于占位符替换
-    /// - Throws: GlobalError 当处理失败时
+    ///   - processor: processor configuration
+    ///   - librariesDir: library directory
+    ///   - gameVersion: game version (for placeholder replacement)
+    ///   - data: data field, used for placeholder replacement
+    /// - Throws: GlobalError when processing fails
     static func executeProcessor(
         _ processor: Processor,
         librariesDir: URL,
@@ -18,23 +18,23 @@ enum ProcessorExecutor {
         javaPath: String,
         data: [String: String]? = nil
     ) async throws {
-        // 1. 验证和准备JAR文件
+        // 1. Verify and prepare JAR files
         let jarPath = try validateAndGetJarPath(
             processor.jar,
             librariesDir: librariesDir
         )
 
-        // 2. 构建classpath
+        // 2. Build classpath
         let classpath = try buildClasspath(
             processor.classpath,
             jarPath: jarPath,
             librariesDir: librariesDir
         )
 
-        // 3. 获取主类
+        // 3. Get the main class
         let mainClass = try getMainClassFromJar(jarPath: jarPath)
 
-        // 4. 构建Java命令
+        // 4. Build Java commands
         let command = buildJavaCommand(
             classpath: classpath,
             mainClass: mainClass,
@@ -44,10 +44,10 @@ enum ProcessorExecutor {
             data: data
         )
 
-        // 5. 执行Java命令
+        // 5. Execute Java commands
         try await executeJavaCommand(command, javaPath: javaPath, workingDir: librariesDir)
 
-        // 6. 处理输出文件
+        // 6. Process output files
         if let outputs = processor.outputs {
             try await processOutputs(outputs, workingDir: librariesDir)
         }
@@ -126,16 +126,16 @@ enum ProcessorExecutor {
         _ coordinate: String,
         librariesDir: URL
     ) throws -> URL {
-        // 使用支持@符号的方法来处理Maven坐标
+        // Use methods that support the @ symbol to handle Maven coordinates
         let relativePath: String
 
         if coordinate.contains("@") {
-            // 对于包含@符号的坐标（如 org.ow2.asm:asm:9.3@jar），使用特殊处理方法
+            // For coordinates containing the @ symbol (such as org.ow2.asm:asm:9.3@jar), special handling is used
             relativePath = CommonService.parseMavenCoordinateWithAtSymbol(
                 coordinate
             )
         } else {
-            // 对于标准坐标，使用原有方法
+            // For standard coordinates, use the original method
             guard
                 let path = CommonService.mavenCoordinateToRelativePath(
                     coordinate
@@ -192,15 +192,15 @@ enum ProcessorExecutor {
         librariesDir: URL,
         data: [String: String]?
     ) -> String {
-        // 快速检查：如果字符串不包含任何占位符，直接返回
+        // Quick check: if the string does not contain any placeholders, just return
         guard arg.contains("{") else {
             return arg
         }
 
-        // 使用 NSMutableString 避免在循环中创建大量临时字符串
+        // Use NSMutableString to avoid creating lots of temporary strings in loops
         let processedArg = NSMutableString(string: arg)
 
-        // 基础占位符替换
+        // Basic placeholder replacement
         let basicReplacements = [
             AppConstants.ProcessorPlaceholders.side: AppConstants.EnvironmentTypes.client,
             AppConstants.ProcessorPlaceholders.version: gameVersion,
@@ -210,7 +210,7 @@ enum ProcessorExecutor {
         ]
 
         for (placeholder, value) in basicReplacements where processedArg.range(of: placeholder).location != NSNotFound {
-            // 先检查是否包含占位符，避免不必要的替换操作
+            // First check whether it contains placeholders to avoid unnecessary replacement operations
             processedArg.replaceOccurrences(
                 of: placeholder,
                 with: value,
@@ -219,11 +219,11 @@ enum ProcessorExecutor {
             )
         }
 
-        // 处理data字段的占位符替换
+        // Handling placeholder replacement for data fields
         if let data = data {
             for (key, value) in data {
                 let placeholder = "{\(key)}"
-                // 先检查是否包含占位符，避免不必要的处理
+                // First check whether it contains placeholders to avoid unnecessary processing
                 if processedArg.range(of: placeholder).location != NSNotFound {
                     let replacementValue =
                         value.contains(":") && !value.hasPrefix("/")
@@ -255,12 +255,12 @@ enum ProcessorExecutor {
         process.arguments = command
         process.currentDirectoryURL = workingDir
 
-        // 设置环境变量
+        // Set environment variables
         var environment = ProcessInfo.processInfo.environment
         environment["LIBRARY_DIR"] = workingDir.path
         process.environment = environment
 
-        // 捕获输出
+        // capture output
         let outputPipe = Pipe()
         let errorPipe = Pipe()
         process.standardOutput = outputPipe
@@ -269,12 +269,12 @@ enum ProcessorExecutor {
         do {
             try process.run()
 
-            // 实时读取输出
+            // Read output in real time
             setupOutputHandlers(outputPipe: outputPipe, errorPipe: errorPipe)
 
             process.waitUntilExit()
 
-            // 清理handlers
+            // Clean up handlers
             outputPipe.fileHandleForReading.readabilityHandler = nil
             errorPipe.fileHandleForReading.readabilityHandler = nil
 
@@ -299,14 +299,14 @@ enum ProcessorExecutor {
         outputPipe.fileHandleForReading.readabilityHandler = { handle in
             let data = handle.availableData
             if !data.isEmpty, String(data: data, encoding: .utf8) != nil {
-                // 输出数据已读取，防止管道阻塞
+                // Output data has been read to prevent pipe blocking
             }
         }
 
         errorPipe.fileHandleForReading.readabilityHandler = { handle in
             let data = handle.availableData
             if !data.isEmpty, String(data: data, encoding: .utf8) != nil {
-                // 错误输出数据已读取，防止管道阻塞
+                // Error output data has been read to prevent pipe blocking
             }
         }
     }
@@ -321,13 +321,13 @@ enum ProcessorExecutor {
             let sourceURL = workingDir.appendingPathComponent(source)
             let destURL = workingDir.appendingPathComponent(destination)
 
-            // 确保目标目录存在
+            // Make sure the target directory exists
             try fileManager.createDirectory(
                 at: destURL.deletingLastPathComponent(),
                 withIntermediateDirectories: true
             )
 
-            // 移动或复制文件
+            // Move or copy files
             if fileManager.fileExists(atPath: sourceURL.path) {
                 try fileManager.moveItem(at: sourceURL, to: destURL)
             }
@@ -369,7 +369,7 @@ enum ProcessorExecutor {
             )
         }
 
-        // 解析MANIFEST.MF查找Main-Class
+        // Parse MANIFEST.MF to find Main-Class
         let lines = manifestContent.components(separatedBy: .newlines)
         for line in lines {
             let trimmedLine = line.trimmingCharacters(in: .whitespaces)

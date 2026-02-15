@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// 主题管理器：负责主题模式、外观应用、系统外观监听
-/// 与 GeneralSettingsManager 解耦，避免非主题设置变更触发根视图重建
+/// Theme manager: responsible for theme mode, appearance application, and system appearance monitoring
+/// Decoupled from GeneralSettingsManager to avoid non-theme setting changes triggering root view reconstruction
 final class ThemeManager: ObservableObject {
     static let shared = ThemeManager()
 
@@ -28,7 +28,7 @@ final class ThemeManager: ObservableObject {
         debounceWorkItem?.cancel()
     }
 
-    /// 当主题模式为 system 时，返回系统当前的主题
+    /// When the theme mode is system, return the current theme of the system
     var currentColorScheme: ColorScheme? {
         guard NSApplication.shared.isRunning else {
             return themeMode == .system ? nil : themeMode.effectiveColorScheme
@@ -36,7 +36,7 @@ final class ThemeManager: ObservableObject {
         return themeMode.effectiveColorScheme
     }
 
-    /// 设置系统外观变化观察者（debounce 降低触发频率）
+    /// Set system appearance change observer (debounce reduces trigger frequency)
     private func setupAppearanceObserver() {
         appearanceObserver = NSApp.observe(
             \.effectiveAppearance,
@@ -55,7 +55,7 @@ final class ThemeManager: ObservableObject {
         }
     }
 
-    /// 应用基于主题设置的全局 AppKit 外观（影响 Sparkle 等 AppKit UI）
+    /// Apply global AppKit appearance based on theme settings (affects AppKit UI such as Sparkle)
     func applyAppAppearance() {
         let appearance = themeMode.nsAppearance
         if Thread.isMainThread {

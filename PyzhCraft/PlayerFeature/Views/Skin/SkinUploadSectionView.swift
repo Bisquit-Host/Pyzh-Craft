@@ -49,9 +49,9 @@ struct SkinUploadSectionView: View {
 
     private var skinRenderArea: some View {
         let playerModel = convertToPlayerModel(currentModel)
-        // 判断是否有 SkinRenderView 显示（已有皮肤时，SkinRenderView 会处理拖拽）
-        // 根据是否有皮肤数据判断，不依赖 capeLoadCompleted
-        // 避免在披风加载期间误认为没有渲染视图，从而导致视图结构来回切换。
+        // Determine whether there is a SkinRenderView displayed (when there is a skin, SkinRenderView will handle dragging)
+        // Judgment based on whether there is skin data, does not rely on capeLoadCompleted
+        // Avoid mistakenly thinking that no view is rendered during cloak loading, causing the view structure to switch back and forth
         let hasSkinRenderView = (selectedSkinImage != nil || currentSkinRenderImage != nil || selectedSkinPath != nil)
 
         return skinRenderContent(playerModel: playerModel)
@@ -63,20 +63,20 @@ struct SkinUploadSectionView: View {
     @ViewBuilder
     private func skinRenderContent(playerModel: PlayerModel) -> some View {
         ZStack {
-            // 底层始终根据皮肤数据决定是否渲染角色，
-            // 不再因为披风加载状态来回切换视图类型，避免 SceneKit 视图被销毁重建。
+            // The bottom layer always decides whether to render the character based on skin data
+            // No longer switch view types back and forth due to cloak loading status, preventing SceneKit views from being destroyed and rebuilt
             Group {
                 if let image = selectedSkinImage ?? currentSkinRenderImage {
                     SkinRenderView(
                         skinImage: image,
-                        // 披风更新流程：
-                        // 1. selectedCapeImage @Binding 变化（用户操作/初始化）
-                        // 2. SwiftUI body 重新评估，创建/更新 SceneKitCharacterViewRepresentable
-                        // 3. updateNSViewController 被调用
-                        // 4. 检查 capeImage 是否存在，调用 updateCapeTexture(image:) 或 removeCapeTexture()
-                        // 5. applyCapeUpdate 检查实例是否相同 (!==)，如果不同则更新并调用 rebuildCharacter()
-                        // 6. 重建或增量更新角色节点，包含新的披风纹理
-                        // 7. SceneKit 渲染新的角色模型
+                        // Cloak update process:
+                        // 1. selectedCapeImage @Binding change (user operation/initialization)
+                        // 2. SwiftUI body re-evaluates and creates/updates SceneKitCharacterViewRepresentable
+                        // 3. updateNSViewController is called
+                        // 4. Check whether capeImage exists and call updateCapeTexture(image:) or removeCapeTexture()
+                        // 5. applyCapeUpdate checks whether the instances are the same (!==), if different, updates and calls rebuildCharacter()
+                        // 6. Rebuild or incrementally update character nodes, including new cloak textures
+                        // 7. SceneKit renders new character model
                         capeImage: $selectedCapeImage,
                         playerModel: playerModel,
                         rotationDuration: 0,
@@ -89,7 +89,7 @@ struct SkinUploadSectionView: View {
                 } else if let skinPath = selectedSkinPath {
                     SkinRenderView(
                         texturePath: skinPath,
-                        // 披风更新流程同上：selectedCapeImage 变化 → SwiftUI 重新评估 → SkinRenderView 内部处理更新
+                        // The cape update process is the same as above: selectedCapeImage change → SwiftUI re-evaluation → SkinRenderView internal processing update
                         capeImage: $selectedCapeImage,
                         playerModel: playerModel,
                         rotationDuration: 0,
@@ -115,24 +115,24 @@ struct SkinUploadSectionView: View {
         }
     }
 
-    /// 打开皮肤预览窗口
+    /// Open skin preview window
     private func openSkinPreviewWindow() {
         let playerModel = convertToPlayerModel(currentModel)
-        // 存储到 WindowDataStore
+        // Store to WindowDataStore
         WindowDataStore.shared.skinPreviewData = SkinPreviewData(
             skinImage: selectedSkinImage ?? currentSkinRenderImage,
             skinPath: selectedSkinPath,
             capeImage: selectedCapeImage,
             playerModel: playerModel
         )
-        // 打开窗口
+        // open window
         WindowManager.shared.openWindow(id: .skinPreview)
     }
 }
 
 // MARK: - View Extension for Conditional Drop
 extension View {
-    /// 条件性地应用拖拽处理修饰符
+    /// Conditionally apply drag handling modifiers
     @ViewBuilder
     func conditionalDrop(isEnabled: Bool, perform: @escaping ([NSItemProvider]) -> Bool) -> some View {
         if isEnabled {

@@ -1,11 +1,11 @@
 import SwiftUI
 
-/// 应用窗口组定义
+/// Apply window group definition
 extension PyzhCraftApp {
-    /// 创建所有应用窗口组
+    /// Create all application window groups
     @SceneBuilder
     func appWindowGroups() -> some Scene {
-        // 贡献者窗口
+        // Contributor window
         Window("about.contributors".localized(), id: WindowID.contributors.rawValue) {
             AboutView(showingAcknowledgements: false)
                 .environmentObject(generalSettingsManager)
@@ -15,7 +15,7 @@ extension PyzhCraftApp {
         }
         .defaultSize(width: 280, height: 600)
 
-        // 致谢窗口
+        // acknowledgment window
         Window("about.acknowledgements".localized(), id: WindowID.acknowledgements.rawValue) {
             AboutView(showingAcknowledgements: true)
                 .environmentObject(generalSettingsManager)
@@ -25,7 +25,7 @@ extension PyzhCraftApp {
         }
         .defaultSize(width: 280, height: 600)
 
-        // AI 聊天窗口
+        // AI chat window
         Window("ai.assistant.title".localized(), id: WindowID.aiChat.rawValue) {
             AIChatWindowContent()
                 .environmentObject(playerListViewModel)
@@ -36,7 +36,7 @@ extension PyzhCraftApp {
         }
         .defaultSize(width: 500, height: 600)
 
-        // Java 下载窗口
+        // Java download window
         Window("global_resource.download".localized(), id: WindowID.javaDownload.rawValue) {
             JavaDownloadProgressWindow(downloadState: JavaDownloadManager.shared.downloadState)
                 .windowStyleConfig(for: .javaDownload)
@@ -44,7 +44,7 @@ extension PyzhCraftApp {
         }
         .defaultSize(width: 400, height: 100)
 
-        // 皮肤预览窗口
+        // Skin preview window
         Window("skin.preview".localized(), id: WindowID.skinPreview.rawValue) {
             SkinPreviewWindowContent()
                 .windowStyleConfig(for: .skinPreview)
@@ -54,9 +54,9 @@ extension PyzhCraftApp {
     }
 }
 
-// MARK: - 窗口内容视图
+// MARK: - window content view
 
-/// AI 聊天窗口内容视图（用于观察 WindowDataStore 变化）
+/// AI chat window content view (used to observe WindowDataStore changes)
 private struct AIChatWindowContent: View {
     @ObservedObject private var windowDataStore = WindowDataStore.shared
     @ObservedObject private var themeManager = ThemeManager.shared
@@ -76,7 +76,7 @@ private struct AIChatWindowContent: View {
     }
 }
 
-/// 皮肤预览窗口内容视图（用于观察 WindowDataStore 变化）
+/// Skin preview window content view (used to observe WindowDataStore changes)
 private struct SkinPreviewWindowContent: View {
     @ObservedObject private var windowDataStore = WindowDataStore.shared
 

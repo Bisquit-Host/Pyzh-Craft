@@ -8,24 +8,24 @@ public class GitHubService: ObservableObject {
 
     // MARK: - Public Methods
 
-    /// 获取仓库贡献者列表
+    /// Get the list of repository contributors
     public func fetchContributors(perPage: Int = 50) async throws -> [GitHubContributor] {
         let url = URLConfig.API.GitHub.contributors(perPage: perPage)
-        // 使用统一的 API 客户端
+        // Use a unified API client
         let data = try await APIClient.get(url: url)
         return try JSONDecoder().decode([GitHubContributor].self, from: data)
     }
 
     // MARK: - Static Contributors
 
-    /// 获取静态贡献者原始数据（JSON）
+    /// Get static contributor raw data (JSON)
     private func fetchStaticContributorsData() async throws -> Data {
         let url = URLConfig.API.GitHub.staticContributors()
-        // 使用统一的 API 客户端
+        // Use a unified API client
         return try await APIClient.get(url: url)
     }
 
-    /// 获取静态贡献者解码后的数据
+    /// Get the decoded data of static contributors
     public func fetchStaticContributors<T: Decodable>() async throws -> T {
         let data = try await fetchStaticContributorsData()
         return try JSONDecoder().decode(T.self, from: data)
@@ -33,15 +33,15 @@ public class GitHubService: ObservableObject {
 
     // MARK: - Acknowledgements
 
-    /// 获取开源致谢原始数据（JSON）
+    /// Get open source acknowledgments raw data (JSON)
     private func fetchAcknowledgementsData() async throws -> Data {
         let url = URLConfig.API.GitHub.acknowledgements()
-        // 使用统一的 API 客户端
+        // Use a unified API client
         let headers = ["Accept": "application/json"]
         return try await APIClient.get(url: url, headers: headers)
     }
 
-    /// 获取开源致谢解码后的数据
+    /// Get open source acknowledgment decoded data
     public func fetchAcknowledgements<T: Decodable>() async throws -> T {
         let data = try await fetchAcknowledgementsData()
         return try JSONDecoder().decode(T.self, from: data)
@@ -49,11 +49,11 @@ public class GitHubService: ObservableObject {
 
     // MARK: - Announcement
 
-    /// 获取公告数据
+    /// Get announcement data
     /// - Parameters:
-    ///   - version: 应用版本号
-    ///   - language: 语言代码
-    /// - Returns: 公告数据，如果不存在（404）则返回 nil
+    ///   - version: application version number
+    ///   - language: language code
+    /// - Returns: announcement data, if it does not exist (404), return nil
     public func fetchAnnouncement(
         version: String,
         language: String
@@ -63,7 +63,7 @@ public class GitHubService: ObservableObject {
             language: language
         )
 
-        // 使用统一的 API 客户端
+        // Use a unified API client
         let headers = ["Accept": "application/json"]
         let data = try await APIClient.get(url: url, headers: headers)
 

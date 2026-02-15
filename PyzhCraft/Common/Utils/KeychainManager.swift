@@ -1,7 +1,7 @@
 import Foundation
 import Security
 
-/// Keychain 管理工具类，用于安全存储敏感信息
+/// Keychain management tool class for secure storage of sensitive information
 enum KeychainManager {
     // MARK: - Constants
 
@@ -9,12 +9,12 @@ enum KeychainManager {
 
     // MARK: - Public Methods
 
-    /// 保存数据到 Keychain
+    /// Save data to Keychain
     /// - Parameters:
-    ///   - data: 要保存的数据
-    ///   - account: 账户标识符（通常是用户ID）
-    ///   - key: 键名
-    /// - Returns: 是否保存成功
+    ///   - data: data to be saved
+    ///   - account: account identifier (usually user ID)
+    ///   - key: key name
+    /// - Returns: Whether the save was successful
     static func save(data: Data, account: String, key: String) -> Bool {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -23,10 +23,10 @@ enum KeychainManager {
             kSecValueData as String: data,
         ]
 
-        // 先删除已存在的项
+        // Delete existing items first
         SecItemDelete(query as CFDictionary)
 
-        // 添加新项
+        // Add new item
         let status = SecItemAdd(query as CFDictionary, nil)
 
         if status == errSecSuccess {
@@ -38,11 +38,11 @@ enum KeychainManager {
         }
     }
 
-    /// 从 Keychain 读取数据
+    /// Read data from Keychain
     /// - Parameters:
-    ///   - account: 账户标识符（通常是用户ID）
-    ///   - key: 键名
-    /// - Returns: 读取的数据，如果不存在或读取失败则返回 nil
+    ///   - account: account identifier (usually user ID)
+    ///   - key: key name
+    /// - Returns: The read data, if it does not exist or the read fails, nil is returned
     static func load(account: String, key: String) -> Data? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -67,11 +67,11 @@ enum KeychainManager {
         }
     }
 
-    /// 从 Keychain 删除数据
+    /// Delete data from Keychain
     /// - Parameters:
-    ///   - account: 账户标识符（通常是用户ID）
-    ///   - key: 键名
-    /// - Returns: 是否删除成功
+    ///   - account: account identifier (usually user ID)
+    ///   - key: key name
+    /// - Returns: Whether the deletion was successful
     static func delete(account: String, key: String) -> Bool {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -90,10 +90,10 @@ enum KeychainManager {
         }
     }
 
-    /// 删除账户的所有 Keychain 数据
-    /// 保存时使用 kSecAttrAccount = "\(account).\(key)"，此处需先查出该 account 前缀的所有项再逐条删除
-    /// - Parameter account: 账户标识符（通常是用户ID）
-    /// - Returns: 是否全部删除成功
+    /// Delete all Keychain data for the account
+    /// Use kSecAttrAccount = "\(account).\(key)" when saving. Here you need to find out all the items with the account prefix and then delete them one by one
+    /// - Parameter account: Account identifier (usually user ID)
+    /// - Returns: Whether all deletions were successful
     static func deleteAll(account: String) -> Bool {
         let accountPrefix = "\(account)."
         let query: [String: Any] = [

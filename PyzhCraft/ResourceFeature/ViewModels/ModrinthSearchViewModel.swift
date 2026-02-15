@@ -1,10 +1,10 @@
 import SwiftUI
 
 // MARK: - Constants
-/// 定义 Modrinth 相关的常量
+/// Define Modrinth related constants
 enum ModrinthConstants {
     // MARK: - UI Constants
-    /// UI 相关的常量
+    /// UI related constants
     enum UIConstants {
         static let pageSize = 20
         static let iconSize: CGFloat = 48
@@ -20,7 +20,7 @@ enum ModrinthConstants {
     }
 
     // MARK: - API Constants
-    /// API 相关的常量
+    /// API related constants
     enum API {
         enum FacetType {
             static let projectType = "project_type"
@@ -41,7 +41,7 @@ enum ModrinthConstants {
 }
 
 // MARK: - Filter Options
-/// 过滤选项结构体，用于减少函数参数数量
+/// Filter option structure, used to reduce the number of function parameters
 struct FilterOptions {
     let resolutions: [String]
     let performanceImpact: [String]
@@ -49,7 +49,7 @@ struct FilterOptions {
 }
 
 // MARK: - ViewModel
-/// Modrinth 搜索视图模型
+/// Modrinth search view model
 @MainActor
 final class ModrinthSearchViewModel: ObservableObject {
     // MARK: - Published Properties
@@ -91,7 +91,7 @@ final class ModrinthSearchViewModel: ObservableObject {
 
         searchTask = Task {
             do {
-                // 创建缓存键
+                // Create cache key
                 let cacheKey = SearchCacheKey(
                     query: query,
                     projectType: projectType,
@@ -104,9 +104,9 @@ final class ModrinthSearchViewModel: ObservableObject {
                     page: page,
                     dataSource: dataSource
                 )
-                // 尝试从缓存获取结果
+                // Try to get results from cache
                 if let cachedEntry = cacheManager.getCachedResult(for: cacheKey) {
-                    // 使用缓存结果
+                    // Use cached results
                     if !Task.isCancelled {
                         if append {
                             results.append(contentsOf: cachedEntry.results)
@@ -114,7 +114,7 @@ final class ModrinthSearchViewModel: ObservableObject {
                             results = cachedEntry.results
                         }
                         totalHits = cachedEntry.totalHits
-                        // 缓存命中后也要设置加载状态为false
+                        // After the cache is hit, the loading status must also be set to false
                         if append {
                             isLoadingMore = false
                         } else {
@@ -130,7 +130,7 @@ final class ModrinthSearchViewModel: ObservableObject {
                 }
                 error = nil
 
-                // 检查任务是否被取消
+                // Check if the task has been canceled
                 try Task.checkCancellation()
 
                 let offset = (page - 1) * pageSize
@@ -151,7 +151,7 @@ final class ModrinthSearchViewModel: ObservableObject {
 
                 let result: ModrinthResult
                 if dataSource == .modrinth {
-                    // 使用 Modrinth 服务
+                    // Using the Modrinth service
                     result = await ModrinthService.searchProjects(
                         facets: facets,
                         offset: offset,
@@ -159,9 +159,9 @@ final class ModrinthSearchViewModel: ObservableObject {
                         query: query
                     )
                 } else {
-                    // 使用 CurseForge 服务并转换为 Modrinth 格式
-                    // 转换 Modrinth 搜索参数为 CurseForge 搜索参数
-                    // 资源包需将 resolutions 一起映射到 CurseForge 分类 ID
+                    // Use CurseForge service and convert to Modrinth format
+                    // Convert Modrinth search parameters to CurseForge search parameters
+                    // The resource package needs to map resolutions together to the CurseForge category ID
                     let cfParams = convertToCurseForgeParams(
                         projectType: projectType,
                         versions: versions,
@@ -190,7 +190,7 @@ final class ModrinthSearchViewModel: ObservableObject {
                 try Task.checkCancellation()
 
                 if !Task.isCancelled {
-                    // 缓存搜索结果
+                    // Caching search results
                     cacheManager.cacheResult(
                         for: cacheKey,
                         results: result.hits,
@@ -215,7 +215,7 @@ final class ModrinthSearchViewModel: ObservableObject {
                     }
                 }
             } catch is CancellationError {
-                // 任务被取消，不需要处理
+                // The task was canceled and does not need to be processed
                 return
             } catch {
                 let globalError = GlobalError.from(error)
@@ -335,13 +335,13 @@ final class ModrinthSearchViewModel: ObservableObject {
         return (clientFacets, serverFacets)
     }
 
-    /// 根据项目类型获取 CurseForge 的 classId
+    /// Get the classId of CurseForge based on the project type
     private func classIdForProjectType(_ projectType: String) -> Int? {
         switch projectType.lowercased() {
         case "mod":
             return 6
         case "modpack":
-            // CurseForge Minecraft Modpacks 的 classId
+            // classId for CurseForge Minecraft modpacks
             return 4471
         case "resourcepack":
             return 12
@@ -354,7 +354,7 @@ final class ModrinthSearchViewModel: ObservableObject {
         }
     }
 
-    /// CurseForge 搜索参数结构
+    /// CurseForge search parameter structure
     private struct CurseForgeSearchParams {
         let classId: Int?
         let categoryIds: [Int]?
@@ -363,16 +363,16 @@ final class ModrinthSearchViewModel: ObservableObject {
         let modLoaderTypes: [Int]?
     }
 
-    /// 将 Modrinth 搜索参数转换为 CurseForge 搜索参数
+    /// Convert Modrinth search parameters to CurseForge search parameters
     /// - Parameters:
-    ///   - projectType: 项目类型
-    ///   - versions: 游戏版本列表
-    ///   - categories: 分类列表（行为/功能类）
-    ///   - resolutions: 资源包分辨率列表（仅在 resourcepack 时生效）
-    ///   - loaders: 加载器列表
-    ///   - query: 搜索关键词
-    /// - Returns: CurseForge 搜索参数
-    /// - Note: API 限制：gameVersions 最多 4 个，modLoaderTypes 最多 5 个，categoryIds 最多 10 个
+    ///   - projectType: project type
+    ///   - versions: game version list
+    ///   - categories: Category list (behavioral/functional categories)
+    ///   - resolutions: resource pack resolution list (only takes effect when resourcepack is used)
+    ///   - loaders: loader list
+    ///   - query: search keywords
+    /// - Returns: CurseForge search parameters
+    /// - Note: API limitations: gameVersions at most 4, modLoaderTypes at most 5, categoryIds at most 10
     private func convertToCurseForgeParams(
         projectType: String,
         versions: [String],
@@ -381,10 +381,10 @@ final class ModrinthSearchViewModel: ObservableObject {
         loaders: [String],
         query: String
     ) -> CurseForgeSearchParams {
-        // 转换项目类型为 classId
+        // Convert item type to classId
         let classId = classIdForProjectType(projectType)
 
-        // 转换游戏版本列表（CurseForge API 限制：最多 4 个版本）
+        // Convert a list of game versions (CurseForge API limit: up to 4 versions)
         let gameVersions: [String]?
         if !versions.isEmpty {
             gameVersions = Array(versions.prefix(4))
@@ -392,13 +392,13 @@ final class ModrinthSearchViewModel: ObservableObject {
             gameVersions = nil
         }
 
-        // 转换分类（CurseForge 使用 categoryIds，从 Modrinth 分类名称映射）
-        // 对于资源包（resourcepack），需要将行为分类 + 分辨率分类一起映射
-        // API 限制：最多 10 个分类 ID
+        // Convert categories (CurseForge uses categoryIds, mapped from Modrinth category names)
+        // For resourcepack, the behavior classification + resolution classification need to be mapped together
+        // API limit: Maximum 10 category IDs
         let categoryIds: [Int]?
         let allCategoryNames: [String]
         if projectType.lowercased() == "resourcepack" {
-            // 行为标签 + 分辨率标签 一起参与映射
+            // Behavior tag + resolution tag participate in mapping together
             allCategoryNames = categories + resolutions
         } else {
             allCategoryNames = categories
@@ -414,9 +414,9 @@ final class ModrinthSearchViewModel: ObservableObject {
             categoryIds = nil
         }
 
-        // 转换加载器列表为 modLoaderTypes
+        // Convert loader list to modLoaderTypes
         // ModLoaderType: 1=Forge, 4=Fabric, 5=Quilt, 6=NeoForge
-        // API 限制：最多 5 个加载器类型
+        // API limit: maximum 5 loader types
 
         let modLoaderTypes: [Int]?
 
@@ -430,14 +430,14 @@ final class ModrinthSearchViewModel: ObservableObject {
                     }
                     return nil
                 }
-                // 限制最多 5 个加载器类型
+                // Limit to 5 loader types
                 modLoaderTypes = loaderTypes.isEmpty ? nil : Array(loaderTypes.prefix(5))
             } else {
                 modLoaderTypes = nil
             }
         }
 
-        // 搜索关键词（直接传原始 query，由 CurseForgeService 负责规范化为空格为 "+")
+        // Search keywords (pass the original query directly, CurseForgeService is responsible for normalizing the spaces into "+")
         let searchFilter = query.isEmpty ? nil : query
 
         return CurseForgeSearchParams(

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 玩家状态管理器（单例）
+/// Player state manager (single case)
 class PlayerStatusManager: ObservableObject {
     static let shared = PlayerStatusManager()
 
@@ -9,38 +9,38 @@ class PlayerStatusManager: ObservableObject {
 
     private init() {}
 
-    /// 获取玩家状态
+    /// Get player status
     func getStatus(for player: Player) -> PlayerStatus {
         statusCache[player.id] ?? .offline
     }
 
-    /// 检查玩家状态
+    /// Check player status
     func checkStatus(for player: Player) {
-        // 取消之前的任务
+        // Cancel previous task
         checkTasks[player.id]?.cancel()
 
-        // 如果是离线账号，直接设置为离线状态（黄色）
+        // If it is an offline account, set it directly to offline status (yellow)
         if !player.isOnlineAccount {
             statusCache[player.id] = .offline
             return
         }
 
-        // 正版账户：如果 token 为空，视为过期（红色）
+        // Genuine account: If the token is empty, it is considered expired (red)
         if player.authAccessToken.isEmpty {
             statusCache[player.id] = .expired
             return
         }
 
-        // 对于正版账户，异步检查 token 是否过期
+        // For genuine accounts, check asynchronously whether the token has expired
         let task = Task {
             let authService = MinecraftAuthService.shared
             let isExpired = await authService.isTokenExpiredBasedOnTime(for: player)
 
             await MainActor.run {
                 if isExpired {
-                    statusCache[player.id] = .expired  // 红色：token 过期
+                    statusCache[player.id] = .expired  // Red: token expired
                 } else {
-                    statusCache[player.id] = .valid    // 绿色：token 有效
+                    statusCache[player.id] = .valid    // Green: token is valid
                 }
             }
         }
@@ -48,13 +48,13 @@ class PlayerStatusManager: ObservableObject {
         checkTasks[player.id] = task
     }
 
-    /// 玩家状态枚举
+    /// Player status enum
     enum PlayerStatus {
-        case expired    // 红色：用户过期（正版）
-        case valid      // 绿色：正常（正版）
-        case offline    // 黄色：离线
+        case expired    // Red: User expired (genuine)
+        case valid      // Green: normal (genuine)
+        case offline    // Yellow: offline
 
-        /// 获取状态对应的图标名称
+        /// Get the icon name corresponding to the status
         var iconName: String {
             switch self {
             case .expired:
@@ -66,7 +66,7 @@ class PlayerStatusManager: ObservableObject {
             }
         }
 
-        /// 获取状态对应的颜色
+        /// Get the color corresponding to the status
         var color: Color {
             switch self {
             case .expired:
@@ -79,18 +79,18 @@ class PlayerStatusManager: ObservableObject {
         }
     }
 
-    /// 获取玩家状态对应的图标名称
+    /// Get the icon name corresponding to the player status
     func getStatusIconName(for player: Player) -> String {
         getStatus(for: player).iconName
     }
 
-    /// 获取玩家状态对应的颜色
+    /// Get the color corresponding to the player status
     func getStatusColor(for player: Player) -> Color {
         getStatus(for: player).color
     }
 }
 
-/// 显示玩家列表的视图
+/// View showing player list
 struct PlayerListView: View {
     @EnvironmentObject var playerListViewModel: PlayerListViewModel
     @Environment(\.dismiss)
@@ -149,7 +149,7 @@ private struct PlayerSelectorLabel: View {
 
 //                Spacer()
 //
-//                // 状态指示器（右对齐）
+//                // status indicator (right aligned)
 //                Image(systemName: statusManager.getStatusIconName(for: selectedPlayer))
 //                    .font(.system(size: 12))
 //                    .foregroundColor(statusManager.getStatusColor(for: selectedPlayer))
@@ -163,7 +163,7 @@ private struct PlayerSelectorLabel: View {
     }
 }
 
-// 列表项视图
+// list item view
 private struct PlayerListItemView: View {
     let player: Player
     let playerListViewModel: PlayerListViewModel
@@ -174,7 +174,7 @@ private struct PlayerListItemView: View {
 
     var body: some View {
         HStack {
-//            // 状态指示器（最左边）
+//            //Status indicator (leftmost)
 //            Image(systemName: statusManager.getStatusIconName(for: player))
 //                .font(.system(size: 12))
 //                .foregroundColor(statusManager.getStatusColor(for: player))

@@ -1,10 +1,10 @@
 import SwiftUI
 import Combine
 
-/// 主界面布局风格：经典（列表在左、内容在右）/ 聚焦（内容在左、列表在右）
+/// Main interface layout style: Classic (list on the left, content on the right) / Focus (content on the left, list on the right)
 public enum InterfaceLayoutStyle: String, CaseIterable {
-    case classic,   // 经典
-         focused  // 聚焦
+    case classic,   // classic
+         focused  // focus
 
     public var localizedName: String {
         "settings.interface_style.\(rawValue)".localized()
@@ -27,20 +27,20 @@ public enum ThemeMode: String, CaseIterable {
             return .dark
             
         case .system:
-            // 在主线程上安全访问系统外观
+            // Safely access system skins on the main thread
             if Thread.isMainThread {
-                // 使用 NSApplication.shared 而不是 NSApp，更安全
+                // Use NSApplication.shared instead of NSApp, safer
                 let appearance = NSApplication.shared.effectiveAppearance
                 let bestMatch = appearance.bestMatch(from: [.aqua, .darkAqua])
                 return bestMatch == .darkAqua ? .dark : .light
             } else {
-                // 如果不在主线程，返回默认的 light 主题
+                // If not in the main thread, return to the default light theme
                 return .light
             }
         }
     }
 
-    /// 对应的 AppKit 外观，用于影响基于 AppKit 的 UI（如 Sparkle）
+    /// Corresponding AppKit skin, used to affect AppKit-based UI (such as Sparkle)
     public var nsAppearance: NSAppearance? {
         switch self {
         case .light: NSAppearance(named: .aqua)
@@ -53,7 +53,7 @@ public enum ThemeMode: String, CaseIterable {
 class GeneralSettingsManager: ObservableObject, WorkingPathProviding {
     static let shared = GeneralSettingsManager()
 
-    /// 是否启用 GitHub 代理（默认开启）
+    /// Whether to enable GitHub proxy (enabled by default)
     @AppStorage("enableGitHubProxy")
     var enableGitHubProxy: Bool = true {
         didSet { objectWillChange.send() }
@@ -64,7 +64,7 @@ class GeneralSettingsManager: ObservableObject, WorkingPathProviding {
         didSet { objectWillChange.send() }
     }
 
-    // MARK: - 应用设置属性
+    // MARK: - Apply settings properties
     @AppStorage("concurrentDownloads")
     var concurrentDownloads: Int = 64 {
         didSet {
@@ -75,13 +75,13 @@ class GeneralSettingsManager: ObservableObject, WorkingPathProviding {
         }
     }
 
-    // 新增：启动器工作目录
+    // New: Launcher working directory
     @AppStorage("launcherWorkingDirectory")
     var launcherWorkingDirectory: String = AppPaths.launcherSupportDirectory.path {
         didSet { objectWillChange.send() }
     }
 
-    /// 界面风格：经典（列表 | 内容）/ 聚焦（内容 | 列表）
+    /// Interface style: Classic (list | content) / Focus (content | list)
     @AppStorage("interfaceLayoutStyle")
     var interfaceLayoutStyle: InterfaceLayoutStyle = .classic {
         didSet { objectWillChange.send() }
@@ -89,8 +89,8 @@ class GeneralSettingsManager: ObservableObject, WorkingPathProviding {
 
     private init() {}
 
-    /// 当前启动器工作目录（WorkingPathProviding）
-    /// 空时使用默认支持目录
+    /// Current launcher working directory (WorkingPathProviding)
+    /// Use default support directory when empty
     var currentWorkingPath: String {
         launcherWorkingDirectory.isEmpty ? AppPaths.launcherSupportDirectory.path : launcherWorkingDirectory
     }

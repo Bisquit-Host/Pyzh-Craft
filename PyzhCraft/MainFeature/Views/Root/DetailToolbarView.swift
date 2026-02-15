@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 详情区域工具栏内容
+/// Details area toolbar content
 public struct DetailToolbarView: ToolbarContent {
     @Environment(\.openURL)
     private var openURL
@@ -23,7 +23,7 @@ public struct DetailToolbarView: ToolbarContent {
         gameStatusManager.isGameRunning(gameId: gameId)
     }
 
-    /// 打开当前资源在浏览器中的项目页面
+    /// Open the project page of the current resource in the browser
     private func openCurrentResourceInBrowser() {
         guard let slug = detailState.loadedProjectDetail?.slug else { return }
 

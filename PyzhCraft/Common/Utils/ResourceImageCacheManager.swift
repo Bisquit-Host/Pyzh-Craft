@@ -1,48 +1,48 @@
 import SwiftUI
 
-/// 资源图片缓存管理器
-/// 为资源列表的图标提供高性能缓存，支持内存和磁盘两级缓存
+/// Resource Image Cache Manager
+/// Provides high-performance caching for resource list icons, supporting both memory and disk level caching
 final class ResourceImageCacheManager: @unchecked Sendable {
     // MARK: - Singleton
     static let shared = ResourceImageCacheManager()
     // MARK: - Properties
-    /// 图片内存缓存：key 为 URL 字符串，value 为 NSImage
+    /// Image memory cache: key is URL string, value is NSImage
     private let imageCache: NSCache<NSString, NSImage>
-    /// 共享的 URLSession，配置持久化缓存策略
+    /// Shared URLSession, configure persistent cache strategy
     private let urlSession: URLSession
     // MARK: - Initialization
     private init() {
-        // 配置内存缓存：最多缓存 100 张图片，总内存限制 20MB
+        // Configure memory cache: cache up to 100 images, total memory limit 20MB
         let cache = NSCache<NSString, NSImage>()
         cache.countLimit = 100
         cache.totalCostLimit = 20 * 1024 * 1024  // 20MB
         cache.name = "ResourceImageCache"
         self.imageCache = cache
-        // 配置 URLSession 使用大容量磁盘缓存
+        // Configure URLSession to use bulk disk cache
         let config = URLSessionConfiguration.default
         config.requestCachePolicy = .returnCacheDataElseLoad
         config.urlCache = URLCache(
-            memoryCapacity: 10 * 1024 * 1024,  // 10MB 内存缓存
-            diskCapacity: 100 * 1024 * 1024,   // 100MB 磁盘缓存
+            memoryCapacity: 10 * 1024 * 1024,  // 10MB memory cache
+            diskCapacity: 100 * 1024 * 1024,   // 100MB disk cache
             diskPath: "ResourceImageCache"
         )
         config.timeoutIntervalForRequest = 30
         self.urlSession = URLSession(configuration: config)
     }
     // MARK: - Public Methods
-    /// 加载图片（优先使用缓存）
-    /// - Parameter url: 图片 URL
-    /// - Returns: 加载的图片
+    /// Load images (use cache first)
+    /// - Parameter url: Image URL
+    /// - Returns: loaded image
     @MainActor
     func loadImage(from url: URL) async throws -> NSImage {
         let cacheKey = url.absoluteString as NSString
-        // 1. 先检查内存缓存
+        // 1. Check the memory cache first
         if let cachedImage = imageCache.object(forKey: cacheKey) {
             return cachedImage
         }
-        // 2. 从网络加载（URLSession 会自动使用磁盘缓存）
+        // 2. Load from the network (URLSession will automatically use disk cache)
         let (data, _) = try await urlSession.data(from: url)
-        // 3. 解析图片
+        // 3. Parse the image
         guard let image = NSImage(data: data) else {
             throw NSError(
                 domain: "ResourceImageCacheManager",
@@ -50,49 +50,49 @@ final class ResourceImageCacheManager: @unchecked Sendable {
                 userInfo: [NSLocalizedDescriptionKey: "无法解析图片数据"]
             )
         }
-        // 4. 存入内存缓存
+        // 4. Store in memory cache
         let cost = data.count
         imageCache.setObject(image, forKey: cacheKey, cost: cost)
         return image
     }
-    /// 预加载图片列表（后台批量加载）
-    /// - Parameter urls: 图片 URL 列表
+    /// Preload image list (background batch loading)
+    /// - Parameter urls: Image URL list
     func preloadImages(urls: [URL]) {
         Task.detached(priority: .utility) {
             for url in urls {
                 let cacheKey = url.absoluteString as NSString
-                // 跳过已缓存的图片
+                // Skip cached images
                 if self.imageCache.object(forKey: cacheKey) != nil {
                     continue
                 }
-                // 后台加载
+                // Background loading
                 do {
                     _ = try await self.loadImage(from: url)
                 } catch {
-                    // 静默处理预加载失败
+                    // Silently handle preload failure
                     Logger.shared.debug("预加载图片失败: \(url.absoluteString)")
                 }
             }
         }
     }
-    /// 清理内存缓存（保留磁盘缓存）
+    /// Clean memory cache (keep disk cache)
     func clearMemoryCache() {
         imageCache.removeAllObjects()
     }
-    /// 清理所有缓存（包括磁盘缓存）
+    /// Clean all caches (including disk cache)
     func clearAllCache() {
         imageCache.removeAllObjects()
         urlSession.configuration.urlCache?.removeAllCachedResponses()
     }
-    /// 获取缓存统计信息（用于调试）
+    /// Get cache statistics (for debugging)
     func getCacheInfo() -> (memoryCount: Int, diskSize: Int) {
         let diskSize = urlSession.configuration.urlCache?.currentDiskUsage ?? 0
-        // NSCache 不提供 count 属性，估算为已使用内存/平均图片大小
+        // NSCache does not provide the count attribute, which is estimated as used memory/average image size
         return (memoryCount: 0, diskSize: diskSize)
     }
 }
 
-/// 带缓存的异步图片视图
+/// Asynchronous image view with cache
 struct CachedAsyncImage<Content: View, Placeholder: View>: View {
     // MARK: - Properties
     let url: URL?
@@ -149,7 +149,7 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
                     self.image = loadedImage
                 }
             } catch {
-                // 静默处理错误，显示占位符
+                // Handle errors silently, display placeholders
                 if !Task.isCancelled {
                     self.image = nil
                 }
@@ -160,7 +160,7 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
 
 // MARK: - Convenience Initializers
 extension CachedAsyncImage where Content == Image, Placeholder == Color {
-    /// 便捷初始化器：默认占位符为灰色背景
+    /// Convenience initializer: default placeholder has gray background
     init(url: URL?) {
         self.init(
             url: url,

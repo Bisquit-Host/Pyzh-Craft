@@ -1,7 +1,7 @@
 import SwiftUI
 import Combine
 
-/// 侧边栏：游戏列表与资源列表导航
+/// Sidebar: Game list and resource list navigation
 public struct SidebarView: View {
     @EnvironmentObject var detailState: ResourceDetailState
     @EnvironmentObject var gameRepository: GameRepository
@@ -24,7 +24,7 @@ public struct SidebarView: View {
 
     public var body: some View {
         List(selection: detailState.selectedItemOptionalBinding) {
-            // 资源部分
+            // Resources section
             Section(header: Text("sidebar.resources.title".localized())) {
                 ForEach(ResourceType.allCases, id: \.self) { type in
                     NavigationLink(value: SidebarItem.resource(type)) {
@@ -38,7 +38,7 @@ public struct SidebarView: View {
                 }
             }
 
-            // 游戏部分
+            // game section
             Section(header: Text("sidebar.games.title".localized())) {
                 ForEach(filteredGames) { game in
                     NavigationLink(value: SidebarItem.game(game.id)) {
@@ -67,7 +67,7 @@ public struct SidebarView: View {
         }
         .searchable(text: $searchText, placement: .sidebar, prompt: Localized.Sidebar.Search.games)
         .safeAreaInset(edge: .bottom) {
-            // 显示玩家列表（如有玩家）
+            // Show player list (if there are players)
             if !playerListViewModel.players.isEmpty {
                 PlayerListView()
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -76,18 +76,18 @@ public struct SidebarView: View {
         }
         .listStyle(.sidebar)
         .onAppear {
-            // 初始化所有游戏的刷新触发器
+            // Initialize refresh triggers for all games
             for game in gameRepository.games where iconRefreshTriggers[game.gameName] == nil {
                 iconRefreshTriggers[game.gameName] = UUID()
             }
-            // 监听图标刷新通知
+            // Listen for icon refresh notifications
             cancellable = IconRefreshNotifier.shared.refreshPublisher
                 .sink { refreshedGameName in
                     if let gameName = refreshedGameName {
-                        // 刷新特定游戏的图标
+                        // Refresh the icon for a specific game
                         iconRefreshTriggers[gameName] = UUID()
                     } else {
-                        // 刷新所有游戏的图标
+                        // Refresh icons for all games
                         for game in gameRepository.games {
                             iconRefreshTriggers[game.gameName] = UUID()
                         }
@@ -98,7 +98,7 @@ public struct SidebarView: View {
             cancellable?.cancel()
         }
         .onChange(of: gameRepository.games) { _, newGames in
-            // 当游戏列表变化时，为新游戏初始化刷新触发器
+            // Initialize refresh triggers for new games when the game list changes
             for game in newGames where iconRefreshTriggers[game.gameName] == nil {
                 iconRefreshTriggers[game.gameName] = UUID()
             }
@@ -132,7 +132,7 @@ public struct SidebarView: View {
         }
     }
 
-    // 只对游戏名做模糊搜索
+    // Only perform fuzzy search on game name
     private var filteredGames: [GameVersionInfo] {
         if searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             return gameRepository.games
@@ -144,16 +144,16 @@ public struct SidebarView: View {
 
 // MARK: - Game Icon View
 
-/// 游戏图标视图组件，支持图标刷新
+/// Game icon view component, supports icon refresh
 private struct GameIconView: View {
     let game: GameVersionInfo
     let refreshTrigger: UUID
 
-    /// 获取图标URL（添加刷新触发器作为查询参数，强制AsyncImage重新加载）
+    /// Get icon URL (add refresh trigger as query parameter, force AsyncImage to reload)
     private var iconURL: URL {
         let profileDir = AppPaths.profileDirectory(gameName: game.gameName)
         let baseURL = profileDir.appendingPathComponent(game.gameIcon)
-        // 添加刷新触发器作为查询参数，确保文件更新后能重新加载
+        // Add a refresh trigger as a query parameter to ensure that the file can be reloaded after updating
         var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)
         components?.queryItems = [URLQueryItem(name: "refresh", value: refreshTrigger.uuidString)]
         return components?.url ?? baseURL
@@ -203,8 +203,8 @@ private struct GameIconView: View {
 
 // MARK: - Game Context Menu
 
-/// 游戏右键菜单组件，优化内存使用
-/// 使用独立的视图组件和缓存的状态，减少内存占用
+/// Game right-click menu component to optimize memory usage
+/// Use independent view components and cached state to reduce memory usage
 private struct GameContextMenu: View {
     let game: GameVersionInfo
     let onDelete: () -> Void
@@ -218,8 +218,8 @@ private struct GameContextMenu: View {
     @EnvironmentObject private var gameRepository: GameRepository
     @EnvironmentObject private var gameLaunchUseCase: GameLaunchUseCase
 
-    /// 使用缓存的游戏状态，避免每次渲染都检查进程
-    /// 这比调用 isGameRunning() 更高效，因为它直接读取已缓存的状态
+    /// Use cached game state to avoid checking the process every render
+    /// This is more efficient than calling isGameRunning() because it reads the cached state directly
     private var isRunning: Bool {
         gameStatusManager.allGameStates[game.id] ?? false
     }
@@ -258,10 +258,10 @@ private struct GameContextMenu: View {
         }
     }
 
-    /// 启动或停止游戏
+    /// Start or stop the game
     private func toggleGameState() {
         Task {
-            // 使用缓存状态而不是重新检查，减少进程查询
+            // Reduce process queries using cached state instead of rechecking
             let currentlyRunning = gameStatusManager.allGameStates[game.id] ?? false
             if currentlyRunning {
                 await gameLaunchUseCase.stopGame(game: game)

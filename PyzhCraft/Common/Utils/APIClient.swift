@@ -1,6 +1,6 @@
 import Foundation
 
-/// 统一的 API 客户端
+/// Unified API client
 enum APIClient {
     private static let sharedDecoder: JSONDecoder = {
         let decoder = JSONDecoder()
@@ -10,8 +10,8 @@ enum APIClient {
     private static let sharedSession: URLSession = {
         let configuration = URLSessionConfiguration.default
         configuration.urlCache = URLCache(
-            memoryCapacity: 4 * 1024 * 1024,  // 4MB 内存缓存
-            diskCapacity: 20 * 1024 * 1024,   // 20MB 磁盘缓存
+            memoryCapacity: 4 * 1024 * 1024,  // 4MB memory cache
+            diskCapacity: 20 * 1024 * 1024,   // 20MB disk cache
             diskPath: nil
         )
         configuration.requestCachePolicy = .useProtocolCachePolicy
@@ -26,12 +26,12 @@ enum APIClient {
     private static let httpMethodGET = "GET"
     private static let httpMethodPOST = "POST"
 
-    /// 执行 GET 请求
+    /// Perform a GET request
     /// - Parameters:
-    ///   - url: 请求 URL
-    ///   - headers: 可选的请求头
-    /// - Returns: 响应数据
-    /// - Throws: GlobalError 当请求失败时
+    ///   - url: request URL
+    ///   - headers: optional request headers
+    /// - Returns: response data
+    /// - Throws: GlobalError when the request fails
     static func get(
         url: URL,
         headers: [String: String]? = nil
@@ -44,13 +44,13 @@ enum APIClient {
         return try await performRequest(request: request)
     }
 
-    /// 执行 POST 请求
+    /// Perform a POST request
     /// - Parameters:
-    ///   - url: 请求 URL
-    ///   - body: 请求体数据
-    ///   - headers: 可选的请求头（如果包含 Content-Type，将使用提供的值，否则默认为 application/json）
-    /// - Returns: 响应数据
-    /// - Throws: GlobalError 当请求失败时
+    ///   - url: request URL
+    ///   - body: request body data
+    ///   - headers: optional request headers (if Content-Type is included, the provided value will be used, otherwise it defaults to application/json)
+    /// - Returns: response data
+    /// - Throws: GlobalError when the request fails
     static func post(
         url: URL,
         body: Data? = nil,
@@ -80,15 +80,15 @@ enum APIClient {
         return try await performRequest(request: request)
     }
 
-    /// 执行请求并返回解码后的对象
+    /// Execute the request and return the decoded object
     /// - Parameters:
-    ///   - url: 请求 URL
-    ///   - method: HTTP 方法
-    ///   - body: 请求体数据
-    ///   - headers: 可选的请求头
-    ///   - decoder: JSON 解码器（可选，默认使用共享解码器）
-    /// - Returns: 解码后的对象
-    /// - Throws: GlobalError 当请求失败时
+    ///   - url: request URL
+    ///   - method: HTTP method
+    ///   - body: request body data
+    ///   - headers: optional request headers
+    ///   - decoder: JSON decoder (optional, shared decoder is used by default)
+    /// - Returns: decoded object
+    /// - Throws: GlobalError when the request fails
     static func request<T: Decodable>(
         url: URL,
         method: String = "GET",
@@ -105,14 +105,14 @@ enum APIClient {
         return try (decoder ?? sharedDecoder).decode(T.self, from: data)
     }
 
-    /// 执行请求并返回原始数据
+    /// Execute the request and return the original data
     /// - Parameters:
-    ///   - url: 请求 URL
-    ///   - method: HTTP 方法
-    ///   - body: 请求体数据
-    ///   - headers: 可选的请求头
-    /// - Returns: 响应数据
-    /// - Throws: GlobalError 当请求失败时
+    ///   - url: request URL
+    ///   - method: HTTP method
+    ///   - body: request body data
+    ///   - headers: optional request headers
+    /// - Returns: response data
+    /// - Throws: GlobalError when the request fails
     static func requestData(
         url: URL,
         method: String = "GET",
@@ -132,10 +132,10 @@ enum APIClient {
         return try await performRequest(request: request)
     }
 
-    /// 执行请求（内部方法）
+    /// Execute request (internal method)
     /// - Parameter request: URLRequest
-    /// - Returns: 响应数据
-    /// - Throws: GlobalError 当请求失败时
+    /// - Returns: response data
+    /// - Throws: GlobalError when the request fails
     private static func performRequest(request: URLRequest) async throws -> Data {
         let (data, response) = try await sharedSession.data(for: request)
 
@@ -159,8 +159,8 @@ enum APIClient {
     }
 
     /// - Parameter request: URLRequest
-    /// - Returns: (数据, HTTP响应)
-    /// - Throws: GlobalError 当请求失败时
+    /// - Returns: (data, HTTP response)
+    /// - Throws: GlobalError when the request fails
     static func performRequestWithResponse(request: URLRequest) async throws -> (Data, HTTPURLResponse) {
         let (data, response) = try await sharedSession.data(for: request)
 

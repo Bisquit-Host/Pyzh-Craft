@@ -68,7 +68,7 @@ struct GameHeaderListRow: View {
         )
     }
 
-    /// 图标文件 URL（路径固定不变；刷新仅依赖通知触发 .id 重建）
+    /// Icon file URL (the path is fixed; refresh only relies on notifications to trigger .id reconstruction)
     private var iconURL: URL {
         profileDir.appendingPathComponent(game.gameIcon)
     }
@@ -90,7 +90,7 @@ struct GameHeaderListRow: View {
                         defaultIcon
                     }
                 }
-                // 额外加一层保险：即使 URL 拼接/缓存行为不如预期，也强制重建 AsyncImage
+                // Extra layer of insurance: force AsyncImage rebuild even if URL splicing/caching does not behave as expected
                 .id(refreshTrigger)
             } else {
                 defaultIcon
@@ -101,10 +101,10 @@ struct GameHeaderListRow: View {
             onIconTap?()
         }
         .onAppear {
-            // 监听图标刷新通知
+            // Listen for icon refresh notifications
             cancellable = IconRefreshNotifier.shared.refreshPublisher
                 .sink { refreshedGameName in
-                    // 如果通知的游戏名称匹配，或者通知为 nil（刷新所有），则刷新
+                    // Refresh if the notification's game name matches, or if the notification is nil (refresh all)
                     if refreshedGameName == nil || refreshedGameName == game.gameName {
                         refreshTrigger = UUID()
                     }
@@ -129,10 +129,10 @@ struct GameHeaderListRow: View {
 
     @ViewBuilder
     private func styledIcon(_ image: Image, size: Int) -> some View {
-        let padding: CGFloat = CGFloat(size) * 0.125 // padding 为 size 的 12.5%（80 时是 10）
+        let padding: CGFloat = CGFloat(size) * 0.125 // padding is 12.5% ​​of size (10 at 80)
         let innerSize = CGFloat(size) - padding * 2
-        let innerCornerRadius = innerSize * 0.2 // 内层圆角为内层尺寸的 20%
-        let outerCornerRadius = CGFloat(size) * 0.2 // 外层圆角为外层尺寸的 20%
+        let innerCornerRadius = innerSize * 0.2 // The inner fillet is 20% of the inner size
+        let outerCornerRadius = CGFloat(size) * 0.2 // The outer fillet is 20% of the outer size
 
         image
             .resizable()

@@ -11,12 +11,12 @@ extension DateFormatter {
 
 // MARK: - GameNameGenerator
 enum GameNameGenerator {
-    /// 为 ModPack 下载生成默认游戏名称
+    /// Generate default game name for ModPack downloads
     /// - Parameters:
-    ///   - projectTitle: 项目标题
-    ///   - gameVersion: 游戏版本
-    ///   - includeTimestamp: 是否包含时间戳（默认 true）
-    /// - Returns: 生成的游戏名称
+    ///   - projectTitle: project title
+    ///   - gameVersion: game version
+    ///   - includeTimestamp: whether to include timestamp (default true)
+    /// - Returns: generated game name
     static func generateModPackName(
         projectTitle: String?,
         gameVersion: String,
@@ -32,12 +32,12 @@ enum GameNameGenerator {
         return baseName
     }
 
-    /// 为 ModPack 导入生成默认游戏名称
+    /// Generate default game name for ModPack import
     /// - Parameters:
-    ///   - modPackName: 整合包名称
-    ///   - modPackVersion: 整合包版本
-    ///   - includeTimestamp: 是否包含时间戳（默认 true）
-    /// - Returns: 生成的游戏名称
+    ///   - modPackName: integration package name
+    ///   - modPackVersion: integration package version
+    ///   - includeTimestamp: whether to include timestamp (default true)
+    /// - Returns: generated game name
     static func generateImportName(
         modPackName: String,
         modPackVersion: String,
@@ -53,11 +53,11 @@ enum GameNameGenerator {
         return baseName
     }
 
-    /// 为普通游戏创建生成默认游戏名称
+    /// Generate default game name for normal game creation
     /// - Parameters:
-    ///   - gameVersion: 游戏版本
-    ///   - modLoader: 模组加载器
-    /// - Returns: 生成的游戏名称
+    ///   - gameVersion: game version
+    ///   - modLoader: Mod loader
+    /// - Returns: generated game name
     static func generateGameName(
         gameVersion: String,
         modLoader: String

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Litematica 投影文件信息模型
+/// Litematica projected file information model
 struct LitematicaInfo: Identifiable, Equatable {
     let id: String
     let name: String
@@ -37,7 +37,7 @@ struct LitematicaInfo: Identifiable, Equatable {
     }
 }
 
-/// Litematica 投影元数据结构（用于列表显示）
+/// Litematica projection metadata structure (for list display)
 struct LitematicaMetadata {
     let author: String?
     let description: String?
@@ -46,7 +46,7 @@ struct LitematicaMetadata {
     let totalBlocks: Int?
 }
 
-/// Litematica 投影完整元数据结构（用于详情显示）
+/// Litematica projects the complete metadata structure (for detailed display)
 struct LitematicMetadata {
     let name: String
     let author: String
@@ -59,7 +59,7 @@ struct LitematicMetadata {
     let regionCount: Int32
 }
 
-/// 尺寸结构
+/// Dimensional structure
 struct Size {
     let x: Int32
     let y: Int32

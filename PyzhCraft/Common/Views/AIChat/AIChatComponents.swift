@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// AI 头像视图
+/// AI avatar view
 struct AIAvatarView: View {
     let size: CGFloat
     let url: String
@@ -19,7 +19,7 @@ struct AIAvatarView: View {
     }
 }
 
-/// 消息气泡视图
+/// message bubble view
 struct MessageBubble: View {
     let message: ChatMessage
     let currentPlayer: Player?
@@ -66,7 +66,7 @@ struct MessageBubble: View {
     // MARK: - AI Message View
 
     @ViewBuilder private var aiMessageView: some View {
-        // 使用缓存的 AI 头像，避免每次重新加载
+        // Use cached AI avatars to avoid reloading each time
         if let cachedAvatar = cachedAIAvatar {
             cachedAvatar
         } else {
@@ -121,7 +121,7 @@ struct MessageBubble: View {
     // MARK: - Avatar Views
 
     @ViewBuilder private var userAvatarView: some View {
-        // 使用缓存的用户头像，避免每次重新加载
+        // Use cached user avatar to avoid reloading every time
         if let cachedAvatar = cachedUserAvatar {
             cachedAvatar
         } else if let player = currentPlayer {
@@ -138,7 +138,7 @@ struct MessageBubble: View {
     }
 }
 
-/// 附件预览视图（输入区域）
+/// Attachment preview view (input area)
 struct AttachmentPreview: View {
     let attachment: MessageAttachmentType
     let onRemove: () -> Void
@@ -155,7 +155,7 @@ struct AttachmentPreview: View {
         HStack(spacing: Constants.spacing) {
             switch attachment {
             case .image:
-                // 图片类型已移除，不应该出现
+                // Image type has been removed and should not be present
                 EmptyView()
             case let .file(_, fileName):
                 Image(systemName: "doc.fill")
@@ -184,7 +184,7 @@ struct AttachmentPreview: View {
     }
 }
 
-/// 附件显示视图（消息中）
+/// Attachment display view (in messages)
 struct AttachmentView: View {
     let attachment: MessageAttachmentType
 
@@ -202,7 +202,7 @@ struct AttachmentView: View {
     var body: some View {
         switch attachment {
         case .image:
-            // 图片类型已移除，不应该出现
+            // Image type has been removed and should not be present
             EmptyView()
         case let .file(url, fileName):
             fileItemView(

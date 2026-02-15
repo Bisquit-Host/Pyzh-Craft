@@ -4,7 +4,7 @@ class CacheManager: ObservableObject {
     @Published var cacheInfo: CacheInfo = CacheInfo(fileCount: 0, totalSize: 0)
     private let calculator = CacheCalculator.shared
 
-    /// 计算元数据缓存信息（静默版本）
+    /// Compute metadata cache information (silent version)
     func calculateMetaCacheInfo() {
         do {
             self.cacheInfo = try calculator.calculateMetaCacheInfo()
@@ -12,11 +12,11 @@ class CacheManager: ObservableObject {
             let globalError = GlobalError.from(error)
             Logger.shared.error("计算元数据缓存信息失败: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
-            // 保持默认值
+            // keep default value
         }
     }
 
-    /// - Throws: GlobalError 当操作失败时
+    /// - Throws: GlobalError when the operation fails
     func calculateMetaCacheInfoThrowing() throws {
         do {
             self.cacheInfo = try calculator.calculateMetaCacheInfo()
@@ -29,7 +29,7 @@ class CacheManager: ObservableObject {
         }
     }
 
-    /// 计算数据缓存信息（静默版本）
+    /// Calculate data cache information (silent version)
     func calculateDataCacheInfo() {
         do {
             self.cacheInfo = try calculator.calculateCacheInfo()
@@ -37,11 +37,11 @@ class CacheManager: ObservableObject {
             let globalError = GlobalError.from(error)
             Logger.shared.error("计算数据缓存信息失败: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
-            // 保持默认值
+            // keep default value
         }
     }
 
-    /// - Throws: GlobalError 当操作失败时
+    /// - Throws: GlobalError when the operation fails
     func calculateDataCacheInfoThrowing() throws {
         do {
             self.cacheInfo = try calculator.calculateCacheInfo()
@@ -54,8 +54,8 @@ class CacheManager: ObservableObject {
         }
     }
 
-    /// 计算游戏缓存信息（静默版本）
-    /// - Parameter game: 游戏名称
+    /// Calculate game cache information (silent version)
+    /// - Parameter game: game name
     func calculateGameCacheInfo(_ game: String) {
         do {
             self.cacheInfo = try calculator.calculateProfileCacheInfo(gameName: game)
@@ -63,12 +63,12 @@ class CacheManager: ObservableObject {
             let globalError = GlobalError.from(error)
             Logger.shared.error("计算游戏缓存信息失败: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
-            // 保持默认值
+            // keep default value
         }
     }
 
-    /// - Parameter game: 游戏名称
-    /// - Throws: GlobalError 当操作失败时
+    /// - Parameter game: game name
+    /// - Throws: GlobalError when the operation fails
     func calculateGameCacheInfoThrowing(_ game: String) throws {
         do {
             self.cacheInfo = try calculator.calculateProfileCacheInfo(gameName: game)

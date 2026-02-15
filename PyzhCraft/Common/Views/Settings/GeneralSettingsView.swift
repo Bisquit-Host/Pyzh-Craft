@@ -25,7 +25,7 @@ public struct GeneralSettingsView: View {
                 .labelsHidden()
                 .fixedSize()
                 .onChange(of: selectedLanguage) { _, newValue in
-                    // 如果是取消操作导致的语言恢复，则不触发重启提示
+                    // If the language is restored due to a cancellation operation, the restart prompt will not be triggered
                     if newValue != LanguageManager.shared.selectedLanguage {
                         showingRestartAlert = true
                     }
@@ -36,7 +36,7 @@ public struct GeneralSettingsView: View {
                     titleVisibility: .visible
                 ) {
                     Button("settings.language.restart.confirm".localized(), role: .destructive) {
-                        // 在重启前更新 Sparkle 的语言设置
+                        // Update Sparkle's language settings before restarting
                         sparkleUpdateService.updateSparkleLanguage(selectedLanguage)
                         LanguageManager.shared.selectedLanguage = selectedLanguage
                         restartAppSafely()
@@ -96,7 +96,7 @@ public struct GeneralSettingsView: View {
                         in: 1...64
                     ).controlSize(.mini)
                         .animation(.easeOut(duration: 0.5), value: generalSettings.concurrentDownloads)
-                    // 当前内存值显示（右对齐，固定宽度）
+                    // Current memory value display (right aligned, fixed width)
                     Text("\(generalSettings.concurrentDownloads)").font(
                         .subheadline
                     )
@@ -154,7 +154,7 @@ public struct GeneralSettingsView: View {
 
     // MARK: - Private Methods
 
-    /// 安全地重置工作目录
+    /// Safely reset the working directory
     private func resetWorkingDirectorySafely() {
         do {
             guard let supportDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appendingPathComponent(Bundle.main.appName) else {
@@ -165,7 +165,7 @@ public struct GeneralSettingsView: View {
                 )
             }
 
-            // 确保目录存在
+            // Make sure the directory exists
             try FileManager.default.createDirectory(at: supportDir, withIntermediateDirectories: true)
 
             generalSettings.launcherWorkingDirectory = supportDir.path
@@ -178,13 +178,13 @@ public struct GeneralSettingsView: View {
         }
     }
 
-    /// 处理目录导入结果
+    /// Processing catalog import results
     private func handleDirectoryImport(_ result: Result<[URL], Error>) {
         switch result {
         case .success(let urls):
             if let url = urls.first {
                 do {
-                    // 验证目录是否可访问
+                    // Verify directory is accessible
                     let resourceValues = try url.resourceValues(forKeys: [.isDirectoryKey, .isReadableKey])
                     guard resourceValues.isDirectory == true, resourceValues.isReadable == true else {
                         throw GlobalError.fileSystem(
@@ -195,7 +195,7 @@ public struct GeneralSettingsView: View {
                     }
 
                     generalSettings.launcherWorkingDirectory = url.path
-                    // GameRepository 观察者会自动重新加载，无需手动 loadGames
+                    // GameRepository observers will automatically reload, no need to manually loadGames
 
                     Logger.shared.info("工作目录已设置为: \(url.path)")
                 } catch {
@@ -215,7 +215,7 @@ public struct GeneralSettingsView: View {
         }
     }
 
-    /// 安全地重启应用
+    /// Safely restart apps
     private func restartAppSafely() {
         do {
             try restartApp()
@@ -227,8 +227,8 @@ public struct GeneralSettingsView: View {
     }
 }
 
-/// 重启应用
-/// - Throws: GlobalError 当重启失败时
+/// Restart application
+/// - Throws: GlobalError when restart fails
 private func restartApp() throws {
     guard let appURL = Bundle.main.bundleURL as URL? else {
         throw GlobalError.configuration(
@@ -275,18 +275,18 @@ struct ThemeOptionView: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            // 主题图标
+            // theme icon
             ZStack {
                 RoundedRectangle(cornerRadius: 6)
                     .stroke(isSelected ? Color.accentColor : Color.clear, lineWidth: isSelected ? 3 : 0)
                     .frame(width: 61, height: 41)
 
-                // 窗口图标内容
+                // Window icon content
                 ThemeWindowIcon(theme: theme)
                     .frame(width: 60, height: 40)
             }
 
-            // 主题标签
+            // Hashtag
             Text(theme.localizedName)
                 .font(.caption)
                 .foregroundColor(isSelected ? .primary : .secondary)

@@ -53,13 +53,13 @@ class MinecraftFileManager {
 
     // MARK: - Public Methods
 
-    /// 清理游戏文件夹（当下载失败或取消时）
-    /// - Parameter gameName: 游戏名称
-    /// - Throws: GlobalError 当操作失败时
+    /// Clean game folder (when download fails or cancels)
+    /// - Parameter gameName: game name
+    /// - Throws: GlobalError when the operation fails
     func cleanupGameDirectories(gameName: String) throws {
         let profileDirectory = AppPaths.profileDirectory(gameName: gameName)
 
-        // 检查游戏文件夹是否存在
+        // Check if the game folder exists
         guard fileManager.fileExists(atPath: profileDirectory.path) else {
             return
         }
@@ -75,11 +75,11 @@ class MinecraftFileManager {
         }
     }
 
-    /// 下载版本文件（静默版本）
+    /// Download version file (silent version)
     /// - Parameters:
-    ///   - manifest: Minecraft 版本清单
-    ///   - gameName: 游戏名称
-    /// - Returns: 是否成功下载
+    ///   - manifest: Minecraft version list
+    ///   - gameName: game name
+    /// - Returns: Whether the download was successful
     func downloadVersionFiles(
         manifest: MinecraftVersionManifest,
         gameName: String
@@ -100,11 +100,11 @@ class MinecraftFileManager {
         }
     }
 
-    /// 下载版本文件（抛出异常版本）
+    /// Download version file (throws exception version)
     /// - Parameters:
-    ///   - manifest: Minecraft 版本清单
-    ///   - gameName: 游戏名称
-    /// - Throws: GlobalError 当操作失败时
+    ///   - manifest: Minecraft version list
+    ///   - gameName: game name
+    /// - Throws: GlobalError when the operation fails
     func downloadVersionFilesThrowing(
         manifest: MinecraftVersionManifest,
         gameName: String
@@ -128,25 +128,25 @@ class MinecraftFileManager {
     private func calculateTotalFiles(_ manifest: MinecraftVersionManifest) -> Int {
         let applicableLibraries = manifest.libraries.filter { shouldDownloadLibrary($0, minecraftVersion: manifest.id) }
 
-        // 统计实际会下载的原生库数量（与下载逻辑保持一致）
+        // Count the number of native libraries that will actually be downloaded (consistent with the download logic)
         let nativeLibraries = applicableLibraries.compactMap { (library: Library) -> Library? in
-            // 检查是否有原生库分类器且当前平台可用
+            // Check if there is a native library classifier and it is available for the current platform
             guard let classifiers = library.downloads.classifiers,
                   let natives = library.natives else { return nil }
 
-            // 查找当前平台对应的原生库分类器
+            // Find the native library classifier corresponding to the current platform
             let osKey = natives.keys.first { isNativeClassifier($0, minecraftVersion: manifest.id) }
             guard let platformKey = osKey,
                   let classifierKey = natives[platformKey],
                   classifiers[classifierKey] != nil else { return nil }
 
-            return library // 返回会实际下载原生库的库
+            return library // Returns the library that will actually download the native library
         }.count
 
         return 1 + applicableLibraries.count + nativeLibraries + 2  // Client JAR + Libraries + Native Libraries + Asset Index + Logging Config
     }
 
-    /// 检查分类器是否为当前平台的原生库
+    /// Check whether the classifier is a native library of the current platform
     private func isNativeClassifier(_ key: String, minecraftVersion: String? = nil) -> Bool {
         MacRuleEvaluator.isPlatformIdentifierSupported(key, minecraftVersion: minecraftVersion)
     }
@@ -224,7 +224,7 @@ class MinecraftFileManager {
                 type: .core
             )
         } catch {
-            // 避免在错误处理中创建大量临时字符串
+            // Avoid creating large temporary strings in error handling
             if let globalError = error as? GlobalError {
                 throw globalError
             } else {
@@ -244,12 +244,12 @@ class MinecraftFileManager {
             shouldDownloadLibrary($0, minecraftVersion: manifest.id)
         }
 
-        // 创建信号量控制并发数量
+        // Create a semaphore to control the number of concurrencies
         let semaphore = AsyncSemaphore(
             value: GeneralSettingsManager.shared.concurrentDownloads
         )
 
-        // 预先获取 metaDirectory，避免在循环中重复访问
+        // Get metaDirectory in advance to avoid repeated access in loops
         let metaDirectory = AppPaths.metaDirectory
         let minecraftVersion = manifest.id
 
@@ -275,25 +275,25 @@ class MinecraftFileManager {
         metaDirectory: URL,
         minecraftVersion: String
     ) async throws {
-        // 检查库的规则是否适用于当前系统（包含 downloadable 检查）
+        // Checks whether the library's rules apply to the current system (contains downloadable check)
         guard shouldDownloadLibrary(library, minecraftVersion: minecraftVersion) else {
             return
         }
 
-        // 如果 path 为 nil，使用 Maven 坐标生成路径
+        // If path is nil, use Maven coordinates to generate the path
         let destinationURL: URL
         if let existingPath = library.downloads.artifact.path {
-            // 检查 existingPath 是否是完整路径
+            // Check if existingPath is a full path
             if existingPath.hasPrefix("/") {
-                // 如果是完整路径，直接使用
+                // If it is a full path, use it directly
                 destinationURL = URL(fileURLWithPath: existingPath)
             } else {
-                // 如果是相对路径，添加到 libraries 目录
+                // If it is a relative path, add it to the libraries directory
                 destinationURL = metaDirectory.appendingPathComponent(AppConstants.DirectoryNames.libraries)
                     .appendingPathComponent(existingPath)
             }
         } else {
-            // 使用 Maven 坐标生成完整路径
+            // Generate full path using Maven coordinates
             let fullPath = CommonService.convertMavenCoordinateToPath(library.name)
             destinationURL = URL(fileURLWithPath: fullPath)
         }
@@ -307,9 +307,9 @@ class MinecraftFileManager {
         }
 
         do {
-            // 预先获取 URL 字符串，避免重复访问
+            // Get the URL string in advance to avoid repeated visits
             let urlString = artifactURL.absoluteString
-            // DownloadManager.downloadFile 已经包含了文件存在性、校验逻辑和 autoreleasepool
+            // DownloadManager.downloadFile already contains file existence, verification logic and autoreleasepool
             _ = try await DownloadManager.downloadFile(
                 urlString: urlString,
                 destinationURL: destinationURL,
@@ -317,7 +317,7 @@ class MinecraftFileManager {
             )
             await handleLibraryDownloadComplete(library: library, metaDirectory: metaDirectory, minecraftVersion: minecraftVersion)
         } catch {
-            // 避免在错误处理中创建大量临时字符串
+            // Avoid creating large temporary strings in error handling
             if let globalError = error as? GlobalError {
                 throw globalError
             } else {
@@ -336,7 +336,7 @@ class MinecraftFileManager {
         metaDirectory: URL,
         minecraftVersion: String
     ) async throws {
-        // 找到当前平台对应的原生库分类器
+        // Find the native library classifier corresponding to the current platform
         guard let natives = library.natives else { return }
 
         let osKey = natives.keys.first { isNativeClassifier($0, minecraftVersion: minecraftVersion) }
@@ -346,13 +346,13 @@ class MinecraftFileManager {
             return
         }
 
-        // 生成目标路径 - 原生库下载到 natives 目录
+        // Generate target path - download the native library to the natives directory
         let destinationURL: URL
         if let existingPath = nativeArtifact.path {
             if existingPath.hasPrefix("/") {
                 destinationURL = URL(fileURLWithPath: existingPath)
             } else {
-                // 原生库下载到 natives 目录，而不是 libraries 目录
+                // Native libraries are downloaded to the natives directory instead of the libraries directory
                 destinationURL = metaDirectory.appendingPathComponent(AppConstants.DirectoryNames.natives)
                     .appendingPathComponent(existingPath)
             }
@@ -371,20 +371,20 @@ class MinecraftFileManager {
         }
 
         do {
-            // DownloadManager.downloadFile 已经包含了文件存在性和校验逻辑
+            // DownloadManager.downloadFile already contains file existence and verification logic
             _ = try await DownloadManager.downloadFile(
                 urlString: nativeURL.absoluteString,
                 destinationURL: destinationURL,
                 expectedSha1: nativeArtifact.sha1
             )
 
-            // 使用库名称，避免格式化字符串创建临时对象
+            // Use library name to avoid formatting strings creating temporary objects
             incrementCompletedFilesCount(
                 fileName: library.name,
                 type: .core
             )
         } catch {
-            // 避免在错误处理中创建大量临时字符串
+            // Avoid creating large temporary strings in error handling
             if let globalError = error as? GlobalError {
                 throw globalError
             } else {
@@ -438,7 +438,7 @@ class MinecraftFileManager {
                 objects: assetIndexData.objects
             )
         } catch {
-            // 避免在错误处理中创建大量临时字符串
+            // Avoid creating large temporary strings in error handling
             if let globalError = error as? GlobalError {
                 throw globalError
             } else {
@@ -473,7 +473,7 @@ class MinecraftFileManager {
                 type: .core
             )
         } catch {
-            // 避免在错误处理中创建大量临时字符串
+            // Avoid creating large temporary strings in error handling
             if let globalError = error as? GlobalError {
                 throw globalError
             } else {
@@ -493,7 +493,7 @@ class MinecraftFileManager {
         fileNameForNotification: String? = nil,
         type: DownloadType
     ) async throws {
-        // 使用 DownloadManager 下载文件（已包含所有优化）
+        // Download files using DownloadManager (all optimizations included)
         do {
             _ = try await DownloadManager.downloadFile(
                 urlString: url.absoluteString,
@@ -507,7 +507,7 @@ class MinecraftFileManager {
                 type: type
             )
         } catch {
-            // 避免在错误处理中创建大量临时字符串
+            // Avoid creating large temporary strings in error handling
             if let globalError = error as? GlobalError {
                 throw globalError
             } else {
@@ -560,7 +560,7 @@ class MinecraftFileManager {
         )
         let assets = Array(assetIndex.objects)
 
-        // 创建信号量控制并发数量
+        // Create a semaphore to control the number of concurrencies
         let semaphore = AsyncSemaphore(
             value: GeneralSettingsManager.shared.concurrentDownloads
         )
@@ -597,28 +597,28 @@ class MinecraftFileManager {
         path: String,
         objectsDirectory: URL
     ) async throws {
-        // 预先计算 hashPrefix，避免重复创建字符串
+        // Precompute hashPrefix to avoid repeated creation of strings
         let hashPrefix = String(asset.hash.prefix(2))
         let assetDirectory = objectsDirectory.appendingPathComponent(hashPrefix)
         let destinationURL = assetDirectory.appendingPathComponent(asset.hash)
 
         do {
-            // 预先构建 URL 字符串，避免在循环中重复创建
+            // Pre-build URL strings to avoid duplicate creation in loops
             let urlString = "https://resources.download.minecraft.net/\(hashPrefix)/\(asset.hash)"
-            // DownloadManager.downloadFile 已经包含了 autoreleasepool
+            // DownloadManager.downloadFile already contains autoreleasepool
             _ = try await DownloadManager.downloadFile(
                 urlString: urlString,
                 destinationURL: destinationURL,
                 expectedSha1: asset.hash
             )
-            // 使用简单的文件名，避免格式化字符串创建临时对象
+            // Use simple file names and avoid formatting strings to create temporary objects
             let fileName = path.components(separatedBy: "/").last ?? path
             incrementCompletedFilesCount(
                 fileName: fileName,
                 type: .resources
             )
         } catch {
-            // 避免在错误处理中创建大量临时字符串
+            // Avoid creating large temporary strings in error handling
             if let globalError = error as? GlobalError {
                 throw globalError
             } else {
@@ -633,7 +633,7 @@ class MinecraftFileManager {
 }
 
 // MARK: - Asset Index Data Types
-// 移除了 DownloadedAssetIndex 和 AssetIndexData 的定义，直接引用 Models/MinecraftManifest.swift 中的类型。
+// Removed the definitions of DownloadedAssetIndex and AssetIndexData and directly reference the types in Models/MinecraftManifest.swift
 
 // MARK: - Thread-safe Counter
 final class NSLockingCounter {
@@ -654,7 +654,7 @@ final class NSLockingCounter {
     }
 }
 
-// MARK: - Library 扩展（如有需要）
+// MARK: - Library extension (if needed)
 extension Library {
     var artifactPath: String? {
         downloads.artifact.path
@@ -665,19 +665,19 @@ extension Library {
     var artifactSHA1: String? {
         downloads.artifact.sha1
     }
-    // 其他业务相关扩展
+    // Other business related extensions
 }
 
 extension MinecraftFileManager {
-    /// 处理库下载完成后的逻辑
+    /// Logic after processing library download is completed
     private func handleLibraryDownloadComplete(library: Library, metaDirectory: URL, minecraftVersion: String) async {
-        // 使用库名称，避免格式化字符串创建临时对象
+        // Use library name to avoid formatting strings creating temporary objects
         incrementCompletedFilesCount(
             fileName: library.name,
             type: .core
         )
 
-        // 处理原生库
+        // Handle native libraries
         if let classifiers = library.downloads.classifiers {
             do {
                 try await downloadNativeLibrary(
@@ -692,12 +692,12 @@ extension MinecraftFileManager {
         }
     }
 
-    /// 判断库是否应该下载
+    /// Determine whether the library should be downloaded
     private func shouldDownloadLibrary(_ library: Library, minecraftVersion: String? = nil) -> Bool {
         LibraryFilter.shouldDownloadLibrary(library, minecraftVersion: minecraftVersion)
     }
 
-    /// 判断库是否允许在 macOS (osx) 下加载（保留向后兼容性）
+    /// Determine whether the library is allowed to be loaded under macOS (osx) (preserving backward compatibility)
     func isLibraryAllowedOnOSX(_ rules: [Rule]?) -> Bool {
         guard let rules = rules, !rules.isEmpty else { return true }
         return MacRuleEvaluator.isAllowed(rules)

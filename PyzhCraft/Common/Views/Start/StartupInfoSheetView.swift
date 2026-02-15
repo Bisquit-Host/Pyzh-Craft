@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 启动信息提示Sheet视图
+/// Start information prompt Sheet view
 struct StartupInfoSheetView: View {
 
     // MARK: - Properties
@@ -14,7 +14,7 @@ struct StartupInfoSheetView: View {
         CommonSheetView(
             header: {
                 VStack(spacing: 12) {
-                    // 标题
+                    // title
                     if let title = announcementData?.title {
                         Text(title)
                             .font(.title2)
@@ -25,7 +25,7 @@ struct StartupInfoSheetView: View {
             body: {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        // 应用图标
+                        // application icon
                         HStack {
                             Spacer()
                             if let appIcon = NSApplication.shared.applicationIconImage {
@@ -38,9 +38,9 @@ struct StartupInfoSheetView: View {
                         }
                         .padding(.bottom, 8)
 
-                        // 主要信息内容
+                        // Main information content
                         if let announcementData = announcementData {
-                            // 显示从API获取的公告内容
+                            // Display announcement content obtained from API
                             Text(
                                 String.localizedStringWithFormat(
                                     announcementData.content,
@@ -54,7 +54,7 @@ struct StartupInfoSheetView: View {
                             .lineSpacing(4)
                             .fixedSize(horizontal: false, vertical: true)
 
-                            // 作者信息
+                            // Author information
                             if !announcementData.author.isEmpty {
                                 Text(announcementData.author)
                                     .font(.caption)
@@ -64,7 +64,7 @@ struct StartupInfoSheetView: View {
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 4)  // 为滚动条留出空间
+                    .padding(.horizontal, 4)  // Leave space for scrollbar
                 }
             },
             footer: {
@@ -81,7 +81,7 @@ struct StartupInfoSheetView: View {
         )
         //        .frame(width: 600, height: 500)
         .onAppear {
-            // 设置窗口属性
+            // Set window properties
             if let window = NSApplication.shared.windows.last {
                 window.level = .floating
                 window.center()

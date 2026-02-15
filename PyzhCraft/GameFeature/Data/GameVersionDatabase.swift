@@ -1,8 +1,8 @@
 import Foundation
 import SQLite3
 
-/// 游戏版本数据库存储层
-/// 使用 SQLite (WAL + mmap + JSON1) 存储游戏版本信息
+/// Game version database storage layer
+/// Use SQLite (WAL + mmap + JSON1) to store game version information
 class GameVersionDatabase {
     // MARK: - Properties
 
@@ -11,25 +11,25 @@ class GameVersionDatabase {
 
     // MARK: - Initialization
 
-    /// 初始化游戏版本数据库
-    /// - Parameter dbPath: 数据库文件路径
+    /// Initialize game version database
+    /// - Parameter dbPath: database file path
     init(dbPath: String) {
         self.db = SQLiteDatabase(path: dbPath)
     }
 
     // MARK: - Database Setup
 
-    /// 打开数据库并初始化表结构
-    /// - Throws: GlobalError 当操作失败时
+    /// Open the database and initialize the table structure
+    /// - Throws: GlobalError when the operation fails
     func initialize() throws {
         try db.open()
         try createTable()
     }
 
-    /// 创建游戏版本表
-    /// 使用 JSON1 扩展存储完整的游戏版本信息
+    /// Create game version table
+    /// Use JSON1 extension to store complete game version information
     private func createTable() throws {
-        // 创建表
+        // Create table
         let createTableSQL = """
         CREATE TABLE IF NOT EXISTS \(tableName) (
             id TEXT PRIMARY KEY,
@@ -44,7 +44,7 @@ class GameVersionDatabase {
 
         try db.execute(createTableSQL)
 
-        // 创建索引（如果不存在）
+        // Create index if it does not exist
         let indexes = [
             ("idx_working_path", "working_path"),
             ("idx_last_played", "last_played"),
@@ -55,7 +55,7 @@ class GameVersionDatabase {
             let createIndexSQL = """
             CREATE INDEX IF NOT EXISTS \(indexName) ON \(tableName)(\(column));
             """
-            try? db.execute(createIndexSQL) // 使用 try? 因为索引可能已存在
+            try? db.execute(createIndexSQL) // Use try? because the index may already exist
         }
 
         Logger.shared.debug("游戏版本表已创建或已存在")
@@ -63,15 +63,15 @@ class GameVersionDatabase {
 
     // MARK: - CRUD Operations
 
-    /// 保存游戏版本信息
+    /// Save game version information
     /// - Parameters:
-    ///   - game: 游戏版本信息
-    ///   - workingPath: 工作路径
-    /// - Throws: GlobalError 当操作失败时
+    ///   - game: game version information
+    ///   - workingPath: working path
+    /// - Throws: GlobalError when the operation fails
     func saveGame(_ game: GameVersionInfo, workingPath: String) throws {
         try db.transaction {
             let encoder = JSONEncoder()
-            // 使用秒级时间戳编码日期（与 UserDefaults 存储兼容）
+            // Encode dates using second-level timestamps (compatible with UserDefaults storage)
             encoder.dateEncodingStrategy = .secondsSince1970
             let jsonData = try encoder.encode(game)
             guard let jsonString = String(data: jsonData, encoding: .utf8) else {
@@ -115,15 +115,15 @@ class GameVersionDatabase {
         }
     }
 
-    /// 批量保存游戏版本信息
+    /// Save game version information in batches
     /// - Parameters:
-    ///   - games: 游戏版本信息数组
-    ///   - workingPath: 工作路径
-    /// - Throws: GlobalError 当操作失败时
+    ///   - games: Array of game version information
+    ///   - workingPath: working path
+    /// - Throws: GlobalError when the operation fails
     func saveGames(_ games: [GameVersionInfo], workingPath: String) throws {
         try db.transaction {
             let encoder = JSONEncoder()
-            // 使用秒级时间戳编码日期（与 UserDefaults 存储兼容）
+            // Encode dates using second-level timestamps (compatible with UserDefaults storage)
             encoder.dateEncodingStrategy = .secondsSince1970
             let now = Date()
 
@@ -167,10 +167,10 @@ class GameVersionDatabase {
         }
     }
 
-    /// 加载指定工作路径的所有游戏
-    /// - Parameter workingPath: 工作路径
-    /// - Returns: 游戏版本信息数组
-    /// - Throws: GlobalError 当操作失败时
+    /// Load all games in the specified working path
+    /// - Parameter workingPath: working path
+    /// - Returns: Array of game version information
+    /// - Throws: GlobalError when the operation fails
     func loadGames(workingPath: String) throws -> [GameVersionInfo] {
         let sql = """
         SELECT data_json FROM \(tableName)
@@ -185,7 +185,7 @@ class GameVersionDatabase {
 
         var games: [GameVersionInfo] = []
         let decoder = JSONDecoder()
-        // 使用秒级时间戳解码日期（与 UserDefaults 存储兼容）
+        // Decode dates using second-level timestamps (compatible with UserDefaults storage)
         decoder.dateDecodingStrategy = .secondsSince1970
 
         while sqlite3_step(statement) == SQLITE_ROW {
@@ -206,9 +206,9 @@ class GameVersionDatabase {
         return games
     }
 
-    /// 加载所有工作路径的游戏（按工作路径分组）
-    /// - Returns: 按工作路径分组的游戏字典
-    /// - Throws: GlobalError 当操作失败时
+    /// Load games for all working paths (grouped by working path)
+    /// - Returns: Game dictionary grouped by working path
+    /// - Throws: GlobalError when the operation fails
     func loadAllGames() throws -> [String: [GameVersionInfo]] {
         let sql = """
         SELECT working_path, data_json FROM \(tableName)
@@ -220,7 +220,7 @@ class GameVersionDatabase {
 
         var gamesByPath: [String: [GameVersionInfo]] = [:]
         let decoder = JSONDecoder()
-        // 使用秒级时间戳解码日期（与 UserDefaults 存储兼容）
+        // Decode dates using second-level timestamps (compatible with UserDefaults storage)
         decoder.dateDecodingStrategy = .secondsSince1970
 
         while sqlite3_step(statement) == SQLITE_ROW {
@@ -245,10 +245,10 @@ class GameVersionDatabase {
         return gamesByPath
     }
 
-    /// 根据 ID 获取游戏
-    /// - Parameter id: 游戏 ID
-    /// - Returns: 游戏版本信息，如果不存在则返回 nil
-    /// - Throws: GlobalError 当操作失败时
+    /// Get game by ID
+    /// - Parameter id: Game ID
+    /// - Returns: game version information, if it does not exist, return nil
+    /// - Throws: GlobalError when the operation fails
     func getGame(by id: String) throws -> GameVersionInfo? {
         let sql = "SELECT data_json FROM \(tableName) WHERE id = ? LIMIT 1"
 
@@ -264,14 +264,14 @@ class GameVersionDatabase {
         }
 
         let decoder = JSONDecoder()
-        // 使用秒级时间戳解码日期（与 UserDefaults 存储兼容）
+        // Decode dates using second-level timestamps (compatible with UserDefaults storage)
         decoder.dateDecodingStrategy = .secondsSince1970
         return try decoder.decode(GameVersionInfo.self, from: jsonData)
     }
 
-    /// 删除游戏
-    /// - Parameter id: 游戏 ID
-    /// - Throws: GlobalError 当操作失败时
+    /// Delete game
+    /// - Parameter id: Game ID
+    /// - Throws: GlobalError when the operation fails
     func deleteGame(id: String) throws {
         try db.transaction {
             let sql = "DELETE FROM \(tableName) WHERE id = ?"
@@ -292,9 +292,9 @@ class GameVersionDatabase {
         }
     }
 
-    /// 删除指定工作路径的所有游戏
-    /// - Parameter workingPath: 工作路径
-    /// - Throws: GlobalError 当操作失败时
+    /// Delete all games from the specified working path
+    /// - Parameter workingPath: working path
+    /// - Throws: GlobalError when the operation fails
     func deleteGames(workingPath: String) throws {
         try db.transaction {
             let sql = "DELETE FROM \(tableName) WHERE working_path = ?"
@@ -315,11 +315,11 @@ class GameVersionDatabase {
         }
     }
 
-    /// 更新游戏最后游玩时间
+    /// Update the last play time of the game
     /// - Parameters:
-    ///   - id: 游戏 ID
-    ///   - lastPlayed: 最后游玩时间
-    /// - Throws: GlobalError 当操作失败时
+    ///   - id: game ID
+    ///   - lastPlayed: last played time
+    /// - Throws: GlobalError when the operation fails
     func updateLastPlayed(id: String, lastPlayed: Date) throws {
         try db.transaction {
             let timestamp = lastPlayed.timeIntervalSince1970
@@ -351,7 +351,7 @@ class GameVersionDatabase {
         }
     }
 
-    /// 关闭数据库连接
+    /// Close database connection
     func close() {
         db.close()
     }

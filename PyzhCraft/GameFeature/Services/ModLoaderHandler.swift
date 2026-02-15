@@ -1,12 +1,12 @@
 protocol ModLoaderHandler {
-    /// 设置指定版本的加载器（抛出异常版本）
+    /// Set the specified version of the loader (throws exception version)
     /// - Parameters:
-    ///   - gameVersion: 游戏版本
-    ///   - loaderVersion: 指定的加载器版本
-    ///   - gameInfo: 游戏信息
-    ///   - onProgressUpdate: 进度更新回调
-    /// - Returns: 设置结果
-    /// - Throws: GlobalError 当操作失败时
+    ///   - gameVersion: game version
+    ///   - loaderVersion: specified loader version
+    ///   - gameInfo: game information
+    ///   - onProgressUpdate: progress update callback
+    /// - Returns: Set results
+    /// - Throws: GlobalError when the operation fails
     static func setupWithSpecificVersionThrowing(
         for gameVersion: String,
         loaderVersion: String,
@@ -14,13 +14,13 @@ protocol ModLoaderHandler {
         onProgressUpdate: @escaping (String, Int, Int) -> Void
     ) async throws -> (loaderVersion: String, classpath: String, mainClass: String)
 
-    /// 设置指定版本的加载器（静默版本）
+    /// Set the specified version of the loader (silent version)
     /// - Parameters:
-    ///   - gameVersion: 游戏版本
-    ///   - loaderVersion: 指定的加载器版本
-    ///   - gameInfo: 游戏信息
-    ///   - onProgressUpdate: 进度更新回调
-    /// - Returns: 设置结果，失败时返回 nil
+    ///   - gameVersion: game version
+    ///   - loaderVersion: specified loader version
+    ///   - gameInfo: game information
+    ///   - onProgressUpdate: progress update callback
+    /// - Returns: Set the result, return nil on failure
     static func setupWithSpecificVersion(
         for gameVersion: String,
         loaderVersion: String,

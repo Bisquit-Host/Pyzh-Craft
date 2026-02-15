@@ -11,18 +11,18 @@ extension URL {
             return nil
         }
 
-        // 如果是 HTTP 协议，替换为 HTTPS
+        // If it is HTTP protocol, replace it with HTTPS
         if components.scheme?.lowercased() == "http" {
             components.scheme = "https"
             return components.url
         }
 
-        // 已经是 HTTPS 或其他协议，直接返回
+        // It is already HTTPS or other protocols, return directly
         return self
     }
 }
 extension String {
-    /// 将字符串中的 HTTP URL 转换为 HTTPS
+    /// Convert HTTP URL in string to HTTPS
     func httpToHttps() -> String {
         return autoreleasepool {
             guard let url = URL(string: self) else { return self }
@@ -32,7 +32,7 @@ extension String {
 }
 
 enum CommonUtil {
-    // MARK: - Base64 图片解码工具
+    // MARK: - Base64 image decoding tool
     static func imageDataFromBase64(_ base64: String) -> Data? {
         if base64.hasPrefix("data:image") {
             if let base64String = base64.split(separator: ",").last,
@@ -45,7 +45,7 @@ enum CommonUtil {
         return nil
     }
 
-    /// 格式化 ISO8601 字符串为相对时间（如"3天前"）
+    /// Format ISO8601 string as relative time (such as "3 days ago")
     static func formatRelativeTime(_ isoString: String) -> String {
         let isoFormatter = ISO8601DateFormatter()
         isoFormatter.formatOptions = [
@@ -53,7 +53,7 @@ enum CommonUtil {
         ]
         var date = isoFormatter.date(from: isoString)
         if date == nil {
-            // 尝试不带毫秒的格式
+            // Try format without milliseconds
             isoFormatter.formatOptions = [.withInternetDateTime]
             date = isoFormatter.date(from: isoString)
         }
@@ -63,14 +63,14 @@ enum CommonUtil {
         return formatter.localizedString(for: date, relativeTo: Date())
     }
 
-    // MARK: - Minecraft 版本比较和排序
+    // MARK: - Minecraft version comparison and sorting
 
-    /// - Returns: -1 表示 version1 < version2，0 相等，1 表示 version1 > version2
+    /// - Returns: -1 means version1 < version2, 0 is equal, 1 means version1 > version2
     static func compareMinecraftVersions(_ version1: String, _ version2: String) -> Int {
         let components1 = parseVersionComponents(version1)
         let components2 = parseVersionComponents(version2)
 
-        // 比较主版本号
+        // Compare major version numbers
         for i in 0..<max(components1.count, components2.count) {
             let v1 = i < components1.count ? components1[i] : 0
             let v2 = i < components2.count ? components2[i] : 0

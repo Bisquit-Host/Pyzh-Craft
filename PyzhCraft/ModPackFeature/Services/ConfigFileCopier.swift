@@ -1,10 +1,10 @@
 import Foundation
 
-/// 配置文件复制器
-/// 负责复制游戏配置文件到 overrides 目录（排除存档目录和资源目录）
+/// Configuration file duplicator
+/// Responsible for copying game configuration files to the overrides directory (excludes archive directories and resource directories)
 enum ConfigFileCopier {
 
-    /// 需要排除的目录（这些目录已经在其他地方处理或不应该被复制）
+    /// Directories that need to be excluded (these are already processed elsewhere or should not be copied)
     private static let excludedDirectories: Set<String> = [
         AppConstants.DirectoryNames.mods,
         AppConstants.DirectoryNames.datapacks,
@@ -15,14 +15,14 @@ enum ConfigFileCopier {
         AppConstants.DirectoryNames.logs,
     ]
 
-    /// 统计需要复制的配置文件数量
-    /// - Parameter gameInfo: 游戏信息
-    /// - Returns: 文件总数
+    /// Count the number of configuration files that need to be copied
+    /// - Parameter gameInfo: game information
+    /// - Returns: total number of files
     static func countFiles(gameInfo: GameVersionInfo) throws -> Int {
         let profileDir = AppPaths.profileDirectory(gameName: gameInfo.gameName)
         var count = 0
 
-        // 获取所有目录和文件
+        // Get all directories and files
         let contents = try FileManager.default.contentsOfDirectory(
             at: profileDir,
             includingPropertiesForKeys: [.isDirectoryKey, .isRegularFileKey],
@@ -36,11 +36,11 @@ enum ConfigFileCopier {
 
             if isDirectory {
                 let dirName = item.lastPathComponent
-                // 排除不需要的目录
+                // Exclude unnecessary directories
                 if excludedDirectories.contains(dirName) {
                     continue
                 }
-                // 递归统计目录中的文件
+                // Files in the recursive statistics directory
                 let enumerator = FileManager.default.enumerator(
                     at: item,
                     includingPropertiesForKeys: [.isRegularFileKey],
@@ -53,7 +53,7 @@ enum ConfigFileCopier {
                     }
                 }
             } else if isRegularFile {
-                // 统计根目录下的配置文件
+                // Statistics of configuration files in the root directory
                 count += 1
             }
         }
@@ -61,11 +61,11 @@ enum ConfigFileCopier {
         return count
     }
 
-    /// 复制配置文件到 overrides 目录
+    /// Copy the configuration file to the overrides directory
     /// - Parameters:
-    ///   - gameInfo: 游戏信息
-    ///   - overridesDir: overrides 目录
-    ///   - progressCallback: 进度回调 (已复制文件数, 当前文件名)
+    ///   - gameInfo: game information
+    ///   - overridesDir: overrides directory
+    ///   - progressCallback: progress callback (number of copied files, current file name)
     static func copyFiles(
         gameInfo: GameVersionInfo,
         to overridesDir: URL,
@@ -74,7 +74,7 @@ enum ConfigFileCopier {
         let profileDir = AppPaths.profileDirectory(gameName: gameInfo.gameName)
         var filesCopied = 0
 
-        // 获取所有目录和文件
+        // Get all directories and files
         let contents = try FileManager.default.contentsOfDirectory(
             at: profileDir,
             includingPropertiesForKeys: [.isDirectoryKey, .isRegularFileKey],
@@ -88,16 +88,16 @@ enum ConfigFileCopier {
 
             if isDirectory {
                 let dirName = item.lastPathComponent
-                // 排除不需要的目录
+                // Exclude unnecessary directories
                 if excludedDirectories.contains(dirName) {
                     continue
                 }
 
-                // 复制整个目录
+                // copy entire directory
                 let destDir = overridesDir.appendingPathComponent(dirName)
                 try? FileManager.default.removeItem(at: destDir)
 
-                // 递归复制目录中的所有文件
+                // Recursively copy all files in a directory
                 let enumerator = FileManager.default.enumerator(
                     at: item,
                     includingPropertiesForKeys: [.isRegularFileKey],
@@ -116,7 +116,7 @@ enum ConfigFileCopier {
                     }
                 }
             } else if isRegularFile {
-                // 复制根目录下的配置文件
+                // Copy the configuration file in the root directory
                 let destFile = overridesDir.appendingPathComponent(item.lastPathComponent)
                 try? FileManager.default.removeItem(at: destFile)
                 try FileManager.default.copyItem(at: item, to: destFile)

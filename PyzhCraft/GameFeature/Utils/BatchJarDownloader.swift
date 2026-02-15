@@ -1,9 +1,9 @@
 import Foundation
 
 struct JarDownloadTask {
-    let name: String         // 用于进度回调显示
+    let name: String         // Used for progress callback display
     let url: URL
-    let destinationPath: String // 相对于 metaLibrariesDir 的路径
+    let destinationPath: String // Path relative to metaLibrariesDir
     let expectedSha1: String?
 }
 
@@ -16,7 +16,7 @@ enum BatchJarDownloader {
         let total = tasks.count
         let counter = Counter()
 
-        // 创建信号量控制并发数量
+        // Create a semaphore to control the number of concurrencies
         let semaphore = AsyncSemaphore(value: GeneralSettingsManager.shared.concurrentDownloads)
 
         try await withThrowingTaskGroup(of: Void.self) { group in

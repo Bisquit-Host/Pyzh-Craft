@@ -1,7 +1,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// AI 对话窗口视图
+/// AI conversation window view
 struct AIChatWindowView: View {
     @ObservedObject var chatState: ChatState
     @EnvironmentObject var playerListViewModel: PlayerListViewModel
@@ -13,7 +13,7 @@ struct AIChatWindowView: View {
     @State private var selectedGameId: String?
     @State private var showFilePicker = false
 
-    // 缓存头像视图，避免每次消息更新时重新加载
+    // Cache avatar view to avoid reloading every time message is updated
     @State private var cachedAIAvatar: AnyView?
     @State private var cachedUserAvatar: AnyView?
 
@@ -24,7 +24,7 @@ struct AIChatWindowView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 消息列表
+            // Message list
             AIChatMessageListView(
                 chatState: chatState,
                 currentPlayer: playerListViewModel.currentPlayer,
@@ -35,7 +35,7 @@ struct AIChatWindowView: View {
 
             Divider()
 
-            // 待发送附件预览
+            // Preview of attachments to be sent
             if !attachmentManager.pendingAttachments.isEmpty {
                 AIChatAttachmentPreviewView(
                     attachments: attachmentManager.pendingAttachments
@@ -44,7 +44,7 @@ struct AIChatWindowView: View {
                 }
             }
 
-            // 输入区域
+            // input area
             AIChatInputAreaView(
                 inputText: $inputText,
                 selectedGameId: $selectedGameId,
@@ -70,31 +70,31 @@ struct AIChatWindowView: View {
         )
         .onAppear {
             isInputFocused = true
-            // 默认选择第一个游戏
+            // The first game is selected by default
             if selectedGameId == nil && !gameRepository.games.isEmpty {
                 selectedGameId = gameRepository.games.first?.id
             }
-            // 初始化头像缓存
+            // Initialize avatar cache
             initializeAvatarCache()
         }
         .onChange(of: gameRepository.games) { _, newGames in
-            // 当游戏列表加载完成且未选择游戏时，自动选择第一个游戏
+            // When the game list is loaded and no game is selected, the first game is automatically selected
             if selectedGameId == nil && !newGames.isEmpty {
                 selectedGameId = newGames.first?.id
             }
         }
         .onChange(of: playerListViewModel.currentPlayer?.id) { _, _ in
-            // 当当前玩家变化时，更新用户头像缓存（仅监听 ID 变化，减少不必要的更新）
+            // When the current player changes, update the user avatar cache (only monitor ID changes to reduce unnecessary updates)
             updateUserAvatarCache()
         }
         .onChange(of: aiSettings.aiAvatarURL) { oldValue, newValue in
-            // 当 AI 头像 URL 变化时，更新 AI 头像缓存（仅在 URL 实际变化时更新）
+            // Update the AI ​​avatar cache when the AI ​​avatar URL changes (only updates when the URL actually changes)
             if oldValue != newValue {
                 updateAIAvatarCache()
             }
         }
         .onDisappear {
-            // 页面关闭后清除所有数据
+            // Clear all data after closing the page
             clearAllData()
         }
     }
@@ -112,23 +112,23 @@ struct AIChatWindowView: View {
 
     // MARK: - Methods
 
-    /// 初始化头像缓存
+    /// Initialize avatar cache
     private func initializeAvatarCache() {
-        // 初始化 AI 头像（使用设置中的 URL）
+        // Initialize AI avatar (using URL from settings)
         updateAIAvatarCache()
 
-        // 初始化用户头像
+        // Initialize user avatar
         updateUserAvatarCache()
     }
 
-    /// 更新 AI 头像缓存
+    /// Update AI avatar cache
     private func updateAIAvatarCache() {
         cachedAIAvatar = AnyView(
             AIAvatarView(size: Constants.avatarSize, url: aiSettings.aiAvatarURL)
         )
     }
 
-    /// 更新用户头像缓存
+    /// Update user avatar cache
     private func updateUserAvatarCache() {
         if let player = playerListViewModel.currentPlayer {
             cachedUserAvatar = AnyView(
@@ -147,22 +147,22 @@ struct AIChatWindowView: View {
         }
     }
 
-    /// 清理头像缓存
+    /// Clear avatar cache
     private func clearAvatarCache() {
         cachedAIAvatar = nil
         cachedUserAvatar = nil
     }
 
-    /// 清除页面所有数据
+    /// Clear all data on the page
     private func clearAllData() {
-        // 清理头像缓存
+        // Clear avatar cache
         clearAvatarCache()
-        // 清理输入文本和附件
+        // Clean input text and attachments
         inputText = ""
         attachmentManager.clearAll()
-        // 重置焦点状态
+        // Reset focus state
         isInputFocused = false
-        // 清理选中的游戏
+        // Clear selected games
         selectedGameId = nil
     }
 
@@ -179,7 +179,7 @@ struct AIChatWindowView: View {
         }
     }
 
-    /// 处理文件选择结果
+    /// Process file selection results
     private func handleFileSelection(_ result: Result<[URL], Error>) {
         switch result {
         case .success(let urls):

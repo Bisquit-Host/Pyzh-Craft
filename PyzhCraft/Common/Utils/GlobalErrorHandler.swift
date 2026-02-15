@@ -2,12 +2,12 @@ import SwiftUI
 
 // MARK: - Error Level Enum
 
-/// 错误等级枚举
+/// error level enum
 enum ErrorLevel: String, CaseIterable {
-    case popup,           // 弹窗显示
-         notification, // 通知显示
-         silent,         // 静默处理，只记录日志
-         disabled     // 什么都不做，不记录
+    case popup,           // Pop-up window display
+         notification, // Notification display
+         silent,         // Silent processing, only logging
+         disabled     // Do nothing, record nothing
 
     var displayName: String {
         switch self {
@@ -21,7 +21,7 @@ enum ErrorLevel: String, CaseIterable {
 
 // MARK: - Global Error Types
 
-/// 全局错误类型枚举
+/// Global error type enum
 enum GlobalError: Error, LocalizedError, Identifiable {
     case network(
         chineseMessage: String,
@@ -106,7 +106,7 @@ enum GlobalError: Error, LocalizedError, Identifiable {
         }
     }
 
-    /// 中文错误描述
+    /// Chinese error description
     var chineseMessage: String {
         switch self {
         case let .network(message, _, _):
@@ -134,7 +134,7 @@ enum GlobalError: Error, LocalizedError, Identifiable {
         }
     }
 
-    /// 国际化key
+    /// International key
     var i18nKey: String {
         switch self {
         case let .network(_, key, _):
@@ -162,7 +162,7 @@ enum GlobalError: Error, LocalizedError, Identifiable {
         }
     }
 
-    /// 错误等级
+    /// error level
     var level: ErrorLevel {
         switch self {
         case let .network(_, _, level):
@@ -190,25 +190,25 @@ enum GlobalError: Error, LocalizedError, Identifiable {
         }
     }
 
-    /// 本地化错误描述（使用国际化key）
+    /// Localized error description (using internationalization key)
     var errorDescription: String? {
         i18nKey.localized()
     }
 
-    /// 本地化描述：优先使用 i18nKey，找不到时回退到 chineseMessage
+    /// Localized description: Use i18nKey first, fall back to chineseMessage if not found
     var localizedDescription: String {
         let localizedText = i18nKey.localized()
 
-        // 有有效的本地化条目时，始终使用本地化内容
+        // Always use localized content when there is a valid localized entry
         if localizedText != i18nKey {
             return localizedText
         }
 
-        // 没有对应的本地化条目时，回退到中文消息
+        // When there is no corresponding localized entry, fallback to Chinese message
         return chineseMessage
     }
 
-    /// 获取通知标题（使用国际化key）
+    /// Get notification title (using internationalization key)
     var notificationTitle: String {
         switch self {
         case .network:
@@ -240,7 +240,7 @@ enum GlobalError: Error, LocalizedError, Identifiable {
 // MARK: - Error Conversion Extensions
 
 extension GlobalError {
-    /// 从其他错误类型转换为全局错误
+    /// Convert from other error types to global errors
     static func from(_ error: Error) -> GlobalError {
         switch error {
         case let globalError as GlobalError:
@@ -248,7 +248,7 @@ extension GlobalError {
 
         default:
             if let urlError = error as? URLError {
-                // 如果是取消错误，使用 silent 级别，不显示通知
+                // If it is a cancellation error, use the silent level and do not display notifications
                 let level: ErrorLevel = urlError.code == .cancelled ? .silent : .notification
                 return .network(
                     chineseMessage: urlError.localizedDescription,
@@ -257,7 +257,7 @@ extension GlobalError {
                 )
             }
 
-            // 检查是否是文件系统错误
+            // Check if it is a file system error
             let nsError = error as NSError
             if nsError.domain == NSCocoaErrorDomain {
                 return .fileSystem(
@@ -302,54 +302,54 @@ class GlobalErrorHandler: ObservableObject {
         }
     }
 
-    /// 根据错误等级处理错误
+    /// Handle errors based on error level
     private func handleErrorByLevel(_ error: GlobalError) {
         switch error.level {
         case .popup:
             Logger.shared.error("[GlobalError-Popup] \(error.chineseMessage)")
 
         case .notification:
-            // 发送通知
+            // Send notification
             NotificationManager.sendSilently(
                 title: error.notificationTitle,
                 body: error.localizedDescription
             )
 
         case .silent:
-            // 静默处理，只记录日志
+            // Silent processing, only logging
             Logger.shared.error("[GlobalError-Silent] \(error.chineseMessage)")
 
         case .disabled:
-            // 什么都不做
+            // do nothing
             break
         }
     }
 
-    /// 清除当前错误
+    /// Clear current errors
     func clearCurrentError() {
         DispatchQueue.main.async {
             self.currentError = nil
         }
     }
 
-    /// 清除错误历史
+    /// Clear error history
     func clearHistory() {
         DispatchQueue.main.async {
             self.errorHistory.removeAll()
         }
     }
 
-    /// 添加错误到历史记录
+    /// Add error to history
     private func addToHistory(_ error: GlobalError) {
         errorHistory.append(error)
 
-        // 限制历史记录数量
+        // Limit the number of history records
         if errorHistory.count > maxHistoryCount {
             errorHistory.removeFirst()
         }
     }
 
-    /// 应用退出时清理内存
+    /// Clean memory when app exits
     func cleanup() {
         DispatchQueue.main.async {
             self.currentError = nil
@@ -357,7 +357,7 @@ class GlobalErrorHandler: ObservableObject {
         }
     }
 
-    /// 记录错误到日志
+    /// Record errors to log
     private func logError(_ error: GlobalError) {
         Logger.shared.error("[GlobalError] \(error.chineseMessage) | Key: \(error.i18nKey) | Level: \(error.level.rawValue)")
     }
@@ -372,7 +372,7 @@ struct GlobalErrorHandlerModifier: ViewModifier {
         content
             .onReceive(errorHandler.$currentError) { error in
                 if let error = error {
-                    // 只记录日志，弹窗由 ErrorAlertModifier 处理
+                    // Only logs are recorded, pop-up windows are handled by ErrorAlertModifier
                     Logger.shared.error("Global error occurred: \(error.chineseMessage)")
                 }
             }

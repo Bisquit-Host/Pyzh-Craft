@@ -17,7 +17,7 @@ struct ProcessingView: View {
     var body: some View {
         VStack(spacing: 24) {
             ZStack {
-                // 始终显示圆形进度条
+                // Always show circular progress bar
                 CircularProgressView(progress: progress)
                     .frame(width: 54, height: 54)
 
@@ -49,14 +49,14 @@ struct CircularProgressView: View {
 
     var body: some View {
         ZStack {
-            // 背景圆环
+            // background ring
             Circle()
                 .stroke(
                     Color.secondary.opacity(0.2),
                     style: StrokeStyle(lineWidth: 6, lineCap: .round)
                 )
 
-            // 进度圆环
+            // progress ring
             Circle()
                 .trim(from: 0, to: progress)
                 .stroke(

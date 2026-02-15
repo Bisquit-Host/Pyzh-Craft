@@ -28,15 +28,15 @@ enum ModrinthService {
     static func fetchVersionInfo(from version: String) async throws -> MinecraftVersionManifest {
         let cacheKey = "version_info_\(version)"
 
-        // 检查缓存
+        // Check cache
         if let cachedVersionInfo: MinecraftVersionManifest = AppCacheManager.shared.get(namespace: "version_info", key: cacheKey, as: MinecraftVersionManifest.self) {
             return cachedVersionInfo
         }
 
-        // 从API获取版本信息
+        // Get version information from API
         let versionInfo = try await fetchVersionInfoThrowing(from: version)
 
-        // 缓存整个版本信息
+        // Cache the entire version information
         AppCacheManager.shared.setSilently(
             namespace: "version_info",
             key: cacheKey,
@@ -49,17 +49,17 @@ enum ModrinthService {
     static func queryVersionTime(from version: String) async -> String {
         let cacheKey = "version_time_\(version)"
 
-        // 检查缓存
+        // Check cache
         if let cachedTime: String = AppCacheManager.shared.get(namespace: "version_time", key: cacheKey, as: String.self) {
             return cachedTime
         }
 
         do {
-            // 使用缓存的版本信息，避免重复API调用
+            // Use cached version information to avoid repeated API calls
             let versionInfo = try await Self.fetchVersionInfo(from: version)
             let formattedTime = CommonUtil.formatRelativeTime(versionInfo.releaseTime)
 
-            // 缓存版本时间信息
+            // Cache version time information
             AppCacheManager.shared.setSilently(
                 namespace: "version_time",
                 key: cacheKey,
@@ -74,7 +74,7 @@ enum ModrinthService {
     static func fetchVersionInfoThrowing(from version: String) async throws -> MinecraftVersionManifest {
         let url = URLConfig.API.Modrinth.versionInfo(version: version)
 
-        // 使用统一的 API 客户端
+        // Use a unified API client
         let data = try await APIClient.get(url: url)
 
         do {
@@ -166,7 +166,7 @@ enum ModrinthService {
                 level: .notification
             )
         }
-        // 使用统一的 API 客户端
+        // Use a unified API client
         let data = try await APIClient.get(url: url)
 
         let decoder = JSONDecoder()
@@ -188,7 +188,7 @@ enum ModrinthService {
     }
 
     static func fetchLoadersThrowing() async throws -> [Loader] {
-        // 使用统一的 API 客户端
+        // Use a unified API client
         let data = try await APIClient.get(url: URLConfig.API.Modrinth.loaderTag)
         let result = try JSONDecoder().decode([Loader].self, from: data)
         return result
@@ -206,7 +206,7 @@ enum ModrinthService {
     }
 
     static func fetchCategoriesThrowing() async throws -> [Category] {
-        // 使用统一的 API 客户端
+        // Use a unified API client
         let data = try await APIClient.get(url: URLConfig.API.Modrinth.categoryTag)
         let result = try JSONDecoder().decode([Category].self, from: data)
         return result
@@ -226,20 +226,20 @@ enum ModrinthService {
     static func fetchGameVersionsThrowing(
         includeSnapshots: Bool = false
     ) async throws -> [GameVersion] {
-        // 使用统一的 API 客户端
+        // Use a unified API client
         let data = try await APIClient.get(url: URLConfig.API.Modrinth.gameVersionTag)
         let result = try JSONDecoder().decode([GameVersion].self, from: data)
-        // 默认仅返回正式版，如果 includeSnapshots 为 true，则返回所有版本
+        // By default, only official versions are returned. If includeSnapshots is true, all versions are returned
         return includeSnapshots ? result : result.filter { $0.version_type == "release" }
     }
 
     static func fetchProjectDetails(id: String) async -> ModrinthProjectDetail? {
-        // 检查是否是 CurseForge 项目（ID 以 "cf-" 开头）
+        // Check if it is a CurseForge project (ID starts with "cf-")
         if id.hasPrefix("cf-") {
             return await CurseForgeService.fetchProjectDetailsAsModrinth(id: id)
         }
 
-        // 使用 Modrinth 服务
+        // Using the Modrinth service
         do {
             return try await fetchProjectDetailsThrowing(id: id)
         } catch {
@@ -251,22 +251,22 @@ enum ModrinthService {
     }
 
     static func fetchProjectDetailsThrowing(id: String) async throws -> ModrinthProjectDetail {
-        // 检查是否是 CurseForge 项目（ID 以 "cf-" 开头）
+        // Check if it is a CurseForge project (ID starts with "cf-")
         if id.hasPrefix("cf-") {
             return try await CurseForgeService.fetchProjectDetailsAsModrinthThrowing(id: id)
         }
 
-        // 使用 Modrinth 服务
+        // Using the Modrinth service
         let url = URLConfig.API.Modrinth.project(id: id)
 
-        // 使用统一的 API 客户端
+        // Use a unified API client
         let data = try await APIClient.get(url: url)
 
         let decoder = JSONDecoder()
         decoder.configureForModrinth()
         var detail = try decoder.decode(ModrinthProjectDetail.self, from: data)
 
-        // 仅保留纯数字（含点号）的正式版游戏版本，例如 1.20.4
+        // Only keep the official version of the game with pure numbers (including dots), such as 1.20.4
         let releaseGameVersions = detail.gameVersions.filter {
             $0.range(of: #"^\d+(\.\d+)*$"#, options: .regularExpression) != nil
         }
@@ -276,7 +276,7 @@ enum ModrinthService {
     }
 
     static func fetchProjectVersions(id: String) async -> [ModrinthProjectDetailVersion] {
-        // 检查是否是 CurseForge 项目（ID 以 "cf-" 开头）
+        // Check if it is a CurseForge project (ID starts with "cf-")
         if id.hasPrefix("cf-") {
             return await CurseForgeService.fetchProjectVersionsAsModrinth(id: id)
         }
@@ -292,14 +292,14 @@ enum ModrinthService {
     }
 
     static func fetchProjectVersionsThrowing(id: String) async throws -> [ModrinthProjectDetailVersion] {
-        // 检查是否是 CurseForge 项目（ID 以 "cf-" 开头）
+        // Check if it is a CurseForge project (ID starts with "cf-")
         if id.hasPrefix("cf-") {
             return try await CurseForgeService.fetchProjectVersionsAsModrinthThrowing(id: id)
         }
 
         let url = URLConfig.API.Modrinth.version(id: id)
 
-        // 使用统一的 API 客户端
+        // Use a unified API client
         let data = try await APIClient.get(url: url)
 
         let decoder = JSONDecoder()
@@ -313,7 +313,7 @@ enum ModrinthService {
             selectedLoaders: [String],
             type: String
         ) async throws -> [ModrinthProjectDetailVersion] {
-            // 检查是否是 CurseForge 项目（ID 以 "cf-" 开头）
+            // Check if it is a CurseForge project (ID starts with "cf-")
             if id.hasPrefix("cf-") {
                 return try await CurseForgeService.fetchProjectVersionsFilterAsModrinth(
                     id: id,
@@ -331,10 +331,10 @@ enum ModrinthService {
                 loaders = ["minecraft"]
             }
             return versions.filter { version in
-                // 必须同时满足版本和 loader 匹配
+                // Both version and loader matching must be met
                 let versionMatch = selectedVersions.isEmpty || !Set(version.gameVersions).isDisjoint(with: selectedVersions)
 
-                // 对于shader和resourcepack，不检查loader匹配
+                // For shader and resourcepack, loader matching is not checked
                 let loaderMatch: Bool
                 if type == "shader" || type == "resourcepack" {
                     loaderMatch = true
@@ -376,7 +376,7 @@ enum ModrinthService {
         selectedVersions: [String],
         selectedLoaders: [String]
     ) async throws -> ModrinthProjectDependency {
-        // 检查是否是 CurseForge 项目（ID 以 "cf-" 开头）
+        // Check if it is a CurseForge project (ID starts with "cf-")
         if id.hasPrefix("cf-") {
             return try await CurseForgeService.fetchProjectDependenciesThrowingAsModrinth(
                 type: type,
@@ -387,24 +387,24 @@ enum ModrinthService {
             )
         }
 
-        // 1. 获取所有筛选后的版本
+        // 1. Get all filtered versions
         let versions = try await fetchProjectVersionsFilter(
             id: id,
             selectedVersions: selectedVersions,
             selectedLoaders: selectedLoaders,
             type: type
         )
-        // 只取第一个版本
+        // Only take the first version
         guard let firstVersion = versions.first else {
             return ModrinthProjectDependency(projects: [])
         }
 
-        // 2. 并发获取所有依赖项目的兼容版本（使用批处理限制并发数量）
+        // 2. Concurrently obtain compatible versions of all dependent projects (use batch processing to limit the number of concurrencies)
         let requiredDeps = firstVersion.dependencies.filter { $0.dependencyType == "required" && $0.projectId != nil }
-        let maxConcurrentTasks = 10 // 限制最大并发任务数
+        let maxConcurrentTasks = 10 // Limit the maximum number of concurrent tasks
         var allDependencyVersions: [ModrinthProjectDetailVersion] = []
 
-        // 分批处理依赖，每批最多 maxConcurrentTasks 个
+        // Process dependencies in batches, with a maximum of maxConcurrentTasks per batch
         var currentIndex = 0
         while currentIndex < requiredDeps.count {
             let endIndex = min(currentIndex + maxConcurrentTasks, requiredDeps.count)
@@ -419,10 +419,10 @@ enum ModrinthService {
                             let depVersion: ModrinthProjectDetailVersion
 
                             if let versionId = dep.versionId {
-                                // 如果有 versionId，直接获取指定版本
+                                // If there is a versionId, directly obtain the specified version
                                 depVersion = try await fetchProjectVersionThrowing(id: versionId)
                             } else {
-                                // 如果没有 versionId，使用过滤逻辑获取兼容版本
+                                // If there is no versionId, use filtering logic to obtain compatible versions
                                 let depVersions = try await fetchProjectVersionsFilter(
                                     id: projectId,
                                     selectedVersions: selectedVersions,
@@ -458,13 +458,13 @@ enum ModrinthService {
             allDependencyVersions.append(contentsOf: batchResults)
         }
 
-        // 3. 使用hash检查是否已安装，过滤出缺失的依赖
+        // 3. Use hash to check whether it is installed and filter out missing dependencies
         let missingDependencyVersions = allDependencyVersions.filter { version in
-            // 获取主文件的hash
+            // Get the hash of the main file
             guard let primaryFile = Self.filterPrimaryFiles(from: version.files) else {
-                return true // 如果没有主文件，认为缺失
+                return true // If there is no main file, it is considered missing
             }
-            // 使用hash检查是否已安装
+            // Use hash to check if it is installed
             return !ModScanner.shared.isModInstalledSync(hash: primaryFile.hashes.sha1, in: cachePath)
         }
 
@@ -474,7 +474,7 @@ enum ModrinthService {
     static func fetchProjectVersionThrowing(id: String) async throws -> ModrinthProjectDetailVersion {
         let url = URLConfig.API.Modrinth.versionId(versionId: id)
 
-        // 使用统一的 API 客户端
+        // Use a unified API client
         let data = try await APIClient.get(url: url)
 
         let decoder = JSONDecoder()
@@ -482,7 +482,7 @@ enum ModrinthService {
         return try decoder.decode(ModrinthProjectDetailVersion.self, from: data)
     }
 
-    // 过滤主文件
+    // Filter master file
     static func filterPrimaryFiles(from files: [ModrinthVersionFile]?) -> ModrinthVersionFile? {
         return files?.first { $0.primary == true }
     }

@@ -1,22 +1,22 @@
 import Foundation
 
-/// 资源启用/禁用状态管理器
-/// 负责管理本地资源的启用和禁用状态（通过 .disable 后缀）
+/// Resource enable/disable state manager
+/// Responsible for managing the enabled and disabled status of local resources (via the .disable suffix)
 enum ResourceEnableDisableManager {
-    /// 检查资源是否被禁用
-    /// - Parameter fileName: 文件名
-    /// - Returns: 是否被禁用
+    /// Check if the resource is disabled
+    /// - Parameter fileName: file name
+    /// - Returns: Whether it is disabled
     static func isDisabled(fileName: String?) -> Bool {
         guard let fileName = fileName else { return false }
         return fileName.hasSuffix(".disable")
     }
 
-    /// 切换资源的启用/禁用状态
+    /// Toggle the enabled/disabled state of a resource
     /// - Parameters:
-    ///   - fileName: 当前文件名
-    ///   - resourceDir: 资源目录
-    /// - Returns: 新的文件名，如果操作失败则返回 nil
-    /// - Throws: 文件操作错误
+    ///   - fileName: current file name
+    ///   - resourceDir: resource directory
+    /// - Returns: new file name, or nil if the operation fails
+    /// - Throws: File operation error
     static func toggleDisableState(
         fileName: String,
         resourceDir: URL

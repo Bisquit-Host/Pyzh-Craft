@@ -1,12 +1,12 @@
 import SwiftUI
 
-/// 资源按钮的 Alert 类型枚举
+/// Alert type enumeration for resource buttons
 enum ResourceButtonAlertType: Identifiable {
     case noGame, noPlayer
 
     var id: Self { self }
 
-    /// 创建对应的 Alert
+    /// Create the corresponding Alert
     var alert: Alert {
         switch self {
         case .noGame:

@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - Footer 按钮区块
+// MARK: - Footer button block
 struct GlobalResourceFooter: View {
     let project: ModrinthProject
     let resourceType: String

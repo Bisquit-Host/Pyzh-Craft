@@ -1,7 +1,7 @@
 import Foundation
 
 enum ForgeLoaderService {
-    /// 通过Modrinth API获取所有可用Forge版本详细信息
+    /// Get all available Forge version details via Modrinth API
     static func fetchAllForgeVersions(for minecraftVersion: String) async throws -> LoaderVersion {
         guard let result = await CommonService.fetchAllLoaderVersions(type: "forge", minecraftVersion: minecraftVersion) else {
             throw GlobalError.resource(
@@ -13,41 +13,41 @@ enum ForgeLoaderService {
         return result
     }
 
-    /// 获取指定版本的 Forge profile
+    /// Get the specified version of Forge profile
     /// - Parameters:
-    ///   - minecraftVersion: Minecraft 版本
-    ///   - loaderVersion: 指定的加载器版本
-    /// - Returns: 指定版本的 Forge profile
-    /// - Throws: GlobalError 当操作失败时
+    ///   - minecraftVersion: Minecraft version
+    ///   - loaderVersion: specified loader version
+    /// - Returns: Forge profile of the specified version
+    /// - Throws: GlobalError when the operation fails
     static func fetchSpecificForgeProfile(for minecraftVersion: String, loaderVersion: String) async throws -> ModrinthLoader {
         let cacheKey = "\(minecraftVersion)-\(loaderVersion)"
 
-        // 1. 查全局缓存
+        // 1. Check the global cache
         if let cached = AppCacheManager.shared.get(namespace: "forge", key: cacheKey, as: ModrinthLoader.self) {
             return cached
         }
 
-        // 2. 直接下载指定版本的 version.json
-        // 使用统一的 API 客户端
+        // 2. Directly download version.json of the specified version
+        // Use a unified API client
         let url = URLConfig.API.Modrinth.loaderProfile(loader: "forge", version: loaderVersion)
         let data = try await APIClient.get(url: url)
 
         var result = try JSONDecoder().decode(ModrinthLoader.self, from: data)
         result = CommonService.processGameVersionPlaceholders(loader: result, gameVersion: minecraftVersion)
         result.version = loaderVersion
-        // 3. 存入缓存
+        // 3. Save to cache
         AppCacheManager.shared.setSilently(namespace: "forge", key: cacheKey, value: result)
 
         return result
     }
 
-    /// 设置指定版本的 Forge 加载器（静默版本）
+    /// Set the specified version of the Forge loader (silent version)
     /// - Parameters:
-    ///   - gameVersion: 游戏版本
-    ///   - loaderVersion: 指定的加载器版本
-    ///   - gameInfo: 游戏信息
-    ///   - onProgressUpdate: 进度更新回调
-    /// - Returns: 设置结果，失败时返回 nil
+    ///   - gameVersion: game version
+    ///   - loaderVersion: specified loader version
+    ///   - gameInfo: game information
+    ///   - onProgressUpdate: progress update callback
+    /// - Returns: Set the result, return nil on failure
     static func setupWithSpecificVersion(
         for gameVersion: String,
         loaderVersion: String,
@@ -69,14 +69,14 @@ enum ForgeLoaderService {
         }
     }
 
-    /// 设置指定版本的 Forge 加载器（抛出异常版本）
+    /// Set the specified version of the Forge loader (throws exception version)
     /// - Parameters:
-    ///   - gameVersion: 游戏版本
-    ///   - loaderVersion: 指定的加载器版本
-    ///   - gameInfo: 游戏信息
-    ///   - onProgressUpdate: 进度更新回调
-    /// - Returns: 设置结果
-    /// - Throws: GlobalError 当操作失败时
+    ///   - gameVersion: game version
+    ///   - loaderVersion: specified loader version
+    ///   - gameInfo: game information
+    ///   - onProgressUpdate: progress update callback
+    /// - Returns: Set results
+    /// - Throws: GlobalError when the operation fails
     static func setupWithSpecificVersionThrowing(
         for gameVersion: String,
         loaderVersion: String,
@@ -90,14 +90,14 @@ enum ForgeLoaderService {
         let fileManager = CommonFileManager(librariesDir: librariesDirectory)
         fileManager.onProgressUpdate = onProgressUpdate
 
-        // 第一步：下载所有downloadable=true的库文件
+        // Step 1: Download all downloadable=true library files
         let downloadableLibraries = forgeProfile.libraries.filter { $0.downloads != nil }
         let totalDownloads = downloadableLibraries.count
         await fileManager.downloadForgeJars(libraries: forgeProfile.libraries)
 
-        // 第二步：执行processors（如果存在）
+        // Step 2: Execute processors (if they exist)
         if let processors = forgeProfile.processors, !processors.isEmpty {
-            // 使用version.json中的原始data字段
+            // Use the original data field from version.json
             try await fileManager.executeProcessors(
                 processors: processors,
                 librariesDir: librariesDirectory,
@@ -105,8 +105,8 @@ enum ForgeLoaderService {
                 data: forgeProfile.data,
                 gameName: gameInfo.gameName
             ) { message, currentProcessor, totalProcessors in
-                    // 将处理器进度消息转换为下载进度格式
-                    // 总任务数 = 下载数 + 处理器数
+                    // Convert processor progress messages to download progress format
+                    // Total number of tasks = number of downloads + number of processors
                     let totalTasks = totalDownloads + totalProcessors
                     let completedTasks = totalDownloads + currentProcessor
                     onProgressUpdate(message, completedTasks, totalTasks)

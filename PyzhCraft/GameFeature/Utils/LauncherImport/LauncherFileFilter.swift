@@ -1,17 +1,17 @@
 import Foundation
 
-/// 启动器文件过滤器
-/// 为每个启动器定义需要过滤的文件名规则（支持正则表达式）
+/// Launcher file filter
+/// Define file name rules that need to be filtered for each launcher (supports regular expressions)
 enum LauncherFileFilter {
 
-    /// 获取指定启动器的文件过滤规则
-    /// - Parameter launcherType: 启动器类型
-    /// - Returns: 文件名过滤规则数组（正则表达式）
+    /// Get the file filtering rules of the specified launcher
+    /// - Parameter launcherType: launcher type
+    /// - Returns: array of file name filtering rules (regular expression)
     static func getFilterPatterns(for launcherType: ImportLauncherType) -> [String] {
         switch launcherType {
         case .multiMC, .prismLauncher:
             return [
-                // MultiMC/PrismLauncher 特定文件
+                // MultiMC/PrismLauncher specific files
                 ".*\\.mmc-pack\\.json$",
                 ".*instance\\.cfg$",
                 ".*\\.log$",
@@ -20,7 +20,7 @@ enum LauncherFileFilter {
 
         case .gdLauncher:
             return [
-                // GDLauncher 特定文件
+                // GDLauncher specific files
                 ".*config\\.json$",
                 ".*\\.log$",
                 "^metadata\\.json$",
@@ -28,7 +28,7 @@ enum LauncherFileFilter {
 
         case .hmcl:
             return [
-                // HMCL 特定文件
+                // HMCL specific files
                 ".*config\\.json$",
                 ".*\\.log$",
                 "^hmclversion\\.json$",
@@ -38,7 +38,7 @@ enum LauncherFileFilter {
 
         case .sjmcLauncher:
             return [
-                // SJMCL 特定文件
+                // SJMCL specific files
                 ".*sjmclcfg\\.json$",
                 ".*\\.log$",
                 "^\\d+.*-.*\\.json$",
@@ -47,7 +47,7 @@ enum LauncherFileFilter {
 
         case .xmcl:
             return [
-                // XMCL 特定文件
+                // XMCL specific files
                 ".*instance\\.json$",
                 ".*\\.log$",
                 "^metadata\\.json$",
@@ -55,11 +55,11 @@ enum LauncherFileFilter {
         }
     }
 
-    /// 检查文件是否应该被过滤
+    /// Check if the file should be filtered
     /// - Parameters:
-    ///   - fileName: 文件名（包含相对路径）
-    ///   - launcherType: 启动器类型
-    /// - Returns: 如果文件应该被过滤（不复制），返回 true
+    ///   - fileName: file name (including relative path)
+    ///   - launcherType: launcher type
+    /// - Returns: true if the file should be filtered (not copied)
     static func shouldFilter(fileName: String, launcherType: ImportLauncherType) -> Bool {
         let patterns = getFilterPatterns(for: launcherType)
 
@@ -80,25 +80,25 @@ enum LauncherFileFilter {
         return false
     }
 
-    /// 过滤文件列表
+    /// Filter file list
     /// - Parameters:
-    ///   - files: 文件 URL 数组
-    ///   - sourceDirectory: 源目录（用于计算相对路径）
-    ///   - launcherType: 启动器类型
-    /// - Returns: 过滤后的文件 URL 数组
+    ///   - files: array of file URLs
+    ///   - sourceDirectory: source directory (used to calculate relative paths)
+    ///   - launcherType: launcher type
+    /// - Returns: filtered file URL array
     static func filterFiles(
         _ files: [URL],
         sourceDirectory: URL,
         launcherType: ImportLauncherType
     ) -> [URL] {
         return files.filter { fileURL in
-            // 计算相对路径
+            // Calculate relative paths
             let relativePath = fileURL.path.replacingOccurrences(
                 of: sourceDirectory.path + "/",
                 with: ""
             )
 
-            // 检查是否应该过滤
+            // Check if it should be filtered
             return !shouldFilter(fileName: relativePath, launcherType: launcherType)
         }
     }

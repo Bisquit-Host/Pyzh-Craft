@@ -38,7 +38,7 @@ struct ModPackImportView: View {
             viewModel.setup(gameRepository: gameRepository)
         }
         .gameFormStateListeners(viewModel: viewModel, triggerConfirm: triggerConfirm, triggerCancel: triggerCancel)
-        // 优化：使用 Task 批量处理多个状态变化，减少不必要的视图更新
+        // Optimization: Use Task to process multiple status changes in batches to reduce unnecessary view updates
         .onChange(of: viewModel.selectedModPackFile) { oldValue, newValue in
             if oldValue != newValue {
                 viewModel.updateParentState()
@@ -60,20 +60,20 @@ struct ModPackImportView: View {
             }
         }
         .onDisappear {
-            // 页面关闭后清除所有数据
+            // Clear all data after closing the page
             clearAllData()
         }
     }
 
-    // MARK: - 清除数据
-    /// 清除页面所有数据
+    // MARK: - clear data
+    /// Clear all data on the page
     private func clearAllData() {
-        // 如果正在下载，取消下载任务以避免资源泄漏
+        // If downloading is in progress, cancel the download task to avoid resource leaks
         if viewModel.isDownloading {
             viewModel.cancelDownloadIfNeeded()
         }
-        // ViewModel 的数据会在下次打开时重新初始化
-        // 不重置 ViewModel 状态，可能正在使用
+        // ViewModel's data will be reinitialized the next time it is opened
+        // Does not reset ViewModel state, may be using
     }
 
     // MARK: - View Components
@@ -140,7 +140,7 @@ struct ModPackImportView: View {
     private var selectedModPackView: some View {
         VStack(alignment: .leading, spacing: 4) {
             if viewModel.modPackIndexInfo != nil {
-                // 解析完成，显示完整信息
+                // The analysis is completed and the complete information is displayed
                 HStack {
                     VStack(alignment: .leading) {
                         Text(viewModel.modPackName)

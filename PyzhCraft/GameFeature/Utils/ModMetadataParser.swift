@@ -2,7 +2,7 @@ import Foundation
 import ZIPFoundation
 
 enum ModMetadataParser {
-    /// 解析 modid 和 version（静默版本）
+    /// Parse modid and version (silent version)
     static func parseModMetadata(
         fileURL: URL,
         completion: @escaping (_ modid: String?, _ version: String?) -> Void
@@ -18,7 +18,7 @@ enum ModMetadataParser {
         }
     }
 
-    /// 解析 modid 和 version（抛出异常版本）
+    /// Parse modid and version (throw exception version)
     static func parseModMetadataThrowing(fileURL: URL) throws -> (
         String?, String?
     ) {
@@ -76,7 +76,7 @@ enum ModMetadataParser {
             }
         }
 
-        // 3. 旧 Forge (mcmod.info)
+        // 3. Old Forge (mcmod.info)
         if let entry = archive["mcmod.info"] {
             if let (modid, version) = try parseMcmodInfoThrowing(
                 archive: archive,

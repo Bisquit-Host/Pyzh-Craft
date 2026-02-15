@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 窗口管理器，用于打开和关闭窗口（使用 Window，所有窗口都是单例）
+/// Window manager for opening and closing windows (with Window, all windows are singletons)
 @MainActor
 class WindowManager {
     static let shared = WindowManager()
@@ -9,16 +9,16 @@ class WindowManager {
 
     private init() {}
 
-    /// 设置窗口打开动作（由 WindowOpener 调用）
+    /// Set the window opening action (called by WindowOpener)
     func setOpenWindowAction(_ action: @escaping (String) -> Void) {
         self.openWindowAction = action
     }
 
-    /// 查找指定 ID 的窗口
+    /// Find the window with the specified ID
     private func findWindow(id: WindowID) -> NSWindow? {
         let windows = NSApplication.shared.windows
         for window in windows {
-            // 通过窗口的 identifier 查找匹配的窗口
+            // Find a matching window by its identifier
             if let identifier = window.identifier?.rawValue,
                identifier == id.rawValue {
                 return window
@@ -27,13 +27,13 @@ class WindowManager {
         return nil
     }
 
-    /// 打开指定 ID 的窗口（Window 本身就是单例，会自动激活已存在的窗口）
+    /// Open the window with the specified ID (Window itself is a singleton and will automatically activate existing windows)
     func openWindow(id: WindowID) {
         if let openWindow = openWindowAction {
-            // 使用 OpenWindowAction 打开窗口（Window 会自动处理单例逻辑）
+            // Use OpenWindowAction to open the window (Window will automatically handle the singleton logic)
             openWindow(id.rawValue)
         } else {
-            // 如果没有设置，通过通知中心通知主视图
+            // If not set, notify the main view through the notification center
             NotificationCenter.default.post(
                 name: NSNotification.Name("OpenWindow"),
                 object: nil,
@@ -42,7 +42,7 @@ class WindowManager {
         }
     }
 
-    /// 关闭指定 ID 的窗口
+    /// Close the window with the specified ID
     func closeWindow(id: WindowID) {
         if let window = findWindow(id: id) {
             window.close()
@@ -50,7 +50,7 @@ class WindowManager {
     }
 }
 
-/// 窗口打开器修饰符，用于在主视图中设置全局的 OpenWindowAction
+/// Window opener modifier for setting a global OpenWindowAction in the main view
 struct WindowOpener: ViewModifier {
     @Environment(\.openWindow)
     private var openWindow
@@ -58,13 +58,13 @@ struct WindowOpener: ViewModifier {
     func body(content: Content) -> some View {
         content
             .onAppear {
-                // 设置全局窗口打开动作（使用闭包包装 OpenWindowAction）
+                // Set the global window opening action (use closure to wrap OpenWindowAction)
                 WindowManager.shared.setOpenWindowAction { windowID in
                     openWindow(id: windowID)
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("OpenWindow"))) { notification in
-                // 监听通知并打开窗口（备用方案）
+                // Listen for notifications and open a window (alternative solution)
                 if let windowIDString = notification.userInfo?["windowID"] as? String {
                     openWindow(id: windowIDString)
                 }
@@ -73,7 +73,7 @@ struct WindowOpener: ViewModifier {
 }
 
 extension View {
-    /// 应用窗口打开器配置
+    /// Application window opener configuration
     func windowOpener() -> some View {
         modifier(WindowOpener())
     }

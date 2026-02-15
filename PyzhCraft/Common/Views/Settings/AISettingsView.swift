@@ -46,7 +46,7 @@ public struct AISettingsView: View {
             }
             .labeledContentStyle(.custom)
 
-            // Ollama 地址设置（仅在选择 Ollama 时显示）
+            // Ollama address settings (only shown when Ollama is selected)
             if aiSettings.selectedProvider == .ollama {
                 LabeledContent("settings.ai.ollama.url.label".localized()) {
                     TextField("http://localhost:11434", text: $aiSettings.ollamaBaseURL)
@@ -59,7 +59,7 @@ public struct AISettingsView: View {
                 .labeledContentStyle(.custom)
             }
 
-            // OpenAI 格式的自定义接口地址设置（可用于 DeepSeek 等兼容服务）
+            // Custom interface address settings in OpenAI format (can be used with compatible services such as DeepSeek)
             if aiSettings.selectedProvider.apiFormat == .openAI {
                 LabeledContent("settings.ai.api_url.label".localized()) {
                     HStack {
@@ -75,7 +75,7 @@ public struct AISettingsView: View {
                 .labeledContentStyle(.custom)
             }
 
-            // 模型设置（必填）
+            // Model settings (required)
             LabeledContent("settings.ai.model.label".localized()) {
                 HStack {
                     TextField("settings.ai.model.placeholder".localized(), text: $aiSettings.modelOverride)
@@ -89,16 +89,16 @@ public struct AISettingsView: View {
             }
             .labeledContentStyle(.custom)
 
-            // AI 头像设置
+            // AI avatar settings
             LabeledContent("settings.ai.avatar.label".localized()) {
                 VStack(alignment: .leading, spacing: 12) {
-                    // 头像预览
+                    // Avatar preview
                     MinecraftSkinUtils(
                         type: .url,
                         src: aiSettings.aiAvatarURL,
                         size: 42
                     )
-                    // URL 输入框
+                    // URL input box
                     HStack {
                         TextField("settings.ai.avatar.placeholder".localized(), text: $aiSettings.aiAvatarURL)
                             .textFieldStyle(.roundedBorder)

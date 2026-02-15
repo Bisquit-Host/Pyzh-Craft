@@ -1,9 +1,9 @@
 import Foundation
 
-/// 侧边栏导航项
+/// Sidebar navigation items
 public enum SidebarItem: Hashable, Identifiable {
-    case game(String)  // 游戏项，包含游戏ID
-    case resource(ResourceType)  // 资源项
+    case game(String)  // Game item, including game ID
+    case resource(ResourceType)  // Resource item
 
     public var id: String {
         switch self {
@@ -17,14 +17,14 @@ public enum SidebarItem: Hashable, Identifiable {
     public var title: String {
         switch self {
         case .game(let gameId):
-            return gameId  // 可从游戏数据获取名称
+            return gameId  // Name can be obtained from game data
         case .resource(let type):
             return type.localizedName
         }
     }
 }
 
-/// 资源类型
+/// Resource type
 public enum ResourceType: String, CaseIterable {
     case mod, datapack, shader, resourcepack, modpack
 
@@ -32,7 +32,7 @@ public enum ResourceType: String, CaseIterable {
         "resource.content.type.\(rawValue)".localized()
     }
 
-    /// 资源类型的 SF Symbol 图标名称
+    /// SF Symbol icon name for the resource type
     public var systemImage: String {
         switch self {
         case .mod:

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// AI 聊天附件预览区域视图
+/// AI chat attachment preview area view
 struct AIChatAttachmentPreviewView: View {
     let attachments: [MessageAttachmentType]
     let onRemove: (Int) -> Void

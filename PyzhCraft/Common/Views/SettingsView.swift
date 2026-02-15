@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 设置标签页枚举
+/// Set tab enumeration
 enum SettingsTab: Int {
     case general = 0
     case game = 1
@@ -8,8 +8,8 @@ enum SettingsTab: Int {
     case ai = 3
 }
 
-/// 通用设置视图
-/// 应用设置
+/// Common settings view
+/// Apply settings
 public struct SettingsView: View {
     @StateObject private var general = GeneralSettingsManager.shared
     @StateObject private var selectedGameManager = SelectedGameManager.shared
@@ -47,14 +47,14 @@ public struct SettingsView: View {
         }
         .padding()
         .onChange(of: selectedGameManager.shouldOpenAdvancedSettings) { _, shouldOpen in
-            // 当标志被设置时（窗口已打开的情况），切换到高级设置标签
+            // When the flag is set (when the window is open), switch to the Advanced Settings tab
             if shouldOpen {
                 checkAndOpenAdvancedSettings()
             }
         }
         .onAppear {
-            // 当设置窗口首次打开时，如果标志已经被设置，则切换到高级设置标签
-            // 这种情况发生在窗口未打开时点击设置按钮
+            // When the settings window first opens, switch to the advanced settings tab if the flag is already set
+            // This happens when the settings button is clicked when the window is not open
             checkAndOpenAdvancedSettings()
         }
     }
@@ -74,28 +74,28 @@ struct CustomLabeledContentStyle: LabeledContentStyle {
         self.alignment = alignment
     }
 
-    // 保留系统布局
+    // Preserve system layout
     func makeBody(configuration: Configuration) -> some View {
         HStack(alignment: alignment) {
-            // 使用系统的标签布局
+            // Use system label layout
             HStack(spacing: 0) {
                 configuration.label
                 Text(":")
             }
-            .layoutPriority(1)  // 保持标签优先级
+            .layoutPriority(1)  // Keep label priority
             .multilineTextAlignment(.trailing)
-            .frame(minWidth: 320, alignment: .trailing)  // 容器右对齐
-            // 右侧内容
+            .frame(minWidth: 320, alignment: .trailing)  // Container aligned right
+            // Right content
             configuration.content
                 .foregroundColor(.secondary)
-            .multilineTextAlignment(.leading)  // 文字左对齐
-                .frame(maxWidth: .infinity, alignment: .leading)  // 容器左对齐
+            .multilineTextAlignment(.leading)  // Text left aligned
+                .frame(maxWidth: .infinity, alignment: .leading)  // Container left aligned
         }
         .padding(.vertical, 4)
     }
 }
 
-// 使用扩展避免破坏布局
+// Use extensions to avoid breaking layout
 extension LabeledContentStyle where Self == CustomLabeledContentStyle {
     static var custom: Self { .init() }
 

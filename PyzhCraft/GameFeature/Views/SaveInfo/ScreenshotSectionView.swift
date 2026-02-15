@@ -5,7 +5,7 @@ private enum ScreenshotSectionConstants {
     static let thumbnailSize: CGFloat = 60
 }
 
-// MARK: - 截图信息区域视图
+// MARK: - Screenshot information area view
 struct ScreenshotSectionView: View {
     // MARK: - Properties
     let screenshots: [ScreenshotInfo]

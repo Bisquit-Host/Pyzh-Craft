@@ -1,16 +1,16 @@
 import Foundation
 
-/// Modrinth 索引构建器
-/// 负责构建 modrinth.index.json 文件
+/// Modrinth index builder
+/// Responsible for building the modrinth.index.json file
 enum ModrinthIndexBuilder {
-    /// 构建索引 JSON 字符串
+    /// Build index JSON string
     /// - Parameters:
-    ///   - gameInfo: 游戏信息
-    ///   - modPackName: 整合包名称
-    ///   - modPackVersion: 整合包版本
-    ///   - summary: 整合包描述
-    ///   - files: 索引文件列表
-    /// - Returns: JSON 字符串
+    ///   - gameInfo: game information
+    ///   - modPackName: integration package name
+    ///   - modPackVersion: integration package version
+    ///   - summary: integration package description
+    ///   - files: index file list
+    /// - Returns: JSON string
     static func build(
         gameInfo: GameVersionInfo,
         modPackName: String,
@@ -21,7 +21,7 @@ enum ModrinthIndexBuilder {
         let gameVersion = gameInfo.gameVersion
         let loaderType = gameInfo.modLoader.lowercased()
 
-        // 获取加载器版本
+        // Get loader version
         let loaderVersion = await LoaderVersionResolver.resolve(
             loaderType: loaderType,
             gameVersion: gameVersion,
@@ -30,14 +30,14 @@ enum ModrinthIndexBuilder {
 
         Logger.shared.info("导出整合包 - 加载器类型: \(loaderType), 版本: \(loaderVersion ?? "未找到")")
 
-        // 构建依赖字典
+        // Build dependency dictionary
         let dependencies = buildDependencies(
             gameVersion: gameVersion,
             loaderType: loaderType,
             loaderVersion: loaderVersion
         )
 
-        // 构建 JSON 字典
+        // Build JSON dictionary
         var jsonDict: [String: Any] = [
             "formatVersion": 1,
             "game": "minecraft",
@@ -49,7 +49,7 @@ enum ModrinthIndexBuilder {
             jsonDict["summary"] = summary
         }
 
-        // 编码 files，排除非标准字段
+        // Encode files, exclude non-standard fields
         var filesArray: [[String: Any]] = []
         for file in files {
             var fileDict: [String: Any] = [
@@ -62,7 +62,7 @@ enum ModrinthIndexBuilder {
                 "fileSize": file.fileSize,
             ]
 
-            // 添加 env 字段（如果存在）
+            // Add env field if present
             if let env = file.env {
                 var envDict: [String: String] = [:]
                 if let client = env.client {
@@ -80,7 +80,7 @@ enum ModrinthIndexBuilder {
         }
         jsonDict["files"] = filesArray
 
-        // 编码 dependencies
+        // coding dependencies
         var depsDict: [String: Any] = [:]
         if let minecraft = dependencies.minecraft {
             depsDict["minecraft"] = minecraft
@@ -99,7 +99,7 @@ enum ModrinthIndexBuilder {
         }
         jsonDict["dependencies"] = depsDict
 
-        // 转换为 JSON 字符串
+        // Convert to JSON string
         let jsonData = try JSONSerialization.data(
             withJSONObject: jsonDict,
             options: [.prettyPrinted, .sortedKeys]
@@ -107,7 +107,7 @@ enum ModrinthIndexBuilder {
         return String(data: jsonData, encoding: .utf8) ?? ""
     }
 
-    /// 构建依赖字典
+    /// Build dependency dictionary
     private static func buildDependencies(
         gameVersion: String,
         loaderType: String,
@@ -183,29 +183,29 @@ enum ModrinthIndexBuilder {
     }
 }
 
-/// 加载器版本解析器
+/// Loader version parser
 enum LoaderVersionResolver {
-    /// 解析加载器版本
-    /// 优先从 modVersion 字段获取，如果不存在则尝试从已安装的加载器 mod 中推断
+    /// Parse loader version
+    /// Preferably get from modVersion field, if not present try to infer from installed loader mod
     static func resolve(
         loaderType: String,
         gameVersion: String,
         gameInfo: GameVersionInfo
     ) async -> String? {
-        // 1. 尝试从 modVersion 字段获取
+        // 1. Try to get from modVersion field
         if !gameInfo.modVersion.isEmpty {
             if isValidVersionFormat(gameInfo.modVersion) {
                 return gameInfo.modVersion
             }
         }
 
-        // 2. 尝试从已安装的加载器 mod 中推断版本
+        // 2. Try to infer version from installed loader mod
         let modsDir = AppPaths.modsDirectory(gameName: gameInfo.gameName)
         guard let modFiles = try? ResourceScanner.scanResourceDirectory(modsDir) else {
             return nil
         }
 
-        // 根据加载器类型查找对应的加载器 mod
+        // Find the corresponding loader mod based on the loader type
         let loaderModPatterns: [String]
         switch loaderType {
         case "fabric":
@@ -220,17 +220,17 @@ enum LoaderVersionResolver {
             return nil
         }
 
-        // 查找加载器 mod 文件
+        // Find loader mod files
         for modFile in modFiles where loaderModPatterns.contains(where: { modFile.lastPathComponent.lowercased().contains($0) }) {
             let fileName = modFile.lastPathComponent.lowercased()
-            // 尝试从文件名中提取版本号
+            // Try to extract the version number from the file name
             if let version = extractVersionFromFileName(fileName) {
                 return version
             }
 
-            // 如果文件名中没有版本，尝试从 Modrinth 获取
+            // If there is no version in the filename, try getting it from Modrinth
             if let modrinthInfo = await ModrinthResourceIdentifier.getModrinthInfo(for: modFile) {
-                // 缓存包含 optional 的 server_side 和 client_side 信息
+                // The cache contains optional server_side and client_side information
                 cacheModrinthSideInfo(modrinthInfo: modrinthInfo, modFile: modFile)
 
                 let versionName = modrinthInfo.version.name
@@ -243,7 +243,7 @@ enum LoaderVersionResolver {
             }
         }
 
-        // 3. 对于 Fabric，尝试从启动参数中提取版本
+        // 3. For Fabric, try to extract the version from the startup parameters
         if loaderType == "fabric" {
             for arg in gameInfo.launchCommand where arg.contains("fabric-loader") {
                 if let version = extractVersionFromString(arg) {
@@ -255,13 +255,13 @@ enum LoaderVersionResolver {
         return nil
     }
 
-    /// 验证版本号格式是否有效
+    /// Verify that the version number format is valid
     private static func isValidVersionFormat(_ version: String) -> Bool {
         let pattern = #"^\d+\.\d+(\.\d+)?(-.*)?$"#
         return version.range(of: pattern, options: .regularExpression) != nil
     }
 
-    /// 从文件名中提取版本号
+    /// Extract version number from file name
     private static func extractVersionFromFileName(_ fileName: String) -> String? {
         let patterns = [
             #"(\d+\.\d+\.\d+)"#,      // 1.2.3
@@ -280,39 +280,39 @@ enum LoaderVersionResolver {
         return nil
     }
 
-    /// 从字符串中提取版本号
+    /// Extract version number from string
     private static func extractVersionFromString(_ string: String) -> String? {
         extractVersionFromFileName(string.lowercased())
     }
 
-    /// 缓存 Modrinth 项目的 server_side 和 client_side 信息
-    /// 仅缓存包含 "optional" 值的数据
+    /// Caching server_side and client_side information for Modrinth projects
+    /// Only cache data containing "optional" values
     private static func cacheModrinthSideInfo(
         modrinthInfo: ModrinthResourceIdentifier.ModrinthModInfo,
         modFile: URL
     ) {
         let projectDetail = modrinthInfo.projectDetail
 
-        // 检查是否需要缓存（至少有一个是 optional）
+        // Check if caching is required (at least one is optional)
         let shouldCache = projectDetail.clientSide == "optional" || projectDetail.serverSide == "optional"
 
         guard shouldCache else {
             return
         }
 
-        // 使用文件 hash 作为缓存键
+        // Use file hash as cache key
         guard let hash = try? SHA1Calculator.sha1(ofFileAt: modFile) else {
             return
         }
 
-        // 构建缓存数据结构
+        // Build cache data structure
         let sideInfo = ModrinthSideInfo(
             clientSide: projectDetail.clientSide,
             serverSide: projectDetail.serverSide,
             projectId: projectDetail.id
         )
 
-        // 缓存到 AppCacheManager
+        // Cache to AppCacheManager
         let cacheKey = "modrinth_side_\(hash)"
         AppCacheManager.shared.setSilently(
             namespace: "modrinth_side_info",
@@ -322,7 +322,7 @@ enum LoaderVersionResolver {
     }
 }
 
-/// Modrinth 项目的 server_side 和 client_side 信息缓存结构
+/// Modrinth project's server_side and client_side information cache structures
 private struct ModrinthSideInfo: Codable {
     let clientSide: String
     let serverSide: String

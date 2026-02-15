@@ -2,11 +2,11 @@ import SwiftUI
 
 // MARK: - Constants
 private enum CategoryConstants {
-    static let cacheTimeout: TimeInterval = 600 // 增加到10分钟
+    static let cacheTimeout: TimeInterval = 600 // Increase to 10 minutes
 }
 
 // MARK: - Global Cache Manager
-/// 全局分类数据缓存管理器，按项目类型共享数据
+/// Global categorical data cache manager to share data by project type
 @MainActor
 final class CategoryDataCacheManager {
     static let shared = CategoryDataCacheManager()
@@ -65,7 +65,7 @@ final class CategoryContentViewModel: ObservableObject {
             await fetchData()
         }
     }
-    /// 强制刷新数据，忽略缓存
+    /// Force refresh of data, ignore cache
     func forceRefresh() async {
         loadTask?.cancel()
         lastFetchTime = nil
@@ -99,15 +99,15 @@ final class CategoryContentViewModel: ObservableObject {
             async let categoriesTask = ModrinthService.fetchCategories()
             async let versionsTask = ModrinthService.fetchGameVersions()
 
-            // 光影（shader）的加载器从 API 获取，其他项目类型使用静态列表
+            // The loader of light and shadow (shader) is obtained from the API, other project types use a static list
             let loadersTask: Task<[Loader], Never>
             if project == ProjectType.shader {
-                // 光影：从 API 获取加载器
+                // Light and Shadow: Get loader from API
                 loadersTask = Task {
                     await ModrinthService.fetchLoaders()
                 }
             } else {
-                // 其他项目类型：使用静态加载器列表
+                // Other project types: Using a static loader list
                 loadersTask = Task {
                     Self.getStaticLoaders()
                 }
@@ -117,7 +117,7 @@ final class CategoryContentViewModel: ObservableObject {
                 categoriesTask, versionsTask, loadersTask.value
             )
 
-            // 验证返回的数据
+            // Verify returned data
             guard !categoriesResult.isEmpty else {
                 throw GlobalError.resource(
                     chineseMessage: "无法获取分类数据",
@@ -146,8 +146,8 @@ final class CategoryContentViewModel: ObservableObject {
         isLoading = false
     }
 
-    /// 获取静态加载器列表（不调用 API）
-    /// - Returns: 四个主要加载器：fabric、forge、quilt、neoforge
+    /// Get a list of static loaders (without calling the API)
+    /// - Returns: four main loaders: fabric, forge, quilt, neoforge
     private static func getStaticLoaders() -> [Loader] {
         return [
             Loader(

@@ -1,29 +1,29 @@
 import Foundation
 
-/// 导入实例信息
-/// 包含从其他启动器解析出的所有必要信息
+/// Import instance information
+/// Contains all necessary information parsed from other launchers
 struct ImportInstanceInfo {
-    /// 游戏名称
+    /// Game name
     let gameName: String
 
-    /// 游戏版本
+    /// game version
     let gameVersion: String
 
-    /// Mod加载器类型（vanilla, fabric, forge, neoforge, quilt）
+    /// Mod loader types (vanilla, fabric, forge, neoforge, quilt)
     let modLoader: String
 
-    /// Mod加载器版本
+    /// Mod loader version
     let modLoaderVersion: String
 
-    /// 游戏图标路径（如果有）
+    /// Game icon path (if any)
     let gameIconPath: URL?
 
-    /// 图标下载 URL（如果需要从网络下载）
+    /// Icon download URL (if you need to download from the Internet)
     let iconDownloadUrl: String?
 
-    /// 源游戏目录路径（.minecraft 文件夹所在位置）
+    /// Source game directory path (where the .minecraft folder is located)
     let sourceGameDirectory: URL
 
-    /// 启动器类型
+    /// Launcher type
     let launcherType: ImportLauncherType
 }

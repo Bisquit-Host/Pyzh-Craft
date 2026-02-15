@@ -1,7 +1,7 @@
 import Foundation
 
-/// 整合包依赖安装服务
-/// 负责安装整合包中定义的所有必需依赖
+/// The integration package depends on the installation service
+/// Responsible for installing all required dependencies defined in the integration package
 enum ModPackDependencyInstaller {
 
     // MARK: - Download Type
@@ -11,23 +11,23 @@ enum ModPackDependencyInstaller {
 
     // MARK: - Main Installation Method
 
-    /// 安装整合包版本的所有必需依赖
+    /// Install all required dependencies for the modpack version
     /// - Parameters:
-    ///   - indexInfo: 解析出的整合包索引信息
-    ///   - gameInfo: 游戏信息
-    ///   - extractedPath: 解压后的路径
-    ///   - onProgressUpdate: 进度更新回调
-    /// - Returns: 是否安装成功
+    ///   - indexInfo: parsed integration package index information
+    ///   - gameInfo: game information
+    ///   - extractedPath: the path after decompression
+    ///   - onProgressUpdate: progress update callback
+    /// - Returns: Whether the installation was successful
     static func installVersionDependencies(
         indexInfo: ModrinthIndexInfo,
         gameInfo: GameVersionInfo,
         extractedPath: URL? = nil,
         onProgressUpdate: ((String, Int, Int, DownloadType) -> Void)? = nil
     ) async -> Bool {
-        // 获取资源目录
+        // Get resource directory
         let resourceDir = AppPaths.profileDirectory(gameName: gameInfo.gameName)
 
-        // 并发执行文件和依赖的安装
+        // Concurrently execute the installation of files and dependencies
         async let filesResult = installModPackFiles(
             files: indexInfo.files,
             resourceDir: resourceDir,
@@ -42,10 +42,10 @@ enum ModPackDependencyInstaller {
             onProgressUpdate: onProgressUpdate
         )
 
-        // 等待两个任务完成
+        // Wait for both tasks to complete
         let (filesSuccess, dependenciesSuccess) = await (filesResult, dependenciesResult)
 
-        // 检查结果
+        // Check results
         if !filesSuccess {
             Logger.shared.error("整合包文件安装失败")
             return false
@@ -61,42 +61,42 @@ enum ModPackDependencyInstaller {
 
     // MARK: - File Installation
 
-    /// 安装整合包文件
+    /// Install integration package files
     /// - Parameters:
-    ///   - files: 文件列表
-    ///   - resourceDir: 资源目录
-    ///   - gameInfo: 游戏信息
-    ///   - onProgressUpdate: 进度更新回调
-    /// - Returns: 是否安装成功
+    ///   - files: file list
+    ///   - resourceDir: resource directory
+    ///   - gameInfo: game information
+    ///   - onProgressUpdate: progress update callback
+    /// - Returns: Whether the installation was successful
     static func installModPackFiles(
         files: [ModrinthIndexFile],
         resourceDir: URL,
         gameInfo: GameVersionInfo,
         onProgressUpdate: ((String, Int, Int, DownloadType) -> Void)?
     ) async -> Bool {
-        // 过滤出需要下载的文件
+        // Filter out the files that need to be downloaded
         let filesToDownload = filterDownloadableFiles(files)
 
-        // 通知开始下载
+        // Notification to start downloading
         onProgressUpdate?("modpack.progress.files_download_started".localized(), 0, filesToDownload.count, .files)
 
-        // 创建信号量控制并发数量
+        // Create a semaphore to control the number of concurrencies
         let semaphore = AsyncSemaphore(value: GeneralSettingsManager.shared.concurrentDownloads)
 
-        // 使用计数器跟踪完成的文件数量
+        // Use a counter to track the number of files completed
         let completedCount = ModPackCounter()
 
-        // 使用 TaskGroup 并发下载文件
+        // Use TaskGroup to download files concurrently
         let results = await withTaskGroup(of: (Int, Bool).self) { group in
             for (index, file) in filesToDownload.enumerated() {
                 group.addTask {
                     await semaphore.wait()
                     defer { Task { await semaphore.signal() } }
 
-                    // 优化：下载文件（内部已使用 autoreleasepool 优化）
+                    // Optimization: Download files (autoreleasepool has been used internally to optimize)
                     let success = await downloadSingleFile(file: file, resourceDir: resourceDir, gameInfo: gameInfo)
 
-                    // 更新进度
+                    // update progress
                     if success {
                         let currentCount = completedCount.increment()
                         onProgressUpdate?(file.path, currentCount, filesToDownload.count, .files)
@@ -106,15 +106,15 @@ enum ModPackDependencyInstaller {
                 }
             }
 
-            // 收集结果
+            // Collect results
             var results: [(Int, Bool)] = []
             for await result in group {
                 results.append(result)
             }
-            return results.sorted { $0.0 < $1.0 } // 按索引排序
+            return results.sorted { $0.0 < $1.0 } // Sort by index
         }
 
-        // 检查所有下载是否成功
+        // Check if all downloads are successful
         let successCount = results.filter { $0.1 }.count
         let failedCount = results.count - successCount
 
@@ -123,18 +123,18 @@ enum ModPackDependencyInstaller {
             return false
         }
 
-        // 通知下载完成
+        // Notification download completed
         onProgressUpdate?("modpack.progress.files_download_completed".localized(), filesToDownload.count, filesToDownload.count, .files)
 
         return true
     }
 
-    /// 过滤可下载的文件
-    /// - Parameter files: 文件列表
-    /// - Returns: 过滤后的文件列表
+    /// Filter downloadable files
+    /// - Parameter files: file list
+    /// - Returns: filtered file list
     private static func filterDownloadableFiles(_ files: [ModrinthIndexFile]) -> [ModrinthIndexFile] {
         return files.filter { file in
-            // 只检查 client 字段，忽略 server
+            // Only check the client field, ignore the server
             if let env = file.env, let client = env.client, client.lowercased() == "unsupported" {
                 return false
             }
@@ -142,18 +142,18 @@ enum ModPackDependencyInstaller {
         }
     }
 
-    /// 下载单个文件
+    /// Download a single file
     /// - Parameters:
-    ///   - file: 文件信息
-    ///   - resourceDir: 资源目录
-    ///   - gameInfo: 游戏信息（可选，用于兼容性检查）
-    /// - Returns: 是否下载成功
+    ///   - file: file information
+    ///   - resourceDir: resource directory
+    ///   - gameInfo: game information (optional, used for compatibility check)
+    /// - Returns: Whether the download is successful
     private static func downloadSingleFile(file: ModrinthIndexFile, resourceDir: URL, gameInfo: GameVersionInfo? = nil) async -> Bool {
-        // 检查是否是 CurseForge 文件（需要延迟获取详情）
+        // Check if it is a CurseForge file (needs to delay getting details)
         if file.source == .curseforge,
            let projectId = file.curseForgeProjectId,
            let fileId = file.curseForgeFileId {
-            // CurseForge 文件：在下载时获取真实的文件详情
+            // CurseForge Files: Get real file details when downloading
             return await downloadCurseForgeFile(
                 projectId: projectId,
                 fileId: fileId,
@@ -161,27 +161,27 @@ enum ModPackDependencyInstaller {
                 gameInfo: gameInfo
             )
         } else {
-            // Modrinth 文件：使用原有逻辑
+            // Modrinth file: use original logic
             return await downloadModrinthFile(file: file, resourceDir: resourceDir)
         }
     }
 
-    /// 下载 CurseForge 文件（并发获取文件详情）
+    /// Download CurseForge files (concurrently obtain file details)
     /// - Parameters:
-    ///   - projectId: 项目ID
-    ///   - fileId: 文件ID
-    ///   - resourceDir: 资源目录
-    ///   - gameInfo: 游戏信息（可选，用于兼容性检查）
-    /// - Returns: 是否下载成功
+    ///   - projectId: project ID
+    ///   - fileId: file ID
+    ///   - resourceDir: resource directory
+    ///   - gameInfo: game information (optional, used for compatibility check)
+    /// - Returns: Whether the download is successful
     private static func downloadCurseForgeFile(projectId: Int, fileId: Int, resourceDir: URL, gameInfo: GameVersionInfo? = nil) async -> Bool {
-        // 并发获取文件详情与模组详情，减少重复请求
+        // Concurrently obtain file details and module details to reduce repeated requests
         async let fileDetailTask = CurseForgeService.fetchFileDetail(projectId: projectId, fileId: fileId)
         async let modDetailTask: CurseForgeModDetail? = try? await CurseForgeService.fetchModDetailThrowing(modId: projectId)
 
         let fileDetail = await fileDetailTask
         let modDetail = await modDetailTask
 
-        // 首选指定文件（若详情存在）
+        // Preferred specified file (if details exist)
         if let fileDetail = fileDetail {
             if await downloadCurseForgeFileWithDetail(
                 fileDetail: fileDetail,
@@ -193,7 +193,7 @@ enum ModPackDependencyInstaller {
             }
         }
 
-        // 主策略失败或下载失败，回退按版本/加载器匹配
+        // Main policy failed or download failed, fallback matches by version/loader
         return await downloadCurseForgeFileWithFallback(
             projectId: projectId,
             resourceDir: resourceDir,
@@ -202,25 +202,25 @@ enum ModPackDependencyInstaller {
         )
     }
 
-    /// 使用备用策略下载 CurseForge 文件（精确匹配游戏版本和加载器）
+    /// Use alternate strategy to download CurseForge files (exactly match game version and loader)
     /// - Parameters:
-    ///   - projectId: 项目ID
-    ///   - resourceDir: 资源目录
-    ///   - gameInfo: 游戏信息（可选，用于兼容性检查）
-    /// - Returns: 是否下载成功
+    ///   - projectId: project ID
+    ///   - resourceDir: resource directory
+    ///   - gameInfo: game information (optional, used for compatibility check)
+    /// - Returns: Whether the download is successful
     private static func downloadCurseForgeFileWithFallback(projectId: Int, resourceDir: URL, gameInfo: GameVersionInfo?, modDetail: CurseForgeModDetail? = nil) async -> Bool {
-        // 必须有游戏信息才能进行精确匹配
+        // Game information is required for exact matching
         guard let gameInfo = gameInfo else {
             Logger.shared.error("缺少游戏信息，无法进行文件过滤: \(projectId)")
             return false
         }
 
-        // 精确匹配游戏版本和加载器
+        // Exactly match game version and loader
         let modLoaderTypeValue = CurseForgeModLoaderType.from(gameInfo.modLoader)?.rawValue
         let filteredFiles: [CurseForgeModFileDetail]
 
         if let modDetail = modDetail {
-            // 复用已获取的模组详情，避免重复网络请求
+            // Reuse the obtained module details to avoid repeated network requests
             filteredFiles = filterFiles(
                 from: modDetail,
                 projectId: projectId,
@@ -228,7 +228,7 @@ enum ModPackDependencyInstaller {
                 modLoaderType: modLoaderTypeValue
             )
         } else {
-            // 仍需网络请求时退回原有逻辑
+            // Return to the original logic when network requests are still needed
             guard let files = await CurseForgeService.fetchProjectFiles(
                 projectId: projectId,
                 gameVersion: gameInfo.gameVersion,
@@ -258,12 +258,12 @@ enum ModPackDependencyInstaller {
         return false
     }
 
-    /// 使用文件详情下载 CurseForge 文件
+    /// Download CurseForge files using file details
     /// - Parameters:
-    ///   - fileDetail: 文件详情
-    ///   - projectId: 项目ID
-    ///   - resourceDir: 资源目录
-    /// - Returns: 是否下载成功
+    ///   - fileDetail: file details
+    ///   - projectId: project ID
+    ///   - resourceDir: resource directory
+    /// - Returns: Whether the download is successful
     private static func downloadCurseForgeFileWithDetail(
         fileDetail: CurseForgeModFileDetail,
         projectId: Int,
@@ -271,16 +271,16 @@ enum ModPackDependencyInstaller {
         modDetail: CurseForgeModDetail? = nil
     ) async -> Bool {
         do {
-            // 确定下载URL
+            // Confirm download URL
             let downloadUrl: String
             if let directUrl = fileDetail.downloadUrl, !directUrl.isEmpty {
                 downloadUrl = directUrl
             } else {
-                // 使用配置的备用下载地址
+                // Use configured alternative download address
                 downloadUrl = URLConfig.API.CurseForge.fallbackDownloadUrl(fileId: fileDetail.id, fileName: fileDetail.fileName).absoluteString
             }
 
-            // 根据文件详情确定子目录（优先使用已获取的模组详情，避免重复请求）
+            // Determine subdirectories based on file details (give priority to the obtained module details to avoid repeated requests)
             let effectiveModDetail: CurseForgeModDetail
             if let modDetail = modDetail {
                 effectiveModDetail = modDetail
@@ -291,22 +291,22 @@ enum ModPackDependencyInstaller {
             let subDirectory = effectiveModDetail.directoryName
             let destinationPath = resourceDir.appendingPathComponent(subDirectory).appendingPathComponent(fileDetail.fileName)
 
-            // 确保目录存在
+            // Make sure the directory exists
             try FileManager.default.createDirectory(
                 at: destinationPath.deletingLastPathComponent(),
                 withIntermediateDirectories: true
             )
 
-            // 下载文件
+            // Download file
             let downloadedFile = try await DownloadManager.downloadFile(
                 urlString: downloadUrl,
                 destinationURL: destinationPath,
                 expectedSha1: fileDetail.hash?.value
             )
 
-            // 写入 Modrinth 风格缓存（使用已有的 CF→Modrinth 转换接口）
+            // Write to Modrinth style cache (using existing CF→Modrinth conversion interface)
             if let hash = ModScanner.sha1Hash(of: downloadedFile) {
-                // 将 CurseForge 项目详情转换为 ModrinthProjectDetail
+                // Convert CurseForge project details to ModrinthProjectDetail
                 if let cfAsModrinth = CurseForgeToModrinthAdapter.convert(effectiveModDetail) {
                     var detailWithFile = cfAsModrinth
                     detailWithFile.fileName = fileDetail.fileName
@@ -322,7 +322,7 @@ enum ModPackDependencyInstaller {
         }
     }
 
-    /// 基于已获取的模组详情筛选文件，避免额外网络请求
+    /// Filter files based on acquired module details to avoid additional network requests
     private static func filterFiles(
         from modDetail: CurseForgeModDetail,
         projectId: Int,
@@ -369,12 +369,12 @@ enum ModPackDependencyInstaller {
             }
         }
 
-        // gameVersion 过滤
+        // gameVersion filter
         if let gameVersion = gameVersion {
             files = files.filter { $0.gameVersions.contains(gameVersion) }
         }
 
-        // modLoaderType 过滤（依赖 latestFilesIndexes 信息）
+        // modLoaderType filtering (depends on latestFilesIndexes information)
         if let modLoaderType = modLoaderType,
            let latestFilesIndexes = modDetail.latestFilesIndexes {
             let matchingIds = Set(
@@ -388,11 +388,11 @@ enum ModPackDependencyInstaller {
         return files
     }
 
-    /// 下载 Modrinth 文件
+    /// Download Modrinth files
     /// - Parameters:
-    ///   - file: 文件信息
-    ///   - resourceDir: 资源目录
-    /// - Returns: 是否下载成功
+    ///   - file: file information
+    ///   - resourceDir: resource directory
+    /// - Returns: Whether the download is successful
     private static func downloadModrinthFile(file: ModrinthIndexFile, resourceDir: URL) async -> Bool {
         guard let urlString = file.downloads.first, !urlString.isEmpty else {
             Logger.shared.error("文件无可用下载链接: \(file.path)")
@@ -400,31 +400,31 @@ enum ModPackDependencyInstaller {
         }
 
         do {
-            // 优化：预先计算目标路径，避免重复创建
-            // 使用 autoreleasepool 包装同步部分，及时释放临时对象
+            // Optimization: Pre-calculate the target path to avoid repeated creation
+            // Use autoreleasepool to wrap the synchronization part and release temporary objects in time
             let destinationPath = autoreleasepool {
                 resourceDir.appendingPathComponent(file.path)
             }
 
-            // DownloadManager.downloadFile 已经包含了 autoreleasepool
+            // DownloadManager.downloadFile already contains autoreleasepool
             let downloadedFile = try await DownloadManager.downloadFile(
                 urlString: urlString,
                 destinationURL: destinationPath,
                 expectedSha1: file.hashes["sha1"]
             )
 
-            // 保存到缓存
+            // Save to cache
             if let hash = ModScanner.sha1Hash(of: downloadedFile) {
-                // 使用fetchModrinthDetail获取真实的项目详情
+                // Use fetchModrinthDetail to get real project details
                 await withCheckedContinuation { continuation in
                     ModrinthService.fetchModrinthDetail(by: hash) { projectDetail in
                         if let detail = projectDetail {
-                            // 添加文件信息到detail
+                            // Add file information to detail
                             var detailWithFile = detail
                             detailWithFile.fileName = (file.path as NSString).lastPathComponent
                             detailWithFile.type = "mod"
 
-                            // 存入缓存
+                            // cache
                             ModScanner.shared.saveToCache(hash: hash, detail: detailWithFile)
                         }
                         continuation.resume()
@@ -441,50 +441,50 @@ enum ModPackDependencyInstaller {
 
     // MARK: - Dependency Installation
 
-    /// 安装整合包依赖
+    /// Install integration package dependencies
     /// - Parameters:
-    ///   - dependencies: 依赖列表
-    ///   - gameInfo: 游戏信息
-    ///   - resourceDir: 资源目录
-    ///   - onProgressUpdate: 进度更新回调
-    /// - Returns: 是否安装成功
+    ///   - dependencies: dependency list
+    ///   - gameInfo: game information
+    ///   - resourceDir: resource directory
+    ///   - onProgressUpdate: progress update callback
+    /// - Returns: Whether the installation was successful
     static func installModPackDependencies(
         dependencies: [ModrinthIndexProjectDependency],
         gameInfo: GameVersionInfo,
         resourceDir: URL,
         onProgressUpdate: ((String, Int, Int, DownloadType) -> Void)?
     ) async -> Bool {
-        // 过滤出必需的依赖
+        // Filter out required dependencies
         let requiredDependencies = dependencies.filter { $0.dependencyType == "required" }
 
-        // 通知开始下载
+        // Notification to start downloading
         onProgressUpdate?("modpack.progress.dependencies_installation_started".localized(), 0, requiredDependencies.count, .dependencies)
 
-        // 创建信号量控制并发数量
+        // Create a semaphore to control the number of concurrencies
         let semaphore = AsyncSemaphore(value: GeneralSettingsManager.shared.concurrentDownloads)
 
-        // 使用计数器跟踪完成的依赖数量
+        // Use counters to track the number of completed dependencies
         let completedCount = ModPackCounter()
 
-        // 使用 TaskGroup 并发安装依赖
+        // Use TaskGroup to install dependencies concurrently
         let results = await withTaskGroup(of: (Int, Bool).self) { group in
             for (index, dep) in requiredDependencies.enumerated() {
                 group.addTask {
                     await semaphore.wait()
                     defer { Task { await semaphore.signal() } }
 
-                    // 检查是否需要跳过
+                    // Check if you need to skip
                     if await shouldSkipDependency(dep: dep, gameInfo: gameInfo, resourceDir: resourceDir) {
-                        // 跳过也更新进度
+                        // Skip also update progress
                         let currentCount = completedCount.increment()
                         onProgressUpdate?("modpack.progress.dependency_skipped".localized(), currentCount, requiredDependencies.count, .dependencies)
-                        return (index, true) // 跳过视为成功
+                        return (index, true) // Skip as success
                     }
 
-                    // 安装依赖
+                    // Install dependencies
                     let success = await installDependency(dep: dep, gameInfo: gameInfo, resourceDir: resourceDir)
 
-                    // 更新进度
+                    // update progress
                     if success {
                         let currentCount = completedCount.increment()
                         let dependencyName = dep.projectId ?? "未知依赖"
@@ -495,15 +495,15 @@ enum ModPackDependencyInstaller {
                 }
             }
 
-            // 收集结果
+            // Collect results
             var results: [(Int, Bool)] = []
             for await result in group {
                 results.append(result)
             }
-            return results.sorted { $0.0 < $1.0 } // 按索引排序
+            return results.sorted { $0.0 < $1.0 } // Sort by index
         }
 
-        // 检查所有安装是否成功
+        // Check if all installations were successful
         let successCount = results.filter { $0.1 }.count
         let failedCount = results.count - successCount
 
@@ -512,33 +512,33 @@ enum ModPackDependencyInstaller {
             return false
         }
 
-        // 通知安装完成
+        // Notification that installation is complete
         onProgressUpdate?("modpack.progress.dependencies_installation_completed".localized(), requiredDependencies.count, requiredDependencies.count, .dependencies)
 
         return true
     }
 
-    /// 检查是否需要跳过依赖
+    /// Check if dependencies need to be skipped
     /// - Parameters:
-    ///   - dep: 依赖信息
-    ///   - gameInfo: 游戏信息
-    ///   - resourceDir: 资源目录
-    /// - Returns: 是否需要跳过
+    ///   - dep: dependency information
+    ///   - gameInfo: game information
+    ///   - resourceDir: resource directory
+    /// - Returns: Whether to skip
     private static func shouldSkipDependency(
         dep: ModrinthIndexProjectDependency,
         gameInfo: GameVersionInfo,
         resourceDir: URL
     ) async -> Bool {
-        // 跳过 Fabric API 在 Quilt 上的安装
+        // Skip Fabric API installation on Quilt
         if dep.projectId == "P7dR8mSH" && gameInfo.modLoader.lowercased() == "quilt" {
             return true
         }
 
-        // 检查是否已安装（使用hash）
+        // Check if it is installed (using hash)
         if let projectId = dep.projectId {
-            // 获取项目版本信息以得到文件hash
+            // Get project version information to get file hash
             if let versionId = dep.versionId {
-                // 如果有指定版本ID，直接获取该版本
+                // If there is a specified version ID, get the version directly
                 if let version = try? await ModrinthService.fetchProjectVersionThrowing(id: versionId),
                    let primaryFile = ModrinthService.filterPrimaryFiles(from: version.files) {
                     if ModScanner.shared.isModInstalledSync(hash: primaryFile.hashes.sha1, in: resourceDir) {
@@ -546,7 +546,7 @@ enum ModPackDependencyInstaller {
                     }
                 }
             } else {
-                // 否则获取兼容版本
+                // Otherwise get compatible version
                 let versions = try? await ModrinthService.fetchProjectVersionsFilter(
                     id: projectId,
                     selectedVersions: [gameInfo.gameVersion],
@@ -567,23 +567,23 @@ enum ModPackDependencyInstaller {
 
     // MARK: - Overrides Installation
 
-    /// 安装 overrides 文件夹内容
+    /// Install the overrides folder contents
     /// - Parameters:
-    ///   - extractedPath: 解压后的路径
-    ///   - resourceDir: 资源目录
-    ///   - onProgressUpdate: 进度更新回调
-    /// - Returns: 是否安装成功
+    ///   - extractedPath: the path after decompression
+    ///   - resourceDir: resource directory
+    ///   - onProgressUpdate: progress update callback
+    /// - Returns: Whether the installation was successful
     static func installOverrides(
         extractedPath: URL,
         resourceDir: URL,
         onProgressUpdate: ((String, Int, Int, DownloadType) -> Void)?
     ) async -> Bool {
-        // 优先检查 Modrinth 格式的 overrides
+        // Check Modrinth format overrides first
         var overridesPath = extractedPath.appendingPathComponent("overrides")
 
-        // 如果不存在，检查 CurseForge 格式的 overrides 文件夹
+        // If not present, check the CurseForge format overrides folder
         if !FileManager.default.fileExists(atPath: overridesPath.path) {
-            // CurseForge 格式可能使用不同的 overrides 路径名
+            // CurseForge formats may use different overrides pathnames
             let possiblePaths = [
                 "overrides",
                 "Override",
@@ -602,28 +602,28 @@ enum ModPackDependencyInstaller {
             if let found = foundPath {
                 overridesPath = found
             } else {
-                // 如果没有 overrides 文件夹，直接返回成功
+                // If there is no overrides folder, return success directly
                 return true
             }
         }
 
         do {
-            // 先计算文件总数，以便在开始时通知进度
+            // Count the total number of files first so you can be notified of progress when you start
             let allFiles = try InstanceFileCopier.getAllFiles(in: overridesPath)
             let totalFiles = allFiles.count
 
-            // 如果没有文件需要合并，直接返回成功（不显示进度条）
+            // If there are no files to be merged, success will be returned directly (no progress bar will be displayed)
             guard totalFiles > 0 else {
                 return true
             }
 
-            // 使用统一的合并文件夹方法
+            // Use a unified method of merging folders
             try await InstanceFileCopier.copyDirectory(
                 from: overridesPath,
                 to: resourceDir,
-                fileFilter: nil  // overrides 不需要过滤文件
+                fileFilter: nil  // overrides does not require filter files
             ) { fileName, completed, total in
-                // 将进度更新传递给统一的进度回调接口
+                // Pass progress updates to the unified progress callback interface
                 onProgressUpdate?(fileName, completed, total, .overrides)
             }
 
@@ -636,12 +636,12 @@ enum ModPackDependencyInstaller {
 
     // MARK: - Private Methods
 
-    /// 安装单个依赖
+    /// Install a single dependency
     /// - Parameters:
-    ///   - dep: 依赖信息
-    ///   - gameInfo: 游戏信息
-    ///   - resourceDir: 资源目录
-    /// - Returns: 是否安装成功
+    ///   - dep: dependency information
+    ///   - gameInfo: game information
+    ///   - resourceDir: resource directory
+    /// - Returns: Whether the installation was successful
     private static func installDependency(
         dep: ModrinthIndexProjectDependency,
         gameInfo: GameVersionInfo,
@@ -652,9 +652,9 @@ enum ModPackDependencyInstaller {
             return false
         }
 
-        // Modrinth 格式：使用原有逻辑
+        // Modrinth format: use original logic
         if let versionId = dep.versionId {
-            // 如果有指定版本ID，直接使用该版本
+            // If a version ID is specified, use that version directly
             return await addProjectFromVersion(
                 projectId: projectId,
                 versionId: versionId,
@@ -662,7 +662,7 @@ enum ModPackDependencyInstaller {
                 resourceDir: resourceDir
             )
         } else {
-            // 如果没有指定版本ID，获取最新兼容版本
+            // If no version ID is specified, get the latest compatible version
             return await addProjectFromLatestVersion(
                 projectId: projectId,
                 gameInfo: gameInfo,
@@ -671,13 +671,13 @@ enum ModPackDependencyInstaller {
         }
     }
 
-    /// 从指定版本安装项目
+    /// Install project from specified version
     /// - Parameters:
-    ///   - projectId: 项目ID
-    ///   - versionId: 版本ID
-    ///   - gameInfo: 游戏信息
-    ///   - resourceDir: 资源目录
-    /// - Returns: 是否安装成功
+    ///   - projectId: project ID
+    ///   - versionId: version ID
+    ///   - gameInfo: game information
+    ///   - resourceDir: resource directory
+    /// - Returns: Whether the installation was successful
     private static func addProjectFromVersion(
         projectId: String,
         versionId: String,
@@ -685,20 +685,20 @@ enum ModPackDependencyInstaller {
         resourceDir: URL
     ) async -> Bool {
         do {
-            // 获取版本详情
+            // Get version details
             let version = try await ModrinthService.fetchProjectVersionThrowing(id: versionId)
 
-            // 检查版本兼容性
+            // Check version compatibility
             guard version.gameVersions.contains(gameInfo.gameVersion) &&
                   version.loaders.contains(gameInfo.modLoader) else {
                 Logger.shared.error("版本不兼容: \(versionId)")
                 return false
             }
 
-            // 获取项目详情
+            // Get project details
             let projectDetail = try await ModrinthService.fetchProjectDetailsThrowing(id: projectId)
 
-            // 下载并安装
+            // Download and install
             return await downloadAndInstallVersion(
                 version: version,
                 projectDetail: projectDetail,
@@ -711,25 +711,25 @@ enum ModPackDependencyInstaller {
         }
     }
 
-    /// 从最新兼容版本安装项目
+    /// Install the project from the latest compatible version
     /// - Parameters:
-    ///   - projectId: 项目ID
-    ///   - gameInfo: 游戏信息
-    ///   - resourceDir: 资源目录
-    /// - Returns: 是否安装成功
+    ///   - projectId: project ID
+    ///   - gameInfo: game information
+    ///   - resourceDir: resource directory
+    /// - Returns: Whether the installation was successful
     private static func addProjectFromLatestVersion(
         projectId: String,
         gameInfo: GameVersionInfo,
         resourceDir: URL
     ) async -> Bool {
         do {
-            // 获取项目详情
+            // Get project details
             let projectDetail = try await ModrinthService.fetchProjectDetailsThrowing(id: projectId)
 
-            // 获取所有版本
+            // Get all versions
             let versions = try await ModrinthService.fetchProjectVersionsThrowing(id: projectId)
 
-            // 按发布日期排序，找到最新兼容版本
+            // Sort by release date to find the latest compatible version
             let sortedVersions = versions.sorted { $0.datePublished > $1.datePublished }
 
             let latestCompatibleVersion = sortedVersions.first { version in
@@ -742,7 +742,7 @@ enum ModPackDependencyInstaller {
                 return false
             }
 
-            // 下载并安装
+            // Download and install
             return await downloadAndInstallVersion(
                 version: latestVersion,
                 projectDetail: projectDetail,
@@ -755,13 +755,13 @@ enum ModPackDependencyInstaller {
         }
     }
 
-    /// 下载并安装版本
+    /// Download and install version
     /// - Parameters:
-    ///   - version: 版本信息
-    ///   - projectDetail: 项目详情
-    ///   - gameInfo: 游戏信息
-    ///   - resourceDir: 资源目录
-    /// - Returns: 是否安装成功
+    ///   - version: version information
+    ///   - projectDetail: project details
+    ///   - gameInfo: game information
+    ///   - resourceDir: resource directory
+    /// - Returns: Whether the installation was successful
     private static func downloadAndInstallVersion(
         version: ModrinthProjectDetailVersion,
         projectDetail: ModrinthProjectDetail,
@@ -769,13 +769,13 @@ enum ModPackDependencyInstaller {
         resourceDir: URL
     ) async -> Bool {
         do {
-            // 获取主文件
+            // Get main file
             guard let primaryFile = ModrinthService.filterPrimaryFiles(from: version.files) else {
                 Logger.shared.error("未找到主文件: \(version.id)")
                 return false
             }
 
-            // 下载文件
+            // Download file
             let downloadedFile = try await DownloadManager.downloadResource(
                 for: gameInfo,
                 urlString: primaryFile.url,
@@ -783,9 +783,9 @@ enum ModPackDependencyInstaller {
                 expectedSha1: primaryFile.hashes.sha1
             )
 
-            // 保存到缓存
+            // Save to cache
             if let hash = ModScanner.sha1Hash(of: downloadedFile) {
-                // 使用传入的项目详情创建缓存
+                // Create a cache using the project details passed in
                 var detailWithFile = projectDetail
                 detailWithFile.fileName = primaryFile.filename
                 detailWithFile.type = "mod"

@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// 主内容区域：持有 filterState、detailState，渲染 NavigationSplitView
-/// 当 filterState/detailState 变更时仅此视图及其子树重建，MainView 不重建
+/// Main content area: holds filterState, detailState, renders NavigationSplitView
+/// When filterState/detailState changes, only this view and its subtree are rebuilt, MainView is not rebuilt
 struct MainContentArea: View {
     let interfaceLayoutStyle: InterfaceLayoutStyle
 

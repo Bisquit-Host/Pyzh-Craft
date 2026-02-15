@@ -7,7 +7,7 @@ struct SkinToolDetailView: View {
     @Environment(\.dismiss)
     private var dismiss
 
-    // 预加载的数据（可选）
+    // Preloaded data (optional)
     private let preloadedSkinInfo: PlayerSkinService.PublicSkinInfo?
     private let preloadedProfile: MinecraftProfileResponse?
 
@@ -37,13 +37,13 @@ struct SkinToolDetailView: View {
 
     @State private var hasChanges = false
     @State private var currentSkinRenderImage: NSImage?
-    // 缓存之前的值，避免不必要的计算
+    // Cache previous values ​​to avoid unnecessary calculations
     @State private var lastSelectedSkinData: Data?
     @State private var lastCurrentModel: PlayerSkinService.PublicSkinInfo.SkinModel = .classic
     @State private var lastSelectedCapeId: String?
     @State private var lastCurrentActiveCapeId: String?
 
-    // Task 引用管理，用于清理时取消所有异步任务
+    // Task reference management, used to cancel all asynchronous tasks during cleanup
     @State private var loadCapeTask: Task<Void, Never>?
     @State private var loadSkinImageTask: Task<Void, Never>?
     @State private var downloadCapeTask: Task<Void, Never>?
@@ -64,7 +64,7 @@ struct SkinToolDetailView: View {
             handleFileSelection(result)
         }
         .onAppear {
-            // 完全使用预加载的数据
+            // Use preloaded data entirely
             guard let skinInfo = preloadedSkinInfo, let profile = preloadedProfile else {
                 dismiss()
                 return
@@ -74,14 +74,14 @@ struct SkinToolDetailView: View {
             currentModel = skinInfo.model
             selectedCapeId = PlayerSkinService.getActiveCapeId(from: profile)
 
-            // 初始化加载状态
+            // Initialize loading state
             isCapeLoading = false
             capeLoadCompleted = false
 
-            // 加载当前皮肤图片
+            // Load current skin image
             loadCurrentSkinRenderImageIfNeeded()
 
-            // 立即加载当前激活的披风（使用高优先级任务）
+            // Immediately load the currently active cloak (using high priority tasks)
             loadCapeTask?.cancel()
             loadCapeTask = Task<Void, Never>(priority: .userInitiated) {
                 await loadCurrentActiveCapeIfNeeded(from: profile)
@@ -90,7 +90,7 @@ struct SkinToolDetailView: View {
             updateHasChanges()
         }
         .onDisappear {
-            // 页面关闭后清除所有数据
+            // Clear all data after closing the page
             clearAllData()
         }
     }
@@ -136,8 +136,8 @@ struct SkinToolDetailView: View {
                 loadCapeTask = nil
 
                 if let imageURL = imageURL, id != nil {
-                    // 切换披风时立即清空旧图片，避免显示错误的预览图
-                    // 新图片会在异步下载完成后更新
+                    // Clear old images immediately when switching cloaks to avoid showing wrong preview images
+                    // New images will be updated after the asynchronous download is complete
                     selectedCapeImage = nil
                     downloadCapeTask?.cancel()
                     downloadCapeTask = Task<Void, Never> {
@@ -153,10 +153,10 @@ struct SkinToolDetailView: View {
                     }
                 } else {
                     selectedCapeLocalPath = nil
-                    // 调试日志：取消选择披风
-                    // Logger.shared.info("[SkinToolDetailView] 设置 selectedCapeImage = nil (取消选择披风), id: \(id ?? "nil")")
+                    // Debug log: Deselecting cloak
+                    // Logger.shared.info("[SkinToolDetailView] set selectedCapeImage = nil (unselect cape), id: \(id ?? "nil")")
                     selectedCapeImage = nil
-                    // 取消选择披风时，立即完成（因为没有披风需要加载）
+                    // Completes immediately when deselecting a cape (since there are no capes to load)
                     capeLoadCompleted = true
                     isCapeLoading = false
                 }
@@ -212,7 +212,7 @@ struct SkinToolDetailView: View {
 
     private var resolvedPlayer: Player? { playerListViewModel.currentPlayer }
 
-    /// 在需要访问皮肤/披风等受保护资源时，确保玩家已从 Keychain 加载认证凭据（accessToken）
+    /// When needing to access protected resources such as skins/cloaks, ensure that the player has loaded the authentication credentials (accessToken) from the Keychain
     private func playerWithCredentialIfNeeded(_ player: Player?) -> Player? {
         guard let p = player, p.isOnlineAccount else { return player }
         var copy = p
@@ -225,18 +225,18 @@ struct SkinToolDetailView: View {
     }
 
     private func updateHasChanges() {
-        // 检查是否有任何相关值发生变化
+        // Check if any relevant values ​​have changed
         let skinDataChanged = selectedSkinData != lastSelectedSkinData
         let modelChanged = currentModel != lastCurrentModel
         let capeIdChanged = selectedCapeId != lastSelectedCapeId
         let activeCapeIdChanged = currentActiveCapeId != lastCurrentActiveCapeId
 
-        // 如果没有任何变化，直接返回
+        // If there are no changes, return directly
         if !skinDataChanged && !modelChanged && !capeIdChanged && !activeCapeIdChanged {
             return
         }
 
-        // 更新缓存的值
+        // Update cached value
         lastSelectedSkinData = selectedSkinData
         lastCurrentModel = currentModel
         lastSelectedCapeId = selectedCapeId
@@ -281,7 +281,7 @@ struct SkinToolDetailView: View {
                 try Task.checkCancellation()
                 await MainActor.run { self.currentSkinRenderImage = image }
             } catch is CancellationError {
-                // 任务被取消，不需要处理
+                // The task was canceled and does not need to be processed
             } catch {
                 Logger.shared.error("Failed to load current skin image for renderer: \(error)")
             }
@@ -343,7 +343,7 @@ struct SkinToolDetailView: View {
         updateHasChanges()
     }
 
-    /// 在后台写入临时皮肤文件，避免主线程 data.write
+    /// Write temporary skin files in the background to avoid main thread data.write
     nonisolated private func saveTempSkinFile(data: Data) -> URL? {
         let tempDir = FileManager.default.temporaryDirectory
         let fileName = "temp_skin_\(UUID().uuidString).png"
@@ -379,7 +379,7 @@ struct SkinToolDetailView: View {
                 await MainActor.run {
                     operationInProgress = false
                     if success {
-                        // 重置成功后关闭视图，由外部重新打开并传入新的预加载数据
+                        // After the reset is successful, close the view, reopen it externally and pass in new preloaded data
                         dismiss()
                     }
                 }
@@ -388,7 +388,7 @@ struct SkinToolDetailView: View {
                     operationInProgress = false
                 }
             } catch {
-                // 其他错误，重置状态
+                // Other errors, reset status
                 await MainActor.run {
                     operationInProgress = false
                 }
@@ -420,7 +420,7 @@ struct SkinToolDetailView: View {
                     operationInProgress = false
                 }
             } catch {
-                // 其他错误，重置状态
+                // Other errors, reset status
                 await MainActor.run {
                     operationInProgress = false
                 }
@@ -475,7 +475,7 @@ struct SkinToolDetailView: View {
                     let result = await PlayerSkinService.showCape(capeId: capeId, player: player)
                     try Task.checkCancellation()
                     if result {
-                        // 成功后刷新玩家资料，确保当前激活披风ID与服务器一致
+                        // After success, refresh the player profile to ensure that the currently activated cloak ID is consistent with the server
                         if let newProfile = await PlayerSkinService.fetchPlayerProfile(player: player) {
                             await MainActor.run {
                                 self.playerProfile = newProfile
@@ -513,7 +513,7 @@ struct SkinToolDetailView: View {
             try Task.checkCancellation()
             let p = playerWithCredentialIfNeeded(player) ?? player
 
-            // 将HTTP URL转换为HTTPS以符合ATS策略
+            // Convert HTTP URLs to HTTPS to comply with ATS policies
             let httpsURL = skinURL.httpToHttps()
 
             guard let url = URL(string: httpsURL) else {
@@ -552,19 +552,19 @@ extension Data {
 
 // MARK: - Cape Download Extension
 extension SkinToolDetailView {
-    /// 加载当前激活的披风（如果存在）
+    /// Loads the currently active cloak (if one exists)
     private func loadCurrentActiveCapeIfNeeded(from profile: MinecraftProfileResponse) async {
         do {
             try Task.checkCancellation()
 
-            // 如果用户已经手动选择了与当前激活披风不同的披风，则不再加载「当前激活披风」以免覆盖预览
+            // If the user has manually selected a different cloak than the currently active cloak, the "currently active cloak" will no longer be loaded to avoid overwriting the preview
             if let manualSelectedId = selectedCapeId,
                let activeId = PlayerSkinService.getActiveCapeId(from: profile),
                manualSelectedId != activeId {
                 return
             }
 
-            // 优先检查 publicSkinInfo 中的 capeURL
+            // Check capeURL in publicSkinInfo first
             if let capeURL = publicSkinInfo?.capeURL, !capeURL.isEmpty {
                 await MainActor.run {
                     selectedCapeImageURL = capeURL
@@ -583,14 +583,14 @@ extension SkinToolDetailView {
 
             try Task.checkCancellation()
 
-            // 否则从 profile 中查找激活的披风
+            // Otherwise look for the active cloak from profile
             guard let activeCapeId = PlayerSkinService.getActiveCapeId(from: profile) else {
                 await MainActor.run {
                     selectedCapeImageURL = nil
                     selectedCapeLocalPath = nil
                     selectedCapeImage = nil
                     isCapeLoading = false
-                    capeLoadCompleted = true  // 没有披风，可以立即渲染皮肤
+                    capeLoadCompleted = true  // No cape, skin can be rendered immediately
                 }
                 return
             }
@@ -603,7 +603,7 @@ extension SkinToolDetailView {
                     selectedCapeLocalPath = nil
                     selectedCapeImage = nil
                     isCapeLoading = false
-                    capeLoadCompleted = true  // 没有披风，可以立即渲染皮肤
+                    capeLoadCompleted = true  // No cape, skin can be rendered immediately
                 }
                 return
             }
@@ -616,14 +616,14 @@ extension SkinToolDetailView {
                     selectedCapeLocalPath = nil
                     selectedCapeImage = nil
                     isCapeLoading = false
-                    capeLoadCompleted = true  // 没有激活的披风，可以立即渲染皮肤
+                    capeLoadCompleted = true  // There is no active cape and the skin can be rendered immediately
                 }
                 return
             }
 
             try Task.checkCancellation()
 
-            // 有披风需要加载，设置加载状态
+            // There is a cloak that needs to be loaded, set the loading status
             await MainActor.run {
                 selectedCapeImageURL = activeCape.url
                 isCapeLoading = true
@@ -637,13 +637,13 @@ extension SkinToolDetailView {
                 capeLoadCompleted = true
             }
         } catch is CancellationError {
-            // 任务被取消，重置状态
+            // The task is canceled and the status is reset
             await MainActor.run {
                 isCapeLoading = false
                 capeLoadCompleted = false
             }
         } catch {
-            // 其他错误，重置状态并记录日志
+            // Other errors, reset state and log
             Logger.shared.error("Failed to load current active cape: \(error)")
             await MainActor.run {
                 isCapeLoading = false
@@ -656,12 +656,12 @@ extension SkinToolDetailView {
         if let current = selectedCapeImageURL, current == urlString, selectedCapeLocalPath != nil {
             return
         }
-        // 验证 URL 格式（但不保留 URL 对象，节省内存）
+        // Verify URL format (but do not preserve URL objects, saving memory)
         guard URL(string: urlString.httpToHttps()) != nil else {
             return
         }
         do {
-            // 使用 DownloadManager 下载文件（已包含所有优化）
+            // Download files using DownloadManager (all optimizations included)
             let tempFile = FileManager.default.temporaryDirectory.appendingPathComponent("cape_\(UUID().uuidString).png")
             _ = try await DownloadManager.downloadFile(
                 urlString: urlString.httpToHttps(),
@@ -678,9 +678,9 @@ extension SkinToolDetailView {
         }
     }
 
-    /// 下载披风纹理并设置图片
+    /// Download the cape texture and set the image
     private func downloadCapeTextureAndSetImage(from urlString: String) async {
-        // 检查是否已经下载过相同的URL
+        // Check if the same URL has already been downloaded
         if let currentURL = selectedCapeImageURL,
            currentURL == urlString,
            let currentPath = selectedCapeLocalPath,
@@ -693,7 +693,7 @@ extension SkinToolDetailView {
             return
         }
 
-        // 验证 URL 格式
+        // Verify URL format
         guard let url = URL(string: urlString.httpToHttps()) else {
             await MainActor.run {
                 selectedCapeImage = nil
@@ -721,9 +721,9 @@ extension SkinToolDetailView {
 
             try Task.checkCancellation()
 
-            // 立即更新UI，不等待文件保存
+            // Update UI immediately without waiting for file to be saved
             await MainActor.run {
-                // 检查URL是否仍然匹配（防止用户快速切换）
+                // Check if the URL still matches (prevents users from switching quickly)
                 if selectedCapeImageURL == urlString {
                     selectedCapeImage = image
                 }
@@ -731,7 +731,7 @@ extension SkinToolDetailView {
 
             try Task.checkCancellation()
 
-            // 异步保存到临时文件（不阻塞UI更新）
+            // Asynchronously save to temporary file (without blocking UI updates)
             let tempFile = FileManager.default.temporaryDirectory.appendingPathComponent("cape_\(UUID().uuidString).png")
             do {
                 try data.write(to: tempFile)
@@ -742,73 +742,73 @@ extension SkinToolDetailView {
                     }
                 }
             } catch is CancellationError {
-                // 如果任务被取消，删除刚创建的文件
+                // If the task is canceled, delete the file just created
                 try? FileManager.default.removeItem(at: tempFile)
             } catch {
                 Logger.shared.error("Failed to save cape to temp file: \(error)")
             }
         } catch is CancellationError {
-            // 任务被取消，不需要处理
+            // The task was canceled and does not need to be processed
         } catch {
             Logger.shared.error("Cape download error: \(error.localizedDescription)")
         }
     }
 
-    // MARK: - 清除数据
-    /// 清除页面所有数据
+    // MARK: - clear data
+    /// Clear all data on the page
     private func clearAllData() {
-        // 取消所有正在运行的异步任务
+        // Cancel all running asynchronous tasks
         loadCapeTask?.cancel()
         loadSkinImageTask?.cancel()
         downloadCapeTask?.cancel()
         resetSkinTask?.cancel()
         applyChangesTask?.cancel()
 
-        // 清理所有 Task 引用
+        // Clean all Task references
         loadCapeTask = nil
         loadSkinImageTask = nil
         downloadCapeTask = nil
         resetSkinTask = nil
         applyChangesTask = nil
 
-        // 删除临时文件
+        // Delete temporary files
         deleteTemporaryFiles()
 
-        // 清理选中的皮肤数据
+        // Clear selected skin data
         selectedSkinData = nil
         selectedSkinImage = nil
         selectedSkinPath = nil
         showingSkinPreview = false
-        // 清理斗篷数据
+        // Clean cloak data
         selectedCapeId = nil
         selectedCapeImageURL = nil
         selectedCapeLocalPath = nil
         selectedCapeImage = nil
         isCapeLoading = false
         capeLoadCompleted = false
-        // 清理加载的数据
+        // Clean loaded data
         publicSkinInfo = nil
         playerProfile = nil
         currentSkinRenderImage = nil
-        // 重置状态
+        // reset state
         currentModel = .classic
         hasChanges = false
         operationInProgress = false
-        // 清理缓存的值
+        // Clear cached values
         lastSelectedSkinData = nil
         lastCurrentModel = .classic
         lastSelectedCapeId = nil
         lastCurrentActiveCapeId = nil
     }
 
-    /// 删除创建的临时文件
+    /// Delete temporary files created
     private func deleteTemporaryFiles() {
         let fileManager = FileManager.default
 
-        // 删除临时皮肤文件
+        // Delete temporary skin files
         if let skinPath = selectedSkinPath, !skinPath.isEmpty {
             let skinURL = URL(fileURLWithPath: skinPath)
-            // 只删除临时目录中的临时文件
+            // Only delete temporary files in the temporary directory
             if skinURL.path.hasPrefix(fileManager.temporaryDirectory.path) {
                 do {
                     try fileManager.removeItem(at: skinURL)
@@ -819,10 +819,10 @@ extension SkinToolDetailView {
             }
         }
 
-        // 删除临时披风文件
+        // Delete temporary cloak files
         if let capePath = selectedCapeLocalPath, !capePath.isEmpty {
             let capeURL = URL(fileURLWithPath: capePath)
-            // 只删除临时目录中的临时文件
+            // Only delete temporary files in the temporary directory
             if capeURL.path.hasPrefix(fileManager.temporaryDirectory.path) {
                 do {
                     try fileManager.removeItem(at: capeURL)

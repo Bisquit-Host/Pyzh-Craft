@@ -20,15 +20,15 @@ class BaseGameFormViewModel: ObservableObject, GameFormStateProtocol {
         self.configuration = configuration
         self.gameNameValidator = GameNameValidator(gameSetupService: gameSetupService)
 
-        // 监听子对象的状态变化
+        // Monitor state changes of child objects
         setupObservers()
 
-        // 设置初始状态
+        // Set initial state
         updateParentState()
     }
 
     private func setupObservers() {
-        // 监听gameNameValidator的变化
+        // Listen for changes in gameNameValidator
         gameNameValidator.objectWillChange
             .sink { [weak self] in
                 DispatchQueue.main.async {
@@ -37,7 +37,7 @@ class BaseGameFormViewModel: ObservableObject, GameFormStateProtocol {
                 }
             }
             .store(in: &cancellables)
-        // 监听gameSetupService的变化
+        // Monitor changes in gameSetupService
         gameSetupService.objectWillChange
             .sink { [weak self] in
                 DispatchQueue.main.async {
@@ -51,14 +51,14 @@ class BaseGameFormViewModel: ObservableObject, GameFormStateProtocol {
     // MARK: - GameFormStateProtocol Implementation
     func handleCancel() {
         if isDownloading {
-            // 停止下载任务
+            // Stop download task
             downloadTask?.cancel()
             downloadTask = nil
 
-            // 取消下载状态
+            // Cancel download status
             gameSetupService.downloadState.cancel()
 
-            // 执行取消后的清理工作
+            // Perform post-cancellation cleanup
             Task {
                 await performCancelCleanup()
             }
@@ -78,12 +78,12 @@ class BaseGameFormViewModel: ObservableObject, GameFormStateProtocol {
         let newIsDownloading = computeIsDownloading()
         let newIsFormValid = computeIsFormValid()
 
-        // 使用 DispatchQueue.main.async 避免在视图更新期间修改状态
+        // Use DispatchQueue.main.async to avoid modifying state during view updates
         DispatchQueue.main.async { [weak self] in
             self?.configuration.isDownloading.wrappedValue = newIsDownloading
             self?.configuration.isFormValid.wrappedValue = newIsFormValid
 
-            // 同步本地状态
+            // Synchronize local state
             self?.isDownloading = newIsDownloading
             self?.isFormValid = newIsFormValid
         }
@@ -98,7 +98,7 @@ class BaseGameFormViewModel: ObservableObject, GameFormStateProtocol {
 
     func performCancelCleanup() async {
         // Override in subclasses for custom cleanup logic
-        // 默认实现：重置下载状态并关闭窗口
+        // Default implementation: reset download status and close window
         await MainActor.run {
             gameSetupService.downloadState.reset()
             configuration.actions.onCancel()

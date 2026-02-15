@@ -103,12 +103,12 @@ struct CapeSelectionView: View {
         let isSelected = selectedCapeId == id
 
         return Button {
-            // 已选中的披风不允许重复点击
+            // The selected cloak does not allow repeated clicks
             guard !isSelected else { return }
 
             selectedCapeId = id
             if let imageURL = imageURL {
-                // 异步加载 NSImage
+                // Load NSImage asynchronously
                 DispatchQueue.global(qos: .userInitiated).async {
                     if let url = URL(string: imageURL.httpToHttps()),
                         let data = try? Data(contentsOf: url),
@@ -132,7 +132,7 @@ struct CapeSelectionView: View {
             }
         }
         .buttonStyle(.plain)
-        // 仅禁用当前已选中的披风按钮，其它仍可选择
+        // Only the currently selected cloak button is disabled, others can still be selected
         .disabled(isSelected)
     }
 
@@ -150,7 +150,7 @@ struct CapeSelectionView: View {
                 )
 
             if let imageURL = imageURL {
-                // 披风展示默认使用 URL 加载
+                // Cloak display is loaded using URL by default
                 CapeTextureView(imageURL: imageURL)
                     .id(imageURL).frame(width: 42, height: 62).clipped().cornerRadius(6)
             } else if isSystemOption {

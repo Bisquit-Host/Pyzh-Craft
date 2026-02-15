@@ -1,20 +1,20 @@
 import Foundation
 
-/// 游戏启动/停止用例
-/// 解耦 UI 与 Run 模块：View 只依赖本 UseCase，不直接依赖 MinecraftLaunchCommand
+/// Game start/stop use case
+/// Decouple UI and Run module: View only depends on this UseCase and does not directly depend on MinecraftLaunchCommand
 final class GameLaunchUseCase: ObservableObject {
 
-    /// 启动游戏
+    /// Start the game
     /// - Parameters:
-    ///   - player: 当前玩家（可为 nil，使用默认认证参数）
-    ///   - game: 要启动的游戏
+    ///   - player: current player (can be nil, use default authentication parameters)
+    ///   - game: the game to start
     func launchGame(player: Player?, game: GameVersionInfo) async {
         let command = MinecraftLaunchCommand(player: player, game: game)
         await command.launchGame()
     }
 
-    /// 停止游戏
-    /// - Parameter game: 要停止的游戏
+    /// stop game
+    /// - Parameter game: The game to stop
     func stopGame(game: GameVersionInfo) async {
         let command = MinecraftLaunchCommand(player: nil, game: game)
         await command.stopGame()

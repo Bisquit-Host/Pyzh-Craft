@@ -1,9 +1,9 @@
 import Foundation
 
-// 缓存信息结构
+// Cache information structure
 struct CacheInfo: Equatable {
     let fileCount: Int
-    let totalSize: Int64 // 字节
+    let totalSize: Int64 // byte
     let formattedSize: String
 
     init(fileCount: Int, totalSize: Int64) {
@@ -20,14 +20,14 @@ struct CacheInfo: Equatable {
     }
 }
 
-// 缓存计算器
+// cache calculator
 class CacheCalculator {
     static let shared = CacheCalculator()
 
     private init() {}
 
-    /// 计算游戏资源缓存信息
-    /// - Throws: GlobalError 当操作失败时
+    /// Calculate game resource cache information
+    /// - Throws: GlobalError when the operation fails
     func calculateMetaCacheInfo() throws -> CacheInfo {
         let resourceTypes = AppConstants.cacheResourceTypes
         var totalFileCount = 0
@@ -43,17 +43,17 @@ class CacheCalculator {
         return CacheInfo(fileCount: totalFileCount, totalSize: totalSize)
     }
 
-    /// 计算应用缓存信息
-    /// - Throws: GlobalError 当操作失败时
+    /// Calculate application cache information
+    /// - Throws: GlobalError when the operation fails
     func calculateCacheInfo() throws -> CacheInfo {
         let (fileCount, size) = try calculateDirectorySize(AppPaths.appCache)
         return CacheInfo(fileCount: fileCount, totalSize: size)
     }
 
-    /// 计算目录大小
-    /// - Parameter directory: 目录路径
-    /// - Returns: (文件数量, 总大小)
-    /// - Throws: GlobalError 当操作失败时
+    /// Calculate directory size
+    /// - Parameter directory: directory path
+    /// - Returns: (number of files, total size)
+    /// - Throws: GlobalError when the operation fails
     private func calculateDirectorySize(_ directory: URL) throws -> (fileCount: Int, size: Int64) {
         let fileManager = FileManager.default
         guard fileManager.fileExists(atPath: directory.path) else {
@@ -72,7 +72,7 @@ class CacheCalculator {
         }
 
         for case let fileURL as URL in enumerator {
-            // 排除 .DS_Store 文件
+            // Exclude .DS_Store files
             if fileURL.lastPathComponent == ".DS_Store" {
                 continue
             }
@@ -85,17 +85,17 @@ class CacheCalculator {
                 }
             } catch {
                 Logger.shared.warning("无法获取文件大小: \(fileURL.path), 错误: \(error.localizedDescription)")
-                // 继续处理其他文件，不中断整个计算过程
+                // Continue processing other files without interrupting the entire calculation process
             }
         }
 
         return (fileCount, totalSize)
     }
 
-    /// 计算指定游戏 profile 下的缓存信息
-    /// - Parameter gameName: 游戏名称
-    /// - Returns: 缓存信息
-    /// - Throws: GlobalError 当操作失败时
+    /// Calculate the cache information under the specified game profile
+    /// - Parameter gameName: game name
+    /// - Returns: cache information
+    /// - Throws: GlobalError when the operation fails
     func calculateProfileCacheInfo(gameName: String) throws -> CacheInfo {
 
         let subdirectories = AppPaths.profileSubdirectories

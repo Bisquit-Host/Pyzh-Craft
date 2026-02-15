@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - 世界信息区域视图
+// MARK: - World information area view
 struct WorldInfoSectionView: View {
     // MARK: - Properties
     let worlds: [WorldInfo]

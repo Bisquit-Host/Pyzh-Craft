@@ -1,14 +1,14 @@
 import SwiftUI
 
-/// 消息角色
+/// message role
 enum MessageRole: String, Codable {
     case user, assistant, system
 }
 
-/// 附件类型
+/// Attachment type
 enum MessageAttachmentType: Identifiable, Equatable {
     case image(URL),
-         file(URL, String) // URL 和文件名
+         file(URL, String) // URL and file name
 
     var id: String {
         switch self {
@@ -21,7 +21,7 @@ enum MessageAttachmentType: Identifiable, Equatable {
     }
 }
 
-/// 聊天消息
+/// Chat messages
 struct ChatMessage: Identifiable, Equatable {
     let id: UUID
     let role: MessageRole
@@ -44,7 +44,7 @@ struct ChatMessage: Identifiable, Equatable {
     }
 }
 
-/// 聊天状态
+/// chat status
 @MainActor
 class ChatState: ObservableObject {
     @Published var messages: [ChatMessage] = []

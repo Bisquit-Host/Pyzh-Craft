@@ -1,22 +1,22 @@
 import Foundation
 
-/// 资源扫描器
-/// 负责扫描游戏实例中的所有资源文件（mods, datapacks, resourcepacks, shaderpacks）
+/// Resource Scanner
+/// Responsible for scanning all resource files (mods, datapacks, resourcepacks, shaderpacks) in the game instance
 enum ResourceScanner {
-    /// 资源类型
+    /// Resource type
     enum ResourceType: String, CaseIterable {
         case mods, datapacks, resourcepacks, shaderpacks
     }
 
-    /// 扫描结果
+    /// Scan results
     struct ScanResult {
         let type: ResourceType
         let files: [URL]
     }
 
-    /// 扫描所有资源文件
-    /// - Parameter gameInfo: 游戏信息
-    /// - Returns: 按类型分组的扫描结果
+    /// Scan all resource files
+    /// - Parameter gameInfo: game information
+    /// - Returns: Scan results grouped by type
     static func scanAllResources(gameInfo: GameVersionInfo) throws -> [ResourceType: [URL]] {
         var results: [ResourceType: [URL]] = [:]
 
@@ -29,7 +29,7 @@ enum ResourceScanner {
         return results
     }
 
-    /// 获取资源类型对应的目录路径
+    /// Get the directory path corresponding to the resource type
     private static func getDirectory(for type: ResourceType, gameName: String) -> URL {
         switch type {
         case .mods:
@@ -43,9 +43,9 @@ enum ResourceScanner {
         }
     }
 
-    /// 扫描单个资源目录
-    /// - Parameter directory: 目录路径
-    /// - Returns: 找到的资源文件列表
+    /// Scan a single resource directory
+    /// - Parameter directory: directory path
+    /// - Returns: List of found resource files
     static func scanResourceDirectory(_ directory: URL) throws -> [URL] {
         guard FileManager.default.fileExists(atPath: directory.path) else {
             return []
@@ -58,15 +58,15 @@ enum ResourceScanner {
         )
 
         return files.filter { file in
-            // 包含 .jar 和 .zip 文件，排除 .disabled 文件
+            // Includes .jar and .zip files, excludes .disabled files
             let ext = file.pathExtension.lowercased()
             return (ext == "jar" || ext == "zip") && !file.lastPathComponent.hasSuffix(".disabled")
         }
     }
 
-    /// 计算总资源文件数
-    /// - Parameter results: 扫描结果
-    /// - Returns: 总文件数
+    /// Calculate the total number of resource files
+    /// - Parameter results: scan results
+    /// - Returns: total number of files
     static func totalFileCount(_ results: [ResourceType: [URL]]) -> Int {
         results.values.reduce(0) { $0 + $1.count }
     }

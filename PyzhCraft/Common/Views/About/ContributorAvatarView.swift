@@ -1,65 +1,65 @@
 import SwiftUI
 
-/// 贡献者头像图片缓存管理器
-/// 使用 NSCache 限制内存占用，避免加载过多图片导致内存溢出
+/// Contributor avatar image cache manager
+/// Use NSCache to limit memory usage and avoid memory overflow caused by loading too many images
 final class ContributorAvatarCache: @unchecked Sendable {
     static let shared = ContributorAvatarCache()
 
-    /// 图片缓存：key 为 URL 字符串，value 为 NSImage
+    /// Image cache: key is URL string, value is NSImage
     private let imageCache: NSCache<NSString, NSImage>
 
-    /// 共享的 URLSession，启用缓存以减少内存占用
+    /// Shared URLSession, enable caching to reduce memory footprint
     private let urlSession: URLSession
 
     private init() {
-        // 设置缓存限制：最多缓存 30 张图片，总内存限制 3MB
+        // Set cache limit: cache up to 30 images, total memory limit 3MB
         let cache = NSCache<NSString, NSImage>()
         cache.countLimit = 30
         cache.totalCostLimit = 3 * 1024 * 1024  // 3MB
         cache.name = "ContributorAvatarCache"
         self.imageCache = cache
 
-        // 配置 URLSession 使用较小的缓存
+        // Configure URLSession to use a smaller cache
         let config = URLSessionConfiguration.default
         config.requestCachePolicy = .returnCacheDataElseLoad
         config.urlCache = URLCache(
-            memoryCapacity: 1 * 1024 * 1024,  // 1MB 内存缓存
-            diskCapacity: 5 * 1024 * 1024,    // 5MB 磁盘缓存
+            memoryCapacity: 1 * 1024 * 1024,  // 1MB memory cache
+            diskCapacity: 5 * 1024 * 1024,    // 5MB disk cache
             diskPath: "ContributorAvatarCache"
         )
         self.urlSession = URLSession(configuration: config)
     }
 
-    /// 加载图片
+    /// Load images
     @MainActor
     func loadImage(from url: URL) async throws -> NSImage {
         let cacheKey = url.absoluteString as NSString
 
-        // 先检查缓存
+        // Check cache first
         if let cachedImage = imageCache.object(forKey: cacheKey) {
             return cachedImage
         }
 
-        // 从网络加载
+        // Load from network
         let (data, _) = try await urlSession.data(from: url)
         guard let image = NSImage(data: data) else {
             throw NSError(domain: "ContributorAvatarCache", code: -1, userInfo: [NSLocalizedDescriptionKey: "无法解析图片数据"])
         }
 
-        // 计算图片大小（用于缓存成本）
+        // Calculate image size (for caching costs)
         let cost = data.count
         imageCache.setObject(image, forKey: cacheKey, cost: cost)
 
         return image
     }
 
-    /// 清理缓存
+    /// clear cache
     func clearCache() {
         imageCache.removeAllObjects()
     }
 }
 
-/// 贡献者头像视图
+/// Contributor avatar view
 struct ContributorAvatarView: View {
     let avatarUrl: String
     let size: CGFloat
@@ -73,17 +73,17 @@ struct ContributorAvatarView: View {
         self.size = size
     }
 
-    /// 获取优化后的头像 URL（使用 GitHub 的缩略图参数）
-    /// GitHub 支持 ?s=size 参数来获取指定大小的图片，减少下载大小
+    /// Get the optimized avatar URL (using GitHub's thumbnail parameter)
+    /// GitHub supports the ?s=size parameter to obtain images of a specified size to reduce download size
     private var optimizedAvatarURL: URL? {
         guard let url = URL(string: avatarUrl.httpToHttps()) else { return nil }
 
-        // 如果已经是 GitHub 头像 URL，添加大小参数
-        // GitHub 头像 URL 格式: https://avatars.githubusercontent.com/u/xxx 或 https://github.com/identicons/xxx.png
+        // If it is already a GitHub avatar URL, add the size parameter
+        // GitHub avatar URL format: https://avatars.githubusercontent.com/u/xxx or https://github.com/identicons/xxx.png
         if url.host?.contains("github.com") == true || url.host?.contains("avatars.githubusercontent.com") == true {
-            // 计算需要的像素大小（@2x 屏幕需要 2 倍）
+            // Calculate required pixel size (@2x screen requires 2x)
             let pixelSize = Int(size * 2)
-            // 移除现有的查询参数（如果有）
+            // Remove existing query parameters (if any)
             var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
             components?.queryItems = [URLQueryItem(name: "s", value: "\(pixelSize)")]
             return components?.url
@@ -140,7 +140,7 @@ struct ContributorAvatarView: View {
                     self.image = loadedImage
                 }
             } catch {
-                // 静默处理错误，显示占位符
+                // Handle errors silently, display placeholders
                 if !Task.isCancelled {
                     self.image = nil
                 }
@@ -149,65 +149,65 @@ struct ContributorAvatarView: View {
     }
 }
 
-/// 静态贡献者头像图片缓存管理器
+/// Static contributor avatar image cache manager
 final class StaticContributorAvatarCache: @unchecked Sendable {
     static let shared = StaticContributorAvatarCache()
 
-    /// 图片缓存：key 为 URL 字符串，value 为 NSImage
+    /// Image cache: key is URL string, value is NSImage
     private let imageCache: NSCache<NSString, NSImage>
 
-    /// 共享的 URLSession，启用缓存以减少内存占用
+    /// Shared URLSession, enable caching to reduce memory footprint
     private let urlSession: URLSession
 
     private init() {
-        // 设置缓存限制：最多缓存 20 张图片，总内存限制 2MB
+        // Set cache limit: cache up to 20 images, total memory limit 2MB
         let cache = NSCache<NSString, NSImage>()
         cache.countLimit = 20
         cache.totalCostLimit = 2 * 1024 * 1024  // 2MB
         cache.name = "StaticContributorAvatarCache"
         self.imageCache = cache
 
-        // 配置 URLSession 使用较小的缓存
+        // Configure URLSession to use a smaller cache
         let config = URLSessionConfiguration.default
         config.requestCachePolicy = .returnCacheDataElseLoad
         config.urlCache = URLCache(
-            memoryCapacity: 1 * 1024 * 1024,  // 1MB 内存缓存
-            diskCapacity: 5 * 1024 * 1024,    // 5MB 磁盘缓存
+            memoryCapacity: 1 * 1024 * 1024,  // 1MB memory cache
+            diskCapacity: 5 * 1024 * 1024,    // 5MB disk cache
             diskPath: "StaticContributorAvatarCache"
         )
         self.urlSession = URLSession(configuration: config)
     }
 
-    /// 加载图片
+    /// Load images
     @MainActor
     func loadImage(from url: URL) async throws -> NSImage {
         let cacheKey = url.absoluteString as NSString
 
-        // 先检查缓存
+        // Check cache first
         if let cachedImage = imageCache.object(forKey: cacheKey) {
             return cachedImage
         }
 
-        // 从网络加载
+        // Load from network
         let (data, _) = try await urlSession.data(from: url)
         guard let image = NSImage(data: data) else {
             throw NSError(domain: "StaticContributorAvatarCache", code: -1, userInfo: [NSLocalizedDescriptionKey: "无法解析图片数据"])
         }
 
-        // 计算图片大小（用于缓存成本）
+        // Calculate image size (for caching costs)
         let cost = data.count
         imageCache.setObject(image, forKey: cacheKey, cost: cost)
 
         return image
     }
 
-    /// 清理缓存
+    /// clear cache
     func clearCache() {
         imageCache.removeAllObjects()
     }
 }
 
-/// 静态贡献者头像视图（支持 emoji）
+/// Static contributor avatar view (supports emoji)
 struct StaticContributorAvatarView: View {
     let avatar: String
     let size: CGFloat
@@ -221,15 +221,15 @@ struct StaticContributorAvatarView: View {
         self.size = size
     }
 
-    /// 获取优化后的头像 URL（使用 GitHub 的缩略图参数）
+    /// Get the optimized avatar URL (using GitHub's thumbnail parameter)
     private var optimizedAvatarURL: URL? {
         guard avatar.starts(with: "http"), let url = URL(string: avatar) else { return nil }
 
-        // 如果已经是 GitHub 头像 URL，添加大小参数
+        // If it is already a GitHub avatar URL, add the size parameter
         if url.host?.contains("github.com") == true || url.host?.contains("avatars.githubusercontent.com") == true {
-            // 计算需要的像素大小（@2x 屏幕需要 2 倍）
+            // Calculate required pixel size (@2x screen requires 2x)
             let pixelSize = Int(size * 2)
-            // 移除现有的查询参数（如果有）
+            // Remove existing query parameters (if any)
             var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
             components?.queryItems = [URLQueryItem(name: "s", value: "\(pixelSize)")]
             return components?.url
@@ -296,7 +296,7 @@ struct StaticContributorAvatarView: View {
                     self.image = loadedImage
                 }
             } catch {
-                // 静默处理错误，显示占位符
+                // Handle errors silently, display placeholders
                 if !Task.isCancelled {
                     self.image = nil
                 }

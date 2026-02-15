@@ -51,14 +51,14 @@ class GameCreationViewModel: BaseGameFormViewModel {
 
     override func handleCancel() {
         if isDownloading {
-            // 停止下载任务
+            // Stop download task
             downloadTask?.cancel()
             downloadTask = nil
 
-            // 取消下载状态
+            // Cancel download status
             gameSetupService.downloadState.cancel()
 
-            // 执行取消后的清理工作
+            // Perform post-cancellation cleanup
             Task {
                 await performCancelCleanup()
             }
@@ -68,37 +68,37 @@ class GameCreationViewModel: BaseGameFormViewModel {
     }
 
     override func performCancelCleanup() async {
-        // 如果正在下载时取消，需要删除已创建的游戏文件夹
+        // If you cancel while downloading, you need to delete the created game folder
         let gameName = gameNameValidator.gameName.trimmingCharacters(in: .whitespacesAndNewlines)
         if !gameName.isEmpty {
-            // 检查游戏是否已经保存到仓库中
-            // 如果已经保存，说明游戏创建成功，不应该删除文件夹
+            // Check if the game has been saved to the warehouse
+            // If it has been saved, it means the game was created successfully and the folder should not be deleted
             let isGameSaved = await MainActor.run {
                 guard let gameRepository = gameRepository else { return false }
                 return gameRepository.games.contains { $0.gameName == gameName }
             }
 
             if !isGameSaved {
-                // 游戏未保存，说明是取消操作，可以安全删除文件夹
+                // The game is not saved, indicating that the operation is cancelled. You can safely delete the folder
                 do {
                     let profileDir = AppPaths.profileDirectory(gameName: gameName)
 
-                    // 检查目录是否存在
+                    // Check if directory exists
                     if FileManager.default.fileExists(atPath: profileDir.path) {
                         try FileManager.default.removeItem(at: profileDir)
                         Logger.shared.info("已删除取消创建的游戏文件夹: \(profileDir.path)")
                     }
                 } catch {
                     Logger.shared.error("删除游戏文件夹失败: \(error.localizedDescription)")
-                    // 即使删除失败，也不应该阻止关闭窗口
+                    // This should not prevent the window from closing even if the deletion fails
                 }
             } else {
-                // 游戏已保存，不应该删除文件夹
+                // The game is saved and the folder should not be deleted
                 Logger.shared.info("游戏已成功保存，跳过删除文件夹: \(gameName)")
             }
         }
 
-        // 重置下载状态并关闭窗口
+        // Reset download status and close window
         await MainActor.run {
             gameSetupService.downloadState.reset()
             configuration.actions.onCancel()
@@ -115,7 +115,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
     }
 
     // MARK: - Version Management
-    /// 初始化版本选择器
+    /// Initial version selector
     func initializeVersionPicker() async {
         let includeSnapshots = GameSettingsManager.shared.includeSnapshotsForGameVersions
         let compatibleVersions = await CommonService.compatibleVersions(
@@ -125,15 +125,15 @@ class GameCreationViewModel: BaseGameFormViewModel {
         await updateAvailableVersions(compatibleVersions)
     }
 
-    /// 更新可用版本并设置默认选择
+    /// Update available versions and set default selections
     func updateAvailableVersions(_ versions: [String]) async {
         self.availableVersions = versions
-        // 如果当前选中的版本不在兼容版本列表中，选择第一个兼容版本
+        // If the currently selected version is not in the compatible version list, select the first compatible version
         if !versions.contains(self.selectedGameVersion) && !versions.isEmpty {
             self.selectedGameVersion = versions.first ?? ""
         }
 
-        // 获取当前选中版本的时间信息
+        // Get the time information of the currently selected version
         if !versions.isEmpty {
             let targetVersion = versions.contains(self.selectedGameVersion) ? self.selectedGameVersion : (versions.first ?? "")
             let timeString = await ModrinthService.queryVersionTime(from: targetVersion)
@@ -141,7 +141,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
         }
     }
 
-    /// 处理模组加载器变化
+    /// Handling mod loader changes
     func handleModLoaderChange(_ newLoader: String) {
         Task {
             let includeSnapshots = GameSettingsManager.shared.includeSnapshotsForGameVersions
@@ -151,7 +151,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
             )
             await updateAvailableVersions(compatibleVersions)
 
-            // 更新加载器版本列表
+            // Update loader version list
             if newLoader != "vanilla" && !selectedGameVersion.isEmpty {
                 await updateLoaderVersions(for: newLoader, gameVersion: selectedGameVersion)
             } else {
@@ -163,14 +163,14 @@ class GameCreationViewModel: BaseGameFormViewModel {
         }
     }
 
-    /// 处理游戏版本变化
+    /// Handle game version changes
     func handleGameVersionChange(_ newGameVersion: String) {
         Task {
             await updateLoaderVersions(for: selectedModLoader, gameVersion: newGameVersion)
         }
     }
 
-    /// 更新加载器版本列表
+    /// Update loader version list
     private func updateLoaderVersions(for loader: String, gameVersion: String) async {
         guard loader != "vanilla" && !gameVersion.isEmpty else {
             availableLoaderVersions = []
@@ -208,7 +208,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
         }
 
         availableLoaderVersions = versions
-        // 如果当前选中的版本不在列表中，选择第一个版本
+        // If the currently selected version is not in the list, select the first version
         if !versions.contains(selectedLoaderVersion) && !versions.isEmpty {
             selectedLoaderVersion = versions.first ?? ""
         } else if versions.isEmpty {
@@ -324,7 +324,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
             return
         }
 
-        // 对于非vanilla加载器，如果没有选择版本，则不允许保存
+        // For non-vanilla loaders, saving is not allowed if no version is selected
         let loaderVersion = selectedModLoader == "vanilla" ? selectedModLoader : selectedLoaderVersion
 
         await gameSetupService.saveGame(

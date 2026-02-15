@@ -1,6 +1,6 @@
 import Foundation
 
-// MARK: - 世界信息模型
+// MARK: - World Information Model
 struct WorldInfo: Identifiable, Equatable {
     let id: String
     let name: String
@@ -8,9 +8,9 @@ struct WorldInfo: Identifiable, Equatable {
     let lastPlayed: Date?
     let gameMode: String?
     let difficulty: String?
-    /// 是否极限模式（不同版本字段位置不同，无法解析时为 false）
+    /// Whether to limit mode (the field position is different in different versions, false when it cannot be parsed)
     let hardcore: Bool
-    /// 是否允许作弊/指令（allowCommands），无法解析时为 false
+    /// Whether to allow cheats/commands (allowCommands), false if it cannot be parsed
     let cheats: Bool
     let version: String?
     let seed: Int64?
@@ -39,7 +39,7 @@ struct WorldInfo: Identifiable, Equatable {
     }
 }
 
-// MARK: - 截图信息模型
+// MARK: - Screenshot information model
 struct ScreenshotInfo: Identifiable, Equatable {
     let id: String
     let name: String
@@ -56,7 +56,7 @@ struct ScreenshotInfo: Identifiable, Equatable {
     }
 }
 
-// MARK: - 日志信息模型
+// MARK: - Log information model
 struct LogInfo: Identifiable, Equatable {
     let id: String
     let name: String
@@ -74,7 +74,7 @@ struct LogInfo: Identifiable, Equatable {
         self.isCrashLog = isCrashLog
     }
 }
-// MARK: - 世界详细信息模型
+// MARK: - world detail model
 struct WorldDetailMetadata {
     let levelName: String
     let folderName: String

@@ -10,7 +10,7 @@ struct CustomVersionPicker: View {
     @Binding var selected: String
     let availableVersions: [String]
     @Binding var time: String
-    let onVersionSelected: (String) async -> String  // 新增：版本选择回调，返回时间信息
+    let onVersionSelected: (String) async -> String  // New: version selection callback, return time information
     @State private var showMenu = false
     @State private var error: GlobalError?
 
@@ -86,7 +86,7 @@ struct CustomVersionPicker: View {
                     if let newValue = newValue {
                         selected = newValue
                         showMenu = false
-                        // 使用版本时间映射来设置时间信息
+                        // Use version time mapping to set time information
                         Task {
                             time = await onVersionSelected(newValue)
                         }
@@ -96,7 +96,7 @@ struct CustomVersionPicker: View {
         ) { version in
             selected = version
             showMenu = false
-            // 使用版本时间映射来设置时间信息
+            // Use version time mapping to set time information
             Task {
                 time = await onVersionSelected(version)
             }

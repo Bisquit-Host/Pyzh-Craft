@@ -1,18 +1,18 @@
 import Foundation
 
-/// HMCL 和 SJMCL 使用不同的 JSON 格式
+/// HMCL and SJMCL use different JSON formats
 struct SJMCLInstanceParser: LauncherInstanceParser {
     let launcherType: ImportLauncherType
 
     func isValidInstance(at instancePath: URL) -> Bool {
         let fileManager = FileManager.default
 
-        // 根据启动器类型使用不同的验证逻辑
+        // Use different validation logic based on launcher type
         if launcherType == .sjmcLauncher {
-            // SJMCL: 检查是否存在 sjmclcfg.json 文件
+            // SJMCL: Check if sjmclcfg.json file exists
             let sjmclcfgPath = instancePath.appendingPathComponent("sjmclcfg.json")
             if fileManager.fileExists(atPath: sjmclcfgPath.path) {
-                // 验证 JSON 文件可以解析
+                // Verify that the JSON file can be parsed
                 do {
                     _ = try parseSJMCLInstanceJson(at: sjmclcfgPath)
                     return true
@@ -22,19 +22,19 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
             }
             return false
         } else {
-            // HMCL: 检查实例文件夹是否包含 文件夹名.json
+            // HMCL: Check if the instance folder contains foldername.json
             let fileManager = FileManager.default
 
-            // 用户选择的是实例文件夹，检查是否包含 文件夹名.json
+            // The user selects the instance folder, check whether it contains folder name.json
             let folderName = instancePath.lastPathComponent
             let folderNameJsonPath = instancePath.appendingPathComponent("\(folderName).json")
 
-            // 检查是否存在 文件夹名.json 文件
+            // Check if foldername.json file exists
             if fileManager.fileExists(atPath: folderNameJsonPath.path) {
-                // 尝试解析 JSON 文件，验证是否为有效的版本配置文件
+                // Try to parse the JSON file to verify whether it is a valid version configuration file
                 do {
                     let data = try Data(contentsOf: folderNameJsonPath)
-                    // 尝试解析为 JSON，检查是否包含必要的字段（如 id）
+                    // Try to parse to JSON, check if necessary fields are included (like id)
                     if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                        json["id"] != nil {
                         return true
@@ -49,7 +49,7 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
     }
 
     func parseInstance(at instancePath: URL, basePath: URL) throws -> ImportInstanceInfo? {
-        // 根据启动器类型使用不同的解析逻辑
+        // Use different parsing logic based on launcher type
         if launcherType == .sjmcLauncher {
             try parseSJMCLInstance(at: instancePath, basePath: basePath)
         } else {
@@ -59,11 +59,11 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
 
     // MARK: - SJMCL Parsing
 
-    /// 解析 SJMCL 实例
+    /// Parse SJMCL instances
     private func parseSJMCLInstance(at instancePath: URL, basePath: URL) throws -> ImportInstanceInfo? {
         let fileManager = FileManager.default
 
-        // 读取 sjmclcfg.json 文件
+        // Read the sjmclcfg.json file
         let sjmclcfgPath = instancePath.appendingPathComponent("sjmclcfg.json")
         guard fileManager.fileExists(atPath: sjmclcfgPath.path) else {
             return nil
@@ -71,16 +71,16 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
 
         let sjmclInstance = try parseSJMCLInstanceJson(at: sjmclcfgPath)
 
-        // 提取信息
+        // Extract information
         let gameName = sjmclInstance.name.isEmpty ? instancePath.lastPathComponent : sjmclInstance.name
         let gameVersion = sjmclInstance.version
         var modLoader = "vanilla"
         var modLoaderVersion = ""
 
-        // 提取 Mod Loader 信息
+        // Extract Mod Loader information
         if let modLoaderInfo = sjmclInstance.modLoader {
             let loaderType = modLoaderInfo.loaderType.lowercased()
-            // 标准化 loader 类型名称
+            // Standardized loader type names
             switch loaderType {
             case "fabric":
                 modLoader = "fabric"
@@ -108,7 +108,7 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
         )
     }
 
-    /// 解析 SJMCL 实例 JSON 文件
+    /// Parse SJMCL instance JSON file
     private func parseSJMCLInstanceJson(at path: URL) throws -> SJMCLInstance {
         let data = try Data(contentsOf: path)
         return try JSONDecoder().decode(SJMCLInstance.self, from: data)
@@ -116,11 +116,11 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
 
     // MARK: - HMCL Parsing
 
-    /// 解析 HMCL 实例
+    /// Parse HMCL instances
     private func parseHMCLInstance(at instancePath: URL, basePath: URL) throws -> ImportInstanceInfo? {
         let fileManager = FileManager.default
 
-        // 从 文件夹名.json 文件读取信息
+        // Read information from foldername.json file
         let folderName = instancePath.lastPathComponent
         let folderNameJsonPath = instancePath.appendingPathComponent("\(folderName).json")
 
@@ -129,7 +129,7 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
             return nil
         }
 
-        // 从版本 JSON 文件获取信息
+        // Get information from version JSON file
         let gameName = versionInfo.id ?? instancePath.lastPathComponent
         let gameVersion = versionInfo.mcVersion ?? ""
         let modLoader = versionInfo.modLoader ?? "vanilla"
@@ -147,7 +147,7 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
         )
     }
 
-    /// 解析 HMCL 版本 JSON 文件（文件夹名.json）
+    /// Parse HMCL version JSON file (folder name.json)
     private func parseHMCLVersionJson(at path: URL) throws -> HMCLVersionInfo? {
         guard let data = try? Data(contentsOf: path),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
@@ -156,19 +156,19 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
 
         let id = json["id"] as? String
 
-        // 从 arguments.game 中提取 Mod Loader 信息
+        // Extract Mod Loader information from arguments.game
         var modLoader = "vanilla"
         var modLoaderVersion = ""
         var mcVersion = ""
 
         if let arguments = json["arguments"] as? [String: Any],
            let gameArgs = arguments["game"] as? [Any] {
-            // 遍历参数数组，查找 Mod Loader 相关信息
+            // Traverse the parameter array to find Mod Loader related information
             for (index, arg) in gameArgs.enumerated() {
                 if let argString = arg as? String {
-                    // 检查 Mod Loader 类型
+                    // Check Mod Loader Type
                     if argString == "--launchTarget" {
-                        // 下一个参数是启动目标
+                        // The next parameter is the launch target
                         if index + 1 < gameArgs.count,
                            let launchTarget = gameArgs[index + 1] as? String {
                             switch launchTarget.lowercased() {
@@ -186,7 +186,7 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
                         }
                     }
 
-                    // 检查 Forge 版本
+                    // Check Forge version
                     if argString == "--fml.forgeVersion" {
                         if index + 1 < gameArgs.count,
                            let version = gameArgs[index + 1] as? String {
@@ -197,7 +197,7 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
                         }
                     }
 
-                    // 检查 Minecraft 版本
+                    // Check Minecraft version
                     if argString == "--fml.mcVersion" {
                         if index + 1 < gameArgs.count,
                            let version = gameArgs[index + 1] as? String {
@@ -205,7 +205,7 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
                         }
                     }
 
-                    // 检查 NeoForge 版本
+                    // Check NeoForge version
                     if argString == "--fml.neoforgeVersion" {
                         if index + 1 < gameArgs.count,
                            let version = gameArgs[index + 1] as? String {
@@ -214,18 +214,18 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
                         }
                     }
 
-                    // 检查 Fabric/Quilt 版本（通常在 --version 参数中）
+                    // Check Fabric/Quilt version (usually in the --version parameter)
                     if argString == "--version" {
                         if index + 1 < gameArgs.count,
                            let version = gameArgs[index + 1] as? String {
-                            // Fabric/Quilt 版本格式通常是 "fabric-loader-0.14.0-1.20.1"
+                            // The Fabric/Quilt version format is usually "fabric-loader-0.14.0-1.20.1"
                             if version.contains("fabric") {
                                 modLoader = "fabric"
                                 let components = version.components(separatedBy: "-")
                                 if components.count >= 3 {
-                                    modLoaderVersion = components[2] // 提取 loader 版本
+                                    modLoaderVersion = components[2] // Extract loader version
                                     if mcVersion.isEmpty && components.count >= 4 {
-                                        mcVersion = components[3] // 提取 MC 版本
+                                        mcVersion = components[3] // Extract MC version
                                     }
                                 }
                             } else if version.contains("quilt") {
@@ -252,7 +252,7 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
         )
     }
 
-    /// 解析 HMCL config.json 文件
+    /// Parse HMCL config.json file
     private func parseHMCLConfigJson(at path: URL) throws -> HMCLConfig? {
         let data = try Data(contentsOf: path)
         return try? JSONDecoder().decode(HMCLConfig.self, from: data)
@@ -260,9 +260,9 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
 
     // MARK: - Common Methods
 
-    /// 从游戏目录提取版本信息
+    /// Extract version information from game directory
     private func extractVersionFromGameDirectory(_ gameDirectory: URL) throws -> String? {
-        // 尝试从版本文件读取
+        // Try reading from version file
         let versionFile = gameDirectory.appendingPathComponent("version.json")
         let fileManager = FileManager.default
 
@@ -305,7 +305,7 @@ private struct SJMCLModLoader: Codable {
 }
 
 private struct SJMCLSpecGameConfig: Codable {
-    // 可添加字段
+    // Fields can be added
 }
 
 // MARK: - HMCL Models

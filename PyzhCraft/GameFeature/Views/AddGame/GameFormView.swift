@@ -102,8 +102,8 @@ struct GameFormView: View {
             footer: { footerView }
         )
 
-        // 当处于“导入启动器”模式时，避免在父视图再挂一个 fileImporter，
-        // 让子视图的 fileImporter 正常工作
+        // When in "Import Launcher" mode, avoid hanging another fileImporter in the parent view
+        // Make the subview's fileImporter work properly
         if case .launcherImport = mode {
             content
         } else {
@@ -166,12 +166,12 @@ struct GameFormView: View {
             }
 
             Button {
-                // 先切换到非 launcherImport 模式
+                // First switch to non-launcherImport mode
                 if case .launcherImport = mode {
                     mode = .creation
                 }
                 filePickerType = .modPack
-                // 异步等待视图更新
+                // Asynchronously wait for view updates
                 DispatchQueue.main.async {
                     showFilePicker = true
                 }
@@ -202,10 +202,10 @@ struct GameFormView: View {
     private var cancelButton: some View {
         Button {
             if isDownloading {
-                // 当正在下载时，触发取消处理逻辑
+                // When downloading, trigger cancellation processing logic
                 triggerCancel = true
             } else {
-                // 非下载状态直接关闭窗口
+                // Directly close the window when not downloading
                 dismiss()
             }
         } label: {

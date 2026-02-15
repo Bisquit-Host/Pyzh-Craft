@@ -1,6 +1,6 @@
 import Foundation
 
-/// IP地理位置响应模型 (ipapi.co API格式)
+/// IP Geolocation Response Model (ipapi.co API format)
 struct IPLocationResponse: Codable {
     let countryCode: String?
     let error: Bool
@@ -18,17 +18,17 @@ struct IPLocationResponse: Codable {
         reason = try container.decodeIfPresent(String.self, forKey: .reason)
     }
 
-    /// 是否请求成功
+    /// Whether the request was successful
     var isSuccess: Bool {
         !error && countryCode != nil
     }
 
-    /// 是否为中国IP
+    /// Is it a Chinese IP?
     var isChina: Bool {
         countryCode == "CN"
     }
 
-    /// 是否为国外IP
+    /// Is it a foreign IP?
     var isForeign: Bool {
         isSuccess && !isChina
     }

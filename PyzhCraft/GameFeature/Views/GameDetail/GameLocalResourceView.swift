@@ -15,26 +15,26 @@ struct GameLocalResourceView: View {
     @State private var hasMoreResults: Bool = true
     @State private var isLoadingMore: Bool = false
     @State private var hasLoaded: Bool = false
-    @State private var resourceDirectory: URL? // 保存资源目录路径
-    @State private var allFiles: [URL] = [] // 所有文件列表
-    @State private var searchTimer: Timer? // 搜索防抖定时器
+    @State private var resourceDirectory: URL? // Save resource directory path
+    @State private var allFiles: [URL] = [] // List of all files
+    @State private var searchTimer: Timer? // Search for anti-shake timer
     @Binding var localFilter: LocalResourceFilter
 
     private static let pageSize: Int = 20
     private var pageSize: Int { Self.pageSize }
 
-    // 当前显示的资源列表（无限滚动）
+    // List of currently displayed resources (infinite scroll)
     private var displayedResources: [ModrinthProjectDetail] {
         scannedResources
     }
 
-    /// 当前筛选下真正用于扫描的文件列表
+    /// List of files actually used for scanning under the current filter
     private var filesToScan: [URL] {
         switch localFilter {
         case .all:
             return allFiles
         case .disabled:
-            // 只扫描 .disable 后缀文件
+            // Only scan files with .disable suffix
             return allFiles.filter { $0.lastPathComponent.hasSuffix(".disable") }
         }
     }
@@ -60,7 +60,7 @@ struct GameLocalResourceView: View {
         .onAppear {
             if !hasLoaded {
                 hasLoaded = true
-                // 页面初始化时，加载第一页资源（无限滚动）
+                // When the page is initialized, load the first page resources (infinite scrolling)
                 initializeResourceDirectory()
                 resetPagination()
                 refreshAllFiles()
@@ -68,29 +68,29 @@ struct GameLocalResourceView: View {
             }
         }
         .onDisappear {
-            // 页面关闭后清除所有数据
+            // Clear all data after closing the page
             clearAllData()
         }
         .onChange(of: refreshToken) { _, _ in
-            // 重置资源目录，确保切换游戏时使用新游戏的目录
+            // Reset the resource directory to ensure that the directory of the new game is used when switching games
             resourceDirectory = nil
             resetPagination()
             refreshAllFiles()
             loadPage(page: 1, append: false)
         }
         .onChange(of: query) { oldValue, newValue in
-            // 当资源类型（query）改变时，重新初始化资源目录并刷新文件列表
+            // When the resource type (query) changes, reinitialize the resource directory and refresh the file list
             if oldValue != newValue {
                 resourceDirectory = nil
                 resetPagination()
                 refreshAllFiles()
                 loadPage(page: 1, append: false)
             }
-            // 保持搜索文本
+            // keep search text
             searchText = ""
         }
         .onChange(of: searchText) { oldValue, newValue in
-            // 搜索文本变化时，重置分页并触发防抖搜索
+            // When the search text changes, reset pagination and trigger anti-shake search
             if oldValue != newValue {
                 resetPagination()
                 debounceSearch()
@@ -116,7 +116,7 @@ struct GameLocalResourceView: View {
         }
     }
 
-    // MARK: - 列表内容
+    // MARK: - List contents
     @ViewBuilder private var listContent: some View {
         if let error {
             VStack {
@@ -157,8 +157,8 @@ struct GameLocalResourceView: View {
                 )
                 .listRowSeparator(.hidden)
                 .onTapGesture {
-                    // 本地资源不跳转详情页面（沿用原逻辑）
-                    // 使用 id 前缀判断本地资源，更可靠
+                    // Local resources do not jump to the details page (the original logic is used)
+                    // Use id prefix to determine local resources, which is more reliable
                     if !mod.projectId.hasPrefix("local_") && !mod.projectId.hasPrefix("file_") {
                         selectedProjectId = mod.projectId
                         if let type = ResourceType(rawValue: query) {
@@ -182,7 +182,7 @@ struct GameLocalResourceView: View {
         .padding(16)
     }
 
-    // MARK: - 分页加载
+    // MARK: - Loading in pages
     private func resetPagination() {
         currentPage = 1
         hasMoreResults = true
@@ -192,13 +192,13 @@ struct GameLocalResourceView: View {
         scannedResources = []
     }
 
-    // MARK: - 清除数据
-    /// 清除页面所有数据
+    // MARK: - clear data
+    /// Clear all data on the page
     private func clearAllData() {
-        // 清理搜索定时器
+        // Clear search timer
         searchTimer?.invalidate()
         searchTimer = nil
-        // 注意：不再清除搜索文本，保持用户搜索状态
+        // NOTE: Search text is no longer cleared, user search status remains
         scannedResources = []
         isLoadingResources = false
         error = nil
@@ -210,8 +210,8 @@ struct GameLocalResourceView: View {
         allFiles = []
     }
 
-    // MARK: - 搜索相关
-    /// 防抖搜索
+    // MARK: - Search related
+    /// Anti-shake search
     private func debounceSearch() {
         searchTimer?.invalidate()
         let currentSearchText = searchText
@@ -219,30 +219,30 @@ struct GameLocalResourceView: View {
             withTimeInterval: 0.5,
             repeats: false
         ) { _ in
-            // 检查搜索文本是否已变化（避免过期的搜索）
+            // Check if search text has changed (avoid expired searches)
             if self.searchText == currentSearchText {
                 self.loadPage(page: 1, append: false)
             }
         }
     }
 
-    /// 根据 title 和 projectType 过滤资源详情
+    /// Filter resource details based on title and projectType
     private func filterResourcesByTitle(_ details: [ModrinthProjectDetail]) -> [ModrinthProjectDetail] {
-        // 按 query 筛选资源类型
+        // Filter resource types by query
         let queryLower = query.lowercased()
         let filteredByType = details.filter { detail in
-            // 本地资源（local_/file_ 开头）目录已按 query 筛选，fallback 的 projectType 恒为 mod
+            // The local resource (starting with local_/file_) directory has been filtered by query, and the projectType of fallback is always mod
             if detail.id.hasPrefix("local_") || detail.id.hasPrefix("file_") {
-                // 本地资源：目录已经筛选，直接显示
+                // Local resources: The directory has been filtered and displayed directly
                 return true
             } else {
-                // 从 API 获取的资源：根据 projectType 筛选
-                // 只显示与 query 匹配的资源类型
+                // Resources obtained from API: filter based on projectType
+                // Only display resource types matching query
                 return detail.projectType.lowercased() == queryLower
             }
         }
 
-        // 按搜索文本过滤
+        // Filter by search text
         let searchLower = searchText.lowercased()
             .trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -255,16 +255,16 @@ struct GameLocalResourceView: View {
         }
     }
 
-    // MARK: - 资源目录初始化
-    /// 初始化资源目录路径
+    // MARK: - Resource directory initialization
+    /// Initialize resource directory path
     private func initializeResourceDirectory() {
-        // 如果 resourceDirectory 已存在，检查是否匹配当前游戏
+        // If resourceDirectory already exists, check if it matches the current game
         if let existingDir = resourceDirectory {
             let expectedDir = AppPaths.resourceDirectory(
                 for: query,
                 gameName: game.gameName
             )
-            // 如果目录不匹配，需要重新初始化
+            // If the directories do not match, reinitialization is required
             if existingDir != expectedDir {
                 resourceDirectory = nil
             } else {
@@ -289,7 +289,7 @@ struct GameLocalResourceView: View {
         }
     }
 
-    // MARK: - 文件列表
+    // MARK: - file list
     private func refreshAllFiles() {
         // Modpacks don't have a local directory to scan
         if query.lowercased() == "modpack" {
@@ -321,7 +321,7 @@ struct GameLocalResourceView: View {
             return
         }
 
-        // 根据当前筛选选择实际要扫描的文件集合
+        // Select the actual set of files to scan based on the current filter
         let sourceFiles = filesToScan
 
         if sourceFiles.isEmpty {
@@ -341,39 +341,39 @@ struct GameLocalResourceView: View {
 
         let isSearching = !searchText.isEmpty
 
-        // 始终使用当前筛选下的文件列表进行分页扫描，然后在结果中根据 title 过滤
+        // Always use the file list under the current filter for paging scanning, and then filter based on title in the results
         ModScanner.shared.scanResourceFilesPage(
             fileURLs: sourceFiles,
             page: page,
             pageSize: pageSize
         ) { [self] details, hasMore in
             DispatchQueue.main.async {
-                // 根据 title 过滤结果
+                // Filter results based on title
                 let filteredDetails = self.filterResourcesByTitle(details)
 
                 if append {
-                    // 追加模式：只添加匹配的结果，并去重
-                    // 获取已存在的 id 集合，用于去重
+                    // Append mode: only add matching results and remove duplicates
+                    // Get the existing id collection for deduplication
                     let existingIds = Set(self.scannedResources.map { $0.id })
-                    // 只添加不重复的资源
+                    // Only add unique resources
                     let newDetails = filteredDetails.filter { !existingIds.contains($0.id) }
                     self.scannedResources.append(contentsOf: newDetails)
                 } else {
-                    // 替换模式：直接使用过滤后的结果
+                    // Replacement mode: directly use the filtered results
                     scannedResources = filteredDetails
                 }
 
-                // 搜索模式下：如果还有更多页，直接自动加载下一页，直到查完所有文件
+                // In search mode: If there are more pages, the next page will be automatically loaded until all files are searched
                 if isSearching && hasMore {
-                    // 先重置加载状态，然后继续加载下一页
+                    // Reset the loading status first, then continue loading the next page
                     isLoadingResources = false
                     isLoadingMore = false
                     let nextPage = page + 1
                     self.currentPage = nextPage
-                    // 直接继续加载下一页，不判断过滤结果
+                    // Continue loading the next page directly without judging the filtering results
                     self.loadPage(page: nextPage, append: true)
                 } else {
-                    // 非搜索模式或已查完所有文件
+                    // Not in search mode or all files have been searched
                     hasMoreResults = hasMore
                     isLoadingResources = false
                     isLoadingMore = false
@@ -392,7 +392,7 @@ struct GameLocalResourceView: View {
             })
         else { return }
 
-        // 滚动到已加载列表的末尾附近时加载下一页
+        // Load next page when scrolling near the end of loaded list
         let thresholdIndex = max(scannedResources.count - 5, 0)
         if index >= thresholdIndex {
             currentPage += 1
@@ -401,25 +401,25 @@ struct GameLocalResourceView: View {
         }
     }
 
-    // MARK: - 刷新资源
-    /// 刷新资源列表（删除资源后调用）
+    // MARK: - Refresh resources
+    /// Refresh the resource list (called after deleting the resource)
     private func refreshResources() {
-        // 刷新文件列表
+        // Refresh file list
         refreshAllFiles()
-        // 重置分页并重新加载第一页
+        // Reset pagination and reload first page
         resetPagination()
         loadPage(page: 1, append: false)
     }
 
-    /// 本地资源启用/禁用状态变更后的处理
+    /// Processing after local resource enable/disable status changes
     /// - Parameters:
-    ///   - project: 对应的 ModrinthProject（由 detail 转换而来，其 fileName 为切换前的旧值）
-    ///   - isDisabled: 变更后的禁用状态
+    ///   - project: the corresponding ModrinthProject (converted from detail, its fileName is the old value before switching)
+    ///   - isDisabled: changed disabled state
     private func handleLocalDisableStateChanged(
         project: ModrinthProject,
         isDisabled: Bool
     ) {
-        // 同步更新 scannedResources 中对应条目的 fileName，避免滚动复用行时状态回退
+        // Synchronously update the fileName of the corresponding entry in scannedResources to avoid state rollback when scrolling multiplexed rows
         guard let oldFileName = project.fileName else { return }
         let newFileName: String
         if isDisabled {
@@ -434,7 +434,7 @@ struct GameLocalResourceView: View {
             d.fileName = newFileName
             scannedResources[i] = d
         }
-        // 同步更新 allFiles，保持与磁盘一致
+        // Update allFiles synchronously to keep it consistent with the disk
         let resourceDir = resourceDirectory ?? AppPaths.resourceDirectory(
             for: query,
             gameName: game.gameName
@@ -443,31 +443,31 @@ struct GameLocalResourceView: View {
            let j = allFiles.firstIndex(where: { $0.lastPathComponent == oldFileName }) {
             allFiles[j] = dir.appendingPathComponent(newFileName)
         }
-        // 在“已禁用”筛选下，当资源被启用时，从当前结果中移除该资源；无需重新扫描
+        // Under "Disabled" filtering, when a resource is enabled, remove the resource from the current results; no rescan is required
         if localFilter == .disabled, !isDisabled {
             scannedResources.removeAll { $0.id == project.projectId }
         }
     }
 
-    /// 更新成功后的局部刷新：仅更新当前条目的 hash 与列表项，不全局扫描
+    /// Partial refresh after successful update: only update the hash and list items of the current entry, no global scan
     /// - Parameters:
-    ///   - projectId: 项目 id
-    ///   - oldFileName: 更新前的文件名（用于在 allFiles 中替换）
-    ///   - newFileName: 新文件名
-    ///   - newHash: 新文件 hash（ModScanner 缓存已由下载器更新，此处仅预留）
+    ///   - projectId: project id
+    ///   - oldFileName: file name before update (used for replacement in allFiles)
+    ///   - newFileName: new file name
+    ///   - newHash: new file hash (ModScanner cache has been updated by the downloader, only reserved here)
     private func handleResourceUpdated(
         projectId: String,
         oldFileName: String,
         newFileName: String,
         newHash: String?
     ) {
-        // 更新 scannedResources 中对应条目的 fileName
+        // Update the fileName of the corresponding entry in scannedResources
         if let i = scannedResources.firstIndex(where: { $0.id == projectId }) {
             var d = scannedResources[i]
             d.fileName = newFileName
             scannedResources[i] = d
         }
-        // 更新 allFiles：将旧文件 URL 替换为新文件 URL，避免与后续分页不一致
+        // Update allFiles: Replace the old file URL with the new file URL to avoid inconsistency with subsequent paging
         let resourceDir = resourceDirectory ?? AppPaths.resourceDirectory(
             for: query,
             gameName: game.gameName
@@ -477,7 +477,7 @@ struct GameLocalResourceView: View {
         }
     }
 
-    /// 切换资源启用/禁用状态
+    /// Toggle resource enable/disable status
     private func toggleResourceState(_ mod: ModrinthProject) {
         guard let resourceDir = resourceDirectory ?? AppPaths.resourceDirectory(
             for: query,

@@ -1,17 +1,17 @@
 import Foundation
 
 enum CurseForgeToModrinthAdapter {
-    /// 将 CurseForge 项目详情转换为 Modrinth 格式
+    /// Convert CurseForge project details to Modrinth format
     /// - Parameters:
-    ///   - cf: CurseForge 项目详情
-    ///   - description: 从 description 接口获取的 HTML 描述内容（可选，如果提供则优先使用）
-    /// - Returns: Modrinth 格式的项目详情
+    ///   - cf: CurseForge project details
+    ///   - description: HTML description content obtained from the description interface (optional, if provided, it will be used first)
+    /// - Returns: Project details in Modrinth format
     static func convert(_ cf: CurseForgeModDetail, description: String = "") -> ModrinthProjectDetail? {
-        // 日期解析器
+        // date parser
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
 
-        // 解析日期
+        // parse date
         var publishedDate = Date()
         var updatedDate = Date()
         if let dateCreated = cf.dateCreated {
@@ -21,7 +21,7 @@ enum CurseForgeToModrinthAdapter {
             updatedDate = dateFormatter.date(from: dateModified) ?? Date()
         }
 
-        // 提取游戏版本（从 latestFilesIndexes）
+        // Extract game version (from latestFilesIndexes)
         var gameVersions: [String] = []
         var allVersionsFromIndexes: [String] = []
         if let indexes = cf.latestFilesIndexes {
@@ -29,7 +29,7 @@ enum CurseForgeToModrinthAdapter {
             gameVersions = CommonUtil.sortMinecraftVersions(allVersionsFromIndexes)
         }
 
-        // 提取加载器（从 latestFilesIndexes）
+        // Extract loader (from latestFilesIndexes)
         var loaders: [String] = []
         if let indexes = cf.latestFilesIndexes {
             let loaderTypes = Set(indexes.compactMap { $0.modLoader })
@@ -49,36 +49,36 @@ enum CurseForgeToModrinthAdapter {
             }
         }
 
-        // 根据项目类型处理加载器
+        // Handle loaders based on project type
         let projectType = cf.projectType
         if loaders.isEmpty {
             if projectType == "resourcepack" {
-                // 资源包使用 "minecraft" loader
+                // Resource packs use the "minecraft" loader
                 loaders = ["minecraft"]
             } else if projectType == "datapack" {
-                // 数据包使用 "datapack" loader
+                // Datapacks use the "datapack" loader
                 loaders = ["datapack"]
             }
         }
 
-        // 提取版本 ID 列表
+        // Extract a list of version IDs
         var versions: [String] = []
         if let files = cf.latestFiles {
             versions = files.map { String($0.id) }
         }
 
-        // 提取分类
+        // Extract classification
         let categories = cf.categories.map { $0.slug }
 
-        // 提取图标 URL
+        // Extract icon URL
         let iconUrl = cf.logo?.url ?? cf.logo?.thumbnailUrl
 
-        // 创建许可证（CurseForge 通常没有明确的许可证信息）
+        // Create a license (CurseForge usually does not have explicit license information)
         let license = License(id: "unknown", name: "Unknown", url: nil)
 
-        // 使用 "cf-" 前缀标识 CurseForge 项目，避免与 Modrinth 项目混淆
-        // 使用 description 接口返回的 HTML 内容作为 body，同时提取纯文本作为 description
-        // 如果 description 为空，则回退到 summary
+        // Use the "cf-" prefix to identify the CurseForge project to avoid confusion with the Modrinth project
+        // Use the HTML content returned by the description interface as the body, and extract the plain text as the description
+        // If description is empty, fall back to summary
         let bodyContent = description.isEmpty ? (cf.body ?? cf.summary) : description
         let descriptionText = description.isEmpty ? cf.summary : extractPlainText(from: description)
 
@@ -87,22 +87,22 @@ enum CurseForgeToModrinthAdapter {
             title: cf.name,
             description: descriptionText,
             categories: categories,
-            clientSide: "optional", // CurseForge 没有明确的客户端/服务端信息
+            clientSide: "optional", // CurseForge has no clear client/server information
             serverSide: "optional",
             body: bodyContent,
             additionalCategories: nil,
             issuesUrl: cf.links?.issuesUrl,
             sourceUrl: cf.links?.sourceUrl,
             wikiUrl: cf.links?.wikiUrl ?? cf.links?.websiteUrl,
-            discordUrl: nil, // CurseForge 没有 Discord URL
+            discordUrl: nil, // CurseForge has no Discord URL
             projectType: cf.projectType,
             downloads: cf.downloadCount ?? 0,
             iconUrl: iconUrl,
-            id: "cf-\(cf.id)", // 使用 "cf-" 前缀标识
+            id: "cf-\(cf.id)", // Use "cf-" prefix identification
             team: "",
             published: publishedDate,
             updated: updatedDate,
-            followers: 0, // CurseForge 没有关注数
+            followers: 0, // CurseForge has no followers
             license: license,
             versions: versions,
             gameVersions: gameVersions,
@@ -112,29 +112,29 @@ enum CurseForgeToModrinthAdapter {
         )
     }
 
-    /// 将 CurseForge 文件详情转换为 Modrinth 版本格式
+    /// Convert CurseForge file details to Modrinth version format
     /// - Parameters:
-    ///   - cfFile: CurseForge 文件详情
-    ///   - projectId: 项目 ID
-    /// - Returns: Modrinth 格式的版本详情
+    ///   - cfFile: CurseForge file details
+    ///   - projectId: project ID
+    /// - Returns: version details in Modrinth format
     static func convertVersion(_ cfFile: CurseForgeModFileDetail, projectId: String) -> ModrinthProjectDetailVersion? {
-        // 日期解析器
+        // date parser
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
 
-        // 解析发布日期
+        // Parse release date
         var publishedDate = Date()
         if !cfFile.fileDate.isEmpty {
             publishedDate = dateFormatter.date(from: cfFile.fileDate) ?? Date()
         }
 
-        // 版本类型统一视为 release，避免不必要的区分
+        // Version types are uniformly regarded as release to avoid unnecessary distinctions
         let versionType = "release"
 
-        // 文件级别不推断加载器，保持空数组
+        // File level does not infer loader, keep empty array
         let loaders: [String] = []
 
-        // 转换依赖
+        // Conversion dependencies
         var dependencies: [ModrinthVersionDependency] = []
         if let cfDeps = cfFile.dependencies {
             dependencies = cfDeps.compactMap { dep in
@@ -159,17 +159,17 @@ enum CurseForgeToModrinthAdapter {
             }
         }
 
-        // 转换文件
+        // Convert files
         let downloadUrl = cfFile.downloadUrl ?? URLConfig.API.CurseForge.fallbackDownloadUrl(
             fileId: cfFile.id,
             fileName: cfFile.fileName
         ).absoluteString
 
         var files: [ModrinthVersionFile] = []
-        // 提取哈希值：优先使用 hashes 数组，如果没有则使用 hash 字段
+        // Extract hash value: use hashes array first, if not, use hash field
         let hashes: ModrinthVersionFileHashes
         if let hashesArray = cfFile.hashes, !hashesArray.isEmpty {
-            // 优先从 hashes 数组中提取
+            // Extract from hashes array first
             let sha1Hash = hashesArray.first { $0.algo == 1 }
             let sha512Hash = hashesArray.first { $0.algo == 2 }
             hashes = ModrinthVersionFileHashes(
@@ -177,7 +177,7 @@ enum CurseForgeToModrinthAdapter {
                 sha1: sha1Hash?.value ?? ""
             )
         } else if let hash = cfFile.hash {
-            // 如果没有 hashes 数组，使用 hash 字段
+            // If there is no hashes array, use the hash field
             switch hash.algo {
             case 1:
                 hashes = ModrinthVersionFileHashes(sha512: "", sha1: hash.value)
@@ -187,7 +187,7 @@ enum CurseForgeToModrinthAdapter {
                 hashes = ModrinthVersionFileHashes(sha512: "", sha1: "")
             }
         } else {
-            // 如果都没有，使用空的 hash
+            // If neither, use empty hash
             hashes = ModrinthVersionFileHashes(sha512: "", sha1: "")
         }
 
@@ -196,19 +196,19 @@ enum CurseForgeToModrinthAdapter {
                 hashes: hashes,
                 url: downloadUrl,
                 filename: cfFile.fileName,
-                primary: true, // CurseForge 通常只有一个主要文件
+                primary: true, // CurseForge usually has only one main file
                 size: cfFile.fileLength ?? 0,
                 fileType: nil
             )
         )
 
-        // 确保 projectId 使用 "cf-" 前缀（如果还没有）
+        // Make sure the projectId is prefixed with "cf-" if it isn't already
         let normalizedProjectId = projectId.hasPrefix("cf-") ? projectId : "cf-\(projectId.replacingOccurrences(of: "cf-", with: ""))"
 
         return ModrinthProjectDetailVersion(
             gameVersions: cfFile.gameVersions,
             loaders: loaders,
-            id: "cf-\(cfFile.id)", // 使用 "cf-" 前缀标识
+            id: "cf-\(cfFile.id)", // Use "cf-" prefix identification
             projectId: normalizedProjectId,
             authorId: cfFile.authors?.first?.name ?? "unknown",
             featured: false,
@@ -217,7 +217,7 @@ enum CurseForgeToModrinthAdapter {
             changelog: cfFile.changelog,
             changelogUrl: nil,
             datePublished: publishedDate,
-            downloads: 0, // CurseForge 文件没有单独的下载数
+            downloads: 0, // CurseForge files do not have separate download numbers
             versionType: versionType,
             status: "listed",
             requestedStatus: nil,
@@ -226,12 +226,12 @@ enum CurseForgeToModrinthAdapter {
         )
     }
 
-    /// 将 CurseForge 搜索结果转换为 Modrinth 格式
-    /// - Parameter cfResult: CurseForge 搜索结果
-    /// - Returns: Modrinth 格式的搜索结果
+    /// Convert CurseForge search results to Modrinth format
+    /// - Parameter cfResult: CurseForge search results
+    /// - Returns: Search results in Modrinth format
     static func convertSearchResult(_ cfResult: CurseForgeSearchResult) -> ModrinthResult {
         let hits = cfResult.data.compactMap { cfMod -> ModrinthProject? in
-            // 确定项目类型
+            // Determine project type
             let projectType: String
             if let classId = cfMod.classId {
                 switch classId {
@@ -239,20 +239,20 @@ enum CurseForgeToModrinthAdapter {
                 case 12: projectType = "resourcepack"
                 case 6552: projectType = "shader"
                 case 6945: projectType = "datapack"
-                case 4471: projectType = "modpack"   // CurseForge 整合包
+                case 4471: projectType = "modpack"   // CurseForge integration package
                 default: projectType = "mod"
                 }
             } else {
                 projectType = "mod"
             }
 
-            // 提取版本 ID 列表
+            // Extract a list of version IDs
             var versions: [String] = []
             if let files = cfMod.latestFiles {
                 versions = files.map { String($0.id) }
             }
 
-            // 使用 "cf-" 前缀标识 CurseForge 项目，避免与 Modrinth 项目混淆
+            // Use the "cf-" prefix to identify the CurseForge project to avoid confusion with the Modrinth project
             return ModrinthProject(
                 projectId: "cf-\(cfMod.id)",
                 projectType: projectType,
@@ -286,17 +286,17 @@ enum CurseForgeToModrinthAdapter {
         )
     }
 
-    /// 从 HTML 内容中提取纯文本作为简短描述
-    /// - Parameter html: HTML 字符串
-    /// - Returns: 提取的纯文本（限制长度）
+    /// Extract plain text from HTML content as a short description
+    /// - Parameter html: HTML string
+    /// - Returns: Extracted plain text (limited length)
     private static func extractPlainText(from html: String) -> String {
-        // 简单的 HTML 标签移除，提取前 200 个字符作为描述
+        // Simple HTML tag removal, extract first 200 characters as description
         let text = html
             .replacingOccurrences(of: "<[^>]+>", with: " ", options: .regularExpression)
             .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
             .trimmingCharacters(in: .whitespacesAndNewlines)
 
-        // 限制长度，避免描述过长
+        // Limit the length to avoid overly long descriptions
         if text.count > 200 {
             return String(text.prefix(200)) + "..."
         }

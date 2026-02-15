@@ -2,12 +2,12 @@ import Foundation
 
 enum AppPaths {
     // MARK: - Path Cache
-    /// 路径缓存，避免重复创建相同的 URL 对象
+    /// Path caching to avoid repeatedly creating the same URL object
     private static let pathCache = NSCache<NSString, NSURL>()
     private static let cacheQueue = DispatchQueue(label: "com.pyzhcraft.apppaths.cache", attributes: .concurrent)
 
     // MARK: - Cached Path Helper
-    /// 获取缓存的 URL 路径，如果不存在则创建并缓存
+    /// Get the cached URL path, create and cache it if it does not exist
     private static func cachedURL(key: String, factory: () -> URL) -> URL {
         return cacheQueue.sync {
             if let cached = pathCache.object(forKey: key as NSString) {
@@ -31,7 +31,7 @@ enum AppPaths {
         launcherSupportDirectory.appendingPathComponent(AppConstants.DirectoryNames.runtime)
     }
 
-    /// 指定版本的 Java 可执行文件路径（runtime 目录下的 jre.bundle）
+    /// Path to the Java executable file of the specified version (jre.bundle in the runtime directory)
     static func javaExecutablePath(version: String) -> String {
         runtimeDirectory.appendingPathComponent(version).appendingPathComponent("jre.bundle/Contents/Home/bin/java").path
     }
@@ -95,8 +95,8 @@ enum AppPaths {
         }
     }
 
-    /// 清除指定游戏相关的路径缓存（删除游戏时调用）
-    /// - Parameter gameName: 游戏名称
+    /// Clear the path cache related to the specified game (called when deleting the game)
+    /// - Parameter gameName: game name
     static func invalidatePaths(forGameName gameName: String) {
         let keys = [
             "profileDirectory:\(gameName)",
@@ -121,13 +121,13 @@ enum AppPaths {
         AppConstants.DirectoryNames.crashReports,
     ]
 
-    /// 日志文件目录 - 使用系统标准日志目录，失败时回退到应用支持目录
+    /// Log file directory - use the system standard log directory and fall back to the application support directory in case of failure
     static var logsDirectory: URL {
         if let libraryDirectory = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first {
             return libraryDirectory.appendingPathComponent("Logs", isDirectory: true)
                 .appendingPathComponent(Bundle.main.appName, isDirectory: true)
         }
-        // 备用方案：使用应用支持目录下的 logs 子目录
+        // Alternate solution: Use the logs subdirectory under your application's support directory
         return launcherSupportDirectory.appendingPathComponent(AppConstants.DirectoryNames.logs, isDirectory: true)
     }
 }
@@ -142,7 +142,7 @@ extension AppPaths {
         default: nil
         }
     }
-    /// 全局缓存文件路径 - 使用系统标准缓存目录，异常时回退到应用支持目录下的 Cache
+    /// Global cache file path - use the system standard cache directory, fall back to the Cache in the application support directory in case of exceptions
     static var appCache: URL {
         if let cachesDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first {
             return cachesDirectory.appendingPathComponent(Bundle.main.identifier)
@@ -152,14 +152,14 @@ extension AppPaths {
         return launcherSupportDirectory.appendingPathComponent("Cache", isDirectory: true)
     }
 
-    /// 数据目录路径
+    /// Data directory path
     static var dataDirectory: URL {
         cachedURL(key: "dataDirectory") {
             launcherSupportDirectory.appendingPathComponent(AppConstants.DirectoryNames.data, isDirectory: true)
         }
     }
 
-    /// 游戏版本数据库路径
+    /// Game version database path
     static var gameVersionDatabase: URL {
         dataDirectory.appendingPathComponent("data.db")
     }

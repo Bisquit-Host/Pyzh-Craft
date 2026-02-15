@@ -22,10 +22,10 @@ class AppCacheManager {
     // MARK: - Public API
 
     /// - Parameters:
-    ///   - namespace: 命名空间
-    ///   - key: 键
-    ///   - value: 值
-    /// - Throws: GlobalError 当操作失败时
+    ///   - namespace: namespace
+    ///   - key: key
+    ///   - value: value
+    /// - Throws: GlobalError when the operation fails
     func set<T: Codable>(namespace: String, key: String, value: T) throws {
         try queue.sync {
             var nsDict = try loadNamespace(namespace)
@@ -45,9 +45,9 @@ class AppCacheManager {
     }
 
     /// - Parameters:
-    ///   - namespace: 命名空间
-    ///   - key: 键
-    ///   - value: 值
+    ///   - namespace: namespace
+    ///   - key: key
+    ///   - value: value
     func setSilently<T: Codable>(namespace: String, key: String, value: T) {
         do {
             try set(namespace: namespace, key: key, value: value)
@@ -56,12 +56,12 @@ class AppCacheManager {
         }
     }
 
-    /// 获取缓存值
+    /// Get cached value
     /// - Parameters:
-    ///   - namespace: 命名空间
-    ///   - key: 键
-    ///   - type: 期望的类型
-    /// - Returns: 解码后的值，如果不存在或解码失败则返回 nil
+    ///   - namespace: namespace
+    ///   - key: key
+    ///   - type: expected type
+    /// - Returns: decoded value, returns nil if it does not exist or decoding fails
     func get<T: Codable>(namespace: String, key: String, as type: T.Type) -> T? {
         return queue.sync {
             do {
@@ -85,11 +85,11 @@ class AppCacheManager {
         }
     }
 
-    /// 移除缓存项
+    /// Remove cached items
     /// - Parameters:
-    ///   - namespace: 命名空间
-    ///   - key: 键
-    /// - Throws: GlobalError 当操作失败时
+    ///   - namespace: namespace
+    ///   - key: key
+    /// - Throws: GlobalError when the operation fails
     func remove(namespace: String, key: String) throws {
         try queue.sync {
             var nsDict = try loadNamespace(namespace)
@@ -98,10 +98,10 @@ class AppCacheManager {
         }
     }
 
-    /// 移除缓存项（静默版本）
+    /// Remove cached items (silent version)
     /// - Parameters:
-    ///   - namespace: 命名空间
-    ///   - key: 键
+    ///   - namespace: namespace
+    ///   - key: key
     func removeSilently(namespace: String, key: String) {
         do {
             try remove(namespace: namespace, key: key)
@@ -110,17 +110,17 @@ class AppCacheManager {
         }
     }
 
-    /// 清空指定命名空间的缓存
-    /// - Parameter namespace: 命名空间
-    /// - Throws: GlobalError 当操作失败时
+    /// Clear the cache of the specified namespace
+    /// - Parameter namespace: namespace
+    /// - Throws: GlobalError when the operation fails
     func clear(namespace: String) throws {
         try queue.sync {
             try saveNamespace(namespace, dict: [:])
         }
     }
 
-    /// 清空指定命名空间的缓存（静默版本）
-    /// - Parameter namespace: 命名空间
+    /// Clear the cache of the specified namespace (silent version)
+    /// - Parameter namespace: namespace
     func clearSilently(namespace: String) {
         do {
             try clear(namespace: namespace)
@@ -129,8 +129,8 @@ class AppCacheManager {
         }
     }
 
-    /// 清空所有缓存
-    /// - Throws: GlobalError 当操作失败时
+    /// Clear all cache
+    /// - Throws: GlobalError when the operation fails
     func clearAll() throws {
         try queue.sync {
 
@@ -149,7 +149,7 @@ class AppCacheManager {
         }
     }
 
-    /// 清空所有缓存（静默版本）
+    /// Clear all caches (silent version)
     func clearAllSilently() {
         do {
             try clearAll()
@@ -160,10 +160,10 @@ class AppCacheManager {
 
     // MARK: - Persistence
 
-    /// 加载命名空间数据
-    /// - Parameter namespace: 命名空间
-    /// - Returns: 命名空间数据字典
-    /// - Throws: GlobalError 当操作失败时
+    /// Load namespace data
+    /// - Parameter namespace: namespace
+    /// - Returns: namespace data dictionary
+    /// - Throws: GlobalError when the operation fails
     private func loadNamespace(_ namespace: String) throws -> [String: Data] {
         let url = try fileURL(for: namespace)
 
@@ -183,11 +183,11 @@ class AppCacheManager {
         }
     }
 
-    /// 保存命名空间数据
+    /// Save namespace data
     /// - Parameters:
-    ///   - namespace: 命名空间
-    ///   - dict: 要保存的数据字典
-    /// - Throws: GlobalError 当操作失败时
+    ///   - namespace: namespace
+    ///   - dict: the data dictionary to be saved
+    /// - Throws: GlobalError when the operation fails
     private func saveNamespace(_ namespace: String, dict: [String: Data]) throws {
         let url = try fileURL(for: namespace)
 

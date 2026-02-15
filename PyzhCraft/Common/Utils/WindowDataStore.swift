@@ -1,7 +1,7 @@
 import SwiftUI
 import SkinRenderKit
 
-/// 皮肤预览数据
+/// Skin preview data
 struct SkinPreviewData {
     let skinImage: NSImage?
     let skinPath: String?
@@ -9,33 +9,33 @@ struct SkinPreviewData {
     let playerModel: PlayerModel
 }
 
-/// 窗口数据存储，用于在窗口间传递数据
+/// Window data storage, used to transfer data between windows
 @MainActor
 class WindowDataStore: ObservableObject {
     static let shared = WindowDataStore()
 
     private init() {}
 
-    // AI Chat 窗口数据
+    // AI Chat window data
     @Published var aiChatState: ChatState?
 
-    // Skin Preview 窗口数据
+    // Skin Preview window data
     @Published var skinPreviewData: SkinPreviewData?
 
-    /// 清理指定窗口的数据
+    /// Clear the data of the specified window
     func cleanup(for windowID: WindowID) {
         switch windowID {
         case .aiChat:
-            // 清理 AI Chat 数据
+            // Clean AI Chat data
             if let chatState = aiChatState {
                 chatState.clear()
             }
             aiChatState = nil
         case .skinPreview:
-            // 清理 Skin Preview 数据
+            // Clean Skin Preview data
             skinPreviewData = nil
         default:
-            // 其他窗口不需要清理 WindowDataStore
+            // Other windows do not need to clean up WindowDataStore
             break
         }
     }

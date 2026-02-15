@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - Litematica 投影文件区域视图
+// MARK: - Litematica projected file area view
 struct LitematicaSectionView: View {
     // MARK: - Properties
     let litematicaFiles: [LitematicaInfo]

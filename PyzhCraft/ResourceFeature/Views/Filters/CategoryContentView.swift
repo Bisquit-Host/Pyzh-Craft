@@ -41,7 +41,7 @@ struct CategoryContentView: View {
         self.gameVersion = gameVersion
         self.gameLoader = gameLoader
         self.dataSource = dataSource
-        // 使用全局共享的 ViewModel，避免重复创建和数据加载
+        // Use globally shared ViewModel to avoid repeated creation and data loading
         self._viewModel = StateObject(
             wrappedValue: CategoryDataCacheManager.shared.getViewModel(for: project)
         )
@@ -195,7 +195,7 @@ struct CategoryContentView: View {
     private var shaderSections: some View {
 
         Group {
-            // CurseForge 数据源不支持性能要求筛选，在 CF 标签下不显示该部分
+            // The CurseForge data source does not support performance requirements filtering and this section is not displayed under the CF tag
             if dataSource == .modrinth {
                 CategorySectionView(
                     title: "filter.behavior",

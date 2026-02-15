@@ -1,7 +1,7 @@
 import UniformTypeIdentifiers
 import SwiftUI
 
-/// 工具类：负责将本地 jar/zip 文件导入到指定资源目录
+/// Tool class: responsible for importing local jar/zip files into the specified resource directory
 enum LocalResourceInstaller {
     enum ResourceType {
         case mod, datapack, resourcepack
@@ -14,20 +14,20 @@ enum LocalResourceInstaller {
             }
         }
 
-        /// 支持的文件扩展名 - 统一支持 jar 和 zip
+        /// Supported file extensions - jar and zip are uniformly supported
         var allowedExtensions: [String] {
             ["jar", "zip"]
         }
     }
 
-    /// 安装本地资源文件到指定目录
+    /// Install local resource files to the specified directory
     /// - Parameters:
-    ///   - fileURL: 用户选中的本地文件
-    ///   - resourceType: 资源类型（mods/datapacks/resourcepacks）
-    ///   - gameRoot: 游戏根目录（如 .minecraft）
+    ///   - fileURL: the local file selected by the user
+    ///   - resourceType: resource type (mods/datapacks/resourcepacks)
+    ///   - gameRoot: game root directory (such as .minecraft)
     /// - Throws: GlobalError
     static func install(fileURL: URL, resourceType: ResourceType, gameRoot: URL) throws {
-        // 检查扩展名
+        // Check extension
         guard let ext = fileURL.pathExtension.lowercased() as String?,
               resourceType.allowedExtensions.contains(ext) else {
             throw GlobalError.resource(
@@ -37,7 +37,7 @@ enum LocalResourceInstaller {
             )
         }
 
-        // 目标目录
+        // target directory
         var isDir: ObjCBool = false
         guard FileManager.default.fileExists(atPath: gameRoot.path, isDirectory: &isDir), isDir.boolValue else {
             throw GlobalError.fileSystem(
@@ -47,7 +47,7 @@ enum LocalResourceInstaller {
             )
         }
 
-        // 处理安全作用域
+        // Handle security scope
         let needsSecurity = fileURL.startAccessingSecurityScopedResource()
         defer { if needsSecurity { fileURL.stopAccessingSecurityScopedResource() } }
         if !needsSecurity {
@@ -58,10 +58,10 @@ enum LocalResourceInstaller {
             )
         }
 
-        // 目标文件路径
+        // target file path
         let destURL = gameRoot.appendingPathComponent(fileURL.lastPathComponent)
 
-        // 如果已存在，先移除
+        // If it already exists, remove it first
         if FileManager.default.fileExists(atPath: destURL.path) {
             try? FileManager.default.removeItem(at: destURL)
         }
@@ -102,7 +102,7 @@ extension LocalResourceInstaller {
                     isPresented: $showImporter,
                     allowedContentTypes: {
                         var types: [UTType] = []
-                        // 统一支持 jar 和 zip 文件
+                        // Unified support for jar and zip files
                         if let jarType = UTType(filenameExtension: "jar") {
                             types.append(jarType)
                         }
@@ -115,11 +115,11 @@ extension LocalResourceInstaller {
                     case .success(let urls):
                         guard let fileURL = urls.first else { return }
 
-                        // 检查 query 是否是有效的资源类型
+                        // Check if query is a valid resource type
                         let validResourceTypes = ["mod", "datapack", "shader", "resourcepack"]
                         let queryLowercased = query.lowercased()
 
-                        // 如果 query 是 modpack 或无效的资源类型，显示错误
+                        // If query is a modpack or an invalid resource type, show an error
                         if queryLowercased == "modpack" || !validResourceTypes.contains(queryLowercased) {
                             errorHandler.handle(GlobalError.configuration(
                                 chineseMessage: "不支持导入此类型的资源",
@@ -139,7 +139,7 @@ extension LocalResourceInstaller {
                             return
                         }
 
-                        // 简化扩展名校验 - 统一支持 jar 和 zip
+                        // Simplified extension verification - unified support for jar and zip
                         let allowedExtensions = ["jar", "zip"]
 
                         do {
@@ -153,7 +153,7 @@ extension LocalResourceInstaller {
 
                             try LocalResourceInstaller.install(
                                 fileURL: fileURL,
-                                resourceType: .mod, // 仅用于 allowedExtensions 校验，已手动校验
+                                resourceType: .mod, // Only used for allowedExtensions verification, manually verified
                                 gameRoot: gameRoot
                             )
                             onResourceChanged()

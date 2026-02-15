@@ -48,15 +48,15 @@ struct ModPackDownloadSheet: View {
             }
         }
         .onDisappear {
-            // 页面关闭后清除所有数据
+            // Clear all data after closing the page
             clearAllData()
         }
     }
 
-    // MARK: - 清除数据
-    /// 清除页面所有数据
+    // MARK: - clear data
+    /// Clear all data on the page
     private func clearAllData() {
-        // 如果正在下载，取消下载任务
+        // If downloading is in progress, cancel the download task
         if isDownloading {
             downloadTask?.cancel()
             downloadTask = nil
@@ -65,10 +65,10 @@ struct ModPackDownloadSheet: View {
             gameSetupService.downloadState.reset()
         }
 
-        // 清理选中的版本
+        // Clean selected versions
         selectedGameVersion = ""
         selectedModPackVersion = nil
-        // 清理 ViewModel 所有数据和临时文件
+        // Clean all ViewModel data and temporary files
         viewModel.cleanupAllData()
     }
 
@@ -195,7 +195,7 @@ struct ModPackDownloadSheet: View {
             Task {
                 await viewModel.loadModPackVersions(for: newValue)
             }
-            // 设置默认游戏名称
+            // Set default game name
             setDefaultGameName()
         } else {
             viewModel.filteredModPackVersions = []
@@ -206,7 +206,7 @@ struct ModPackDownloadSheet: View {
         if !viewModel.filteredModPackVersions.isEmpty
             && selectedModPackVersion == nil {
             selectedModPackVersion = viewModel.filteredModPackVersions[0]
-            // 设置默认游戏名称
+            // Set default game name
             setDefaultGameName()
         }
     }
@@ -227,11 +227,11 @@ struct ModPackDownloadSheet: View {
             isProcessing = false
             viewModel.modPackInstallState.reset()
 
-            // 清理已创建的游戏文件夹
+            // Clean created game folders
             Task {
                 await cleanupGameDirectories(gameName: gameNameValidator.gameName)
             }
-            // 停止后直接关闭sheet
+            // Close the sheet directly after stopping
             dismiss()
         } else {
             dismiss()
@@ -261,7 +261,7 @@ struct ModPackDownloadSheet: View {
     ) async {
         isProcessing = true
 
-        // 1. 下载整合包
+        // 1. Download the integration package
         guard
             let downloadedPath = await downloadModPackFile(
                 selectedVersion: selectedVersion,
@@ -272,7 +272,7 @@ struct ModPackDownloadSheet: View {
             return
         }
 
-        // 2. 解压整合包
+        // 2. Unzip the integration package
         guard
             let extractedPath = await viewModel.extractModPack(
                 modPackPath: downloadedPath
@@ -282,7 +282,7 @@ struct ModPackDownloadSheet: View {
             return
         }
 
-        // 3. 解析 modrinth.index.json
+        // 3. Parse modrinth.index.json
         guard
             let indexInfo = await viewModel.parseModrinthIndex(
                 extractedPath: extractedPath
@@ -292,13 +292,13 @@ struct ModPackDownloadSheet: View {
             return
         }
 
-        // 4. 下载游戏图标
+        // 4. Download the game icon
         let iconPath = await viewModel.downloadGameIcon(
             projectDetail: projectDetail,
             gameName: gameNameValidator.gameName
         )
 
-        // 5. 创建 profile 文件夹
+        // 5. Create profile folder
         let profileCreated = await withCheckedContinuation { continuation in
             Task {
                 let result = await createProfileDirectories(for: gameNameValidator.gameName)
@@ -311,17 +311,17 @@ struct ModPackDownloadSheet: View {
             return
         }
 
-        // 进入安装阶段（复制 overrides / 下载文件 / 安装依赖），不再视为“解析中”
-        // 保持 UI 结构不变，仅通过状态切换让进度条区域可见
+        // Entering the installation phase (copying overrides/downloading files/installing dependencies) is no longer considered "parsing"
+        // Keep the UI structure unchanged and only make the progress bar area visible through state switching
         isProcessing = false
 
-        // 6. 复制 overrides 文件（在安装依赖之前）
+        // 6. Copy the overrides file (before installing dependencies)
         let resourceDir = AppPaths.profileDirectory(gameName: gameNameValidator.gameName)
-        // 先计算 overrides 文件总数
+        // First calculate the total number of overrides files
         let overridesTotal = await calculateOverridesTotal(extractedPath: extractedPath)
 
-        // 只有当有 overrides 文件时，才提前设置 isInstalling 和 overridesTotal
-        // 确保进度条能在复制开始前显示（updateOverridesProgress 会在回调中更新其他状态）
+        // Only when there is an overrides file, isInstalling and overridesTotal are set in advance
+        // Make sure the progress bar is displayed before copying starts (updateOverridesProgress will update other status in the callback)
         if overridesTotal > 0 {
             await MainActor.run {
                 viewModel.modPackInstallState.isInstalling = true
@@ -330,8 +330,8 @@ struct ModPackDownloadSheet: View {
             }
         }
 
-        // 等待一小段时间，确保 UI 更新
-        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1秒
+        // Wait a short period of time to ensure the UI is updated
+        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
 
         let overridesSuccess = await ModPackDependencyInstaller.installOverrides(
             extractedPath: extractedPath,
@@ -353,7 +353,7 @@ struct ModPackDownloadSheet: View {
             return
         }
 
-        // 7. 准备安装
+        // 7. Prepare for installation
         let tempGameInfo = GameVersionInfo(
             id: UUID(),
             gameName: gameNameValidator.gameName,
@@ -371,7 +371,7 @@ struct ModPackDownloadSheet: View {
             dependenciesTotal: requiredDependencies.count
         )
 
-        // 8. 下载整合包文件（mod 文件）
+        // 8. Download the integration package file (mod file)
         let filesSuccess = await ModPackDependencyInstaller.installModPackFiles(
             files: indexInfo.files,
             resourceDir: resourceDir,
@@ -393,7 +393,7 @@ struct ModPackDownloadSheet: View {
             return
         }
 
-        // 9. 安装依赖
+        // 9. Install dependencies
         let dependencySuccess = await ModPackDependencyInstaller.installModPackDependencies(
             dependencies: indexInfo.dependencies,
             gameInfo: tempGameInfo,
@@ -415,7 +415,7 @@ struct ModPackDownloadSheet: View {
             return
         }
 
-        // 10. 安装游戏本体
+        // 10. Install the game itself
         let gameSuccess = await withCheckedContinuation { continuation in
             Task {
                 await gameSetupService.saveGame(
@@ -469,10 +469,10 @@ struct ModPackDownloadSheet: View {
     }
 
     private func calculateOverridesTotal(extractedPath: URL) async -> Int {
-        // 优先检查 Modrinth 格式的 overrides
+        // Check Modrinth format overrides first
         var overridesPath = extractedPath.appendingPathComponent("overrides")
 
-        // 如果不存在，检查 CurseForge 格式的 overrides 文件夹
+        // If not present, check the CurseForge format overrides folder
         if !FileManager.default.fileExists(atPath: overridesPath.path) {
             let possiblePaths = ["overrides", "Override", "override"]
             for pathName in possiblePaths {
@@ -484,12 +484,12 @@ struct ModPackDownloadSheet: View {
             }
         }
 
-        // 如果 overrides 文件夹不存在，返回 0
+        // If the overrides folder does not exist, returns 0
         guard FileManager.default.fileExists(atPath: overridesPath.path) else {
             return 0
         }
 
-        // 计算文件总数
+        // Count total number of files
         do {
             let allFiles = try InstanceFileCopier.getAllFiles(in: overridesPath)
             return allFiles.count
@@ -578,12 +578,12 @@ struct ModPackDownloadSheet: View {
     private func handleInstallationResult(success: Bool, gameName: String) {
         if success {
             Logger.shared.info("整合包依赖安装完成: \(gameName)")
-            // 清理不再需要的索引数据以释放内存
+            // Clean up index data no longer needed to free up memory
             viewModel.clearParsedIndexInfo()
             dismiss()
         } else {
             Logger.shared.error("整合包依赖安装失败: \(gameName)")
-            // 清理已创建的游戏文件夹
+            // Clean created game folders
             Task {
                 await cleanupGameDirectories(gameName: gameName)
             }
@@ -595,21 +595,21 @@ struct ModPackDownloadSheet: View {
             GlobalErrorHandler.shared.handle(globalError)
             viewModel.modPackInstallState.reset()
             gameSetupService.downloadState.reset()
-            // 清理不再需要的索引数据以释放内存
+            // Clean up index data no longer needed to free up memory
             viewModel.clearParsedIndexInfo()
         }
         isProcessing = false
     }
 
-    /// 清理游戏文件夹
-    /// - Parameter gameName: 游戏名称
+    /// Clean game folder
+    /// - Parameter gameName: game name
     private func cleanupGameDirectories(gameName: String) async {
         do {
             let fileManager = MinecraftFileManager()
             try fileManager.cleanupGameDirectories(gameName: gameName)
         } catch {
             Logger.shared.error("清理游戏文件夹失败: \(error.localizedDescription)")
-            // 不抛出错误，因为这是清理操作，不应该影响主流程
+            // No error is thrown because this is a cleanup operation and should not affect the main process
         }
     }
 }

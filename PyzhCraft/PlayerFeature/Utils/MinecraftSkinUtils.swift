@@ -9,20 +9,20 @@ enum SkinType {
 
 // MARK: - Cache Wrapper
 private class RenderedImageCache: NSObject {
-    let headImage: CGImage  // 头部图像 (8x8)
-    let layerImage: CGImage // 图层图像 (8x8)
-    let hasLayerContent: Bool  // 图层是否有实际内容（非透明像素）
-    let cost: Int  // 内存成本（字节数）
+    let headImage: CGImage  // Head image (8x8)
+    let layerImage: CGImage // Layer image (8x8)
+    let hasLayerContent: Bool  // Whether the layer has actual content (non-transparent pixels)
+    let cost: Int  // Memory cost (number of bytes)
 
     init(headImage: CGImage, layerImage: CGImage, hasLayerContent: Bool) {
         self.headImage = headImage
         self.layerImage = layerImage
         self.hasLayerContent = hasLayerContent
-        // 计算内存成本：两个 8x8 RGBA 图像 = 2 * 8 * 8 * 4 = 512 字节
-        // 加上 CGImage 对象的开销，每个约 1KB，总计约 2.5KB
+        // Calculate memory cost: two 8x8 RGBA images = 2 * 8 * 8 * 4 = 512 bytes
+        // Plus the overhead of CGImage objects, about 1KB each, for a total of about 2.5KB
         let headCost = Int(headImage.width * headImage.height * 4)
         let layerCost = Int(layerImage.width * layerImage.height * 4)
-        self.cost = headCost + layerCost + 2 * 1024  // 两个图像 + 对象开销
+        self.cost = headCost + layerCost + 2 * 1024  // Two images + object overhead
         super.init()
     }
 }
@@ -31,9 +31,9 @@ private enum Constants {
     static let padding: CGFloat = 6
     static let networkTimeout: TimeInterval = 10.0
 
-    // 缓存配置 - 优化后的配置
-    static let maxCacheSize = 100  // 最多缓存100个渲染后的图像（之前是50个完整图像）
-    static let maxCacheMemory = 2 * 1024 * 1024  // 最多缓存2MB内存（约800个渲染后的图像）
+    // Cache configuration - optimized configuration
+    static let maxCacheSize = 100  // Cache up to 100 rendered images (previously 50 full images)
+    static let maxCacheMemory = 2 * 1024 * 1024  // Cache up to 2MB of memory (~800 rendered images)
 
     // Minecraft skin coordinates (64x64 format)
     static let headStartX: CGFloat = 8
@@ -63,31 +63,31 @@ struct MinecraftSkinUtils: View {
         let cache = NSCache<NSString, RenderedImageCache>()
         cache.countLimit = Constants.maxCacheSize
         cache.totalCostLimit = Constants.maxCacheMemory
-        // 设置缓存名称，便于调试
+        // Set cache name for easy debugging
         cache.name = "MinecraftSkinCache"
         return cache
     }()
 
-    // 共享的 URLSession，避免每次请求都创建新的 session
+    // Shared URLSession to avoid creating a new session for each request
     private static let sharedURLSession: URLSession = {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = Constants.networkTimeout
         config.timeoutIntervalForResource = Constants.networkTimeout
-        // 使用缓存策略：允许使用本地缓存，但会验证服务器响应
+        // Use caching policy: Allow local cache, but verify server responses
         config.requestCachePolicy = .returnCacheDataElseLoad
-        // 减少 URLSession 缓存大小，应用已有独立缓存
+        // Reduce URLSession cache size, the application has a separate cache
         config.urlCache = URLCache(
-            memoryCapacity: 2 * 1024 * 1024,  // 2MB 内存缓存（从 5MB 减少）
-            diskCapacity: 5 * 1024 * 1024,    // 5MB 磁盘缓存（从 10MB 减少）
+            memoryCapacity: 2 * 1024 * 1024,  // 2MB memory cache (reduced from 5MB)
+            diskCapacity: 5 * 1024 * 1024,    // 5MB disk cache (reduced from 10MB)
             diskPath: "MinecraftSkinCache"
         )
         return URLSession(configuration: config)
     }()
 
-    // 缓存统计（用于调试和监控）
+    // Cache statistics (for debugging and monitoring)
     private static var cacheStats = CacheStats()
 
-    // 只初始化一次
+    // Only initialize once
     private static var memoryObserverSetup = false
     private static let memoryObserverQueue = DispatchQueue(label: "com.pyzhcraft.skincache.memory")
 
@@ -112,12 +112,12 @@ struct MinecraftSkinUtils: View {
             .name: "MinecraftSkinProcessor",
         ]
         let context = CIContext(options: options)
-        // 初始化缓存维护任务（只一次）
+        // Initialize cache maintenance tasks (only once)
         setupMemoryPressureObserverOnce()
         return context
     }()
 
-    // 生成缓存键
+    // Generate cache key
     private var cacheKey: String {
         let typeString: String
         switch type {
@@ -129,7 +129,7 @@ struct MinecraftSkinUtils: View {
         return "\(typeString):\(src)"
     }
 
-    // 获取缓存的渲染图像
+    // Get cached rendered image
     private static func getCachedRenderedImage(for key: String) -> RenderedImageCache? {
         let nsKey = key as NSString
         if let cache = imageCache.object(forKey: nsKey) {
@@ -141,12 +141,12 @@ struct MinecraftSkinUtils: View {
         }
     }
 
-    // 检查图像是否有非透明像素
+    // Check if the image has non-transparent pixels
     private static func hasNonTransparentPixels(_ cgImage: CGImage) -> Bool {
         let width = cgImage.width
         let height = cgImage.height
 
-        // 创建位图上下文以确保格式一致（RGBA）
+        // Create bitmap context to ensure consistent format (RGBA)
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         let bytesPerPixel = 4
         let bytesPerRow = bytesPerPixel * width
@@ -165,32 +165,32 @@ struct MinecraftSkinUtils: View {
             return false
         }
 
-        // 将图像绘制到位图上下文中
+        // Draw an image into a bitmap context
         context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
 
-        // 检查每个像素的 alpha 通道（RGBA 格式中 alpha 是第4个字节）
+        // Check the alpha channel of each pixel (alpha is the 4th byte in RGBA format)
         for y in 0..<height {
             for x in 0..<width {
                 let pixelOffset = (y * width + x) * bytesPerPixel
                 let alpha = pixelData[pixelOffset + 3]
                 if alpha > 0 {
-                    return true  // 找到非透明像素
+                    return true  // Find non-transparent pixels
                 }
             }
         }
-        return false  // 所有像素都是透明的
+        return false  // All pixels are transparent
     }
 
-    // 渲染并缓存图像（裁剪后的 CGImage）
+    // Render and cache the image (cropped CGImage)
     private static func renderAndCacheImage(_ ciImage: CIImage, for key: String, context: CIContext) -> RenderedImageCache? {
         let nsKey = key as NSString
 
-        // 检查是否已经缓存
+        // Check if cached
         if let cached = imageCache.object(forKey: nsKey) {
             return cached
         }
 
-        // 渲染头部图像
+        // Render head image
         let headRect = CGRect(
             x: Constants.headStartX,
             y: ciImage.extent.height - Constants.headStartY - Constants.headHeight,
@@ -199,7 +199,7 @@ struct MinecraftSkinUtils: View {
         )
         let headCropped = ciImage.cropped(to: headRect)
 
-        // 渲染图层图像
+        // Render layer image
         let layerRect = CGRect(
             x: Constants.layerStartX,
             y: ciImage.extent.height - Constants.layerStartY - Constants.layerHeight,
@@ -208,29 +208,29 @@ struct MinecraftSkinUtils: View {
         )
         let layerCropped = ciImage.cropped(to: layerRect)
 
-        // 转换为 CGImage
+        // Convert to CGImage
         guard let headCGImage = context.createCGImage(headCropped, from: headCropped.extent),
               let layerCGImage = context.createCGImage(layerCropped, from: layerCropped.extent) else {
             return nil
         }
 
-        // 检查图层是否有实际内容
+        // Check if the layer has actual content
         let hasLayerContent = hasNonTransparentPixels(layerCGImage)
 
-        // 创建缓存对象
+        // Create cache object
         let cache = RenderedImageCache(headImage: headCGImage, layerImage: layerCGImage, hasLayerContent: hasLayerContent)
         imageCache.setObject(cache, forKey: nsKey, cost: cache.cost)
         return cache
     }
 
-    // 清理缓存（用于内存压力时）
+    // Clean cache (for use when memory pressure occurs)
     static func clearCache() {
         imageCache.removeAllObjects()
         cacheStats = CacheStats()
         Logger.shared.debug("🧹 MinecraftSkinUtils 缓存已清理")
     }
 
-    // 获取当前缓存配置（用于调试）
+    // Get the current cache configuration (for debugging)
     static func getCacheInfo() -> (countLimit: Int, memoryLimit: Int, hitRate: Double) {
         return (
             countLimit: imageCache.countLimit,
@@ -239,7 +239,7 @@ struct MinecraftSkinUtils: View {
         )
     }
 
-    // 获取缓存统计信息（用于调试）
+    // Get cache statistics (for debugging)
     static func getCacheStats() -> (hits: Int, misses: Int, hitRate: Double) {
         return (
             hits: cacheStats.hits,
@@ -248,7 +248,7 @@ struct MinecraftSkinUtils: View {
         )
     }
 
-    // 初始化缓存维护任务（确保只初始化一次）
+    // Initialize cache maintenance tasks (make sure to initialize only once)
     private static func setupMemoryPressureObserverOnce() {
         memoryObserverQueue.sync {
             guard !memoryObserverSetup else { return }
@@ -267,19 +267,19 @@ struct MinecraftSkinUtils: View {
             if let cache = renderedCache {
                 avatarLayers(for: cache)
             } else if isLoading {
-                // Loading 指示器
+                // Loading indicator
                 VStack(spacing: 8) {
                     ProgressView()
                         .controlSize(.small)
                 }
             } else if error != nil {
-                // 加载失败时使用默认 Steve 皮肤
+                // Use default Steve skin when loading fails
                 Self(type: .asset, src: "steve", size: size)
             }
         }
         .frame(width: size, height: size)
         .onAppear {
-            // 先检查缓存
+            // Check cache first
             if let cached = Self.getCachedRenderedImage(for: cacheKey) {
                 self.renderedCache = cached
                 self.isLoading = false
@@ -288,7 +288,7 @@ struct MinecraftSkinUtils: View {
             }
         }
         .onChange(of: src) { _, _ in
-            // 当 src 改变时，检查新缓存键（cacheKey 会根据新的 src 自动计算）
+            // When src changes, check the new cache key (cacheKey will be automatically calculated based on the new src)
             if let cached = Self.getCachedRenderedImage(for: cacheKey) {
                 self.renderedCache = cached
                 self.isLoading = false
@@ -300,7 +300,7 @@ struct MinecraftSkinUtils: View {
             }
         }
         .onDisappear {
-            // 取消正在进行的任务，避免内存泄漏
+            // Cancel ongoing tasks to avoid memory leaks
             loadTask?.cancel()
             loadTask = nil
         }
@@ -309,8 +309,8 @@ struct MinecraftSkinUtils: View {
     @ViewBuilder
     private func avatarLayers(for cache: RenderedImageCache) -> some View {
         ZStack {
-            // Head layer - 直接使用缓存的 CGImage，无需再次裁剪和转换
-            // 如果没有遮罩层，使用完整大小，否则使用 0.9 倍大小
+            // Head layer - use cached CGImage directly without cropping and converting again
+            // If there is no mask layer, use full size, otherwise use 0.9x size
             Image(decorative: cache.headImage, scale: 1.0)
                 .interpolation(.none)
                 .resizable()
@@ -319,8 +319,8 @@ struct MinecraftSkinUtils: View {
                     height: cache.hasLayerContent ? size * 0.9 : size
                 )
                 .clipped()
-            // Skin layer (overlay) - 直接使用缓存的 CGImage
-            // 只有当图层有实际内容时才显示
+            // Skin layer (overlay) - Use cached CGImage directly
+            // Only shown if the layer has actual content
             if cache.hasLayerContent {
                 Image(decorative: cache.layerImage, scale: 1.0)
                     .interpolation(.none)
@@ -336,12 +336,12 @@ struct MinecraftSkinUtils: View {
         error = nil
         isLoading = true
 
-        // 取消之前的任务
+        // Cancel previous task
         loadTask?.cancel()
 
         loadTask = Task {
             do {
-                // 检查任务是否被取消
+                // Check if the task has been canceled
                 try Task.checkCancellation()
 
                 Logger.shared.debug("Loading skin: \(src)")
@@ -369,8 +369,8 @@ struct MinecraftSkinUtils: View {
 
                 try Task.checkCancellation()
 
-                // 渲染并缓存图像（裁剪后的 CGImage）
-                // 在后台线程进行渲染，避免阻塞主线程
+                // Render and cache the image (cropped CGImage)
+                // Render on a background thread to avoid blocking the main thread
                 let cacheKeyValue = cacheKey
                 let renderedCache = await Task.detached {
                     await Self.renderAndCacheImage(ciImage, for: cacheKeyValue, context: Self.ciContext)
@@ -381,13 +381,13 @@ struct MinecraftSkinUtils: View {
                     self.isLoading = false
                 }
             } catch is CancellationError {
-                // 任务被取消，不需要处理
+                // The task was canceled and does not need to be processed
                 await MainActor.run {
                     self.isLoading = false
                 }
                 return
             } catch let urlError as URLError where urlError.code == .cancelled {
-                // URL 请求被取消（通常是视图被销毁或重新创建），静默处理
+                // URL request is canceled (usually the view is destroyed or recreated), handled silently
                 await MainActor.run {
                     self.isLoading = false
                 }
@@ -444,7 +444,7 @@ struct MinecraftSkinUtils: View {
             )
         }
 
-        // 使用统一的 API 客户端（需要处理非 200 状态码）
+        // Use unified API client (needs to handle non-200 status codes)
         let request = URLRequest(url: url)
         let (data, httpResponse) = try await APIClient.performRequestWithResponse(request: request)
 
@@ -474,14 +474,14 @@ struct MinecraftSkinUtils: View {
 
     // MARK: - Export Functions
 
-    /// 导出玩家头像图像
+    /// Export player avatar image
     /// - Parameters:
-    ///   - type: 皮肤类型（URL 或 Asset）
-    ///   - src: 皮肤源（URL 或 Asset 名称）
-    ///   - size: 导出尺寸（1024 或 2048）
-    /// - Returns: 合并后的头像图像（头部和图层重叠）
+    ///   - type: skin type (URL or Asset)
+    ///   - src: skin source (URL or Asset name)
+    ///   - size: export size (1024 or 2048)
+    /// - Returns: Merged avatar image (head and layer overlap)
     static func exportAvatarImage(type: SkinType, src: String, size: Int) async throws -> NSImage {
-        // 加载皮肤数据
+        // Load skin data
         let data: Data
         switch type {
         case .asset:
@@ -523,7 +523,7 @@ struct MinecraftSkinUtils: View {
             data = responseData
         }
 
-        // 创建 CIImage
+        // Create CIImage
         guard let ciImage = CIImage(data: data) else {
             throw GlobalError.validation(
                 chineseMessage: "无效的图像数据",
@@ -532,7 +532,7 @@ struct MinecraftSkinUtils: View {
             )
         }
 
-        // 验证皮肤尺寸
+        // Verify skin size
         guard ciImage.extent.width == 64 && ciImage.extent.height == 64 else {
             throw GlobalError.validation(
                 chineseMessage: "不支持的皮肤格式，仅支持64x64像素",
@@ -541,7 +541,7 @@ struct MinecraftSkinUtils: View {
             )
         }
 
-        // 裁剪头部和图层
+        // Crop header and layers
         let headRect = CGRect(
             x: Constants.headStartX,
             y: ciImage.extent.height - Constants.headStartY - Constants.headHeight,
@@ -558,7 +558,7 @@ struct MinecraftSkinUtils: View {
         )
         let layerCropped = ciImage.cropped(to: layerRect)
 
-        // 转换为 CGImage 并放大
+        // Convert to CGImage and zoom in
         guard let headCGImage = ciContext.createCGImage(headCropped, from: headCropped.extent),
               let layerCGImage = ciContext.createCGImage(layerCropped, from: layerCropped.extent) else {
             throw GlobalError.validation(
@@ -568,10 +568,10 @@ struct MinecraftSkinUtils: View {
             )
         }
 
-        // 检查图层是否有内容
+        // Check if the layer has content
         let hasLayerContent = hasNonTransparentPixels(layerCGImage)
 
-        // 创建目标尺寸的图像
+        // Create image of target size
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         let bytesPerPixel = 4
         let bytesPerRow = bytesPerPixel * size
@@ -593,18 +593,18 @@ struct MinecraftSkinUtils: View {
             )
         }
 
-        // 绘制头部图层（如果需要缩放以适应图层，则缩小到 90%）
+        // Draw the head layer (zoom out to 90% if you need to scale to fit the layer)
         let headSize = hasLayerContent ? Int(Double(size) * 0.9) : size
         let headOffset = hasLayerContent ? (size - headSize) / 2 : 0
         context.interpolationQuality = .none
         context.draw(headCGImage, in: CGRect(x: headOffset, y: headOffset, width: headSize, height: headSize))
 
-        // 如果有图层内容，绘制图层（覆盖在头部上方）
+        // If there is layer content, draw the layer (overlaying it above the head)
         if hasLayerContent {
             context.draw(layerCGImage, in: CGRect(x: 0, y: 0, width: size, height: size))
         }
 
-        // 获取最终的 CGImage
+        // Get the final CGImage
         guard let finalCGImage = context.makeImage() else {
             throw GlobalError.validation(
                 chineseMessage: "无法生成最终图像",
@@ -613,7 +613,7 @@ struct MinecraftSkinUtils: View {
             )
         }
 
-        // 转换为 NSImage
+        // Convert to NSImage
         return NSImage(cgImage: finalCGImage, size: NSSize(width: size, height: size))
     }
 }

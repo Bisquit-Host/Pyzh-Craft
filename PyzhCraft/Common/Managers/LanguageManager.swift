@@ -1,11 +1,11 @@
 import SwiftUI
 
-/// 语言管理器
-/// 只负责语言列表和 bundle
+/// Language manager
+/// Only responsible for language list and bundle
 public class LanguageManager {
     private static let appleLanguagesKey = "AppleLanguages"
 
-    /// 当前选中的语言（取 AppleLanguages 数组的第一个）
+    /// The currently selected language (take the first one in the AppleLanguages ​​array)
     public var selectedLanguage: String {
         get {
             UserDefaults.standard.stringArray(forKey: Self.appleLanguagesKey)?.first ?? ""
@@ -22,17 +22,17 @@ public class LanguageManager {
         }
     }
 
-    /// 单例实例
+    /// Singleton instance
     public static let shared = LanguageManager()
 
     private init() {
-        // 如果是首次启动（selectedLanguage为空），则根据系统语言设置默认语言
+        // If it is the first startup (selectedLanguage is empty), the default language is set according to the system language
         if selectedLanguage.isEmpty {
             selectedLanguage = Self.getDefaultLanguage()
         }
     }
 
-    /// 支持的语言列表
+    /// Supported language list
     public let languages: [(String, String)] = [
         ("🇨🇳 简体中文", "zh-Hans"),
         ("🇨🇳 繁體中文", "zh-Hant"),
@@ -58,7 +58,7 @@ public class LanguageManager {
         ("🇻🇳 Tiếng Việt", "vi"),
     ]
 
-    /// 获取当前语言的 Bundle
+    /// Get the Bundle of the current language
     public var bundle: Bundle {
         if let path = Bundle.main.path(forResource: selectedLanguage, ofType: "lproj"),
            let bundle = Bundle(path: path) {
@@ -72,18 +72,18 @@ public class LanguageManager {
         let preferredLanguages = Locale.preferredLanguages
 
         for preferredLanguage in preferredLanguages {
-            // 处理语言代码匹配
+            // Handle language code matching
             let languageCode = preferredLanguage.prefix(2).lowercased()
 
             switch languageCode {
             case "zh":
-                // 中文：优先简体，其次繁体
+                // Chinese: Simplified Chinese first, then Traditional Chinese
                 if preferredLanguage.contains("Hans") || preferredLanguage.contains("CN") {
                     return "zh-Hans"
                 } else if preferredLanguage.contains("Hant") || preferredLanguage.contains("TW") || preferredLanguage.contains("HK") {
                     return "zh-Hant"
                 } else {
-                    // 默认简体中文
+                    // Default Simplified Chinese
                     return "zh-Hans"
                 }
             case "ar": return "ar"
@@ -111,7 +111,7 @@ public class LanguageManager {
             }
         }
 
-        // 如果系统语言都不支持，默认使用英文
+        // If the system language is not supported, English will be used by default
         return "en"
     }
 }
@@ -119,9 +119,9 @@ public class LanguageManager {
 // MARK: - String Localization Extension
 
 extension String {
-    /// 获取本地化字符串
-    /// - Parameter bundle: 语言包，默认使用当前语言
-    /// - Returns: 本地化后的字符串
+    /// Get localized string
+    /// - Parameter bundle: language pack, using the current language by default
+    /// - Returns: localized string
     public func localized(
         _ bundle: Bundle = LanguageManager.shared.bundle
     ) -> String {

@@ -8,7 +8,7 @@ enum GameResourceHandler {
         addButtonState: Binding<ModrinthDetailCardView.AddButtonState>
     ) {
         guard let gameInfo = gameInfo else { return }
-        // 无文件 hash 时，通过扫描目录检查项目 ID 是否已安装
+        // When there is no file hash, check whether the project ID is installed by scanning the directory
         let modsDir = AppPaths.modsDirectory(gameName: gameInfo.gameName)
         ModScanner.shared.scanResourceDirectory(modsDir) { details in
             let installed = details.contains { $0.id == project.projectId }
@@ -22,9 +22,9 @@ enum GameResourceHandler {
         }
     }
 
-    // MARK: - 文件删除
+    // MARK: - file deletion
 
-    /// 删除文件（静默版本）
+    /// Delete files (silent version)
     static func performDelete(fileURL: URL) {
         do {
             try performDeleteThrowing(fileURL: fileURL)
@@ -35,7 +35,7 @@ enum GameResourceHandler {
         }
     }
 
-    /// 删除文件（抛出异常版本）
+    /// Delete file (throws exception version)
     static func performDeleteThrowing(fileURL: URL) throws {
         guard FileManager.default.fileExists(atPath: fileURL.path) else {
             throw GlobalError.resource(
@@ -45,20 +45,20 @@ enum GameResourceHandler {
             )
         }
 
-        // 如果是 mod 文件，删除前获取 hash 以便从缓存中移除
+        // If it is a mod file, obtain the hash before deleting it so that it can be removed from the cache
         var hash: String?
         var gameName: String?
         if isModsDirectory(fileURL.deletingLastPathComponent()) {
-            // 从文件路径提取 gameName
+            // Extract gameName from file path
             gameName = extractGameName(from: fileURL.deletingLastPathComponent())
-            // 获取文件的hash
+            // Get the hash of the file
             hash = ModScanner.sha1Hash(of: fileURL)
         }
 
         do {
             try FileManager.default.removeItem(at: fileURL)
 
-            // 删除成功后，如果是 mod，从缓存中移除
+            // After the deletion is successful, if it is a mod, it will be removed from the cache
             if let hash = hash, let gameName = gameName {
                 ModScanner.shared.removeModHash(hash, from: gameName)
             }
@@ -72,23 +72,23 @@ enum GameResourceHandler {
         }
     }
 
-    /// 判断目录是否是 mods 目录
-    /// - Parameter dir: 目录 URL
-    /// - Returns: 是否是 mods 目录
+    /// Determine whether the directory is a mods directory
+    /// - Parameter dir: directory URL
+    /// - Returns: whether it is the mods directory
     private static func isModsDirectory(_ dir: URL) -> Bool {
         dir.lastPathComponent.lowercased() == "mods"
     }
 
-    /// 从 mods 目录路径中提取游戏名称
-    /// - Parameter modsDir: mods 目录 URL
-    /// - Returns: 游戏名称，如果无法提取则返回 nil
+    /// Extract game name from mods directory path
+    /// - Parameter modsDir: mods directory URL
+    /// - Returns: game name, returns nil if it cannot be extracted
     private static func extractGameName(from modsDir: URL) -> String? {
-        // mods 目录结构：profileRootDirectory/gameName/mods，gameName 即父目录
+        // Mods directory structure: profileRootDirectory/gameName/mods, gameName is the parent directory
         let parentDir = modsDir.deletingLastPathComponent()
         return parentDir.lastPathComponent
     }
 
-    // MARK: - 下载方法
+    // MARK: - Download method
 
     @MainActor
     static func downloadWithDependencies(
@@ -242,11 +242,11 @@ enum GameResourceHandler {
         var versionDict: [String: [ModrinthProjectDetailVersion]] = [:]
         var selectedVersionDict: [String: String] = [:]
 
-        // 使用服务端的过滤方法，和全局资源安装逻辑一致
-        // 预置游戏版本和加载器
+        // Use server-side filtering method, consistent with global resource installation logic
+        // Preset game versions and loaders
         for dep in missing {
             do {
-                // 使用和全局资源安装一样的服务端过滤方法
+                // Use the same server-side filtering method as global resource installation
                 let filteredVersions = try await ModrinthService.fetchProjectVersionsFilter(
                     id: dep.id,
                     selectedVersions: [gameInfo.gameVersion],
@@ -255,15 +255,15 @@ enum GameResourceHandler {
                 )
 
                 versionDict[dep.id] = filteredVersions
-                // 和全局资源安装一样，自动选择第一个版本
+                // Like global resource installation, the first version is automatically selected
                 if let firstVersion = filteredVersions.first {
                     selectedVersionDict[dep.id] = firstVersion.id
                 }
             } catch {
-                // 如果某个依赖的版本获取失败，记录错误但继续处理其他依赖
+                // If the version of a dependency fails to be obtained, an error will be logged but other dependencies will continue to be processed
                 let globalError = GlobalError.from(error)
                 Logger.shared.error("获取依赖 \(dep.title) 的版本失败: \(globalError.chineseMessage)")
-                // 设置空版本列表，让用户知道这个依赖无法安装
+                // Set an empty version list to let users know that this dependency cannot be installed
                 versionDict[dep.id] = []
             }
         }
@@ -329,7 +329,7 @@ enum GameResourceHandler {
                 selectedVersions: selectedVersions,
                 dependencyVersions: dependencyVersions,
                 mainProjectId: project.projectId,
-                mainProjectVersionId: nil,  // 使用最新版本
+                mainProjectVersionId: nil,  // Use the latest version
                 gameInfo: gameInfo,
                 query: query,
                 gameRepository: gameRepository,
@@ -498,9 +498,9 @@ enum GameResourceHandler {
             resourceToAdd.fileName = primaryFile.filename
             resourceToAdd.type = query
 
-            // 如果是 mod，添加到安装缓存
+            // If it is a mod, add it to the installation cache
             if query.lowercased() == "mod" {
-                // 获取下载文件的hash
+                // Get the hash of the downloaded file
                 if let hash = ModScanner.sha1Hash(of: fileURL) {
                     ModScanner.shared.addModHash(
                         hash,

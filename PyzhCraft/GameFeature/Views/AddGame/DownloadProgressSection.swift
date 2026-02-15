@@ -21,11 +21,11 @@ struct DownloadProgressSection: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            // 游戏核心下载进度
+            // Game core download progress
             gameDownloadProgressView
-            // 模组加载器下载进度
+            // Mod loader download progress
             modLoaderProgressView
-            // 整合包安装进度
+            // Integration package installation progress
             if let modPackViewModel = modPackViewModel {
                 ModPackProgressView(modPackViewModel: modPackViewModel)
             }
@@ -93,7 +93,7 @@ struct DownloadProgressSection: View {
     private func getLoaderProgressInfo() -> LoaderProgressInfo? {
         let loaderType = selectedModLoader.lowercased()
 
-        // 如果是整合包模式，使用整合包的加载器信息
+        // If it is integration package mode, use the loader information of the integration package
         if let indexInfo = modPackIndexInfo {
             let loaderState = getLoaderDownloadState(for: indexInfo.loaderType)
             let title = getLoaderTitle(for: indexInfo.loaderType)
@@ -106,7 +106,7 @@ struct DownloadProgressSection: View {
                 )
             }
         } else {
-            // 普通游戏创建模式
+            // Normal game creation mode
             let state = getLoaderDownloadState(for: loaderType)
             let title = getLoaderTitle(for: loaderType)
 
@@ -158,7 +158,7 @@ private struct ModPackProgressView: View {
     var body: some View {
         if modPackViewModel.modPackInstallState.isInstalling {
             VStack(spacing: 24) {
-                // 显示 overrides 进度条（只有在有文件需要合并时才显示）
+                // Show overrides progress bar (only displayed when there are files that need to be merged)
                 if modPackViewModel.modPackInstallState.overridesTotal > 0 {
                     modPackProgressSection(
                         title: "launcher.import.copying_files".localized(),

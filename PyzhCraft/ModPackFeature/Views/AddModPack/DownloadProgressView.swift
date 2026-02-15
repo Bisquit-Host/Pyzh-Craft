@@ -63,7 +63,7 @@ struct DownloadProgressView: View {
     private var modPackInstallProgress: some View {
         Group {
             if modPackInstallState.isInstalling {
-                // 显示 overrides 进度条（只有在有文件需要合并时才显示）
+                // Show overrides progress bar (only displayed when there are files that need to be merged)
                 if modPackInstallState.overridesTotal > 0 {
                     progressRow(
                         title: "launcher.import.copying_files".localized(),

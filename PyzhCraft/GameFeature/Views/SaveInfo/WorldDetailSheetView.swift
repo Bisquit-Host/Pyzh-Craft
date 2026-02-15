@@ -4,7 +4,7 @@ private enum WorldDetailLoadError: Error {
     case levelDatNotFound, invalidStructure
 }
 
-/// 世界详细信息视图（读取 level.dat）
+/// World details view (read level.dat)
 struct WorldDetailSheetView: View {
     // MARK: - Properties
     let world: WorldInfo
@@ -13,11 +13,11 @@ struct WorldDetailSheetView: View {
     private var dismiss
 
     @State private var metadata: WorldDetailMetadata?
-    @State private var rawDataTag: [String: Any]? // 原始 Data 标签，尽可能多展示数据
+    @State private var rawDataTag: [String: Any]? // Original Data tag, display as much data as possible
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var showError = false
-    @State private var showRawData = false // 控制是否显示原始数据
+    @State private var showRawData = false // Control whether raw data is displayed
 
     // MARK: - Body
     var body: some View {
@@ -88,7 +88,7 @@ struct WorldDetailSheetView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 HStack(alignment: .top, spacing: 24) {
-                    // 基本信息
+                    // Basic information
                     infoSection(title: "saveinfo.world.detail.section.basic".localized()) {
                         infoRow(label: "saveinfo.world.detail.label.level_name".localized(), value: metadata.levelName)
                         infoRow(label: "saveinfo.world.detail.label.folder_name".localized(), value: metadata.folderName)
@@ -103,7 +103,7 @@ struct WorldDetailSheetView: View {
                         }
                     }
 
-                    // 游戏设置
+                    // game settings
                     infoSection(title: "saveinfo.world.detail.section.game_settings".localized()) {
                         infoRow(label: "saveinfo.world.detail.label.game_mode".localized(), value: metadata.gameMode)
                         infoRow(label: "saveinfo.world.detail.label.difficulty".localized(), value: metadata.difficulty)
@@ -115,7 +115,7 @@ struct WorldDetailSheetView: View {
                     }
                 }
 
-                // 其他信息
+                // Other information
                 infoSection(title: "saveinfo.world.detail.section.other".localized()) {
                     if let lastPlayed = metadata.lastPlayed {
                         infoRow(label: "saveinfo.world.detail.label.last_played".localized(), value: formatDate(lastPlayed))
@@ -141,7 +141,7 @@ struct WorldDetailSheetView: View {
                     Text("saveinfo.world.detail.label.world_path".localized() + ":")
                         .font(.headline)
                     Button {
-                        // 在 Finder 中打开文件位置
+                        // Open file location in Finder
                         NSWorkspace.shared.selectFile(metadata.path.path, inFileViewerRootedAtPath: "")
                     } label: {
                         PathBreadcrumbView(path: metadata.path.path)
@@ -151,7 +151,7 @@ struct WorldDetailSheetView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                // 原始数据切换按钮
+                // Raw data toggle button
                 if let raw = rawDataTag {
                     let displayedKeys: Set<String> = [
                         "LevelName", "Version", "DataVersion",
@@ -270,7 +270,7 @@ struct WorldDetailSheetView: View {
                     throw WorldDetailLoadError.invalidStructure
                 }
 
-                // 26+ 新版存档：seed 拆到 data/minecraft/world_gen_settings.dat
+                // 26+ new version archive: seed split to data/minecraft/world_gen_settings.dat
                 var seed: Int64?
                 if FileManager.default.fileExists(atPath: worldGenSettingsPath.path) {
                     do {
@@ -282,7 +282,7 @@ struct WorldDetailSheetView: View {
                             seed = s
                         }
                     } catch {
-                        // 读取失败不影响 level.dat 的展示
+                        // Reading failure does not affect the display of level.dat
                     }
                 }
 
@@ -320,19 +320,19 @@ struct WorldDetailSheetView: View {
     private func parseWorldDetail(from dataTag: [String: Any], folderName: String, path: URL, seedOverride: Int64?) -> WorldDetailMetadata {
         let levelName = (dataTag["LevelName"] as? String) ?? folderName
 
-        // LastPlayed 为毫秒时间戳（Long），兼容 Int/Int64 等类型
+        // LastPlayed is a millisecond timestamp (Long), compatible with Int/Int64 and other types
         var lastPlayedDate: Date?
         if let ts = WorldNBTMapper.readInt64(dataTag["LastPlayed"]) {
             lastPlayedDate = Date(timeIntervalSince1970: TimeInterval(ts) / 1000.0)
         }
 
-        // GameType: 0 生存, 1 创造, 2 冒险, 3 旁观
+        // GameType: 0 Survival, 1 Creation, 2 Adventure, 3 Spectator
         var gameMode = "saveinfo.world.game_mode.unknown".localized()
         if let gt = WorldNBTMapper.readInt64(dataTag["GameType"]) {
             gameMode = WorldNBTMapper.mapGameMode(Int(gt))
         }
 
-        // Difficulty: 旧版为数值，新版（26+）常为 difficulty_settings.difficulty 字符串
+        // Difficulty: The old version is a numerical value, the new version (26+) is usually the difficulty_settings.difficulty string
         var difficulty = "saveinfo.world.difficulty.unknown".localized()
         if let diff = WorldNBTMapper.readInt64(dataTag["Difficulty"]) {
             difficulty = WorldNBTMapper.mapDifficulty(Int(diff))
@@ -341,7 +341,7 @@ struct WorldDetailSheetView: View {
             difficulty = WorldNBTMapper.mapDifficultyString(diffStr)
         }
 
-        // 极限/作弊标志在新版可能是 byte 或 bool，这里统一为「非 0 即 true」
+        // The limit/cheating flag may be byte or bool in the new version, here it is unified as "non-0 means true"
         let hardcore: Bool = {
             if let ds = dataTag["difficulty_settings"] as? [String: Any] {
                 return WorldNBTMapper.readBoolFlag(ds["hardcore"])
@@ -368,7 +368,7 @@ struct WorldDetailSheetView: View {
             dataVersion = Int(dv32)
         }
 
-        // 种子：26+ 优先 world_gen_settings.dat，其次 level.dat 的 RandomSeed / WorldGenSettings.seed
+        // Seed: 26+ first world_gen_settings.dat, followed by level.dat of RandomSeed / WorldGenSettings.seed
         var seed: Int64? = seedOverride
         if seed == nil {
             seed = WorldNBTMapper.readSeed(from: dataTag, worldPath: path)
@@ -385,7 +385,7 @@ struct WorldDetailSheetView: View {
                   let x = WorldNBTMapper.readInt64(pos[0]),
                   let y = WorldNBTMapper.readInt64(pos[1]),
                   let z = WorldNBTMapper.readInt64(pos[2]) {
-            // 26+ 新版存档：spawn.pos = [x, y, z]，同时可能带 dimension/yaw/pitch
+            // 26+ new version archive: spawn.pos = [x, y, z], and may also include dimension/yaw/pitch
             if let dim = spawnTag["dimension"] as? String, !dim.isEmpty {
                 spawn = "\(x), \(y), \(z) (\(dim))"
             } else {
@@ -481,7 +481,7 @@ struct WorldDetailSheetView: View {
     }
 }
 
-// MARK: - NBT 结构视图（保持原始嵌套结构）
+// MARK: - NBT structural view (maintains original nested structure)
 struct NBTStructureView: View {
     let data: [String: Any]
     @State private var expandedKeys: Set<String> = []
@@ -524,7 +524,7 @@ struct NBTEntryView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let dict = value as? [String: Any] {
-                // 字典类型
+                // dictionary type
                 NBTDisclosureButton(
                     isExpanded: expandedKeys.contains(fullKey),
                     label: key,
@@ -555,7 +555,7 @@ struct NBTEntryView: View {
                     }
                 }
             } else if let array = value as? [Any] {
-                // 数组类型
+                // array type
                 NBTDisclosureButton(
                     isExpanded: expandedKeys.contains(fullKey),
                     label: key,
@@ -593,7 +593,7 @@ struct NBTEntryView: View {
                     }
                 }
             } else {
-                // 基本类型
+                // basic type
                 NBTValueRow(
                     label: key,
                     value: formatNBTValue(value),
@@ -619,7 +619,7 @@ struct NBTEntryView: View {
     }
 }
 
-// MARK: - macOS 风格的组件
+// MARK: - macOS style components
 struct NBTDisclosureButton: View {
     let isExpanded: Bool
     let label: String

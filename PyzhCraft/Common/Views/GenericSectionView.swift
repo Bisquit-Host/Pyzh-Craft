@@ -134,7 +134,7 @@ struct GenericSectionView<Item: Identifiable, ChipContent: View>: View {
 
 // MARK: - Convenience Initializers
 extension GenericSectionView {
-    /// 从配置创建 GenericSectionView
+    /// Create GenericSectionView from configuration
     init<Config: SectionViewConfiguration>(
         configuration: Config,
         @ViewBuilder chipBuilder: @escaping (Item) -> ChipContent,

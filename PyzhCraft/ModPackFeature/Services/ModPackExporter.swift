@@ -1,7 +1,7 @@
 import Foundation
 
-/// 整合包导出器
-/// 将游戏实例导出为 Modrinth 官方整合包格式 (.mrpack)
+/// Integrated package exporter
+/// Export the game instance to Modrinth official modpack format (.mrpack)
 enum ModPackExporter {
 
     // MARK: - Export Result
@@ -20,7 +20,7 @@ enum ModPackExporter {
         var totalFiles: Int = 0
         var processedFiles: Int = 0
 
-        // 多个进度条支持
+        // Multiple progress bars support
         struct ProgressItem {
             var title: String
             var progress: Double
@@ -35,15 +35,15 @@ enum ModPackExporter {
 
     // MARK: - Main Export Function
 
-    /// 导出整合包
+    /// Export integration package
     /// - Parameters:
-    ///   - gameInfo: 游戏实例信息
-    ///   - outputPath: 输出文件路径
-    ///   - modPackName: 整合包名称
-    ///   - modPackVersion: 整合包版本
-    ///   - summary: 整合包描述（可选）
-    ///   - progressCallback: 进度回调
-    /// - Returns: 导出结果
+    ///   - gameInfo: game instance information
+    ///   - outputPath: output file path
+    ///   - modPackName: integration package name
+    ///   - modPackVersion: integration package version
+    ///   - summary: integration package description (optional)
+    ///   - progressCallback: progress callback
+    /// - Returns: export results
     static func exportModPack(
         gameInfo: GameVersionInfo,
         outputPath: URL,
@@ -55,17 +55,17 @@ enum ModPackExporter {
         var progress = ExportProgress()
 
         do {
-            // 1. 准备临时目录
+            // 1. Prepare temporary directory
             progress.progress = 0.0
             progressCallback?(progress)
 
             let (tempDir, overridesDir) = try prepareDirectories()
             defer {
-                // 清理临时目录
+                // Clean up temporary directory
                 try? FileManager.default.removeItem(at: tempDir)
             }
 
-            // 2. 先显示扫描进度条（在开始扫描之前）
+            // 2. Display the scanning progress bar first (before starting scanning)
             progress.progress = 0.1
             progress.scanProgress = ExportProgress.ProgressItem(
                 title: "modpack.export.scanning.title".localized(),
@@ -76,17 +76,17 @@ enum ModPackExporter {
             )
             progressCallback?(progress)
 
-            // 给UI一点时间渲染，确保进度条先显示出来
+            // Give the UI some time to render and make sure the progress bar is displayed first
             try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
 
-            // 3. 扫描所有资源文件
+            // 3. Scan all resource files
             let scanResults = try ResourceScanner.scanAllResources(gameInfo: gameInfo)
             let totalResources = ResourceScanner.totalFileCount(scanResults)
             let totalConfigFiles = try ConfigFileCopier.countFiles(gameInfo: gameInfo)
             let totalFiles = totalResources + totalConfigFiles
             progress.totalFiles = totalFiles
 
-            // 4. 更新扫描进度条为实际值
+            // 4. Update the scanning progress bar to the actual value
             var initialProgress = progress
             initialProgress.scanProgress = ExportProgress.ProgressItem(
                 title: "modpack.export.scanning.title".localized(),
@@ -97,10 +97,10 @@ enum ModPackExporter {
             )
             progressCallback?(initialProgress)
 
-            // 给UI一点时间渲染
+            // Give the UI some time to render
             try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
 
-            // 5. 扫描识别所有资源文件
+            // 5. Scan and identify all resource files
             progress.progress = 0.2
             progressCallback?(progress)
 
@@ -116,7 +116,7 @@ enum ModPackExporter {
                 progressCallback: progressCallback
             )
 
-            // 6. 复制需要复制的资源文件和配置文件
+            // 6. Copy the resource files and configuration files that need to be copied
             progress.progress = 0.6
             progressCallback?(progress)
 
@@ -134,7 +134,7 @@ enum ModPackExporter {
                 progressCallback: progressCallback
             )
 
-            // 7. 生成索引文件并打包
+            // 7. Generate index files and package them
             try await buildIndexAndArchive(
                 params: IndexBuildParams(
                     gameInfo: gameInfo,
@@ -168,7 +168,7 @@ enum ModPackExporter {
 
     // MARK: - Helper Functions
 
-    /// 创建临时目录
+    /// Create temporary directory
     private static func createTempDirectory() throws -> URL {
         let tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent("modpack_export")
@@ -179,7 +179,7 @@ enum ModPackExporter {
 
     // MARK: - Parameter Structures
 
-    /// 索引构建参数
+    /// Index building parameters
     private struct IndexBuildParams {
         let gameInfo: GameVersionInfo
         let modPackName: String
@@ -188,7 +188,7 @@ enum ModPackExporter {
         let indexFiles: [ModrinthIndexFile]
     }
 
-    /// 文件复制参数
+    /// File copy parameters
     private struct CopyFilesParams {
         let filesToCopy: [(file: URL, resourceType: ResourceScanner.ResourceType)]
         let gameInfo: GameVersionInfo
@@ -196,13 +196,13 @@ enum ModPackExporter {
         let totalConfigFiles: Int
     }
 
-    /// 准备临时目录和 overrides 目录结构
+    /// Prepare temporary directory and overrides directory structure
     private static func prepareDirectories() throws -> (tempDir: URL, overridesDir: URL) {
         let tempDir = try createTempDirectory()
         let overridesDir = tempDir.appendingPathComponent("overrides")
         try FileManager.default.createDirectory(at: overridesDir, withIntermediateDirectories: true)
 
-        // 创建各种资源的 overrides 子目录
+        // Create overrides subdirectories for various resources
         for resourceType in ResourceScanner.ResourceType.allCases {
             let subDir = overridesDir.appendingPathComponent(resourceType.rawValue)
             try FileManager.default.createDirectory(at: subDir, withIntermediateDirectories: true)
@@ -211,7 +211,7 @@ enum ModPackExporter {
         return (tempDir, overridesDir)
     }
 
-    /// 扫描并识别所有资源文件
+    /// Scan and identify all resource files
     private static func scanAndIdentifyResources(
         gameInfo: GameVersionInfo,
         scanResults: [ResourceScanner.ResourceType: [URL]],
@@ -224,15 +224,15 @@ enum ModPackExporter {
             for (resourceType, files) in scanResults {
                 for file in files {
                     group.addTask {
-                        // 只识别，不复制
+                        // Only recognize, do not copy
                         let result = await ResourceProcessor.identify(
                             file: file,
                             resourceType: resourceType
                         )
 
-                        // 更新扫描进度
+                        // Update scan progress
                         let processed = await processedCounter.increment()
-                        let scanTotal = max(totalResources, 1) // 至少为1，避免除零错误
+                        let scanTotal = max(totalResources, 1) // At least 1 to avoid divide-by-zero errors
                         let scanItem = ExportProgress.ProgressItem(
                             title: "modpack.export.scanning.title".localized(),
                             progress: Double(processed) / Double(scanTotal),
@@ -242,7 +242,7 @@ enum ModPackExporter {
                         )
                         await progressUpdater.updateScanProgress(scanItem)
 
-                        // 获取完整进度并更新
+                        // Get full progress and updates
                         let updatedProgress = await progressUpdater.getFullProgress()
                         progressCallback?(updatedProgress)
 
@@ -251,16 +251,16 @@ enum ModPackExporter {
                 }
             }
 
-            // 收集所有结果
+            // Collect all results
             var indexFiles: [ModrinthIndexFile] = []
             var filesToCopy: [(file: URL, resourceType: ResourceScanner.ResourceType)] = []
 
             for await result in group {
                 if let indexFile = result.indexFile {
-                    // 成功识别到 Modrinth 资源，添加到索引
+                    // Modrinth resource successfully identified and added to index
                     indexFiles.append(indexFile)
                 } else {
-                    // 未识别到或识别失败，需要复制到 overrides
+                    // Not recognized or failed to recognize, needs to be copied to overrides
                     if result.shouldCopyToOverrides {
                         if let resourceType = ResourceScanner.ResourceType(rawValue: result.relativePath) {
                             filesToCopy.append((file: result.sourceFile, resourceType: resourceType))
@@ -268,13 +268,13 @@ enum ModPackExporter {
                             Logger.shared.warning("无法识别资源类型: \(result.relativePath)")
                         }
                     } else {
-                        // 这种情况理论上不应该发生，但记录警告以防万一
+                        // This theoretically shouldn't happen, but the warning is logged just in case
                         Logger.shared.warning("资源文件既没有索引文件也不需要复制: \(result.sourceFile.lastPathComponent)")
                     }
                 }
             }
 
-            // 如果没有资源文件，确保扫描进度条显示为完成
+            // If there are no resource files, make sure the scan progress bar shows Complete
             if totalResources == 0 {
                 let completedScanItem = ExportProgress.ProgressItem(
                     title: "modpack.export.scanning.title".localized(),
@@ -292,7 +292,7 @@ enum ModPackExporter {
         }
     }
 
-    /// 复制资源文件和配置文件
+    /// Copy resource files and configuration files
     private static func copyFiles(
         params: CopyFilesParams,
         copyCounter: CopyCounter,
@@ -305,14 +305,14 @@ enum ModPackExporter {
         let totalConfigFiles = params.totalConfigFiles
         let totalFilesToCopy = filesToCopy.count + totalConfigFiles
 
-        // 更新复制进度条的总数
+        // Update the total number of copy progress bars
         if totalFilesToCopy > 0 {
             await progressUpdater.setCopyProgressTotal(totalFilesToCopy)
             let currentProgress = await progressUpdater.getFullProgress()
             progressCallback?(currentProgress)
         }
 
-        // 并发复制资源文件和配置文件
+        // Concurrently copy resource files and configuration files
         async let copyResourcesTask: Void = {
             await withTaskGroup(of: Void.self) { group in
                 for (file, resourceType) in filesToCopy {
@@ -324,7 +324,7 @@ enum ModPackExporter {
                                 overridesDir: overridesDir
                             )
 
-                            // 更新复制进度
+                            // Update copy progress
                             let (processed, total) = await copyCounter.increment()
                             let copyItem = ExportProgress.ProgressItem(
                                 title: "modpack.export.copying.title".localized(),
@@ -335,13 +335,13 @@ enum ModPackExporter {
                             )
                             await progressUpdater.updateCopyProgress(copyItem)
 
-                            // 获取完整进度并更新
+                            // Get full progress and updates
                             let updatedProgress = await progressUpdater.getFullProgress()
                             progressCallback?(updatedProgress)
                         } catch {
                             Logger.shared.warning("复制资源文件失败: \(file.lastPathComponent), 错误: \(error.localizedDescription)")
 
-                            // 更新进度（即使失败也计入已处理）
+                            // Update progress (counts as processed even if it fails)
                             let (processed, total) = await copyCounter.increment()
                             let copyItem = ExportProgress.ProgressItem(
                                 title: "modpack.export.copying.title".localized(),
@@ -352,14 +352,14 @@ enum ModPackExporter {
                             )
                             await progressUpdater.updateCopyProgress(copyItem)
 
-                            // 获取完整进度并更新
+                            // Get full progress and updates
                             let updatedProgress = await progressUpdater.getFullProgress()
                             progressCallback?(updatedProgress)
                         }
                     }
                 }
 
-                // 等待所有复制任务完成
+                // Wait for all copy tasks to complete
                 for await _ in group {}
             }
         }()
@@ -370,7 +370,7 @@ enum ModPackExporter {
                 to: overridesDir
             ) { _, currentFileName in
                 Task {
-                    // 使用共享计数器更新总进度
+                    // Update total progress using shared counter
                     let (processed, total) = await copyCounter.increment()
                     let copyItem = ExportProgress.ProgressItem(
                         title: "modpack.export.copying.title".localized(),
@@ -381,19 +381,19 @@ enum ModPackExporter {
                     )
                     await progressUpdater.updateCopyProgress(copyItem)
 
-                    // 获取完整进度并更新
+                    // Get full progress and updates
                     let updatedProgress = await progressUpdater.getFullProgress()
                     progressCallback?(updatedProgress)
                 }
             }
         }()
 
-        // 等待两个复制任务完成
+        // Wait for both copy tasks to complete
         await copyResourcesTask
         try await copyConfigTask
     }
 
-    /// 生成索引文件并打包
+    /// Generate index files and package them
     private static func buildIndexAndArchive(
         params: IndexBuildParams,
         tempDir: URL,
@@ -401,7 +401,7 @@ enum ModPackExporter {
         progressUpdater: ProgressUpdater,
         progressCallback: ((ExportProgress) -> Void)?
     ) async throws {
-        // 生成 modrinth.index.json
+        // Generate modrinth.index.json
         var currentProgress = await progressUpdater.getFullProgress()
         currentProgress.progress = 0.9
         progressCallback?(currentProgress)
@@ -417,17 +417,17 @@ enum ModPackExporter {
         let indexPath = tempDir.appendingPathComponent(AppConstants.modrinthIndexFileName)
         try indexJson.write(to: indexPath, atomically: true, encoding: String.Encoding.utf8)
 
-        // 打包为 .mrpack
+        // Packed as .mrpack
         currentProgress = await progressUpdater.getFullProgress()
         currentProgress.progress = 0.95
         progressCallback?(currentProgress)
 
         try ModPackArchiver.archive(tempDir: tempDir, outputPath: outputPath)
 
-        // 打包完成，确保进度条显示100%
+        // Packaging is complete, make sure the progress bar shows 100%
         currentProgress = await progressUpdater.getFullProgress()
         currentProgress.progress = 1.0
-        // 确保扫描和复制进度条都显示100%，但保留最后一个处理的文件名
+        // Make sure both the scan and copy progress bars show 100%, but keep the last filename processed
         if var scanProgress = currentProgress.scanProgress {
             scanProgress.progress = 1.0
             scanProgress.completed = scanProgress.total
@@ -443,7 +443,7 @@ enum ModPackExporter {
 
     // MARK: - Progress Management Types
 
-    /// 进度更新器
+    /// progress updater
     private actor ProgressUpdater {
         private var scanProgress: ExportProgress.ProgressItem?
         private var copyProgress: ExportProgress.ProgressItem?
@@ -489,7 +489,7 @@ enum ModPackExporter {
         }
     }
 
-    /// 已处理文件计数器
+    /// Processed files counter
     private actor ProcessedCounter {
         private var count = 0
 
@@ -503,7 +503,7 @@ enum ModPackExporter {
         }
     }
 
-    /// 复制进度计数器
+    /// Copy progress counter
     private actor CopyCounter {
         private var count = 0
         private let total: Int

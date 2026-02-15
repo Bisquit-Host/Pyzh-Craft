@@ -1,34 +1,34 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// AI 聊天附件管理器
+/// AI Chat Attachment Manager
 class AIChatAttachmentManager: ObservableObject {
     @Published var pendingAttachments: [MessageAttachmentType] = []
 
-    /// 处理文件选择
+    /// Handle file selection
     func handleFileSelection(_ urls: [URL]) {
         for url in urls {
             guard url.startAccessingSecurityScopedResource() else { continue }
             defer { url.stopAccessingSecurityScopedResource() }
 
-            // 过滤掉图片类型，只允许非图片文件
+            // Filter out image types and only allow non-image files
             let isImage = UTType(filenameExtension: url.pathExtension)?.conforms(to: .image) ?? false
             if isImage {
                 continue
             }
-            // 只添加非图片文件
+            // Only add non-image files
             let attachment: MessageAttachmentType = .file(url, url.lastPathComponent)
             pendingAttachments.append(attachment)
         }
     }
 
-    /// 移除附件
+    /// Remove attachment
     func removeAttachment(at index: Int) {
         guard index < pendingAttachments.count else { return }
         pendingAttachments.remove(at: index)
     }
 
-    /// 清除所有附件
+    /// Clear all attachments
     func clearAll() {
         pendingAttachments.removeAll()
     }

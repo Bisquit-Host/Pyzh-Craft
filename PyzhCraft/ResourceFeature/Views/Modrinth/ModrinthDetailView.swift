@@ -15,7 +15,7 @@ struct ModrinthDetailView: View {
     @Binding var selectedItem: SidebarItem
     @Binding var gameType: Bool
     let header: AnyView?
-    @Binding var scannedDetailIds: Set<String> // 已扫描资源的 detailId Set，用于快速查找
+    @Binding var scannedDetailIds: Set<String> // detailId Set of scanned resources for quick lookup
     @Binding var dataSource: DataSource
 
     @StateObject private var viewModel = ModrinthSearchViewModel()
@@ -97,7 +97,7 @@ struct ModrinthDetailView: View {
                 await initialLoadIfNeeded()
             }
         }
-        // 当筛选条件变化时，重新搜索
+        // Search again when filter conditions change
         .onChange(of: selectedVersions) {
             resetPagination()
             triggerSearch()
@@ -123,11 +123,11 @@ struct ModrinthDetailView: View {
             triggerSearch()
         }
         .onChange(of: selectedProjectId) { _, _ in
-            // 关闭详情页后不需要重新刷新，使用缓存数据即可
-            // 如果需要更新状态（如已安装标记），视图会自动更新
+            // There is no need to refresh the details page after closing it, just use the cached data
+            // If a status update is required (such as an installed tag), the view updates automatically
         }
         .onChange(of: dataSource) { _, _ in
-            // 切换数据源时重置状态并触发新搜索
+            // Reset state and trigger new search when switching data sources
             hasLoaded = false
             resetPagination()
             searchText = ""
@@ -136,7 +136,7 @@ struct ModrinthDetailView: View {
             triggerSearch()
         }
         .onChange(of: query) { _, _ in
-            // 切换查询类型时重置状态并触发新搜索
+            // Reset state and trigger new search when switching query type
             hasLoaded = false
             resetPagination()
             searchText = ""
@@ -149,7 +149,7 @@ struct ModrinthDetailView: View {
         )
 
         .onChange(of: searchText) { oldValue, newValue in
-            // 优化：仅在搜索文本实际变化时触发防抖搜索
+            // Optimization: only trigger anti-shake search when the search text actually changes
             if oldValue != newValue {
                 resetPagination()
                 debounceSearch()
@@ -168,7 +168,7 @@ struct ModrinthDetailView: View {
             }
         }
         .onDisappear {
-            // 页面消失时重置状态，确保下次进入时能正确加载（使用缓存或网络请求）
+            // Reset the state when the page disappears to ensure that it can be loaded correctly the next time you enter (use cache or network request)
             hasLoaded = false
             resetPagination()
         }
@@ -221,7 +221,7 @@ struct ModrinthDetailView: View {
         let params = buildSearchParamsKey(page: page)
 
         if params == lastSearchParams {
-            // 完全重复，不请求
+            // Exact duplicate, no request
             return
         }
 
@@ -324,15 +324,15 @@ struct ModrinthDetailView: View {
         lastSearchParams = ""
     }
 
-    // MARK: - 清除数据
-    /// 清除页面所有数据
+    // MARK: - clear data
+    /// Clear all data on the page
     private func clearAllData() {
-        // 清理搜索定时器，避免内存泄漏
+        // Clean up search timer to avoid memory leaks
         searchTimer?.invalidate()
         searchTimer = nil
-        // 清理 ViewModel 数据
+        // Clean ViewModel data
         viewModel.clearResults()
-        // 清理状态数据
+        // Clean status data
         searchText = ""
         currentPage = 1
         lastSearchParams = ""
@@ -340,14 +340,14 @@ struct ModrinthDetailView: View {
         hasLoaded = false
     }
 
-    /// 清除数据但保留搜索文本（用于从详情页返回时）
+    /// Clear data but keep search text (used when returning from details page)
     private func clearDataExceptSearchText() {
-        // 清理搜索定时器，避免内存泄漏
+        // Clean up search timer to avoid memory leaks
         searchTimer?.invalidate()
         searchTimer = nil
-        // 清理 ViewModel 数据
+        // Clean ViewModel data
         viewModel.clearResults()
-        // 清理状态数据，但保留搜索文本
+        // Clean state data but keep search text
         currentPage = 1
         lastSearchParams = ""
         error = nil

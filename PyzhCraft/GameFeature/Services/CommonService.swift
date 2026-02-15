@@ -2,9 +2,9 @@ import Foundation
 
 enum CommonService {
 
-    /// 根据 mod loader 获取适配的版本列表（静默版本）
-    /// - Parameter loader: 加载器类型
-    /// - Returns: 兼容的版本列表
+    /// Get the adapted version list (silent version) according to the mod loader
+    /// - Parameter loader: loader type
+    /// - Returns: List of compatible versions
     static func compatibleVersions(
         for loader: String,
         includeSnapshots: Bool = false
@@ -24,10 +24,10 @@ enum CommonService {
         }
     }
 
-    /// 根据 mod loader 获取适配的版本列表（抛出异常版本）
-    /// - Parameter loader: 加载器类型
-    /// - Returns: 兼容的版本列表
-    /// - Throws: GlobalError 当操作失败时
+    /// Get the adapted version list according to mod loader (throws exception version)
+    /// - Parameter loader: loader type
+    /// - Returns: List of compatible versions
+    /// - Throws: GlobalError when the operation fails
     static func compatibleVersionsThrowing(
         for loader: String,
         includeSnapshots: Bool = false
@@ -42,7 +42,7 @@ enum CommonService {
             )
             let filteredVersions = loaderVersions.map { $0.id }
                 .filter { version in
-                    // 过滤出纯数字版本（如 1.21.1, 1.20.4 等）
+                    // Filter out purely numeric versions (such as 1.21.1, 1.20.4, etc.)
                     let components = version.components(separatedBy: ".")
                     return components.allSatisfy {
                         $0.rangeOfCharacter(
@@ -57,7 +57,7 @@ enum CommonService {
             )
             let allVersions = gameVersions
                 .map { version in
-                    // 缓存每个版本的时间信息
+                    // Cache time information for each version
                     let cacheKey = "version_time_\(version.version)"
                     let formattedTime = CommonUtil.formatRelativeTime(
                         version.date
@@ -74,7 +74,7 @@ enum CommonService {
         return result
     }
 
-    // forge 和 neoforge 通用的classpath生成
+    // Common classpath generation for forge and neoforge
     static func generateClasspath(
         from loader: ModrinthLoader,
         librariesDir: URL
@@ -93,11 +93,11 @@ enum CommonService {
         return jarPaths.joined(separator: ":")
     }
 
-    /// 获取指定加载器类型和 Minecraft 版本的所有加载器版本（静默版本）
+    /// Get all loader versions (silent versions) for the specified loader type and Minecraft version
     /// - Parameters:
-    ///   - type: 加载器类型
-    ///   - minecraftVersion: Minecraft 版本
-    /// - Returns: 加载器版本信息，失败时返回 nil
+    ///   - type: loader type
+    ///   - minecraftVersion: Minecraft version
+    /// - Returns: loader version information, returns nil on failure
     static func fetchAllLoaderVersions(
         type: String,
         minecraftVersion: String
@@ -115,22 +115,22 @@ enum CommonService {
         }
     }
 
-    /// 获取指定加载器类型和 Minecraft 版本的所有加载器版本（抛出异常版本）
+    /// Get all loader versions for the specified loader type and Minecraft version (throws exception version)
     /// - Parameters:
-    ///   - type: 加载器类型
-    ///   - minecraftVersion: Minecraft 版本
-    /// - Returns: 加载器版本信息
-    /// - Throws: GlobalError 当操作失败时
+    ///   - type: loader type
+    ///   - minecraftVersion: Minecraft version
+    /// - Returns: loader version information
+    /// - Throws: GlobalError when the operation fails
     static func fetchAllLoaderVersionsThrowing(
         type: String,
         minecraftVersion: String
     ) async throws -> LoaderVersion {
         let manifest = try await fetchAllVersionThrowing(type: type)
 
-        // 过滤出 id 等于当前 minecraftVersion 的结果
+        // Filter out results with id equal to current minecraftVersion
         let filteredVersions = manifest.filter { $0.id == minecraftVersion }
 
-        // 返回第一个匹配的版本，如果没有则抛出错误
+        // Returns the first matching version, or throws an error if there is none
         guard let firstVersion = filteredVersions.first else {
             throw GlobalError.resource(
                 chineseMessage:
@@ -143,30 +143,30 @@ enum CommonService {
         return firstVersion
     }
 
-    /// 获取指定加载器类型的所有版本（抛出异常版本）
-    /// - Parameter type: 加载器类型
-    /// - Returns: 版本列表
-    /// - Throws: GlobalError 当操作失败时
+    /// Get all versions of the specified loader type (throws exception version)
+    /// - Parameter type: loader type
+    /// - Returns: version list
+    /// - Throws: GlobalError when the operation fails
     static func fetchAllVersionThrowing(
         type: String
     ) async throws -> [LoaderVersion] {
-        // 获取版本清单
+        // Get version list
         let manifestURL = URLConfig.API.Modrinth.loaderManifest(loader: type)
-        // 使用统一的 API 客户端
+        // Use a unified API client
         let manifestData = try await APIClient.get(url: manifestURL)
 
-        // 解析版本清单
+        // parse version list
         do {
             let result = try JSONDecoder().decode(
                 ModrinthLoaderVersion.self,
                 from: manifestData
             )
 
-            // 对于 NeoForge，不进行 stable 过滤，因为所有版本都是 beta
+            // For NeoForge, there is no stable filtering as all versions are beta
             if type == "neo" {
                 return result.gameVersions
             } else {
-                // 过滤出稳定版本
+                // Filter out stable versions
                 return result.gameVersions.filter { $0.stable }
             }
         } catch {
@@ -179,16 +179,16 @@ enum CommonService {
         }
     }
 
-    /// 将Maven坐标转换为文件路径（支持classifier和@符号）
-    /// - Parameter coordinate: Maven坐标
-    /// - Returns: 文件路径
+    /// Convert Maven coordinates to file paths (classifier and @ symbols are supported)
+    /// - Parameter coordinate: Maven coordinates
+    /// - Returns: file path
     static func convertMavenCoordinateToPath(_ coordinate: String) -> String {
-        // 检查是否包含@符号，需要特殊处理
+        // Check whether it contains the @ symbol, which requires special handling
         if coordinate.contains("@") {
             return convertMavenCoordinateWithAtSymbol(coordinate)
         }
 
-        // 对于标准Maven坐标，使用CommonService的方法
+        // For standard Maven coordinates, use the CommonService method
         if let relativePath = mavenCoordinateToRelativePath(coordinate) {
 
             return AppPaths.librariesDirectory.appendingPathComponent(
@@ -196,13 +196,13 @@ enum CommonService {
             ).path
         }
 
-        // 如果CommonService方法失败，可能是非标准格式，返回原值
+        // If the CommonService method fails, possibly in a non-standard format, the original value is returned
         return coordinate
     }
 
-    /// 解析包含@符号的Maven坐标的公共逻辑
-    /// - Parameter coordinate: Maven坐标
-    /// - Returns: 相对路径
+    /// Common logic for parsing Maven coordinates containing @ symbols
+    /// - Parameter coordinate: Maven coordinates
+    /// - Returns: relative path
     static func parseMavenCoordinateWithAtSymbol(
         _ coordinate: String
     ) -> String {
@@ -212,12 +212,12 @@ enum CommonService {
         let groupId = parts[0]
         let artifactId = parts[1]
 
-        // 处理版本部分，可能包含@符号
+        // Process version part, may contain @ symbol
         var version = parts[2]
         var classifier = ""
         var classifierName = ""
 
-        // 检查版本部分是否包含@符号
+        // Check if version part contains @ symbol
         if version.contains("@") {
             let versionParts = version.components(separatedBy: "@")
             if versionParts.count >= 2 {
@@ -225,36 +225,36 @@ enum CommonService {
                 classifier = versionParts[1]
             }
         } else if parts.count > 3 {
-            // 如果没有@符号在版本中，但有额外的部分，则作为classifier处理
+            // If there is no @ symbol in the version but there is an extra part, it is treated as a classifier
             let classifierPart = parts[3]
-            // 检查classifier部分是否包含@符号（如 client@lzma）
+            // Check whether the classifier part contains the @ symbol (such as client@lzma)
             if classifierPart.contains("@") {
                 let classifierParts = classifierPart.components(
                     separatedBy: "@"
                 )
                 if classifierParts.count >= 2 {
-                    classifierName = classifierParts[0]  // 取@前面的部分作为classifier名称
-                    classifier = classifierParts[1]  // 取@后面的部分作为扩展名
+                    classifierName = classifierParts[0]  // Take the part before @ as the classifier name
+                    classifier = classifierParts[1]  // Take the part after @ as the extension
                 }
             } else {
                 classifier = classifierPart
             }
         }
 
-        // 构建文件名
-        // 使用字符串插值构建文件名，避免多次字符串拼接
+        // Build file name
+        // Use string interpolation to construct file names to avoid multiple string concatenations
         let classifierSuffix = classifierName.isEmpty ? "" : "-\(classifierName)"
         let extensionSuffix = classifier.isEmpty ? ".\(AppConstants.FileExtensions.jar)" : ".\(classifier)"
         let fileName = "\(artifactId)-\(version)\(classifierSuffix)\(extensionSuffix)"
 
-        // 构建相对路径
+        // Build relative path
         let groupPath = groupId.replacingOccurrences(of: ".", with: "/")
         return "\(groupPath)/\(artifactId)/\(version)/\(fileName)"
     }
 
-    /// 处理包含@符号的Maven坐标
-    /// - Parameter coordinate: Maven坐标
-    /// - Returns: 文件路径
+    /// Handle Maven coordinates containing @ symbol
+    /// - Parameter coordinate: Maven coordinates
+    /// - Returns: file path
     static func convertMavenCoordinateWithAtSymbol(
         _ coordinate: String
     ) -> String {
@@ -263,9 +263,9 @@ enum CommonService {
         return AppPaths.librariesDirectory.appendingPathComponent(relativePath)
             .path
     }
-    /// Maven 坐标转相对路径
-    /// - Parameter coordinate: Maven 坐标
-    /// - Returns: 相对路径
+    /// Maven coordinates to relative path
+    /// - Parameter coordinate: Maven coordinate
+    /// - Returns: relative path
     static func mavenCoordinateToRelativePath(_ coordinate: String) -> String? {
         let parts = coordinate.split(separator: ":")
         guard parts.count >= 3 else { return nil }
@@ -280,7 +280,7 @@ enum CommonService {
             // group:artifact:version
             version = String(parts[2])
         } else if parts.count == 4 {
-            // group:artifact:version:classifier  (MC这种情况)
+            // group:artifact:version:classifier (MC in this case)
             version = String(parts[2])
             classifier = String(parts[3])
         } else if parts.count == 5 {
@@ -297,63 +297,63 @@ enum CommonService {
         }
     }
 
-    /// Maven 坐标转相对路径（支持特殊格式）
-    /// - Parameter coordinate: Maven 坐标
-    /// - Returns: 相对路径
+    /// Maven coordinates to relative path (supports special formats)
+    /// - Parameter coordinate: Maven coordinate
+    /// - Returns: relative path
     static func mavenCoordinateToRelativePathForURL(_ coordinate: String) -> String {
-        // 检查是否包含@符号，需要特殊处理
+        // Check whether it contains the @ symbol, which requires special handling
         if coordinate.contains("@") {
             return convertMavenCoordinateWithAtSymbolForURL(coordinate)
         }
 
-        // 对于标准Maven坐标，使用标准方法
+        // For standard Maven coordinates, use the standard method
         if let relativePath = mavenCoordinateToRelativePath(coordinate) {
             return relativePath
         }
 
-        // 如果标准方法失败，可能是非标准格式，返回原值
+        // If the standard method fails, possibly in a non-standard format, the original value is returned
         return coordinate
     }
 
-    /// 处理包含@符号的Maven坐标（用于URL构建）
-    /// - Parameter coordinate: Maven坐标
-    /// - Returns: 相对路径
+    /// Handling Maven coordinates containing @ symbols (for URL building)
+    /// - Parameter coordinate: Maven coordinates
+    /// - Returns: relative path
     static func convertMavenCoordinateWithAtSymbolForURL(
         _ coordinate: String
     ) -> String {
         parseMavenCoordinateWithAtSymbol(coordinate)
     }
 
-    /// Maven 坐标转 FabricMC Maven 仓库 URL
-    /// - Parameter coordinate: Maven 坐标
-    /// - Returns: Maven 仓库 URL
+    /// Maven coordinates to FabricMC Maven warehouse URL
+    /// - Parameter coordinate: Maven coordinate
+    /// - Returns: Maven repository URL
     static func mavenCoordinateToURL(lib: ModrinthLoaderLibrary) -> URL? {
-        // 使用相对路径而不是完整路径来构建URL
+        // Use relative paths instead of full paths to build URLs
         let relativePath = mavenCoordinateToRelativePathForURL(lib.name)
         return lib.url?.appendingPathComponent(relativePath)
     }
 
-    /// Maven 坐标转默认 Minecraft 库 URL
-    /// - Parameter coordinate: Maven 坐标
-    /// - Returns: Minecraft 库 URL
+    /// Maven coordinates to default Minecraft library URL
+    /// - Parameter coordinate: Maven coordinate
+    /// - Returns: Minecraft library URL
     static func mavenCoordinateToDefaultURL(_ coordinate: String, url: URL) -> URL {
-        // 使用相对路径而不是完整路径来构建URL
+        // Use relative paths instead of full paths to build URLs
         let relativePath = mavenCoordinateToRelativePathForURL(coordinate)
         return url.appendingPathComponent(relativePath)
     }
 
-    /// Maven 坐标转默认路径（用于本地文件路径）
-    /// - Parameter coordinate: Maven 坐标
-    /// - Returns: 本地文件路径
+    /// Maven coordinates to default path (for local file paths)
+    /// - Parameter coordinate: Maven coordinate
+    /// - Returns: local file path
     static func mavenCoordinateToDefaultPath(_ coordinate: String) -> String {
-        // 使用相对路径而不是完整路径来构建URL
+        // Use relative paths instead of full paths to build URLs
         return mavenCoordinateToRelativePathForURL(coordinate)
     }
-    /// 根据 FabricLoader 生成 classpath 字符串
+    /// Generate classpath string based on FabricLoader
     /// - Parameters:
-    ///   - loader: Fabric 加载器
-    ///   - librariesDir: 库目录
-    /// - Returns: classpath 字符串
+    ///   - loader: Fabric loader
+    ///   - librariesDir: library directory
+    /// - Returns: classpath string
     static func generateFabricClasspath(
         from loader: ModrinthLoader,
         librariesDir: URL
@@ -366,22 +366,22 @@ enum CommonService {
         return jarPaths.joined(separator: ":")
     }
 
-    /// 处理 ModrinthLoader 中的游戏版本占位符
+    /// Handling game version placeholders in ModrinthLoader
     /// - Parameters:
-    ///   - loader: 原始加载器数据
-    ///   - gameVersion: 游戏版本
-    /// - Returns: 处理后的加载器数据
+    ///   - loader: raw loader data
+    ///   - gameVersion: game version
+    /// - Returns: processed loader data
     static func processGameVersionPlaceholders(
         loader: ModrinthLoader,
         gameVersion: String
     ) -> ModrinthLoader {
         var processedLoader = loader
 
-        // 处理 libraries 中的 URL 占位符
+        // Handling URL placeholders in libraries
         processedLoader.libraries = loader.libraries.map { library in
             var processedLibrary = library
 
-            // 处理 name 字段中的占位符
+            // Handle placeholders in name field
             processedLibrary.name = library.name.replacingOccurrences(
                 of: "${modrinth.gameVersion}",
                 with: gameVersion

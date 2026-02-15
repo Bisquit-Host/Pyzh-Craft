@@ -31,7 +31,7 @@ func spacerView() -> some View {
     Spacer().frame(maxHeight: 20)
 }
 
-// 路径设置行
+// path setting line
 struct DirectorySettingRow: View {
     let title: String
     let path: String
@@ -66,10 +66,10 @@ struct DirectorySettingRow: View {
         }
     }
 }
-// 路径分段显示控件（Finder风格图标）
+// Path segment display control (Finder style icon)
 struct PathBreadcrumbView: View {
     let path: String
-    let maxVisible: Int = 3  // 最多显示几段（含首尾）
+    let maxVisible: Int = 3  // Maximum number of paragraphs to display (including first and last paragraphs)
 
     var body: some View {
         let components = path.split(separator: "/").map(String.init)
@@ -77,7 +77,7 @@ struct PathBreadcrumbView: View {
             var result: [String] = []
             var current = path.hasPrefix("/") ? "/" : ""
             for comp in components {
-                // 使用字符串插值而非字符串拼接
+                // Use string interpolation instead of string concatenation
                 let separator = current == "/" ? "" : "/"
                 current = "\(current)\(separator)\(comp)"
                 result.append(current)
@@ -92,9 +92,9 @@ struct PathBreadcrumbView: View {
         let startTail = max(count - tailCount, headCount)
 
         func segmentView(idx: Int) -> some View {
-            // 安全获取文件图标，避免 NSXPC 警告
+            // Securely obtain file icons and avoid NSXPC warnings
             let icon: NSImage = {
-                // 检查文件是否存在
+                // Check if the file exists
                 guard FileManager.default.fileExists(atPath: paths[idx]) else {
                     if #available(macOS 12.0, *) {
                         return NSWorkspace.shared.icon(for: .folder)
@@ -102,7 +102,7 @@ struct PathBreadcrumbView: View {
                         return NSWorkspace.shared.icon(forFileType: NSFileTypeForHFSTypeCode(0))
                     }
                 }
-                // 使用 try-catch 包装，避免潜在的 NSXPC 警告
+                // Use try-catch wrapper to avoid potential NSXPC warnings
                 return NSWorkspace.shared.icon(forFile: paths[idx])
             }()
             return HStack(spacing: 2) {
@@ -116,7 +116,7 @@ struct PathBreadcrumbView: View {
         }
 
         return HStack(spacing: 0) {
-            // 开头
+            // beginning
             ForEach(0..<headCount, id: \.self) { idx in
                 if idx > 0 {
                     Image(systemName: "chevron.right")
@@ -127,7 +127,7 @@ struct PathBreadcrumbView: View {
                 }
                 segmentView(idx: idx)
             }
-            // 省略号
+            // Ellipsis
             if showEllipsis {
                 if headCount > 0 {
                     Image(systemName: "chevron.right")
@@ -140,7 +140,7 @@ struct PathBreadcrumbView: View {
                     .font(.body)
                     .foregroundColor(.primary)
             }
-            // 结尾
+            // ending
             ForEach(startTail..<count, id: \.self) { idx in
                 if idx > headCount || (showEllipsis && idx == startTail) {
                     Image(systemName: "chevron.right")
@@ -190,7 +190,7 @@ extension Scene {
         }
     }
 
-    /// 禁用窗口恢复行为（在所有支持的 macOS 版本上）
+    /// Disable window recovery behavior (on all supported macOS versions)
     func applyRestorationBehaviorDisabled() -> some Scene {
         if #available(macOS 15.0, *) {
             return self.restorationBehavior(.disabled)
@@ -200,14 +200,14 @@ extension Scene {
     }
 }
 
-// MARK: - 通用信息图标组件（带 Popover）
-/// 一个通用的问号标记组件，鼠标悬浮时显示详细说明
+// MARK: - Universal information icon component (with Popover)
+/// A universal question mark component that displays detailed instructions when the mouse is hovering
 struct InfoIconWithPopover<Content: View>: View {
-    /// Popover 中显示的内容
+    /// What appears in the Popover
     let content: Content
-    /// 图标大小
+    /// icon size
     let iconSize: CGFloat
-    /// 延迟显示时间（秒）
+    /// Delay display time (seconds)
     let delay: Double
 
     @State private var isHovering = false
@@ -226,7 +226,7 @@ struct InfoIconWithPopover<Content: View>: View {
 
     var body: some View {
         Button {
-            // 点击时也显示 popover
+            // Also show popover when clicked
             showPopover.toggle()
         } label: {
             Image(systemName: "questionmark.circle")
@@ -236,11 +236,11 @@ struct InfoIconWithPopover<Content: View>: View {
         .buttonStyle(.plain)
         .onHover { hovering in
             isHovering = hovering
-            // 取消之前的任务
+            // Cancel previous task
             hoverTask?.cancel()
 
             if hovering {
-                // 延迟显示 popover，避免鼠标快速移动时频繁显示
+                // Delay the display of popover to avoid frequent display when the mouse moves quickly
                 hoverTask = Task {
                     try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
                     if !Task.isCancelled && isHovering {
@@ -266,9 +266,9 @@ struct InfoIconWithPopover<Content: View>: View {
     }
 }
 
-// MARK: - 便捷初始化方法（使用字符串）
+// MARK: - Convenience initialization method (using strings)
 extension InfoIconWithPopover {
-    /// 使用字符串文本创建 InfoIconWithPopover 的便捷初始化方法
+    /// Convenience initialization method for creating InfoIconWithPopover using string literals
     init(
         text: String,
         iconSize: CGFloat = 14,

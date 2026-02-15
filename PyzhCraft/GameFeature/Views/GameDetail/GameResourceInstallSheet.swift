@@ -1,15 +1,15 @@
 import SwiftUI
 
-// MARK: - 游戏资源安装 Sheet（预置游戏信息，无需选择游戏）
+// MARK: - Game resource installation sheet (preset game information, no need to select a game)
 struct GameResourceInstallSheet: View {
     let project: ModrinthProject
     let resourceType: String
-    let gameInfo: GameVersionInfo  // 预置的游戏信息
+    let gameInfo: GameVersionInfo  // Preset game information
     @Binding var isPresented: Bool
-    let preloadedDetail: ModrinthProjectDetail?  // 预加载的项目详情
-    var isUpdateMode: Bool = false  // 更新模式：footer 显示「下载」、不显示依赖
+    let preloadedDetail: ModrinthProjectDetail?  // Preloaded project details
+    var isUpdateMode: Bool = false  // Update mode: The footer displays "Download" and does not display dependencies
     @EnvironmentObject var gameRepository: GameRepository
-    /// 下载成功回调，参数为 (fileName, hash)，仅 downloadResource 路径会传值，downloadAllManual 传 (nil, nil)
+    /// Download success callback, the parameters are (fileName, hash), only the downloadResource path will pass the value, downloadAllManual will pass (nil, nil)
     var onDownloadSuccess: ((String?, String?) -> Void)?
 
     @State private var selectedVersion: ModrinthProjectDetailVersion?
@@ -39,7 +39,7 @@ struct GameResourceInstallSheet: View {
                         VersionPickerForSheet(
                             project: project,
                             resourceType: resourceType,
-                            selectedGame: .constant(gameInfo),  // 预置游戏信息
+                            selectedGame: .constant(gameInfo),  // Preset game information
                             selectedVersion: $selectedVersion,
                             availableVersions: $availableVersions,
                             mainVersionId: $mainVersionId
@@ -80,7 +80,7 @@ struct GameResourceInstallSheet: View {
             }
         )
         .onDisappear {
-            // sheet 关闭时清理所有状态数据以释放内存
+            // Clean up all state data when sheet closes to free up memory
             selectedVersion = nil
             availableVersions = []
             dependencyState = DependencyState()
@@ -120,7 +120,7 @@ struct GameResourceInstallSheet: View {
             )
         }
 
-        // 获取缺失的依赖项（包含版本信息）
+        // Get missing dependencies (with version information)
         let missingWithVersions =
             await ModrinthDependencyDownloader
             .getMissingDependenciesWithVersions(
@@ -149,11 +149,11 @@ struct GameResourceInstallSheet: View {
     }
 }
 
-// MARK: - Footer 按钮区块
+// MARK: - Footer button block
 struct GameResourceInstallFooter: View {
     let project: ModrinthProject
     let resourceType: String
-    var isUpdateMode: Bool = false  // 更新模式：显示「下载」、不显示依赖（由父级控制不展示依赖区块）
+    var isUpdateMode: Bool = false  // Update mode: Display "Download", do not display dependencies (controlled by the parent and do not display dependent blocks)
     @Binding var isPresented: Bool
     let projectDetail: ModrinthProjectDetail?
     let gameInfo: GameVersionInfo
@@ -164,7 +164,7 @@ struct GameResourceInstallFooter: View {
     let loadDependencies:
         (ModrinthProjectDetailVersion, GameVersionInfo) -> Void
     @Binding var mainVersionId: String
-    /// 下载成功回调，参数为 (fileName, hash)，仅 downloadResource 路径会传值，downloadAllManual 传 (nil, nil)
+    /// Download success callback, the parameters are (fileName, hash), only the downloadResource path will pass the value, downloadAllManual will pass (nil, nil)
     var onDownloadSuccess: ((String?, String?) -> Void)?
 
     var body: some View {
@@ -174,7 +174,7 @@ struct GameResourceInstallFooter: View {
                     Button("common.close".localized()) { isPresented = false }
                     Spacer()
                     if resourceType == "mod", !isUpdateMode {
-                        // 安装模式下的 mod：显示「下载全部」（含依赖）
+                        // Mod in installation mode: displays "Download All" (including dependencies)
                         if !dependencyState.isLoading {
                             if selectedVersion != nil {
                                 Button(action: downloadAllManual) {
@@ -192,7 +192,7 @@ struct GameResourceInstallFooter: View {
                             }
                         }
                     } else {
-                        // 非 mod，或更新模式：显示「下载」（仅主资源）
+                        // Non-mod, or update mode: Show "Download" (main resource only)
                         if selectedVersion != nil {
                             Button(action: downloadResource) {
                                 if isDownloadingAll {
@@ -221,7 +221,7 @@ struct GameResourceInstallFooter: View {
         Task {
             do {
                 try await downloadAllManualThrowing()
-                // 下载成功已在 downloadAllManualThrowing 中处理关闭 sheet
+                // Successful download has been handled in downloadAllManualThrowing to close the sheet
             } catch {
                 let globalError = GlobalError.from(error)
                 Logger.shared.error(
@@ -269,7 +269,7 @@ struct GameResourceInstallFooter: View {
             )
         }
 
-        // 下载成功，更新按钮状态并关闭 sheet（downloadAllManual 不传 fileName/hash）
+        // The download is successful, the button status is updated and the sheet is closed (downloadAllManual does not pass fileName/hash)
         _ = await MainActor.run {
             onDownloadSuccess?(nil, nil)
             isDownloadingAll = false
@@ -283,7 +283,7 @@ struct GameResourceInstallFooter: View {
         Task {
             do {
                 try await downloadResourceThrowing()
-                // 下载成功已在 downloadResourceThrowing 中处理关闭 sheet
+                // Successful download has been handled in downloadResourceThrowing to close the sheet
             } catch {
                 let globalError = GlobalError.from(error)
                 Logger.shared.error("下载资源失败: \(globalError.chineseMessage)")
@@ -321,7 +321,7 @@ struct GameResourceInstallFooter: View {
             )
         }
 
-        // 下载成功，更新按钮状态并关闭 sheet，传递 (fileName, hash) 供更新流程做局部刷新
+        // If the download is successful, update the button status and close the sheet. Pass (fileName, hash) for partial refresh in the update process
         _ = await MainActor.run {
             onDownloadSuccess?(fileName, hash)
             isDownloadingAll = false

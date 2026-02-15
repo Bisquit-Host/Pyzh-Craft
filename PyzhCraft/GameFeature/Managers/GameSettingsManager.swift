@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 数据源枚举
+/// Data source enumeration
 enum DataSource: String, CaseIterable, Codable {
     case modrinth = "Modrinth"
     case curseforge = "CurseForge"
@@ -20,7 +20,7 @@ enum DataSource: String, CaseIterable, Codable {
 }
 
 class GameSettingsManager: ObservableObject {
-    // MARK: - 单例实例
+    // MARK: - Singleton instance
     static let shared = GameSettingsManager()
 
     @AppStorage("globalXms")
@@ -43,13 +43,13 @@ class GameSettingsManager: ObservableObject {
         didSet { objectWillChange.send() }
     }
 
-    /// 是否在游戏版本选择中包含快照版（全局设置）
+    /// Whether to include snapshot versions in game version selection (global setting)
     @AppStorage("includeSnapshotsForGameVersions")
     var includeSnapshotsForGameVersions: Bool = false {
         didSet { objectWillChange.send() }
     }
 
-    /// 计算系统最大可用内存分配（基于物理内存的70%）
+    /// Compute the system's maximum available memory allocation (based on 70% of physical memory)
     var maximumMemoryAllocation: Int {
         let physicalMemoryBytes = ProcessInfo.processInfo.physicalMemory
         let physicalMemoryMB = physicalMemoryBytes / 1_048_576

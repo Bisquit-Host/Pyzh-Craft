@@ -1,13 +1,13 @@
 import Foundation
 
 enum URLConfig {
-    /// 安全创建 URL 的辅助方法，无效时记录日志并返回占位 URL，避免生产环境闪退
+    /// An auxiliary method for safely creating URLs. When invalid, logs are logged and return placeholder URLs to avoid crashes in the production environment
     private static func url(_ string: String) -> URL {
         guard let url = URL(string: string) else {
             Logger.shared.error("Invalid URL: \(string)，使用占位 URL")
-            // 使用 guard let 避免强制解包
+            // Use guard let to avoid forced unwrapping
             guard let fallbackURL = URL(string: "https://localhost") else {
-                // 如果连 localhost 都失败，返回一个硬编码的 URL（这种情况理论上不应该发生）
+                // If even localhost fails, a hardcoded URL is returned (this should not happen in theory)
                 return URL(string: "https://localhost") ?? URL(fileURLWithPath: "/")
             }
             return fallbackURL
@@ -15,7 +15,7 @@ enum URLConfig {
         return url
     }
 
-    /// GitHub 代理设置（从 UserDefaults 读取，避免 UI 依赖）
+    /// GitHub proxy settings (read from UserDefaults, avoid UI dependencies)
     private enum GitHubProxySettings {
         static let defaultProxy = "https://gh-proxy.com"
         static let enableKey = "enableGitHubProxy"
@@ -23,7 +23,7 @@ enum URLConfig {
 
         static var isEnabled: Bool {
             let defaults = UserDefaults.standard
-            // 未写入时默认开启
+            // Enabled by default when not written
             return (defaults.object(forKey: enableKey) as? Bool) ?? true
         }
 
@@ -33,7 +33,7 @@ enum URLConfig {
                 .trimmingCharacters(in: .whitespacesAndNewlines)
         }
 
-        /// 返回用于拼接的代理前缀（保证为 http(s) 且不以 / 结尾），无效则返回 nil
+        /// Returns the proxy prefix used for splicing (guaranteed to be http(s) and not ending with /), or nil if invalid
         static var normalizedProxyPrefix: String? {
             let proxy = proxyString
             guard !proxy.isEmpty else { return nil }
@@ -43,39 +43,39 @@ enum URLConfig {
         }
     }
 
-    // 常量字符串，避免重复创建
+    // Constant string to avoid repeated creation
     private static let githubHost = "github.com"
     private static let rawGithubHost = "raw.githubusercontent.com"
 
-    // 公共方法：为 GitHub URL 应用代理（如果需要）
-    /// 为 GitHub 相关的 URL 应用 gitProxyURL 代理
-    /// - Parameter url: 原始 URL
-    /// - Returns: 应用代理后的 URL（如果需要）
+    // Public method: Apply proxy for GitHub URL (if needed)
+    /// Apply gitProxyURL proxy for GitHub related URLs
+    /// - Parameter url: original URL
+    /// - Returns: URL after applying proxy (if required)
     static func applyGitProxyIfNeeded(_ url: URL) -> URL {
         guard GitHubProxySettings.isEnabled else { return url }
         guard let proxy = GitHubProxySettings.normalizedProxyPrefix else { return url }
 
-        // 优化：直接使用 URL 的 host 属性，避免转换为 String
+        // Optimization: Use the host attribute of URL directly to avoid conversion to String
         guard let host = url.host else { return url }
 
-        // 仅对 GitHub 相关域名应用代理（排除 api.github.com）
+        // Apply proxy only to GitHub related domains (excluding api.github.com)
         let isGitHubURL = host == githubHost || host == rawGithubHost
         guard isGitHubURL else { return url }
 
-        // 优化：使用 URL 的 absoluteString 检查是否已有代理前缀
+        // Optimization: Use URL's absoluteString to check if there is already a proxy prefix
         let urlString = url.absoluteString
         if urlString.hasPrefix("\(proxy)/") { return url }
 
-        // 使用字符串插值而非字符串拼接
+        // Use string interpolation instead of string concatenation
         let proxiedString = "\(proxy)/\(urlString)"
         return Self.url(proxiedString)
     }
 
-    // 公共方法：为 GitHub URL 字符串应用代理（如果需要）
-    /// 为 GitHub 相关的 URL 字符串应用 gitProxyURL 代理
-    /// - Parameter urlString: 原始 URL 字符串
-    /// - Returns: 应用代理后的 URL 字符串（如果需要）
-    /// 优化：使用 autoreleasepool 及时释放临时 URL 对象
+    // Public method: Apply proxy for GitHub URL string (if needed)
+    /// Apply the gitProxyURL proxy to GitHub-related URL strings
+    /// - Parameter urlString: original URL string
+    /// - Returns: URL string after applying proxy (if required)
+    /// Optimization: Use autoreleasepool to release temporary URL objects in time
     static func applyGitProxyIfNeeded(_ urlString: String) -> String {
         return autoreleasepool {
             guard let url = URL(string: urlString) else { return urlString }
@@ -83,7 +83,7 @@ enum URLConfig {
         }
     }
 
-    // API 端点
+    // API endpoint
     enum API {
         // Authentication API
         enum Authentication {
@@ -116,22 +116,22 @@ enum URLConfig {
             static let baseURL = URLConfig.url("https://launchermeta.mojang.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871")
             static let allRuntimes = baseURL.appendingPathComponent("all.json")
 
-            /// 获取Java运行时清单
-            /// - Parameter manifestURL: 清单URL
-            /// - Returns: 清单URL
+            /// Get Java runtime manifest
+            /// - Parameter manifestURL: Manifest URL
+            /// - Returns: Listing URL
             static func manifest(_ manifestURL: String) -> URL {
                 URLConfig.url(manifestURL)
             }
         }
 
-        // ARM平台专用版本的Zulu JDK下载URL
+        // Zulu JDK download URL for the ARM platform-specific version
         enum JavaRuntimeARM {
             static let jreLegacy = URLConfig.url("https://cdn.azul.com/zulu/bin/zulu8.88.0.19-ca-jre8.0.462-macosx_aarch64.zip")
             static let javaRuntimeAlpha = URLConfig.url("https://cdn.azul.com/zulu/bin/zulu16.32.15-ca-jre16.0.2-macosx_aarch64.zip")
             static let javaRuntimeBeta = URLConfig.url("https://cdn.azul.com/zulu/bin/zulu17.60.17-ca-jre17.0.16-macosx_aarch64.zip")
         }
 
-        // Intel平台专用版本的Zulu JDK下载URL
+        // Intel platform-specific version of Zulu JDK download URL
         enum JavaRuntimeIntel {
             static let jreLegacy = URLConfig.url("https://cdn.azul.com/zulu/bin/zulu8.88.0.19-ca-jre8.0.462-macosx_x64.zip")
             static let javaRuntimeAlpha = URLConfig.url("https://cdn.azul.com/zulu/bin/zulu16.32.15-ca-jre16.0.2-macosx_x64.zip")
@@ -145,11 +145,11 @@ enum URLConfig {
             static let repositoryOwner = "suhang12332"
             static let assetsRepositoryName = "Swift-Craft-Launcher-Assets"
             static let repositoryName = "Swift-Craft-Launcher"
-            /// 公告基础地址：
-            /// 例如：https://raw.githubusercontent.com/suhang12332/Swift-Craft-Launcher-Assets/refs/heads/main/news/api/announcements/0.3.1-beta/ar.json
+            /// Announcement base address:
+            /// For example: https://raw.githubusercontent.com/suhang12332/Swift-Craft-Launcher-Assets/refs/heads/main/news/api/announcements/0.3.1-beta/ar.json
             static let announcementBaseURL = URLConfig.url("https://raw.githubusercontent.com/\(repositoryOwner)/\(assetsRepositoryName)/refs/heads/main/news/api/announcements")
 
-            // 私有方法：构建仓库基础路径
+            // Private method: Build the base path of the warehouse
             private static var repositoryBaseURL: URL {
                 baseURL
                     .appendingPathComponent("repos")
@@ -172,14 +172,14 @@ enum URLConfig {
                 return URLConfig.applyGitProxyIfNeeded(url)
             }
 
-            // GitHub 仓库主页 URL
+            // GitHub repository homepage URL
             static func repositoryURL() -> URL {
                 return gitHubBase
                     .appendingPathComponent(repositoryOwner)
                     .appendingPathComponent(repositoryName)
             }
 
-            // Appcast 相关
+            // Appcast related
             static func appcastURL(
                 architecture: String
             ) -> URL {
@@ -194,7 +194,7 @@ enum URLConfig {
                 return URLConfig.applyGitProxyIfNeeded(url)
             }
 
-            // 静态贡献者数据
+            // Static contributor data
             static func staticContributors() -> URL {
                 let timestamp = Int(Date().timeIntervalSince1970)
                 let url = URLConfig.url("https://raw.githubusercontent.com")
@@ -211,7 +211,7 @@ enum URLConfig {
                 return URLConfig.applyGitProxyIfNeeded(url)
             }
 
-            // 致谢数据
+            // Acknowledgments data
             static func acknowledgements() -> URL {
                 let timestamp = Int(Date().timeIntervalSince1970)
                 let url = URLConfig.url("https://raw.githubusercontent.com")
@@ -228,7 +228,7 @@ enum URLConfig {
                 return URLConfig.applyGitProxyIfNeeded(url)
             }
 
-            // LICENSE 文件（API）
+            // LICENSE file (API)
             static func license(ref: String = "main") -> URL {
                 let url = repositoryBaseURL
                     .appendingPathComponent("contents")
@@ -239,7 +239,7 @@ enum URLConfig {
                 return URLConfig.applyGitProxyIfNeeded(url)
             }
 
-            // LICENSE 文件（网页）
+            // LICENSE file (web page)
             static func licenseWebPage(ref: String = "main") -> URL {
                 let url = gitHubBase
                     .appendingPathComponent(repositoryOwner)
@@ -247,16 +247,16 @@ enum URLConfig {
                     .appendingPathComponent("blob")
                     .appendingPathComponent(ref)
                     .appendingPathComponent("LICENSE")
-                // License 网页不走 GitHub 代理，直接打开原始 github.com 链接
+                // The License webpage does not go through the GitHub proxy and directly opens the original github.com link
                 return url
             }
 
             // Announcement API
-            /// 获取公告URL
+            /// Get announcement URL
             /// - Parameters:
-            ///   - version: 应用版本号
-            ///   - language: 语言代码，如 "zh-Hans"
-            /// - Returns: 公告URL（带时间戳，避免缓存）
+            ///   - version: application version number
+            ///   - language: language code, such as "zh-Hans"
+            /// - Returns: Announcement URL (with timestamp to avoid caching)
             static func announcement(version: String, language: String) -> URL {
                 let timestamp = Int(Date().timeIntervalSince1970)
                 let url = announcementBaseURL
@@ -272,15 +272,15 @@ enum URLConfig {
         // Modrinth API
         enum Modrinth {
             static let baseURL = URLConfig.url("https://api.modrinth.com/v2")
-            /// Modrinth 项目详情基础 URL，例如：https://modrinth.com/mod/fabric-api
+            /// Modrinth project details base URL, for example: https://modrinth.com/mod/fabric-api
             static let webProjectBase = "https://modrinth.com/mod/"
 
-            // 项目相关
+            // Project related
             static func project(id: String) -> URL {
                 baseURL.appendingPathComponent("project/\(id)")
             }
 
-            // 版本相关
+            // Version related
             static func version(id: String) -> URL {
                 baseURL.appendingPathComponent("project/\(id)/version")
             }
@@ -289,7 +289,7 @@ enum URLConfig {
                 baseURL.appendingPathComponent("version/\(versionId)")
             }
 
-            // 搜索相关
+            // Search related
             static var search: URL {
                 baseURL.appendingPathComponent("search")
             }
@@ -298,7 +298,7 @@ enum URLConfig {
                 baseURL.appendingPathComponent("version_file/\(hash)")
             }
 
-            // 标签相关
+            // tag related
             static var gameVersionTag: URL {
                 baseURL.appendingPathComponent("tag/game_version")
             }
@@ -327,13 +327,13 @@ enum URLConfig {
                 URLConfig.url("https://launcher-meta.modrinth.com/\(loader)/v0/versions/\(version).json")
             }
 
-            // 下载 URL
-            /// 生成 Modrinth 文件下载 URL
+            // Download URL
+            /// Generate Modrinth file download URL
             /// - Parameters:
-            ///   - projectId: 项目 ID
-            ///   - versionId: 版本 ID
-            ///   - fileName: 文件名（会自动进行 URL 编码）
-            /// - Returns: 下载 URL
+            ///   - projectId: project ID
+            ///   - versionId: version ID
+            ///   - fileName: file name (URL encoding will be performed automatically)
+            /// - Returns: Download URL
             static func downloadUrl(projectId: String, versionId: String, fileName: String) -> String {
                 let encodedFileName = fileName.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? fileName
                 return "https://cdn.modrinth.com/data/\(projectId)/versions/\(versionId)/\(encodedFileName)"
@@ -353,7 +353,7 @@ enum URLConfig {
         enum CurseForge {
             static let mirrorBaseURL = URLConfig.url("https://api.curseforge.com/v1")
             static let fallbackDownloadBaseURL = URLConfig.url("https://edge.forgecdn.net/files")
-            /// CurseForge 项目详情基础 URL，例如：https://www.curseforge.com/minecraft/mc-mods/geckolib
+            /// CurseForge project details base URL, for example: https://www.curseforge.com/minecraft/mc-mods/geckolib
             static let webProjectBase = "https://www.curseforge.com/minecraft/mc-mods/"
 
             static func fileDetail(projectId: Int, fileId: Int) -> URL {
@@ -369,7 +369,7 @@ enum URLConfig {
             }
 
             static func fallbackDownloadUrl(fileId: Int, fileName: String) -> URL {
-                // 格式：https://edge.forgecdn.net/files/{fileId前三位}/{fileId后三位}/{fileName}
+                // Format: https://edge.forgecdn.net/files/{first three digits of fileId}/{last three digits of fileId}/{fileName}
                 fallbackDownloadBaseURL
                     .appendingPathComponent("\(fileId / 1000)")
                     .appendingPathComponent("\(fileId % 1000)")
@@ -397,17 +397,17 @@ enum URLConfig {
                 return components?.url ?? url
             }
 
-            // 搜索相关
+            // Search related
             static var search: URL {
                 mirrorBaseURL.appendingPathComponent("mods/search")
             }
 
-            // 分类相关
+            // Classification related
             static var categories: URL {
                 mirrorBaseURL.appendingPathComponent("categories")
             }
 
-            // 游戏版本相关
+            // Game version related
             static var gameVersions: URL {
                 mirrorBaseURL.appendingPathComponent("minecraft/version")
             }
@@ -416,7 +416,7 @@ enum URLConfig {
         // IP Location API
         enum IPLocation {
             static var currentLocation: URL {
-                // 使用 ipapi.co 的免费API，支持HTTPS，返回国家代码
+                // Use ipapi.co's free API, support HTTPS, return country code
                 URLConfig.url("https://ipapi.co/json/")
             }
         }
@@ -424,7 +424,7 @@ enum URLConfig {
 
     // Store URLs
     enum Store {
-        // Minecraft 购买链接
+        // Minecraft purchase link
         static let minecraftPurchase = URLConfig.url("https://www.xbox.com/zh-CN/games/store/productId/9NXP44L49SHJ")
     }
 }

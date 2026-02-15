@@ -1,13 +1,13 @@
 import SwiftUI
 
-/// 启动器导入 ViewModel
+/// Launcher import ViewModel
 @MainActor
 class LauncherImportViewModel: BaseGameFormViewModel {
 
     // MARK: - Published Properties
 
     @Published var selectedLauncherType: ImportLauncherType = .multiMC
-    @Published var selectedInstancePath: URL?  // 直接选择的实例路径（所有启动器都使用此方式）
+    @Published var selectedInstancePath: URL?  // Directly selected instance path (all launchers use this method)
     @Published var isImporting = false {
         didSet {
             updateParentState()
@@ -37,27 +37,27 @@ class LauncherImportViewModel: BaseGameFormViewModel {
 
     // MARK: - Cleanup Methods
 
-    /// 清理缓存和状态（在 sheet 关闭时调用）
+    /// Clean cache and state (called when sheet is closed)
     func cleanup() {
-        // 取消正在进行的任务
+        // Cancel an ongoing task
         copyTask?.cancel()
         copyTask = nil
         downloadTask?.cancel()
         downloadTask = nil
 
-        // 重置状态
+        // reset state
         selectedInstancePath = nil
         importProgress = nil
         isImporting = false
         selectedLauncherType = .multiMC
 
-        // 清理游戏名（可选，根据需求决定是否保留）
+        // Clean up the game name (optional, decide whether to keep it based on your needs)
         // gameNameValidator.gameName = ""
 
-        // 重置下载状态
+        // Reset download status
         gameSetupService.downloadState.reset()
 
-        // 清理引用
+        // Clean up references
         gameRepository = nil
         playerListViewModel = nil
     }
@@ -65,7 +65,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
     // MARK: - Override Methods
 
     override func performConfirmAction() async {
-        // 所有启动器都直接使用 selectedInstancePath
+        // All launchers use selectedInstancePath directly
         if let instancePath = selectedInstancePath {
             startDownloadTask {
                 await self.importSelectedInstancePath(instancePath)
@@ -75,10 +75,10 @@ class LauncherImportViewModel: BaseGameFormViewModel {
 
     override func handleCancel() {
         if isDownloading || isImporting {
-            // 取消复制任务
+            // Cancel copy task
             copyTask?.cancel()
             copyTask = nil
-            // 取消下载任务
+            // Cancel download task
             downloadTask?.cancel()
             downloadTask = nil
             gameSetupService.downloadState.cancel()
@@ -91,16 +91,16 @@ class LauncherImportViewModel: BaseGameFormViewModel {
     }
 
     override func performCancelCleanup() async {
-        // 清理已创建的游戏文件夹
+        // Clean created game folders
         if let instancePath = selectedInstancePath {
-            // 从实例路径推断启动器基础路径
+            // Infer launcher base path from instance path
             let basePath = inferBasePath(from: instancePath)
 
             let parser = LauncherInstanceParserFactory.createParser(for: selectedLauncherType)
             if let info = try? parser.parseInstance(at: instancePath, basePath: basePath) {
                 do {
                     let fileManager = MinecraftFileManager()
-                    // 使用用户输入的游戏名（如果有），否则使用实例的游戏名
+                    // Use the game name entered by the user if available, otherwise use the instance's game name
                     let gameName = gameNameValidator.gameName.isEmpty
                         ? info.gameName
                         : gameNameValidator.gameName
@@ -124,42 +124,42 @@ class LauncherImportViewModel: BaseGameFormViewModel {
     }
 
     override func computeIsFormValid() -> Bool {
-        // 所有启动器都检查 selectedInstancePath
+        // All launchers check selectedInstancePath
         guard selectedInstancePath != nil && gameNameValidator.isFormValid else {
             return false
         }
 
-        // 检查 Mod Loader 是否支持
+        // Check if Mod Loader supports
         return isModLoaderSupported
     }
 
     // MARK: - Instance Validation
 
-    /// 自动填充游戏名到输入框（如果输入框为空）
+    /// Automatically fill the game name into the input box (if the input box is empty)
     func autoFillGameNameIfNeeded() {
         guard let instancePath = selectedInstancePath else { return }
 
-        // 如果游戏名已经填写，不自动填充
+        // If the game name has been filled in, it will not be filled in automatically
         guard gameNameValidator.gameName.isEmpty else { return }
 
-        // 从实例路径推断启动器基础路径
+        // Infer launcher base path from instance path
         let basePath = inferBasePath(from: instancePath)
         let parser = LauncherInstanceParserFactory.createParser(for: selectedLauncherType)
 
-        // 解析实例信息并填充游戏名
+        // Parse instance information and populate game name
         if let info = try? parser.parseInstance(at: instancePath, basePath: basePath) {
             gameNameValidator.gameName = info.gameName
         }
     }
 
-    /// 检查 Mod Loader 是否支持，如果不支持则显示通知
+    /// Check if Mod Loader supports it and display notification if not
     func checkAndNotifyUnsupportedModLoader() {
         guard let info = currentInstanceInfo else { return }
 
-        // 检查 Mod Loader 是否支持
+        // Check if Mod Loader supports
         guard !AppConstants.modLoaders.contains(info.modLoader.lowercased()) else { return }
 
-        // 如果不支持，显示通知
+        // If not supported, show notification
         let supportedModLoadersList = AppConstants.modLoaders.joined(separator: "、")
         let instanceName = selectedInstancePath?.lastPathComponent ?? "Unknown"
         let chineseMessage = "实例 \(instanceName) 使用了不支持的 Mod Loader (\(info.modLoader))，仅支持 \(supportedModLoadersList)"
@@ -173,13 +173,13 @@ class LauncherImportViewModel: BaseGameFormViewModel {
         )
     }
 
-    /// 验证选择的实例文件夹是否有效
-    /// 所有启动器都需要直接选择实例文件夹
+    /// Verify that the selected instance folder is valid
+    /// All launchers require direct selection of the instance folder
     func validateInstance(at instancePath: URL) -> Bool {
         let parser = LauncherInstanceParserFactory.createParser(for: selectedLauncherType)
         let fileManager = FileManager.default
 
-        // 检查路径是否存在且为目录
+        // Check if the path exists and is a directory
         guard fileManager.fileExists(atPath: instancePath.path) else {
             return false
         }
@@ -189,13 +189,13 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             return false
         }
 
-        // 验证是否为有效实例
+        // Verify if it is a valid instance
         return parser.isValidInstance(at: instancePath)
     }
 
     // MARK: - Import Methods
 
-    /// 直接从路径导入实例（所有启动器都使用此方法）
+    /// Import instance directly from path (all launchers use this method)
     private func importSelectedInstancePath(_ instancePath: URL) async {
         guard let gameRepository = gameRepository else { return }
 
@@ -204,12 +204,12 @@ class LauncherImportViewModel: BaseGameFormViewModel {
 
         let instanceName = instancePath.lastPathComponent
 
-        // 从实例路径推断启动器基础路径
+        // Infer launcher base path from instance path
         let basePath = inferBasePath(from: instancePath)
 
         let parser = LauncherInstanceParserFactory.createParser(for: selectedLauncherType)
 
-        // 解析实例信息
+        // Parse instance information
         let instanceInfo: ImportInstanceInfo
         do {
             guard let parsedInfo = try parser.parseInstance(at: instancePath, basePath: basePath) else {
@@ -236,7 +236,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             return
         }
 
-        // 验证实例必须有版本
+        // The verification instance must have a version
         guard !instanceInfo.gameVersion.isEmpty else {
             Logger.shared.error("实例 \(instanceName) 没有游戏版本")
             GlobalErrorHandler.shared.handle(
@@ -249,22 +249,22 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             return
         }
 
-        // 验证 Mod Loader 支持，错误已显示，此处仅记录日志
+        // Verified Mod Loader support, error shown, only logged here
         guard AppConstants.modLoaders.contains(instanceInfo.modLoader.lowercased()) else {
             Logger.shared.error("实例 \(instanceName) 使用了不支持的 Mod Loader: \(instanceInfo.modLoader)")
             return
         }
 
-        // 生成游戏名称（如果用户没有自定义）
+        // Generate game name (if not customized by user)
         let finalGameName = gameNameValidator.gameName.isEmpty
             ? instanceInfo.gameName
             : gameNameValidator.gameName
 
-        // 1. 先复制游戏目录（保留 mods、config 等文件）
+        // 1. Copy the game directory first (keep mods, config and other files)
         let targetDirectory = AppPaths.profileDirectory(gameName: finalGameName)
 
         do {
-            // 创建复制任务，以便可以取消
+            // Create a replication task so it can be canceled
             copyTask = Task {
                 try await InstanceFileCopier.copyGameDirectory(
                     from: instanceInfo.sourceGameDirectory,
@@ -284,7 +284,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
         } catch is CancellationError {
             Logger.shared.info("复制游戏目录已取消: \(instanceName)")
             copyTask = nil
-            // 清理已复制的文件
+            // Clean copied files
             await performCancelCleanup()
             return
         } catch {
@@ -300,7 +300,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             return
         }
 
-        // 2. 下载游戏和 Mod Loader（只下载缺失的，不覆盖已有）
+        // 2. Download the game and Mod Loader (only download the missing ones, do not overwrite existing ones)
         let downloadSuccess = await withCheckedContinuation { continuation in
             Task {
                 await gameSetupService.saveGame(
@@ -309,7 +309,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
                     selectedGameVersion: instanceInfo.gameVersion,
                     selectedModLoader: instanceInfo.modLoader,
                     specifiedLoaderVersion: instanceInfo.modLoaderVersion,
-                    pendingIconData: nil,  // 从启动器导入时不导入图标
+                    pendingIconData: nil,  // Icons are not imported when importing from launcher
                     playerListViewModel: playerListViewModel,
                     gameRepository: gameRepository,
                     onSuccess: {
@@ -331,7 +331,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
 
         Logger.shared.info("成功导入实例: \(instanceName) -> \(finalGameName)")
 
-        // 导入完成
+        // Import completed
         await MainActor.run {
             gameSetupService.downloadState.reset()
             configuration.actions.onCancel()
@@ -340,13 +340,13 @@ class LauncherImportViewModel: BaseGameFormViewModel {
 
     // MARK: - Helper Methods
 
-    /// 从实例路径推断启动器基础路径
-    /// 向上查找包含 icons 文件夹的目录，如果找不到则使用实例路径的父目录的父目录
+    /// Infer launcher base path from instance path
+    /// Looks up for the directory containing the icons folder, using the parent directory of the instance path's parent directory if not found
     private func inferBasePath(from instancePath: URL) -> URL {
         let fileManager = FileManager.default
         var currentPath = instancePath
 
-        // 向上查找，最多查找5层
+        // Search upward, up to 5 levels
         for _ in 0..<5 {
             let iconsPath = currentPath.appendingPathComponent("icons")
             
@@ -357,25 +357,25 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             let parentPath = currentPath.deletingLastPathComponent()
             
             if parentPath.path == currentPath.path {
-                // 已经到达根目录
+                // Root directory has been reached
                 break
             }
             
             currentPath = parentPath
         }
 
-        // 如果找不到 icons 文件夹，使用实例路径的父目录的父目录作为 fallback
+        // If the icons folder is not found, use the parent directory of the instance path as a fallback
         return instancePath.deletingLastPathComponent().deletingLastPathComponent()
     }
 
-    /// 下载图标
+    /// download icon
     private func downloadIcon(from urlString: String, instanceName: String) async -> Data? {
         guard let url = URL(string: urlString) else { return nil }
 
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
 
-            // 缓存图标
+            // cache icon
             let cacheDir = AppPaths.appCache.appendingPathComponent("imported_icons")
             try FileManager.default.createDirectory(
                 at: cacheDir,
@@ -401,17 +401,17 @@ class LauncherImportViewModel: BaseGameFormViewModel {
         selectedInstancePath != nil
     }
 
-    /// 获取当前选中实例的信息
+    /// Get information about the currently selected instance
     var currentInstanceInfo: ImportInstanceInfo? {
         guard let instancePath = selectedInstancePath else { return nil }
 
-        // 从实例路径推断启动器基础路径
+        // Infer launcher base path from instance path
         let basePath = inferBasePath(from: instancePath)
 
         let parser = LauncherInstanceParserFactory.createParser(for: selectedLauncherType)
         do {
             if let info = try parser.parseInstance(at: instancePath, basePath: basePath) {
-                // 验证必须有版本（只记录日志，不显示错误，错误会在导入时显示）
+                // Verification must have a version (only records logs, does not display errors, errors will be displayed during import)
                 guard !info.gameVersion.isEmpty else {
                     Logger.shared.warning("选中的实例没有游戏版本")
                     return nil
@@ -428,7 +428,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
         }
     }
 
-    /// 检查当前选中的实例是否使用了支持的 Mod Loader
+    /// Checks whether the currently selected instance uses a supported Mod Loader
     var isModLoaderSupported: Bool {
         guard let info = currentInstanceInfo else { return false }
         return AppConstants.modLoaders.contains(info.modLoader.lowercased())

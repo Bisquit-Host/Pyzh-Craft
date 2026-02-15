@@ -1,6 +1,6 @@
 import Foundation
 
-/// 本地资源筛选类型
+/// Local resource filter type
 enum LocalResourceFilter: String, CaseIterable, Identifiable {
     case all, disabled
 

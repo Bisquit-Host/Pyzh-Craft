@@ -2,14 +2,14 @@ import SwiftUI
 
 // MARK: - Game Form View Extensions
 extension View {
-    /// 通用的游戏表单状态监听修饰符
+    /// Universal game form status listening modifier
     func gameFormStateListeners<T: BaseGameFormViewModel>(
         viewModel: T,
         triggerConfirm: Binding<Bool>,
         triggerCancel: Binding<Bool>
     ) -> some View {
         self
-            // 优化：仅在值实际变化时更新，减少不必要的视图更新
+            // Optimization: only update when the value actually changes, reducing unnecessary view updates
             .onChange(of: viewModel.gameNameValidator.gameName) { oldValue, newValue in
                 if oldValue != newValue {
                     viewModel.updateParentState()
@@ -42,7 +42,7 @@ extension View {
 
 // MARK: - Common Error Handling
 extension BaseGameFormViewModel {
-    /// 统一的文件访问错误处理
+    /// Unified file access error handling
     func handleFileAccessError(_ error: Error, context: String) {
         let globalError = GlobalError.fileSystem(
             chineseMessage: "无法访问文件: \(context)",
@@ -52,7 +52,7 @@ extension BaseGameFormViewModel {
         handleNonCriticalError(globalError, message: "error.file.access.failed".localized())
     }
 
-    /// 统一的文件读取错误处理
+    /// Unified file read error handling
     func handleFileReadError(_ error: Error, context: String) {
         let globalError = GlobalError.fileSystem(
             chineseMessage: "无法读取文件: \(context)",

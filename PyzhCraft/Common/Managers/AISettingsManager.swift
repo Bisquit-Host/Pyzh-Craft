@@ -1,10 +1,10 @@
 import SwiftUI
 
-// MARK: - Keychain 存储常量
+// MARK: - Keychain stores constants
 private let aiSettingsAccount = "aiSettings"
 private let aiApiKeyKeychainKey = "apiKey"
 
-/// AI 提供商枚举
+/// AI provider enumeration
 enum AIProvider: String, CaseIterable, Identifiable {
     case openai,
          ollama
@@ -34,7 +34,7 @@ enum AIProvider: String, CaseIterable, Identifiable {
         }
     }
 
-    /// API 格式类型
+    /// API format type
     var apiFormat: APIFormat {
         switch self {
         case .openai:
@@ -46,7 +46,7 @@ enum AIProvider: String, CaseIterable, Identifiable {
         }
     }
 
-    /// API 路径
+    /// API path
     var apiPath: String {
         switch self {
         case .openai:
@@ -59,14 +59,14 @@ enum AIProvider: String, CaseIterable, Identifiable {
     }
 }
 
-/// API 格式枚举
+/// API format enum
 enum APIFormat {
-    case openAI,  // OpenAI 格式（兼容 DeepSeek 等）
+    case openAI,  // OpenAI format (compatible with DeepSeek, etc.)
          ollama
 //    case gemini
 }
 
-/// AI 设置管理器
+/// AI Settings Manager
 class AISettingsManager: ObservableObject {
     static let shared = AISettingsManager()
 
@@ -84,34 +84,34 @@ class AISettingsManager: ObservableObject {
 
     private var _cachedApiKey: String?
 
-    /// AI API Key（使用 Keychain 安全存储，带内存缓存）
+    /// AI API Key (secure storage using Keychain, with memory cache)
     var apiKey: String {
         get {
-            // 如果缓存已存在，直接返回
+            // If the cache already exists, return directly
             if let cached = _cachedApiKey {
                 return cached
             }
 
-            // 从 Keychain 读取并缓存
+            // Read from Keychain and cache
             if let data = KeychainManager.load(account: aiSettingsAccount, key: aiApiKeyKeychainKey),
                let key = String(data: data, encoding: .utf8) {
                 _cachedApiKey = key
                 return key
             }
 
-            // Keychain 中没有数据，缓存空字符串
+            // There is no data in the Keychain and the empty string is cached
             _cachedApiKey = ""
             return ""
         } set {
-            // 更新缓存
+            // Update cache
             _cachedApiKey = newValue.isEmpty ? "" : newValue
 
-            // 保存到 Keychain
+            // Save to Keychain
             if newValue.isEmpty {
-                // 如果为空，删除 Keychain 中的项
+                // If empty, deletes the item in Keychain
                 _ = KeychainManager.delete(account: aiSettingsAccount, key: aiApiKeyKeychainKey)
             } else {
-                // 保存到 Keychain
+                // Save to Keychain
                 if let data = newValue.data(using: .utf8) {
                     _ = KeychainManager.save(data: data, account: aiSettingsAccount, key: aiApiKeyKeychainKey)
                 }
@@ -148,13 +148,13 @@ class AISettingsManager: ObservableObject {
         }
     }
 
-    /// 获取当前提供商的 API URL（不包括 Gemini，因为 Gemini 需要特殊处理）
+    /// Get the API URL of the current provider (excluding Gemini as Gemini requires special handling)
     func getAPIURL() -> String {
         if selectedProvider == .ollama {
             let url = ollamaBaseURL.isEmpty ? selectedProvider.baseURL : ollamaBaseURL
             return url + selectedProvider.apiPath
         } else if selectedProvider.apiFormat == .openAI {
-            // OpenAI 格式支持自定义 URL（可用于 DeepSeek 等兼容服务）
+            // OpenAI format supports custom URLs (can be used with compatible services such as DeepSeek)
             let url = openAIBaseURL.isEmpty ? selectedProvider.baseURL : openAIBaseURL
             return url + selectedProvider.apiPath
         } else {
@@ -162,7 +162,7 @@ class AISettingsManager: ObservableObject {
         }
     }
 
-    /// 获取当前提供商的模型名称（必填）
+    /// Get the model name of the current provider (required)
     func getModel() -> String {
         modelOverride.trimmingCharacters(in: .whitespacesAndNewlines)
     }

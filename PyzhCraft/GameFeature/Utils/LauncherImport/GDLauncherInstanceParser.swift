@@ -1,6 +1,6 @@
 import Foundation
 
-/// GDLauncher 实例解析器
+/// GDLauncher instance parser
 struct GDLauncherInstanceParser: LauncherInstanceParser {
     let launcherType: ImportLauncherType = .gdLauncher
 
@@ -12,7 +12,7 @@ struct GDLauncherInstanceParser: LauncherInstanceParser {
             return false
         }
 
-        // 验证 JSON 文件可以解析
+        // Verify that the JSON file can be parsed
         do {
             _ = try parseInstanceJson(at: instanceJsonPath)
             return true
@@ -25,10 +25,10 @@ struct GDLauncherInstanceParser: LauncherInstanceParser {
         let instanceJsonPath = instancePath.appendingPathComponent("instance.json")
         let instanceConfig = try parseInstanceJson(at: instanceJsonPath)
 
-        // 提取游戏版本
+        // Extract game version
         let gameVersion = instanceConfig.gameConfiguration.version.release
 
-        // 提取 Mod 加载器信息（取第一个 modloader）
+        // Extract Mod loader information (take the first modloader)
         var modLoader = "vanilla"
         var modLoaderVersion = ""
 
@@ -37,10 +37,10 @@ struct GDLauncherInstanceParser: LauncherInstanceParser {
             modLoaderVersion = firstModLoader.version
         }
 
-        // 提取游戏名称
+        // Extract game name
         let gameName = instanceConfig.name
 
-        // 提取图标路径
+        // Extract icon path
         var gameIconPath: URL?
         if let iconName = instanceConfig.icon {
             let iconPath = instancePath.appendingPathComponent(iconName)
@@ -64,7 +64,7 @@ struct GDLauncherInstanceParser: LauncherInstanceParser {
 
     // MARK: - Private Methods
 
-    /// 解析 instance.json 文件
+    /// Parse instance.json file
     private func parseInstanceJson(at path: URL) throws -> GDLauncherInstanceConfig {
         let data = try Data(contentsOf: path)
         return try JSONDecoder().decode(GDLauncherInstanceConfig.self, from: data)

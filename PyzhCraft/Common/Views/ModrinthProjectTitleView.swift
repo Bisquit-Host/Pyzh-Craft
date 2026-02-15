@@ -6,7 +6,7 @@ struct ModrinthProjectTitleView: View {
     var body: some View {
         VStack {
             HStack {
-                // 项目图标
+                // Project icon
                 if let iconUrl = projectDetail.iconUrl,
                     let url = URL(string: iconUrl) {
                     AsyncImage(url: url) { image in
@@ -52,7 +52,7 @@ struct ModrinthProjectTitleView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .lineLimit(3)
-                    // 项目标签
+                    // Project tags
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack {
                             ForEach(projectDetail.categories, id: \.self) { category in

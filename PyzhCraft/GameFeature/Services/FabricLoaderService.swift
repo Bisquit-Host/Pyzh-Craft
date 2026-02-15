@@ -2,9 +2,9 @@ import Foundation
 
 enum FabricLoaderService {
 
-    /// 获取所有 Loader 版本（静默版本）
-    /// - Parameter minecraftVersion: Minecraft 版本
-    /// - Returns: 加载器版本列表，失败时返回空数组
+    /// Get all Loader versions (silent versions)
+    /// - Parameter minecraftVersion: Minecraft version
+    /// - Returns: loader version list, returns empty array on failure
     static func fetchAllLoaderVersions(for minecraftVersion: String) async -> [FabricLoader] {
         do {
             return try await fetchAllLoaderVersionsThrowing(for: minecraftVersion)
@@ -16,13 +16,13 @@ enum FabricLoaderService {
         }
     }
 
-    /// 获取所有 Loader 版本（抛出异常版本）
-    /// - Parameter minecraftVersion: Minecraft 版本
-    /// - Returns: 加载器版本列表
-    /// - Throws: GlobalError 当操作失败时
+    /// Get all Loader versions (throw exception version)
+    /// - Parameter minecraftVersion: Minecraft version
+    /// - Returns: Loader version list
+    /// - Throws: GlobalError when the operation fails
     static func fetchAllLoaderVersionsThrowing(for minecraftVersion: String) async throws -> [FabricLoader] {
         let url = URLConfig.API.Fabric.loader.appendingPathComponent(minecraftVersion)
-        // 使用统一的 API 客户端
+        // Use a unified API client
         let data = try await APIClient.get(url: url)
 
         var result: [FabricLoader] = []
@@ -46,40 +46,40 @@ enum FabricLoaderService {
         }
     }
 
-    /// 获取指定版本的 Fabric Loader
+    /// Get the specified version of Fabric Loader
     /// - Parameters:
-    ///   - minecraftVersion: Minecraft 版本
-    ///   - loaderVersion: 指定的加载器版本
-    /// - Returns: 指定版本的加载器
-    /// - Throws: GlobalError 当操作失败时
+    ///   - minecraftVersion: Minecraft version
+    ///   - loaderVersion: specified loader version
+    /// - Returns: Specified version of loader
+    /// - Throws: GlobalError when the operation fails
     static func fetchSpecificLoaderVersion(for minecraftVersion: String, loaderVersion: String) async throws -> ModrinthLoader {
         let cacheKey = "\(minecraftVersion)-\(loaderVersion)"
 
-        // 1. 查全局缓存
+        // 1. Check the global cache
         if let cached = AppCacheManager.shared.get(namespace: "fabric", key: cacheKey, as: ModrinthLoader.self) {
             return cached
         }
 
-        // 2. 直接下载指定版本的 version.json
-        // 使用统一的 API 客户端
+        // 2. Directly download version.json of the specified version
+        // Use a unified API client
         let url = URLConfig.API.Modrinth.loaderProfile(loader: "fabric", version: loaderVersion)
         let data = try await APIClient.get(url: url)
 
         var result = try JSONDecoder().decode(ModrinthLoader.self, from: data)
         result.version = loaderVersion
         result = CommonService.processGameVersionPlaceholders(loader: result, gameVersion: minecraftVersion)
-        // 3. 存入缓存
+        // 3. Save to cache
         AppCacheManager.shared.setSilently(namespace: "fabric", key: cacheKey, value: result)
         return result
     }
 
-    /// 设置指定版本的 Fabric 加载器（静默版本）
+    /// Set the specified version of Fabric loader (silent version)
     /// - Parameters:
-    ///   - gameVersion: 游戏版本
-    ///   - loaderVersion: 指定的加载器版本
-    ///   - gameInfo: 游戏信息
-    ///   - onProgressUpdate: 进度更新回调
-    /// - Returns: 设置结果，失败时返回 nil
+    ///   - gameVersion: game version
+    ///   - loaderVersion: specified loader version
+    ///   - gameInfo: game information
+    ///   - onProgressUpdate: progress update callback
+    /// - Returns: Set the result, return nil on failure
     static func setupWithSpecificVersion(
         for gameVersion: String,
         loaderVersion: String,
@@ -101,14 +101,14 @@ enum FabricLoaderService {
         }
     }
 
-    /// 设置指定版本的 Fabric 加载器（抛出异常版本）
+    /// Set the specified version of the Fabric loader (throws exception version)
     /// - Parameters:
-    ///   - gameVersion: 游戏版本
-    ///   - loaderVersion: 指定的加载器版本
-    ///   - gameInfo: 游戏信息
-    ///   - onProgressUpdate: 进度更新回调
-    /// - Returns: 设置结果
-    /// - Throws: GlobalError 当操作失败时
+    ///   - gameVersion: game version
+    ///   - loaderVersion: specified loader version
+    ///   - gameInfo: game information
+    ///   - onProgressUpdate: progress update callback
+    /// - Returns: Set results
+    /// - Throws: GlobalError when the operation fails
     static func setupWithSpecificVersionThrowing(
         for gameVersion: String,
         loaderVersion: String,

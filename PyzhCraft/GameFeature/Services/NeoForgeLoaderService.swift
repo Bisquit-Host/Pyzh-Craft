@@ -1,7 +1,7 @@
 import Foundation
 
 enum NeoForgeLoaderService {
-    /// 获取所有可用NeoForge版本的version字符串集合
+    /// Get a collection of version strings for all available NeoForge versions
     static func fetchAllNeoForgeVersions(for minecraftVersion: String) async throws -> LoaderVersion {
         guard let result = await CommonService.fetchAllLoaderVersions(type: "neo", minecraftVersion: minecraftVersion) else {
             throw GlobalError.resource(
@@ -13,41 +13,41 @@ enum NeoForgeLoaderService {
         return result
     }
 
-    /// 获取指定版本的 NeoForge profile
+    /// Get the NeoForge profile of the specified version
     /// - Parameters:
-    ///   - minecraftVersion: Minecraft 版本
-    ///   - loaderVersion: 指定的加载器版本
-    /// - Returns: 指定版本的 NeoForge profile
-    /// - Throws: GlobalError 当操作失败时
+    ///   - minecraftVersion: Minecraft version
+    ///   - loaderVersion: specified loader version
+    /// - Returns: NeoForge profile of the specified version
+    /// - Throws: GlobalError when the operation fails
     static func fetchSpecificNeoForgeProfile(for minecraftVersion: String, loaderVersion: String) async throws -> ModrinthLoader {
         let cacheKey = "\(minecraftVersion)-\(loaderVersion)"
 
-        // 1. 查全局缓存
+        // 1. Check the global cache
         if let cached = AppCacheManager.shared.get(namespace: "neoforge", key: cacheKey, as: ModrinthLoader.self) {
             return cached
         }
 
-        // 2. 直接下载指定版本的 version.json
-        // 使用统一的 API 客户端
+        // 2. Directly download version.json of the specified version
+        // Use a unified API client
         let url = URLConfig.API.Modrinth.loaderProfile(loader: "neo", version: loaderVersion)
         let data = try await APIClient.get(url: url)
 
         var result = try JSONDecoder().decode(ModrinthLoader.self, from: data)
         result = CommonService.processGameVersionPlaceholders(loader: result, gameVersion: minecraftVersion)
-        // 3. 存入缓存
+        // 3. Save to cache
         result.version = loaderVersion
         AppCacheManager.shared.setSilently(namespace: "neoforge", key: cacheKey, value: result)
 
         return result
     }
 
-    /// 设置指定版本的 NeoForge 加载器（静默版本）
+    /// Set a specific version of the NeoForge loader (silent version)
     /// - Parameters:
-    ///   - gameVersion: 游戏版本
-    ///   - loaderVersion: 指定的加载器版本
-    ///   - gameInfo: 游戏信息
-    ///   - onProgressUpdate: 进度更新回调
-    /// - Returns: 设置结果，失败时返回 nil
+    ///   - gameVersion: game version
+    ///   - loaderVersion: specified loader version
+    ///   - gameInfo: game information
+    ///   - onProgressUpdate: progress update callback
+    /// - Returns: Set the result, return nil on failure
     static func setupWithSpecificVersion(
         for gameVersion: String,
         loaderVersion: String,
@@ -69,14 +69,14 @@ enum NeoForgeLoaderService {
         }
     }
 
-    /// 设置指定版本的 NeoForge 加载器（抛出异常版本）
+    /// Set the specified version of the NeoForge loader (throws exception version)
     /// - Parameters:
-    ///   - gameVersion: 游戏版本
-    ///   - loaderVersion: 指定的加载器版本
-    ///   - gameInfo: 游戏信息
-    ///   - onProgressUpdate: 进度更新回调
-    /// - Returns: 设置结果
-    /// - Throws: GlobalError 当操作失败时
+    ///   - gameVersion: game version
+    ///   - loaderVersion: specified loader version
+    ///   - gameInfo: game information
+    ///   - onProgressUpdate: progress update callback
+    /// - Returns: Set results
+    /// - Throws: GlobalError when the operation fails
     static func setupWithSpecificVersionThrowing(
         for gameVersion: String,
         loaderVersion: String,
@@ -90,12 +90,12 @@ enum NeoForgeLoaderService {
         let fileManager = CommonFileManager(librariesDir: librariesDirectory)
         fileManager.onProgressUpdate = onProgressUpdate
 
-        // 第一步：下载所有downloadable=true的库文件
+        // Step 1: Download all downloadable=true library files
         let downloadableLibraries = neoForgeProfile.libraries.filter { $0.downloads != nil }
         let totalDownloads = downloadableLibraries.count
         await fileManager.downloadForgeJars(libraries: neoForgeProfile.libraries)
 
-        // 第二步：执行processors（如果存在）
+        // Step 2: Execute processors (if they exist)
         if let processors = neoForgeProfile.processors, !processors.isEmpty {
             try await fileManager.executeProcessors(
                 processors: processors,
@@ -104,8 +104,8 @@ enum NeoForgeLoaderService {
                 data: neoForgeProfile.data,
                 gameName: gameInfo.gameName
             ) { message, currentProcessor, totalProcessors in
-                // 将处理器进度消息转换为下载进度格式
-                // 总任务数 = 下载数 + 处理器数
+                // Convert processor progress messages to download progress format
+                // Total number of tasks = number of downloads + number of processors
                 let totalTasks = totalDownloads + totalProcessors
                 let completedTasks = totalDownloads + currentProcessor
                 onProgressUpdate(message, completedTasks, totalTasks)

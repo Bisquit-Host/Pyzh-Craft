@@ -1,11 +1,11 @@
 import Combine
 import Foundation
 
-/// 游戏版本信息仓库
+/// Game version information warehouse
 class GameRepository: ObservableObject {
     // MARK: - Properties
 
-    /// 按工作路径分组的游戏列表，键为工作路径，值为游戏数组
+    /// A list of games grouped by working path, where the key is the working path and the value is an array of games
     @Published private(set) var gamesByWorkingPath: [String: [GameVersionInfo]] = [:]
 
     var games: [GameVersionInfo] {
@@ -32,7 +32,7 @@ class GameRepository: ObservableObject {
 
         lastWorkingPath = currentWorkingPath
 
-        // 初始化数据库
+        // Initialize database
         Task {
             do {
                 try await initializeDatabase()
@@ -47,13 +47,13 @@ class GameRepository: ObservableObject {
         }
     }
 
-    /// 初始化数据库
+    /// Initialize database
     private func initializeDatabase() async throws {
-        // 创建数据库目录
+        // Create database directory
         let dataDir = AppPaths.dataDirectory
         try? FileManager.default.createDirectory(at: dataDir, withIntermediateDirectories: true)
 
-        // 初始化数据库
+        // Initialize database
         try database.initialize()
     }
 
@@ -61,32 +61,32 @@ class GameRepository: ObservableObject {
         workingPathCancellable?.cancel()
     }
 
-    /// 设置工作路径变化观察者
+    /// Set up work path change observer
     private func setupWorkingPathObserver() {
         lastWorkingPath = currentWorkingPath
 
-        // 使用注入的 WorkingPathProviding 监听工作路径变化
-        // 使用 debounce 避免频繁触发
-        // 使用 skip(1) 跳过订阅时的初始值，只响应后续的变化
+        // Use injected WorkingPathProviding to monitor working path changes
+        // Use debounce to avoid frequent triggering
+        // Use skip(1) to skip the initial value when subscribing and only respond to subsequent changes
         workingPathCancellable = workingPathProvider.workingPathWillChange
             .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self = self else { return }
-                // 检查工作路径是否真的改变了
+                // Check if the working path has actually changed
                 let newPath = self.currentWorkingPath
                 if newPath != self.lastWorkingPath {
                     self.lastWorkingPath = newPath
-                    // 通知工作路径已改变（用于触发UI切换）
+                    // Notify that the working path has changed (used to trigger UI switching)
                     self.workingPathChanged = true
-                    // 当工作路径改变时，重新加载当前工作路径的游戏
+                    // When the working path changes, reload the game for the current working path
                     Task { @MainActor in
                         do {
                             try await self.loadGamesThrowing()
-                            // 重置通知标志
+                            // Reset notification flag
                             self.workingPathChanged = false
                         } catch {
                             GlobalErrorHandler.shared.handle(error)
-                            // 即使出错也要重置标志
+                            // Reset flag even if error occurs
                             self.workingPathChanged = false
                         }
                     }
@@ -307,7 +307,7 @@ class GameRepository: ObservableObject {
             )
         }
 
-        // 验证内存参数
+        // Verify memory parameters
         guard xms > 0 && xmx > 0 && xms <= xmx else {
             throw GlobalError.validation(
                 chineseMessage: "无效的内存参数：xms=\(xms), xmx=\(xmx)",
@@ -335,18 +335,18 @@ class GameRepository: ObservableObject {
 
     // MARK: - Private Methods
 
-    /// 从 UserDefaults 加载游戏列表（静默版本）
+    /// Load game list from UserDefaults (silent version)
     func loadGames() {
         loadGamesSafely()
     }
 
-    /// 从 UserDefaults 加载游戏列表（静默版本）
+    /// Load game list from UserDefaults (silent version)
     private func loadGamesSafely() {
         Task {
             do {
                 try await loadGamesThrowing()
 
-                // 加载完成后，扫描所有游戏的 mods 目录
+                // After loading, scan the mods directory of all games
                 await scanAllGamesModsDirectory()
             } catch {
                 GlobalErrorHandler.shared.handle(error)
@@ -357,12 +357,12 @@ class GameRepository: ObservableObject {
         }
     }
 
-    // 异步扫描所有游戏的 mods 目录
+    // Asynchronously scan the mods directory of all games
     private func scanAllGamesModsDirectory() async {
         let games = games
         Logger.shared.info("开始扫描 \(games.count) 个游戏的 mods 目录")
 
-        // 并发扫描所有游戏
+        // Scan all games concurrently
         await withTaskGroup(of: Void.self) { group in
             for game in games {
                 group.addTask {
@@ -374,7 +374,7 @@ class GameRepository: ObservableObject {
         Logger.shared.info("完成所有游戏的 mods 目录扫描")
     }
 
-    // 只加载当前工作路径的游戏（数据库与目录扫描在后台执行，避免主线程阻塞）
+    // Only load games in the current working path (database and directory scanning are performed in the background to avoid blocking the main thread)
     func loadGamesThrowing() async throws {
         let workingPath = currentWorkingPath
         let dbPath = AppPaths.gameVersionDatabase.path

@@ -5,10 +5,10 @@ public struct GameSettingsView: View {
 
     @StateObject private var gameSettings = GameSettingsManager.shared
 
-    // 内存区间
+    // memory range
     @State private var globalMemoryRange: ClosedRange<Double> = 512...4096
 
-    /// 安全地计算缓存信息
+    /// Compute cached information securely
     private func calculateCacheInfoSafely() {
         cacheManager.calculateMetaCacheInfo()
     }

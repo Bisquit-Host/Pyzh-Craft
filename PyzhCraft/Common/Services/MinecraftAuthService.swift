@@ -16,10 +16,10 @@ class MinecraftAuthService: NSObject, ObservableObject {
         super.init()
     }
 
-    // MARK: - 认证流程 (使用 ASWebAuthenticationSession)
+    // MARK: - Authentication process (using ASWebAuthenticationSession)
     @MainActor
     func startAuthentication() async {
-        // 开始新认证前清理之前的状态
+        // Clean up the previous state before starting a new authentication
         webAuthSession?.cancel()
         webAuthSession = nil
 
@@ -65,7 +65,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
                         return
                     }
 
-                    // 检查是否是用户拒绝授权
+                    // Check whether the user refused authorization
                     if authResponse.isUserDenied {
                         Logger.shared.info("用户拒绝了 Microsoft 授权")
                         self?.authState = .notAuthenticated
@@ -74,7 +74,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
                         return
                     }
 
-                    // 检查是否有其他错误
+                    // Check for other errors
                     if let error = authResponse.error {
                         let description = authResponse.errorDescription ?? error
                         Logger.shared.error("Microsoft 授权失败: \(description)")
@@ -84,7 +84,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
                         return
                     }
 
-                    // 检查是否成功获取授权码
+                    // Check whether the authorization code was successfully obtained
                     guard authResponse.isSuccess, let code = authResponse.code else {
                         Logger.shared.error("未获取到授权码")
                         self?.authState = .error("minecraft.auth.error.no_authorization_code".localized())
@@ -104,7 +104,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         }
     }
 
-    // MARK: - 构建授权 URL（失败时返回 nil，由调用方处理，避免生产环境闪退）
+    // MARK: - Construct the authorization URL (return nil in case of failure, handled by the caller to avoid crashing in the production environment)
     private func buildAuthorizationURL() -> URL? {
         guard var components = URLComponents(url: URLConfig.API.Authentication.authorize, resolvingAgainstBaseURL: false) else {
             Logger.shared.error("Invalid authorization URL configuration")
@@ -125,25 +125,25 @@ class MinecraftAuthService: NSObject, ObservableObject {
         return url
     }
 
-    // MARK: - 处理授权码
+    // MARK: - Process authorization code
     @MainActor
     private func handleAuthorizationCode(_ code: String) async {
         authState = .processingAuthCode
 
         do {
-            // 使用授权码获取访问令牌
+            // Get access token using authorization code
             let tokenResponse = try await exchangeCodeForToken(code: code)
 
-            // 获取完整的认证链
+            // Get the complete certification chain
             let xboxToken = try await getXboxLiveTokenThrowing(accessToken: tokenResponse.accessToken)
             let minecraftToken = try await getMinecraftTokenThrowing(xboxToken: xboxToken.token, uhs: xboxToken.displayClaims.xui.first?.uhs ?? "")
             try await checkMinecraftOwnership(accessToken: minecraftToken)
 
-            // 使用JWT解析获取Minecraft token的真实过期时间
+            // Use JWT parsing to get the true expiration time of Minecraft tokens
             let minecraftTokenExpiration = JWTDecoder.getMinecraftTokenExpiration(from: minecraftToken)
             Logger.shared.info("Minecraft token过期时间: \(minecraftTokenExpiration)")
 
-            // 创建包含正确过期时间的profile
+            // Create a profile with the correct expiration time
             let profile = try await getMinecraftProfileThrowing(
                 accessToken: minecraftToken,
                 authXuid: xboxToken.displayClaims.xui.first?.uhs ?? "",
@@ -161,7 +161,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         }
     }
 
-    // MARK: - 使用授权码交换访问令牌
+    // MARK: - exchange authorization code for access token
     private func exchangeCodeForToken(code: String) async throws -> TokenResponse {
         let url = URLConfig.API.Authentication.token
         var request = URLRequest(url: url)
@@ -179,7 +179,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         let bodyString = bodyParameters.map { "\($0.key)=\($0.value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")" }.joined(separator: "&")
         let bodyData = bodyString.data(using: .utf8)
 
-        // 使用统一的 API 客户端
+        // Use a unified API client
         let headers = ["Content-Type": "application/x-www-form-urlencoded"]
         let data = try await APIClient.post(url: url, body: bodyData, headers: headers)
 
@@ -194,7 +194,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         }
     }
 
-    // MARK: - 获取Xbox Live令牌（静默版本）
+    // MARK: - Get Xbox Live token (silent version)
     private func getXboxLiveToken(accessToken: String) async -> XboxLiveTokenResponse? {
         do {
             return try await getXboxLiveTokenThrowing(accessToken: accessToken)
@@ -206,7 +206,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         }
     }
 
-    // MARK: - 获取Xbox Live令牌（抛出异常版本）
+    // MARK: - Get Xbox Live token (throws exception version)
     private func getXboxLiveTokenThrowing(accessToken: String) async throws -> XboxLiveTokenResponse {
         let url = URLConfig.API.Authentication.xboxLiveAuth
         var request = URLRequest(url: url)
@@ -234,7 +234,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
             )
         }
 
-        // 使用统一的 API 客户端
+        // Use a unified API client
         let headers = ["Content-Type": "application/json"]
         let data = try await APIClient.post(url: url, body: bodyData, headers: headers)
 
@@ -249,7 +249,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         }
     }
 
-    // MARK: - 获取Minecraft访问令牌（静默版本）
+    // MARK: - Get Minecraft access token (silent version)
     private func getMinecraftToken(xboxToken: String, uhs: String) async -> String? {
         do {
             return try await getMinecraftTokenThrowing(xboxToken: xboxToken, uhs: uhs)
@@ -261,9 +261,9 @@ class MinecraftAuthService: NSObject, ObservableObject {
         }
     }
 
-    // MARK: - 获取Minecraft访问令牌（抛出异常版本）
+    // MARK: - Get Minecraft access token (throws exception version)
     private func getMinecraftTokenThrowing(xboxToken: String, uhs: String) async throws -> String {
-        // 获取XSTS令牌
+        // Get XSTS token
         let xstsUrl = URLConfig.API.Authentication.xstsAuth
         var xstsRequest = URLRequest(url: xstsUrl)
         xstsRequest.httpMethod = "POST"
@@ -289,7 +289,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
             )
         }
 
-        // 使用统一的 API 客户端
+        // Use a unified API client
         let xstsHeaders = ["Content-Type": "application/json"]
         let xstsData = try await APIClient.post(url: xstsUrl, body: xstsBodyData, headers: xstsHeaders)
 
@@ -304,7 +304,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
             )
         }
 
-        // 获取Minecraft访问令牌
+        // Get Minecraft access token
         Logger.shared.debug("开始获取 Minecraft 访问令牌")
         let minecraftUrl = URLConfig.API.Authentication.minecraftLogin
 
@@ -323,7 +323,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
             )
         }
 
-        // 使用统一的 API 客户端（需要处理非 200 状态码）
+        // Use unified API client (needs to handle non-200 status codes)
         var minecraftRequest = URLRequest(url: minecraftUrl)
         minecraftRequest.httpMethod = "POST"
         minecraftRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -336,7 +336,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
             let statusCode = minecraftHttpResponse.statusCode
             Logger.shared.error("Minecraft 认证失败: HTTP \(statusCode)")
 
-            // 根据不同的状态码提供更具体的错误信息
+            // Provide more specific error information based on different status codes
             switch statusCode {
             case 401:
                 throw GlobalError.authentication(
@@ -385,7 +385,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         return minecraftTokenResponse.accessToken
     }
 
-    // MARK: - 检查Minecraft游戏拥有情况
+    // MARK: - Check Minecraft game ownership
     private func checkMinecraftOwnership(accessToken: String) async throws {
         let url = URLConfig.API.Authentication.minecraftEntitlements
         var request = URLRequest(url: url)
@@ -393,13 +393,13 @@ class MinecraftAuthService: NSObject, ObservableObject {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.timeoutInterval = 30.0
 
-        // 使用统一的 API 客户端（需要处理非 200 状态码）
+        // Use unified API client (needs to handle non-200 status codes)
         let (data, httpResponse) = try await APIClient.performRequestWithResponse(request: request)
 
         guard httpResponse.statusCode == 200 else {
             let statusCode = httpResponse.statusCode
 
-            // 根据状态码提供具体的错误信息
+            // Provide specific error information based on status code
             switch statusCode {
             case 401:
                 throw GlobalError.authentication(
@@ -425,7 +425,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         do {
             let entitlements = try JSONDecoder().decode(MinecraftEntitlementsResponse.self, from: data)
 
-            // 检查是否拥有必要的游戏权限
+            // Check if you have the necessary game permissions
             let hasProductMinecraft = entitlements.items.contains { $0.name == MinecraftEntitlement.productMinecraft.rawValue }
             let hasGameMinecraft = entitlements.items.contains { $0.name == MinecraftEntitlement.gameMinecraft.rawValue }
 
@@ -437,7 +437,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
                 )
             }
 
-            // 验证通过
+            // Verification passed
         } catch let decodingError as DecodingError {
             throw GlobalError.validation(
                 chineseMessage: "解析游戏权限响应失败: \(decodingError.localizedDescription)",
@@ -445,7 +445,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
                 level: .notification
             )
         } catch let globalError as GlobalError {
-            // 重新抛出 GlobalError
+            // Rethrow GlobalError
             throw globalError
         } catch {
             throw GlobalError.validation(
@@ -456,17 +456,17 @@ class MinecraftAuthService: NSObject, ObservableObject {
         }
     }
 
-    // MARK: - 获取Minecraft用户资料
+    // MARK: - Get Minecraft user profile
     private func getMinecraftProfileThrowing(accessToken: String, authXuid: String, refreshToken: String = "") async throws -> MinecraftProfileResponse {
         let url = URLConfig.API.Authentication.minecraftProfile
-        // 使用统一的 API 客户端
+        // Use a unified API client
         let headers = ["Authorization": "Bearer \(accessToken)"]
         let data = try await APIClient.get(url: url, headers: headers)
 
         do {
             let profile = try JSONDecoder().decode(MinecraftProfileResponse.self, from: data)
 
-            // accessToken、authXuid 和 refreshToken 非 API 返回，需手动设置
+            // accessToken, authXuid and refreshToken are not returned by API and need to be set manually
             return MinecraftProfileResponse(
                 id: profile.id,
                 name: profile.name,
@@ -485,7 +485,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         }
     }
 
-    // MARK: - 登出/取消认证
+    // MARK: - Logout/cancel authentication
     @MainActor
     func logout() {
         authState = .notAuthenticated
@@ -494,7 +494,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         isLoading = false
     }
 
-    // MARK: - 清理认证数据
+    // MARK: - Clean authentication data
     @MainActor
     func clearAuthenticationData() {
         authState = .notAuthenticated
@@ -506,11 +506,11 @@ class MinecraftAuthService: NSObject, ObservableObject {
 
 // MARK: - Token Validation and Refresh
 extension MinecraftAuthService {
-    // MARK: - Token验证和刷新相关方法
+    // MARK: - Token verification and refresh related methods
 
-    /// 刷新指定玩家的 Token（公开接口）
-    /// - Parameter player: 需要刷新 Token 的玩家
-    /// - Returns: 刷新后的玩家对象
+    /// Refresh the token of the specified player (public interface)
+    /// - Parameter player: Player who needs to refresh Token
+    /// - Returns: refreshed player object
     @MainActor
     func refreshPlayerToken(for player: Player) async -> Result<Player, GlobalError> {
         isLoading = true
@@ -532,13 +532,13 @@ extension MinecraftAuthService {
         }
     }
 
-    /// 验证并尝试刷新玩家Token
-    /// - Parameter player: 玩家对象
-    /// - Returns: 验证/刷新后的玩家对象
-    /// - Throws: GlobalError 当操作失败时
+    /// Verify and try to refresh player token
+    /// - Parameter player: player object
+    /// - Returns: verified/refreshed player object
+    /// - Throws: GlobalError when the operation fails
     func validateAndRefreshPlayerTokenThrowing(for player: Player) async throws -> Player {
 
-        // 如果没有访问令牌，抛出错误要求重新登录
+        // If there is no access token, throw an error and ask to log in again
         guard !player.authAccessToken.isEmpty else {
             throw GlobalError.authentication(
                 chineseMessage: "缺少访问令牌，请重新登录",
@@ -547,7 +547,7 @@ extension MinecraftAuthService {
             )
         }
 
-        // 基于tokenExpiresAt检查token是否过期
+        // Check whether the token expires based on tokenExpiresAt
         let isTokenExpired = await isTokenExpiredBasedOnTime(for: player)
 
         if !isTokenExpired {
@@ -557,7 +557,7 @@ extension MinecraftAuthService {
 
         Logger.shared.info("玩家 \(player.name) 的Token已过期，尝试刷新")
 
-        // Token过期，尝试使用refresh token刷新
+        // Token expires, try to refresh using refresh token
         guard !player.authRefreshToken.isEmpty else {
             throw GlobalError.authentication(
                 chineseMessage: "登录已过期，请重新登录该账户",
@@ -566,14 +566,14 @@ extension MinecraftAuthService {
             )
         }
 
-        // 使用refresh token刷新访问令牌
+        // Refresh access token using refresh token
         let refreshedTokens = try await refreshTokenThrowing(refreshToken: player.authRefreshToken)
 
-        // 使用新的访问令牌获取完整的认证链
+        // Get the complete authentication chain using the new access token
         let xboxToken = try await getXboxLiveTokenThrowing(accessToken: refreshedTokens.accessToken)
         let minecraftToken = try await getMinecraftTokenThrowing(xboxToken: xboxToken.token, uhs: xboxToken.displayClaims.xui.first?.uhs ?? "")
 
-        // 创建更新后的玩家对象
+        // Create updated player object
         var updatedProfile = player.profile
         updatedProfile.lastPlayed = player.lastPlayed
         updatedProfile.isCurrent = player.isCurrent
@@ -585,7 +585,7 @@ extension MinecraftAuthService {
             credential.xuid = xboxToken.displayClaims.xui.first?.uhs ?? player.authXuid
             updatedCredential = credential
         } else {
-            // 如果原来没有 credential，创建一个新的
+            // If there is no credential, create a new one
             updatedCredential = AuthCredential(
                 userId: player.id,
                 accessToken: minecraftToken,
@@ -600,14 +600,14 @@ extension MinecraftAuthService {
         return updatedPlayer
     }
 
-    /// 使用refresh token刷新访问令牌（抛出异常版本）
-    /// - Parameter refreshToken: 刷新令牌
-    /// - Returns: 新的令牌响应
-    /// - Throws: GlobalError 当刷新失败时
+    /// Refresh access token using refresh token (throws exception version)
+    /// - Parameter refreshToken: refresh token
+    /// - Returns: new token response
+    /// - Throws: GlobalError when refresh fails
     private func refreshTokenThrowing(refreshToken: String) async throws -> TokenResponse {
         let url = URLConfig.API.Authentication.token
 
-        // refresh_token 可能包含特殊字符，必须进行 x-www-form-urlencoded 编码
+        // refresh_token may contain special characters and must be x-www-form-urlencoded encoded
         let bodyParameters: [String: String] = [
             "grant_type": "refresh_token",
             "client_id": clientId,
@@ -618,7 +618,7 @@ extension MinecraftAuthService {
             .joined(separator: "&")
         let bodyData = bodyString.data(using: .utf8)
 
-        // 使用统一的 API 客户端（需要处理非 200 状态码）
+        // Use unified API client (needs to handle non-200 status codes)
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
@@ -626,7 +626,7 @@ extension MinecraftAuthService {
 
         let (data, httpResponse) = try await APIClient.performRequestWithResponse(request: request)
 
-        // 检查OAuth错误
+        // Check for OAuth errors
         if let errorResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
            let error = errorResponse["error"] as? String {
             switch error {
@@ -658,18 +658,18 @@ extension MinecraftAuthService {
         return try JSONDecoder().decode(TokenResponse.self, from: data)
     }
 
-    /// 基于时间戳检查Token是否过期
-    /// - Parameter player: 玩家对象
-    /// - Returns: 是否过期
+    /// Check whether the Token has expired based on the timestamp
+    /// - Parameter player: player object
+    /// - Returns: Whether it has expired
     func isTokenExpiredBasedOnTime(for player: Player) async -> Bool {
-        // 正常逻辑：根据 JWT 中的 exp 字段判断是否即将过期（含 5 分钟缓冲）
+        // Normal logic: Determine whether it is about to expire based on the exp field in the JWT (including 5-minute buffer)
         return JWTDecoder.isTokenExpiringSoon(player.authAccessToken)
     }
 
-    /// 提示用户重新登录指定玩家
-    /// - Parameter player: 需要重新登录的玩家
+    /// Prompts the user to re-login to the specified player
+    /// - Parameter player: Player who needs to log in again
     func promptForReauth(player: Player) {
-        // 显示通知提示用户重新登录
+        // Display notification prompting user to log in again
         let notification = GlobalError.authentication(
             chineseMessage: "玩家 \(player.name) 的登录已过期，请在玩家管理中重新登录该账户后再启动游戏",
             i18nKey: "error.authentication.reauth_required",
@@ -683,7 +683,7 @@ extension MinecraftAuthService {
 // MARK: - ASWebAuthenticationPresentationContextProviding
 extension MinecraftAuthService: ASWebAuthenticationPresentationContextProviding {
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        // 返回主窗口作为展示锚点
+        // Return to the main window as the display anchor
         return NSApplication.shared.windows.first ?? ASPresentationAnchor()
     }
 }

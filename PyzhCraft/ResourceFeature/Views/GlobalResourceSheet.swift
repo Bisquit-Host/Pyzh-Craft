@@ -1,12 +1,12 @@
 import SwiftUI
 
-// MARK: - 主资源添加 Sheet
+// MARK: - Add Sheet to the main resource
 struct GlobalResourceSheet: View {
     let project: ModrinthProject
     let resourceType: String
     @Binding var isPresented: Bool
-    let preloadedDetail: ModrinthProjectDetail?  // 预加载的项目详情
-    let preloadedCompatibleGames: [GameVersionInfo]  // 预检测的兼容游戏列表
+    let preloadedDetail: ModrinthProjectDetail?  // Preloaded project details
+    let preloadedCompatibleGames: [GameVersionInfo]  // Pre-detected list of compatible games
     @EnvironmentObject var gameRepository: GameRepository
     @State private var selectedGame: GameVersionInfo?
     @State private var selectedVersion: ModrinthProjectDetailVersion?
@@ -91,7 +91,7 @@ struct GlobalResourceSheet: View {
             }
         )
         .onDisappear {
-            // sheet 关闭时清理所有状态数据以释放内存
+            // Clean up all state data when sheet closes to free up memory
             selectedGame = nil
             selectedVersion = nil
             availableVersions = []
@@ -133,7 +133,7 @@ struct GlobalResourceSheet: View {
             )
         }
 
-        // 获取缺失的依赖项（包含版本信息）
+        // Get missing dependencies (with version information)
         let missingWithVersions =
             await ModrinthDependencyDownloader
             .getMissingDependenciesWithVersions(

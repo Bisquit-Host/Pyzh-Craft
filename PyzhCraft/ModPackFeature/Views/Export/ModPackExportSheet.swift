@@ -1,7 +1,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// 整合包文档类型，用于文件导出
+/// Integration package document type, used for file export
 struct ModPackDocument: FileDocument {
     static var readableContentTypes: [UTType] {
         [UTType(filenameExtension: "mrpack") ?? UTType.zip]
@@ -25,12 +25,12 @@ struct ModPackDocument: FileDocument {
     }
 }
 
-/// 整合包导出 Sheet 视图
-/// 提供整合包导出功能，包括：
-/// - 导出表单（名称、版本、描述）
-/// - 导出进度显示
-/// - 导出完成提示
-/// - 文件保存对话框
+/// Integration package export Sheet view
+/// Provides integration package export functions, including:
+/// - Export form (name, version, description)
+/// - Export progress display
+/// - Export completion prompt
+/// - File save dialog
 struct ModPackExportSheet: View {
     // MARK: - Properties
     let gameInfo: GameVersionInfo
@@ -45,7 +45,7 @@ struct ModPackExportSheet: View {
     init(gameInfo: GameVersionInfo) {
         self.gameInfo = gameInfo
         let viewModel = ModPackExportViewModel()
-        // 在初始化时设置默认值
+        // Set default value on initialization
         if viewModel.modPackName.isEmpty {
             viewModel.modPackName = gameInfo.gameName
         }
@@ -131,7 +131,7 @@ struct ModPackExportSheet: View {
 
     private var exportFormView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // 整合包名称
+            // Integrated package name
             VStack(alignment: .leading, spacing: 8) {
                 Text("modpack.export.name".localized())
                     .font(.subheadline)
@@ -140,7 +140,7 @@ struct ModPackExportSheet: View {
                     .textFieldStyle(.roundedBorder)
             }
 
-            // 整合包版本
+            // Integrated package version
             VStack(alignment: .leading, spacing: 8) {
                 Text("modpack.export.version".localized())
                     .font(.subheadline)
@@ -188,13 +188,13 @@ struct ModPackExportSheet: View {
 
     private var progressItemsView: some View {
         VStack(spacing: 16) {
-            // 扫描资源进度条（总是显示，因为扫描是必然的）
+            // Scan resource progress bar (always shown because scanning is inevitable)
             if let scanProgress = viewModel.exportProgress.scanProgress {
                 progressRow(progress: scanProgress)
                     .id("scan-\(scanProgress.completed)-\(scanProgress.total)")
             }
 
-            // 复制文件进度条（只在有复制任务时显示，不显示占位符）
+            // Copy file progress bar (only displayed when there is a copy task, no placeholder is displayed)
             if let copyProgress = viewModel.exportProgress.copyProgress {
                 progressRow(progress: copyProgress)
                     .id("copy-\(copyProgress.completed)-\(copyProgress.total)")
@@ -236,7 +236,7 @@ struct ModPackExportSheet: View {
 
     // MARK: - Actions
 
-    /// 处理导出完成，显示保存对话框
+    /// The export process is completed and the save dialog box is displayed
     private func handleExportCompleted(tempFilePath: URL) {
         if viewModel.shouldShowSaveDialog {
             viewModel.markSaveDialogShown()

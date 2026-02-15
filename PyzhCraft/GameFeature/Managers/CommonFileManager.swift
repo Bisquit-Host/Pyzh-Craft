@@ -26,8 +26,8 @@ class CommonFileManager {
         }
     }
 
-    /// 下载 Forge JAR 文件（静默版本）
-    /// - Parameter libraries: 要下载的库文件列表
+    /// Download the Forge JAR file (silent version)
+    /// - Parameter libraries: list of library files to download
     func downloadForgeJars(libraries: [ModrinthLoaderLibrary]) async {
         do {
             try await downloadForgeJarsThrowing(libraries: libraries)
@@ -38,14 +38,14 @@ class CommonFileManager {
         }
     }
 
-    /// 下载 Forge JAR 文件（抛出异常版本）
-    /// - Parameter libraries: 要下载的库文件列表
-    /// - Throws: GlobalError 当下载失败时
+    /// Download the Forge JAR file (throws exception version)
+    /// - Parameter libraries: list of library files to download
+    /// - Throws: GlobalError when download fails
     func downloadForgeJarsThrowing(libraries: [ModrinthLoaderLibrary]) async throws {
         let tasks = libraries.compactMap { lib -> JarDownloadTask? in
             guard lib.downloadable else { return nil }
 
-            // 优先使用LibraryDownloads.artifact
+            // Prefer using LibraryDownloads.artifact
             if let downloads = lib.downloads, let artifactUrl = downloads.artifact.url, let artifactPath = downloads.artifact.path {
                 return JarDownloadTask(
                     name: lib.name,
@@ -80,8 +80,8 @@ class CommonFileManager {
         }
     }
 
-    /// 下载 FabricJAR 文件（静默版本）
-    /// - Parameter libraries: 要下载的库文件列表
+    /// Download the FabricJAR file (silent version)
+    /// - Parameter libraries: list of library files to download
     func downloadFabricJars(libraries: [ModrinthLoaderLibrary]) async {
         do {
             try await downloadFabricJarsThrowing(libraries: libraries)
@@ -92,9 +92,9 @@ class CommonFileManager {
         }
     }
 
-    /// 下载 FabricJAR 文件（抛出异常版本）
-    /// - Parameter libraries: 要下载的库文件列表
-    /// - Throws: GlobalError 当下载失败时
+    /// Download the FabricJAR file (throws exception version)
+    /// - Parameter libraries: list of library files to download
+    /// - Throws: GlobalError when download fails
     func downloadFabricJarsThrowing(libraries: [ModrinthLoaderLibrary]) async throws {
         let tasks = libraries.compactMap { lib -> JarDownloadTask? in
             guard lib.downloadable else { return nil }
@@ -123,19 +123,19 @@ class CommonFileManager {
         }
     }
 
-    /// 执行processors处理
+    /// Execute processors
     /// - Parameters:
-    ///   - processors: 处理器列表
-    ///   - librariesDir: 库目录
-    ///   - gameVersion: 游戏版本
-    ///   - data: 数据字段，用于占位符替换
-    ///   - gameName: 游戏名称（可选）
-    ///   - onProgressUpdate: 进度更新回调（可选，包含当前处理器索引和总处理器数量）
-    /// - Throws: GlobalError 当处理失败时
+    ///   - processors: processor list
+    ///   - librariesDir: library directory
+    ///   - gameVersion: game version
+    ///   - data: data field, used for placeholder replacement
+    ///   - gameName: game name (optional)
+    ///   - onProgressUpdate: progress update callback (optional, including current processor index and total number of processors)
+    /// - Throws: GlobalError when processing fails
     func executeProcessors(processors: [Processor], librariesDir: URL, gameVersion: String, data: [String: SidedDataEntry]? = nil, gameName: String? = nil, onProgressUpdate: ((String, Int, Int) -> Void)? = nil) async throws {
-        // 过滤出client端的processor
+        // Filter out the client-side processor
         let clientProcessors = processors.filter { processor in
-            guard let sides = processor.sides else { return true } // 如果没有指定sides，默认执行
+            guard let sides = processor.sides else { return true } // If sides is not specified, it will be executed by default
             return sides.contains(AppConstants.EnvironmentTypes.client)
         }
 
@@ -146,31 +146,31 @@ class CommonFileManager {
 
         Logger.shared.info("找到 \(clientProcessors.count) 个client端processor，开始执行")
 
-        // 使用version.json中的原始data字段，并添加必要的环境变量
+        // Use the original data field from version.json and add the necessary environment variables
         var processorData: [String: String] = [:]
 
-        // 添加基础环境变量
+        // Add basic environment variables
         processorData["SIDE"] = AppConstants.EnvironmentTypes.client
         processorData["MINECRAFT_VERSION"] = gameVersion
         processorData["LIBRARY_DIR"] = librariesDir.path
 
-        // 添加Minecraft JAR路径
+        // Add Minecraft JAR path
         let minecraftJarPath = AppPaths.versionsDirectory.appendingPathComponent(gameVersion).appendingPathComponent("\(gameVersion).jar")
         processorData["MINECRAFT_JAR"] = minecraftJarPath.path
 
-        // 添加实例路径（profile目录）
+        // Add instance path (profile directory)
         if let gameName = gameName {
             processorData["ROOT"] = AppPaths.profileDirectory(gameName: gameName).path
         }
 
-        // 解析version.json中的data字段
+        // Parse the data field in version.json
         if let data = data {
             for (key, sidedEntry) in data {
                 processorData[key] = Self.extractClientValue(from: sidedEntry.client) ?? sidedEntry.client
             }
         }
 
-        // 通过gameVersion获取对应的Java版本，只获取一次，避免在每个processor中重复请求和校验
+        // Obtain the corresponding Java version through gameVersion and only obtain it once to avoid repeated requests and verification in each processor
         let versionInfo = try await ModrinthService.fetchVersionInfo(from: gameVersion)
         let javaPath = JavaManager.shared.findJavaExecutable(version: versionInfo.javaVersion.component)
 
@@ -198,15 +198,15 @@ class CommonFileManager {
         }
     }
 
-    /// 执行单个processor
+    /// Execute a single processor
     /// - Parameters:
-    ///   - processor: 处理器
-    ///   - librariesDir: 库目录
-    ///   - gameVersion: 游戏版本
-    ///   - javaPath: Java可执行路径（已提前解析/校验）
-    ///   - data: 数据字段，用于占位符替换
-    ///   - onProgressUpdate: 进度更新回调（可选，包含当前处理器索引和总处理器数量）
-    /// - Throws: GlobalError 当处理失败时
+    ///   - processor: processor
+    ///   - librariesDir: library directory
+    ///   - gameVersion: game version
+    ///   - javaPath: Java executable path (parsed/verified in advance)
+    ///   - data: data field, used for placeholder replacement
+    ///   - onProgressUpdate: progress update callback (optional, including current processor index and total number of processors)
+    /// - Throws: GlobalError when processing fails
     private func executeProcessor(_ processor: Processor, librariesDir: URL, gameVersion: String, javaPath: String, data: [String: String]? = nil, onProgressUpdate: ((String, Int, Int) -> Void)? = nil) async throws {
         try await ProcessorExecutor.executeProcessor(
             processor,
@@ -217,16 +217,16 @@ class CommonFileManager {
         )
     }
 
-    /// 从data字段值中提取client端的数据
-    /// - Parameter value: data字段的值
-    /// - Returns: client端的数据，如果无法解析则返回nil
+    /// Extract client-side data from the data field value
+    /// - Parameter value: the value of the data field
+    /// - Returns: client-side data, if it cannot be parsed, return nil
     static func extractClientValue(from value: String) -> String? {
-        // 如果是Maven坐标格式，直接转换为路径
+        // If it is in Maven coordinate format, convert it directly to a path
         if value.contains(":") && !value.hasPrefix("[") && !value.hasPrefix("{") {
             return CommonService.convertMavenCoordinateToPath(value)
         }
 
-        // 如果是数组格式，直接提取内容并转换为路径
+        // If it is in array format, directly extract the content and convert it to a path
         if value.hasPrefix("[") && value.hasSuffix("]") {
             let content = String(value.dropFirst().dropLast())
             if content.contains(":") {

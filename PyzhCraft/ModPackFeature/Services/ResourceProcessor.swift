@@ -1,10 +1,10 @@
 import Foundation
 
-/// 资源处理器
-/// 负责识别资源文件并决定是添加到索引还是复制到 overrides
+/// resource handler
+/// Responsible for identifying resource files and deciding whether to add them to the index or copy them to overrides
 enum ResourceProcessor {
 
-    /// 处理结果
+    /// Processing results
     struct ProcessResult {
         let indexFile: ModrinthIndexFile?
         let shouldCopyToOverrides: Bool
@@ -12,21 +12,21 @@ enum ResourceProcessor {
         let relativePath: String
     }
 
-    /// 识别资源文件（不复制）
+    /// Identify resource files (do not copy)
     /// - Parameters:
-    ///   - file: 资源文件路径
-    ///   - resourceType: 资源类型
-    /// - Returns: 处理结果
+    ///   - file: resource file path
+    ///   - resourceType: resource type
+    /// - Returns: processing results
     static func identify(
         file: URL,
         resourceType: ResourceScanner.ResourceType
     ) async -> ProcessResult {
         let relativePath = resourceType.rawValue
 
-        // 尝试从 Modrinth 获取信息
+        // Try to get information from Modrinth
         var indexFile: ModrinthIndexFile?
         if let modrinthInfo = await ModrinthResourceIdentifier.getModrinthInfo(for: file) {
-            // 找到 Modrinth 项目，尝试创建索引文件
+            // Find the Modrinth project and try to create an index file
             indexFile = await createIndexFile(
                 from: file,
                 modrinthInfo: modrinthInfo,
@@ -34,7 +34,7 @@ enum ResourceProcessor {
             )
         }
 
-        // 如果成功创建了索引文件，不需要复制到 overrides
+        // If the index file is successfully created, it does not need to be copied to overrides
         if let indexFile = indexFile {
             return ProcessResult(
                 indexFile: indexFile,
@@ -44,7 +44,7 @@ enum ResourceProcessor {
             )
         }
 
-        // 如果索引文件创建失败（Modrinth 识别不到、创建失败等），需要复制到 overrides
+        // If the index file fails to be created (Modrinth cannot recognize it, the creation fails, etc.), it needs to be copied to overrides
         return ProcessResult(
             indexFile: nil,
             shouldCopyToOverrides: true,
@@ -53,12 +53,12 @@ enum ResourceProcessor {
         )
     }
 
-    /// 复制文件到 overrides 目录
+    /// Copy the files to the overrides directory
     /// - Parameters:
-    ///   - file: 源文件路径
-    ///   - resourceType: 资源类型
-    ///   - overridesDir: overrides 目录
-    /// - Throws: 如果复制文件失败
+    ///   - file: source file path
+    ///   - resourceType: resource type
+    ///   - overridesDir: overrides directory
+    /// - Throws: If copying files fails
     static func copyToOverrides(
         file: URL,
         resourceType: ResourceScanner.ResourceType,
@@ -70,7 +70,7 @@ enum ResourceProcessor {
 
         try FileManager.default.createDirectory(at: overridesSubDir, withIntermediateDirectories: true)
 
-        // 如果目标文件已存在，先删除
+        // If the target file already exists, delete it first
         if FileManager.default.fileExists(atPath: destPath.path) {
             try? FileManager.default.removeItem(at: destPath)
         }
@@ -78,22 +78,22 @@ enum ResourceProcessor {
         try FileManager.default.copyItem(at: file, to: destPath)
     }
 
-    /// 处理单个资源文件（兼容旧接口，先识别后复制）
+    /// Process a single resource file (compatible with the old interface, identify first and then copy)
     /// - Parameters:
-    ///   - file: 资源文件路径
-    ///   - resourceType: 资源类型
-    ///   - overridesDir: overrides 目录
-    /// - Returns: 处理结果
-    /// - Throws: 如果复制文件失败
+    ///   - file: resource file path
+    ///   - resourceType: resource type
+    ///   - overridesDir: overrides directory
+    /// - Returns: processing results
+    /// - Throws: If copying files fails
     static func process(
         file: URL,
         resourceType: ResourceScanner.ResourceType,
         overridesDir: URL
     ) async throws -> ProcessResult {
-        // 先识别
+        // Identify first
         let result = await identify(file: file, resourceType: resourceType)
 
-        // 如果需要复制，则复制
+        // If copying is required, copy
         if result.shouldCopyToOverrides {
             try copyToOverrides(file: file, resourceType: resourceType, overridesDir: overridesDir)
         }
@@ -101,18 +101,18 @@ enum ResourceProcessor {
         return result
     }
 
-    /// 创建索引文件
+    /// Create index file
     private static func createIndexFile(
         from modFile: URL,
         modrinthInfo: ModrinthResourceIdentifier.ModrinthModInfo,
         relativePath: String
     ) async -> ModrinthIndexFile? {
-        // 计算文件 hash
+        // Calculate file hash
         guard let fileHash = try? SHA1Calculator.sha1(ofFileAt: modFile) else {
             return nil
         }
 
-        // 找到匹配的文件
+        // Matching files found
         let matchingFile = modrinthInfo.version.files.first { file in
             file.hashes.sha1 == fileHash
         } ?? modrinthInfo.version.files.first
@@ -123,8 +123,8 @@ enum ResourceProcessor {
 
         let fileSize = (try? FileManager.default.attributesOfItem(atPath: modFile.path)[.size] as? Int64) ?? 0
 
-        // 设置 env 字段（根据 Modrinth 项目的 clientSide 和 serverSide）
-        // 将 Modrinth 的 "optional" 映射为 "optional"，其他值映射为 "required"
+        // Set env field (clientSide and serverSide according to Modrinth project)
+        // Map "optional" of Modrinth to "optional" and other values ​​to "required"
         let clientEnv = modrinthInfo.projectDetail.clientSide == "optional" ? "optional" : "required"
         let serverEnv = modrinthInfo.projectDetail.serverSide == "optional" ? "optional" : "required"
 
@@ -147,8 +147,8 @@ enum ResourceProcessor {
     }
 }
 
-/// Modrinth 资源识别器
-/// 负责从 Modrinth 获取资源信息
+/// Modrinth Resource Identifier
+/// Responsible for obtaining resource information from Modrinth
 enum ModrinthResourceIdentifier {
 
     struct ModrinthModInfo {
@@ -156,14 +156,14 @@ enum ModrinthResourceIdentifier {
         let version: ModrinthProjectDetailVersion
     }
 
-    /// 尝试从 Modrinth 获取 mod 信息
-    /// 始终通过 hash 查询 API
+    /// Try to get mod information from Modrinth
+    /// Always query the API via hash
     static func getModrinthInfo(for modFile: URL) async -> ModrinthModInfo? {
         guard let hash = try? SHA1Calculator.sha1(ofFileAt: modFile) else {
             return nil
         }
 
-        // 直接通过 hash 查询 API
+        // Directly query the API via hash
         return await withCheckedContinuation { continuation in
             ModrinthService.fetchModrinthDetail(by: hash) { detail in
                 guard let detail = detail else {
@@ -171,11 +171,11 @@ enum ModrinthResourceIdentifier {
                     return
                 }
 
-                // 需要找到匹配的版本
+                // Need to find matching version
                 Task {
                     do {
                         let versions = try await ModrinthService.fetchProjectVersionsThrowing(id: detail.id)
-                        // 找到包含该 hash 的版本
+                        // Find the version containing the hash
                         if let matchingVersion = versions.first(where: { version in
                             version.files.contains { $0.hashes.sha1 == hash }
                         }) {

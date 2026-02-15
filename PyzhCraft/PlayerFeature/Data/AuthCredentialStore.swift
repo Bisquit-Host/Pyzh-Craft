@@ -1,13 +1,13 @@
 import Foundation
 
-/// 认证凭据存储管理器
-/// 使用 Keychain 安全存储认证凭据
+/// Authentication Credentials Storage Manager
+/// Securely store authentication credentials using Keychain
 class AuthCredentialStore {
     // MARK: - Public Methods
 
-    /// 保存认证凭据
-    /// - Parameter credential: 要保存的认证凭据
-    /// - Returns: 是否保存成功
+    /// Save authentication credentials
+    /// - Parameter credential: the authentication credential to be saved
+    /// - Returns: Whether the save was successful
     func saveCredential(_ credential: AuthCredential) -> Bool {
         do {
             let encoder = JSONEncoder()
@@ -19,9 +19,9 @@ class AuthCredentialStore {
         }
     }
 
-    /// 加载认证凭据
-    /// - Parameter userId: 用户ID
-    /// - Returns: 认证凭据，如果不存在或加载失败则返回 nil
+    /// Load authentication credentials
+    /// - Parameter userId: user ID
+    /// - Returns: Authentication credentials, returns nil if it does not exist or fails to load
     func loadCredential(userId: String) -> AuthCredential? {
         guard let data = KeychainManager.load(account: userId, key: "authCredential") else {
             return nil
@@ -36,23 +36,23 @@ class AuthCredentialStore {
         }
     }
 
-    /// 删除认证凭据
-    /// - Parameter userId: 用户ID
-    /// - Returns: 是否删除成功
+    /// Delete authentication credentials
+    /// - Parameter userId: user ID
+    /// - Returns: Whether the deletion was successful
     func deleteCredential(userId: String) -> Bool {
         KeychainManager.delete(account: userId, key: "authCredential")
     }
 
-    /// 删除用户的所有认证凭据
-    /// - Parameter userId: 用户ID
-    /// - Returns: 是否删除成功
+    /// Remove all authentication credentials for a user
+    /// - Parameter userId: user ID
+    /// - Returns: Whether the deletion was successful
     func deleteAllCredentials(userId: String) -> Bool {
         KeychainManager.deleteAll(account: userId)
     }
 
-    /// 更新认证凭据
-    /// - Parameter credential: 更新后的认证凭据
-    /// - Returns: 是否更新成功
+    /// Update authentication credentials
+    /// - Parameter credential: updated authentication credentials
+    /// - Returns: Whether the update is successful
     func updateCredential(_ credential: AuthCredential) -> Bool {
         saveCredential(credential)
     }

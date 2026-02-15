@@ -1,41 +1,41 @@
 import Foundation
 
-/// 玩家信息模型
-/// 组合 UserProfile 和可选的 AuthCredential
-/// 不直接存储，而是从 UserProfileStore 和 AuthCredentialStore 加载
+/// player information model
+/// Combining UserProfile and optional AuthCredential
+/// Not stored directly, but loaded from UserProfileStore and AuthCredentialStore
 struct Player: Identifiable, Equatable {
-    /// 用户基本信息
+    /// User basic information
     var profile: UserProfile
 
-    /// 认证凭据（仅在线账号有）
+    /// Authentication credentials (available only for online accounts)
     var credential: AuthCredential?
 
     // MARK: - Computed Properties
 
-    /// 玩家唯一标识符
+    /// Player unique identifier
     var id: String { profile.id }
 
-    /// 玩家名称
+    /// player name
     var name: String { profile.name }
 
-    /// 玩家头像路径或URL
+    /// Player avatar path or URL
     var avatarName: String { profile.avatar }
 
-    /// 最后游玩时间
+    /// last play time
     var lastPlayed: Date {
         get { profile.lastPlayed }
         set { profile.lastPlayed = newValue }
     }
 
-    /// 是否为当前选中的玩家
+    /// Is it the currently selected player?
     var isCurrent: Bool {
         get { profile.isCurrent }
         set { profile.isCurrent = newValue }
     }
 
-    /// 是否为在线账号
-    /// 优先依据认证凭据；在尚未从 Keychain 加载凭据时，
-    /// 通过头像是否为远程 URL（http/https）来近似判断是否为正版账号
+    /// Is it an online account?
+    /// Prioritizes authentication credentials; when credentials have not yet been loaded from the Keychain,
+    /// Approximately determine whether it is a genuine account by whether the avatar is a remote URL (http/https)
     var isOnlineAccount: Bool {
         if credential != nil {
             return true
@@ -43,36 +43,36 @@ struct Player: Identifiable, Equatable {
         return profile.avatar.hasPrefix("http://") || profile.avatar.hasPrefix("https://")
     }
 
-    /// 访问令牌
+    /// access token
     var authAccessToken: String { credential?.accessToken ?? "" }
 
-    /// 刷新令牌
+    /// refresh token
     var authRefreshToken: String { credential?.refreshToken ?? "" }
 
-    /// Xbox 用户ID
+    /// Xbox User ID
     var authXuid: String { credential?.xuid ?? "" }
 
-    /// 令牌过期时间
+    /// Token expiration time
     var expiresAt: Date? { credential?.expiresAt }
 
-    /// 初始化玩家信息
+    /// Initialize player information
     /// - Parameters:
-    ///   - profile: 用户基本信息
-    ///   - credential: 认证凭据（可选，离线账号为 nil）
+    ///   - profile: basic user information
+    ///   - credential: authentication credentials (optional, offline account is nil)
     init(profile: UserProfile, credential: AuthCredential? = nil) {
         self.profile = profile
         self.credential = credential
     }
 
-    /// 初始化玩家信息（便捷方法）
+    /// Initialize player information (convenience method)
     /// - Parameters:
-    ///   - name: 玩家名称
-    ///   - uuid: 玩家UUID，如果为nil则生成离线UUID
-    ///   - avatar: 头像名称或路径
-    ///   - credential: 认证凭据（可选）
-    ///   - lastPlayed: 最后游玩时间，默认当前时间
-    ///   - isCurrent: 是否当前玩家，默认false
-    /// - Throws: 如果生成玩家ID失败则抛出错误
+    ///   - name: player name
+    ///   - uuid: player UUID, if nil, generate offline UUID
+    ///   - avatar: avatar name or path
+    ///   - credential: authentication credentials (optional)
+    ///   - lastPlayed: last play time, default is current time
+    ///   - isCurrent: whether the current player, default false
+    /// - Throws: Throws an error if generation of player ID fails
     init(
         name: String,
         uuid: String? = nil,
@@ -81,7 +81,7 @@ struct Player: Identifiable, Equatable {
         lastPlayed: Date = Date(),
         isCurrent: Bool = false
     ) throws {
-        // 如果提供了UUID则使用，否则生成离线UUID
+        // Use UUID if provided, otherwise generate offline UUID
         let playerId: String
         if let providedUUID = uuid {
             playerId = providedUUID
@@ -89,15 +89,15 @@ struct Player: Identifiable, Equatable {
             playerId = try PlayerUtils.generateOfflineUUID(for: name)
         }
 
-        // 确定头像
+        // Confirm avatar
         let avatarName: String
         if let providedAvatar = avatar {
             avatarName = providedAvatar
         } else if credential != nil {
-            // 在线账号需要提供头像
+            // Online accounts require a profile picture
             avatarName = ""
         } else {
-            // 离线账号使用默认头像
+            // Use default avatar for offline accounts
             avatarName = PlayerUtils.avatarName(for: playerId) ?? "steve"
         }
 

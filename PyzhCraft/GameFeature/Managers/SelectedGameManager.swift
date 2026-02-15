@@ -1,20 +1,20 @@
 import SwiftUI
 
-/// 选中游戏管理器
-/// 主视图与设置页共享当前选中的游戏 ID
+/// Select game manager
+/// The main view shares the currently selected game ID with the settings page
 class SelectedGameManager: ObservableObject {
-    // MARK: - 单例实例
+    // MARK: - Singleton instance
     static let shared = SelectedGameManager()
 
-    /// 当前选中的游戏ID
+    /// The currently selected game ID
     @Published var selectedGameId: String? {
         didSet {
-            // 当游戏ID变化时，自动通知观察者
+            // Automatically notify observers when the game ID changes
             objectWillChange.send()
         }
     }
 
-    /// 是否应该打开高级设置标签
+    /// Whether the advanced settings tab should be opened
     @Published var shouldOpenAdvancedSettings: Bool = false {
         didSet {
             objectWillChange.send()
@@ -24,20 +24,20 @@ class SelectedGameManager: ObservableObject {
     private init() {
     }
 
-    /// 设置选中的游戏ID
-    /// - Parameter gameId: 游戏ID，如果为nil则清除选中状态
+    /// Set selected game ID
+    /// - Parameter gameId: game ID, if nil, clear the selected state
     func setSelectedGame(_ gameId: String?) {
         selectedGameId = gameId
     }
 
-    /// 清除选中的游戏
+    /// Clear selected games
     func clearSelection() {
         selectedGameId = nil
         shouldOpenAdvancedSettings = false
     }
 
-    /// 设置选中的游戏并标记应该打开高级设置
-    /// - Parameter gameId: 游戏ID
+    /// Settings selected game and mark should open advanced settings
+    /// - Parameter gameId: game ID
     func setSelectedGameAndOpenAdvancedSettings(_ gameId: String?) {
         selectedGameId = gameId
         shouldOpenAdvancedSettings = true

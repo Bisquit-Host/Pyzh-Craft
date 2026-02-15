@@ -16,7 +16,7 @@ public class ContributorsViewModel: ObservableObject {
                 perPage: 50
             )
         } catch {
-            // 静默处理错误
+            // Handle errors silently
         }
     }
 
@@ -31,7 +31,7 @@ public class ContributorsViewModel: ObservableObject {
             ? String(format: "%.1fk", Double(count) / 1000.0) : "\(count)"
     }
 
-    /// 清理贡献者数据，释放内存
+    /// Clean contributor data and release memory
     public func clearContributors() {
         contributors = []
     }

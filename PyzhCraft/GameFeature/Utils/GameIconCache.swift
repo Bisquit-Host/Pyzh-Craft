@@ -1,41 +1,41 @@
 import SwiftUI
 import Combine
 
-/// 游戏图标缓存管理器
-/// 图标缓存，避免重复文件系统访问
-/// 使用 @unchecked Sendable 因为已经通过 DispatchQueue 确保线程安全
+/// Game Icon Cache Manager
+/// Icon caching to avoid duplicate file system accesses
+/// Use @unchecked Sendable because thread safety has been ensured through DispatchQueue
 final class GameIconCache: @unchecked Sendable {
     static let shared = GameIconCache()
 
-    /// 图标文件存在性缓存：key 为 "gameName/iconName"，value 为是否存在
+    /// Icon file existence cache: key is "gameName/iconName", value is whether it exists
     private let existenceCache = NSCache<NSString, NSNumber>()
 
-    /// 图标 URL 缓存：key 为 "gameName/iconName"，value 为图标 URL
+    /// Icon URL cache: key is "gameName/iconName", value is icon URL
     private let urlCache = NSCache<NSString, NSURL>()
 
-    /// 缓存访问队列，确保线程安全
+    /// Cache access queue to ensure thread safety
     private let cacheQueue = DispatchQueue(label: "com.pyzhcraft.gameiconcache", attributes: .concurrent)
 
-    /// 缓存失效通知：当缓存被清除时发送通知
-    /// key 为游戏名称，nil 表示清除所有缓存
+    /// Cache invalidation notification: Send notification when cache is cleared
+    /// key is the game name, nil means clear all caches
     private let cacheInvalidationSubject = PassthroughSubject<String?, Never>()
 
-    /// 缓存失效通知的发布者
+    /// Cache invalidation notification publisher
     var cacheInvalidationPublisher: AnyPublisher<String?, Never> {
         cacheInvalidationSubject.eraseToAnyPublisher()
     }
 
     private init() {
-        // 设置缓存限制
+        // Set cache limits
         existenceCache.countLimit = 100
         urlCache.countLimit = 100
     }
 
-    /// 获取游戏图标的 URL
+    /// Get the URL of the game icon
     /// - Parameters:
-    ///   - gameName: 游戏名称
-    ///   - iconName: 图标文件名
-    /// - Returns: 图标的 URL
+    ///   - gameName: game name
+    ///   - iconName: icon file name
+    /// - Returns: URL of the icon
     func iconURL(gameName: String, iconName: String) -> URL {
         let cacheKey = "\(gameName)/\(iconName)" as NSString
 
@@ -51,11 +51,11 @@ final class GameIconCache: @unchecked Sendable {
         }
     }
 
-    /// 检查图标文件是否存在（带缓存）
+    /// Check if icon file exists (with cache)
     /// - Parameters:
-    ///   - gameName: 游戏名称
-    ///   - iconName: 图标文件名
-    /// - Returns: 图标文件是否存在
+    ///   - gameName: game name
+    ///   - iconName: icon file name
+    /// - Returns: Whether the icon file exists
     func iconExists(gameName: String, iconName: String) -> Bool {
         let cacheKey = "\(gameName)/\(iconName)" as NSString
 
@@ -82,15 +82,15 @@ final class GameIconCache: @unchecked Sendable {
         }
     }
 
-    /// 异步检查图标文件是否存在（在后台线程执行）
+    /// Asynchronously checks whether the icon file exists (executed on a background thread)
     /// - Parameters:
-    ///   - gameName: 游戏名称
-    ///   - iconName: 图标文件名
-    /// - Returns: 图标文件是否存在
+    ///   - gameName: game name
+    ///   - iconName: icon file name
+    /// - Returns: Whether the icon file exists
     func iconExistsAsync(gameName: String, iconName: String) async -> Bool {
         let cacheKeyString = "\(gameName)/\(iconName)"
 
-        // 先检查缓存（在主线程同步检查，避免 Sendable 问题）
+        // Check the cache first (check synchronously on the main thread to avoid Sendable problems)
         let cacheKey = cacheKeyString as NSString
         let cached = cacheQueue.sync {
             existenceCache.object(forKey: cacheKey)
@@ -100,16 +100,16 @@ final class GameIconCache: @unchecked Sendable {
             return cached.boolValue
         }
 
-        // 在后台线程检查文件存在性
+        // Check file existence on background thread
         let exists = await Task.detached(priority: .utility) {
-            // 在后台线程获取 URL（不依赖 self）
+            // Get the URL on a background thread (does not rely on self)
             let profileDir = AppPaths.profileDirectory(gameName: gameName)
             let iconURL = profileDir.appendingPathComponent(iconName)
             return FileManager.default.fileExists(atPath: iconURL.path)
         }.value
 
-        // 更新缓存（在主线程或队列中执行，避免 Sendable 问题）
-        // 使用 String 而不是 NSString，在闭包内部转换，避免 Sendable 问题
+        // Update cache (performed in main thread or queue to avoid Sendable issues)
+        // Use String instead of NSString, convert inside closure, avoid Sendable issues
         let existsValue = exists
         cacheQueue.async(flags: .barrier) {
             let cacheKey = cacheKeyString as NSString
@@ -119,30 +119,30 @@ final class GameIconCache: @unchecked Sendable {
         return exists
     }
 
-    /// 清除特定游戏的图标缓存
-    /// - Parameter gameName: 游戏名称
+    /// Clear the icon cache for a specific game
+    /// - Parameter gameName: game name
     func invalidateCache(for gameName: String) {
         cacheQueue.async(flags: .barrier) {
-            // NSCache 没有 allKeys，需要手动维护键列表或使用其他方式
-            // 简化处理：直接清空缓存
-            // 如果需要更精细的控制，可以维护一个单独的键集合
+            // NSCache does not have allKeys, you need to manually maintain the key list or use other methods
+            // Simplified processing: clear the cache directly
+            // If finer control is required, a separate set of keys can be maintained
             self.existenceCache.removeAllObjects()
             self.urlCache.removeAllObjects()
 
-            // 发送缓存失效通知
+            // Send cache invalidation notification
             DispatchQueue.main.async {
                 self.cacheInvalidationSubject.send(gameName)
             }
         }
     }
 
-    /// 清除所有缓存
+    /// clear all cache
     func clearAllCache() {
         cacheQueue.async(flags: .barrier) {
             self.existenceCache.removeAllObjects()
             self.urlCache.removeAllObjects()
 
-            // 发送缓存失效通知（nil 表示清除所有缓存）
+            // Send cache invalidation notification (nil means clear all caches)
             DispatchQueue.main.async {
                 self.cacheInvalidationSubject.send(nil)
             }

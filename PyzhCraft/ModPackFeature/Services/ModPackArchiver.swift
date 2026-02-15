@@ -1,23 +1,23 @@
 import Foundation
 import ZIPFoundation
 
-/// 整合包打包器
-/// 负责将临时目录打包为 .mrpack 文件
+/// Integrated package packager
+/// Responsible for packaging the temporary directory into a .mrpack file
 enum ModPackArchiver {
-    /// 打包整合包
+    /// Packaging integration package
     /// - Parameters:
-    ///   - tempDir: 临时目录（包含 modrinth.index.json 和 overrides）
-    ///   - outputPath: 输出文件路径
+    ///   - tempDir: temporary directory (contains modrinth.index.json and overrides)
+    ///   - outputPath: output file path
     static func archive(
         tempDir: URL,
         outputPath: URL
     ) throws {
-        // 如果输出文件已存在，先删除
+        // If the output file already exists, delete it first
         if FileManager.default.fileExists(atPath: outputPath.path) {
             try FileManager.default.removeItem(at: outputPath)
         }
 
-        // 创建 ZIP 归档
+        // Create ZIP archive
         let archive: Archive
         do {
             archive = try Archive(url: outputPath, accessMode: .create)
@@ -29,7 +29,7 @@ enum ModPackArchiver {
             )
         }
 
-        // 添加 modrinth.index.json 到 zip 根目录
+        // Add modrinth.index.json to the zip root directory
         let indexPath = tempDir.appendingPathComponent(AppConstants.modrinthIndexFileName)
         if FileManager.default.fileExists(atPath: indexPath.path) {
             let indexData = try Data(contentsOf: indexPath)
@@ -45,7 +45,7 @@ enum ModPackArchiver {
             }
         }
 
-        // 添加 overrides 文件夹及其所有内容到 zip 根目录
+        // Add the overrides folder and all its contents to the zip root
         let overridesDir = tempDir.appendingPathComponent("overrides")
         if FileManager.default.fileExists(atPath: overridesDir.path) {
             let overridesEnumerator = FileManager.default.enumerator(
@@ -54,7 +54,7 @@ enum ModPackArchiver {
                 options: [.skipsHiddenFiles]
             )
 
-            // 标准化 overridesDir 路径（确保以 / 结尾）
+            // Normalize overridesDir path (make sure it ends with /)
             let overridesDirPath = (overridesDir.path as NSString).standardizingPath
             let overridesDirPathWithSlash = overridesDirPath.hasSuffix("/")
                 ? overridesDirPath
@@ -63,19 +63,19 @@ enum ModPackArchiver {
             while let fileURL = overridesEnumerator?.nextObject() as? URL {
                 if let isRegularFile = try? fileURL.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile,
                    isRegularFile {
-                    // 计算相对路径（相对于 overridesDir），添加 overrides/ 前缀
-                    // 使用标准化的路径来避免路径中包含 "private" 等词导致的问题
+                    // Calculate relative path (relative to overridesDir), add overrides/ prefix
+                    // Use standardized paths to avoid problems caused by paths containing words like "private"
                     let filePath = (fileURL.path as NSString).standardizingPath
 
-                    // 确保文件路径以 overridesDir 路径开头
+                    // Make sure the file path starts with the overridesDir path
                     guard filePath.hasPrefix(overridesDirPathWithSlash) else {
                         Logger.shared.warning("文件路径不在 overrides 目录内: \(filePath)")
                         continue
                     }
 
-                    // 提取相对路径部分
+                    // Extract relative path part
                     let relativeToOverrides = String(filePath.dropFirst(overridesDirPathWithSlash.count))
-                    // 构建 ZIP 中的路径（以 overrides/ 开头）
+                    // Path in build ZIP (starting with overrides/)
                     let relativePath = "overrides/\(relativeToOverrides)"
 
                     let fileData = try Data(contentsOf: fileURL)

@@ -1,19 +1,19 @@
 import Foundation
 
-/// 游戏状态管理器
-/// 基于实际进程状态管理游戏运行状态，使用gameId作为key
+/// game state manager
+/// Manage the game running status based on the actual process status, using gameId as the key
 class GameStatusManager: ObservableObject {
     static let shared = GameStatusManager()
-    /// 游戏运行状态字典，key为gameId，value为是否正在运行
+    /// Game running status dictionary, key is gameId, value is whether it is running
     @Published private var gameRunningStates: [String: Bool] = [:]
-    /// 游戏启动中状态字典，key为gameId，value为是否正在启动（尚未进入运行态）
+    /// Game startup status dictionary, key is gameId, value is whether it is starting (not yet in running state)
     @Published private var gameLaunchingStates: [String: Bool] = [:]
 
     private init() {}
 
-    /// 检查指定游戏是否正在运行
-    /// - Parameter gameId: 游戏ID
-    /// - Returns: 是否正在运行
+    /// Check if the specified game is running
+    /// - Parameter gameId: game ID
+    /// - Returns: Is it running?
     func isGameRunning(gameId: String) -> Bool {
         let actuallyRunning = GameProcessManager.shared.isGameRunning(gameId: gameId)
 
@@ -23,10 +23,10 @@ class GameStatusManager: ObservableObject {
 
         return actuallyRunning
     }
-    /// 更新游戏状态（如果需要）
+    /// Update game status (if needed)
     /// - Parameters:
-    ///   - gameId: 游戏ID
-    ///   - actuallyRunning: 实际运行状态
+    ///   - gameId: game ID
+    ///   - actuallyRunning: actual running status
     private func updateGameStatusIfNeeded(gameId: String, actuallyRunning: Bool) {
         if let cachedState = gameRunningStates[gameId], cachedState != actuallyRunning {
             gameRunningStates[gameId] = actuallyRunning
@@ -36,8 +36,8 @@ class GameStatusManager: ObservableObject {
         }
     }
 
-    /// 强制刷新指定游戏的状态
-    /// - Parameter gameId: 游戏ID
+    /// Force refresh the status of the specified game
+    /// - Parameter gameId: game ID
     func refreshGameStatus(gameId: String) {
         let actuallyRunning = GameProcessManager.shared.isGameRunning(gameId: gameId)
         DispatchQueue.main.async { [weak self] in
@@ -48,8 +48,8 @@ class GameStatusManager: ObservableObject {
     }
 
     /// - Parameters:
-    ///   - gameId: 游戏ID
-    ///   - isRunning: 是否正在运行
+    ///   - gameId: game ID
+    ///   - isRunning: whether it is running
     func setGameRunning(gameId: String, isRunning: Bool) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
@@ -61,7 +61,7 @@ class GameStatusManager: ObservableObject {
         }
     }
 
-    /// 清理已停止的游戏状态
+    /// Clean up stopped game state
     func cleanupStoppedGames() {
         let processManager = GameProcessManager.shared
 
@@ -73,23 +73,23 @@ class GameStatusManager: ObservableObject {
         }
     }
 
-    /// 获取所有正在运行的游戏ID
+    /// Get all running game IDs
     var runningGameIds: [String] {
         return gameRunningStates.compactMap { gameId, isRunning in
             isRunning ? gameId : nil
         }
     }
 
-    /// 获取所有游戏状态
+    /// Get all game status
     var allGameStates: [String: Bool] {
         gameRunningStates
     }
 
-    // MARK: - 启动中状态管理
+    // MARK: - Startup status management
 
     /// - Parameters:
-    ///   - gameId: 游戏ID
-    ///   - isLaunching: 是否正在启动
+    ///   - gameId: game ID
+    ///   - isLaunching: whether it is launching
     func setGameLaunching(gameId: String, isLaunching: Bool) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
@@ -101,13 +101,13 @@ class GameStatusManager: ObservableObject {
         }
     }
 
-    /// - Parameter gameId: 游戏ID
-    /// - Returns: 是否正在启动
+    /// - Parameter gameId: game ID
+    /// - Returns: Whether it is starting
     func isGameLaunching(gameId: String) -> Bool {
         gameLaunchingStates[gameId] ?? false
     }
 
-    /// - Parameter gameId: 游戏ID
+    /// - Parameter gameId: game ID
     func removeGameState(gameId: String) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }

@@ -15,7 +15,7 @@ enum DownloadManager {
         }
 
         init?(from string: String) {
-            // 优化：使用 caseInsensitiveCompare 避免创建临时小写字符串
+            // Optimization: Use caseInsensitiveCompare to avoid creating temporary lowercase strings
             let lowercased = string.lowercased()
             switch lowercased {
             case "mod": self = .mod
@@ -27,14 +27,14 @@ enum DownloadManager {
         }
     }
 
-    /// 下载资源文件
+    /// Download resource file
     /// - Parameters:
-    ///   - game: 游戏信息
-    ///   - urlString: 下载地址
-    ///   - resourceType: 资源类型（如 "mod", "datapack", "shader", "resourcepack"）
-    ///   - expectedSha1: 预期 SHA1 值
-    /// - Returns: 下载到的本地文件 URL
-    /// - Throws: GlobalError 当操作失败时
+    ///   - game: game information
+    ///   - urlString: download address
+    ///   - resourceType: resource type (such as "mod", "datapack", "shader", "resourcepack")
+    ///   - expectedSha1: expected SHA1 value
+    /// - Returns: Downloaded local file URL
+    /// - Throws: GlobalError when the operation fails
     static func downloadResource(for game: GameVersionInfo, urlString: String, resourceType: String, expectedSha1: String? = nil) async throws -> URL {
         guard let url = URL(string: urlString) else {
             throw GlobalError.validation(
@@ -57,7 +57,7 @@ enum DownloadManager {
             case .mod:
                 return AppPaths.modsDirectory(gameName: game.gameName)
             case .datapack:
-                // 优化：缓存小写路径组件，避免重复创建
+                // Optimization: cache lowercase path components to avoid repeated creation
                 let lowercasedPath = url.lastPathComponent.lowercased()
                 if lowercasedPath.hasSuffix(".\(AppConstants.FileExtensions.jar)") {
                     return AppPaths.modsDirectory(gameName: game.gameName)
@@ -66,7 +66,7 @@ enum DownloadManager {
             case .shader:
                 return AppPaths.shaderpacksDirectory(gameName: game.gameName)
             case .resourcepack:
-                // 优化：缓存小写路径组件，避免重复创建
+                // Optimization: cache lowercase path components to avoid repeated creation
                 let lowercasedPath = url.lastPathComponent.lowercased()
                 if lowercasedPath.hasSuffix(".\(AppConstants.FileExtensions.jar)") {
                     return AppPaths.modsDirectory(gameName: game.gameName)
@@ -84,29 +84,29 @@ enum DownloadManager {
         }
 
         let destURL = resourceDirUnwrapped.appendingPathComponent(url.lastPathComponent)
-        // 优化：直接传递已创建的 URL，避免在 downloadFile 中重复创建
+        // Optimization: Pass the created URL directly to avoid repeated creation in downloadFile
         return try await downloadFile(url: url, destinationURL: destURL, expectedSha1: expectedSha1)
     }
 
-    // 常量字符串，避免重复创建
+    // Constant string to avoid repeated creation
     private static let githubPrefix = "https://github.com/"
     private static let rawGithubPrefix = "https://raw.githubusercontent.com/"
     private static let githubHost = "github.com"
     private static let rawGithubHost = "raw.githubusercontent.com"
 
-    /// 通用下载文件到指定路径（不做任何目录结构拼接）
+    /// Universally download files to the specified path (without splicing any directory structure)
     /// - Parameters:
-    ///   - urlString: 下载地址（字符串形式）
-    ///   - destinationURL: 目标文件路径
-    ///   - expectedSha1: 预期 SHA1 值
-    /// - Returns: 下载到的本地文件 URL
-    /// - Throws: GlobalError 当操作失败时
+    ///   - urlString: download address (string form)
+    ///   - destinationURL: destination file path
+    ///   - expectedSha1: expected SHA1 value
+    /// - Returns: Downloaded local file URL
+    /// - Throws: GlobalError when the operation fails
     static func downloadFile(
         urlString: String,
         destinationURL: URL,
         expectedSha1: String? = nil
     ) async throws -> URL {
-        // 优化：先创建 URL，然后调用内部方法
+        // Optimization: Create URL first, then call internal method
         let url: URL = try autoreleasepool {
             guard let url = URL(string: urlString) else {
                 throw GlobalError.validation(
@@ -120,27 +120,27 @@ enum DownloadManager {
         return try await downloadFile(url: url, destinationURL: destinationURL, expectedSha1: expectedSha1)
     }
 
-    /// 通用下载文件到指定路径（内部方法，接受 URL 对象）
+    /// Universal download file to specified path (internal method, accepts URL object)
     /// - Parameters:
-    ///   - url: 下载地址（URL 对象）
-    ///   - destinationURL: 目标文件路径
-    ///   - expectedSha1: 预期 SHA1 值
-    /// - Returns: 下载到的本地文件 URL
-    /// - Throws: GlobalError 当操作失败时
+    ///   - url: download address (URL object)
+    ///   - destinationURL: destination file path
+    ///   - expectedSha1: expected SHA1 value
+    /// - Returns: Downloaded local file URL
+    /// - Throws: GlobalError when the operation fails
     private static func downloadFile(
         url: URL,
         destinationURL: URL,
         expectedSha1: String? = nil
     ) async throws -> URL {
-        // 优化：在同步部分使用 autoreleasepool 及时释放临时对象
-        // 优化：直接使用 URL，避免同时存储 String 和 URL（节省内存）
+        // Optimization: Use autoreleasepool in the synchronization part to release temporary objects in time
+        // Optimization: Use URL directly to avoid storing String and URL at the same time (save memory)
         let finalURL: URL = autoreleasepool {
-            // 优化：直接使用 URL 的 host 属性检查，避免转换为 String
+            // Optimization: Directly use the host attribute check of the URL to avoid conversion to String
             let needsProxy: Bool
             if let host = url.host {
                 needsProxy = host == githubHost || host == rawGithubHost
             } else {
-                // 如果没有 host，检查 absoluteString（可能是相对路径）
+                // If there is no host, check absoluteString (possibly a relative path)
                 let absoluteString = url.absoluteString
                 needsProxy = absoluteString.hasPrefix(githubPrefix) || absoluteString.hasPrefix(rawGithubPrefix)
             }
@@ -164,14 +164,14 @@ enum DownloadManager {
             )
         }
 
-        // 检查是否需要 SHA1 校验
+        // Check if SHA1 verification is required
         let shouldCheckSha1 = (expectedSha1?.isEmpty == false)
 
-        // 如果文件已存在
+        // if the file already exists
         let destinationPath = destinationURL.path
         if fileManager.fileExists(atPath: destinationPath) {
             if shouldCheckSha1, let expectedSha1 = expectedSha1 {
-                // 优化：使用 autoreleasepool 释放 SHA1 计算过程中的临时对象
+                // Optimization: Use autoreleasepool to release temporary objects during SHA1 calculation
                 do {
                     let actualSha1 = try autoreleasepool {
                         try calculateFileSHA1(at: destinationURL)
@@ -179,25 +179,25 @@ enum DownloadManager {
                     if actualSha1 == expectedSha1 {
                         return destinationURL
                     }
-                    // 如果校验失败，继续下载（不返回，继续执行下面的下载逻辑）
+                    // If the verification fails, continue downloading (without returning, continue executing the download logic below)
                 } catch {
-                    // 如果校验出错，继续下载（不中断）
+                    // If there is an error in the verification, continue downloading (without interruption)
                 }
             } else {
-                // 没有 SHA1 时直接跳过
+                // Skip directly if there is no SHA1
                 return destinationURL
             }
         }
 
-        // 下载文件到临时位置（异步操作在 autoreleasepool 外部）
+        // Download files to a temporary location (asynchronous operation outside autoreleasepool)
         do {
             let (tempFileURL, response) = try await URLSession.shared.download(from: finalURL)
             defer {
-                // 确保临时文件被清理
+                // Make sure temporary files are cleaned up
                 try? fileManager.removeItem(at: tempFileURL)
             }
 
-            // 优化：直接检查状态码，减少中间变量
+            // Optimization: Check status codes directly and reduce intermediate variables
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 throw GlobalError.download(
                     chineseMessage: "HTTP 请求失败",
@@ -206,7 +206,7 @@ enum DownloadManager {
                 )
             }
 
-            // SHA1 校验（优化：使用 autoreleasepool）
+            // SHA1 verification (optimized: use autoreleasepool)
             if shouldCheckSha1, let expectedSha1 = expectedSha1 {
                 try autoreleasepool {
                     let actualSha1 = try calculateFileSHA1(at: tempFileURL)
@@ -220,9 +220,9 @@ enum DownloadManager {
                 }
             }
 
-            // 原子性地移动到最终位置
+            // Move atomically to final position
             if fileManager.fileExists(atPath: destinationURL.path) {
-                // 先尝试直接替换
+                // Try to replace directly
                 try fileManager.replaceItem(at: destinationURL, withItemAt: tempFileURL, backupItemName: nil, options: [], resultingItemURL: nil)
             } else {
                 try fileManager.moveItem(at: tempFileURL, to: destinationURL)
@@ -230,7 +230,7 @@ enum DownloadManager {
 
             return destinationURL
         } catch {
-            // 转换错误为 GlobalError
+            // Convert error to GlobalError
             if let globalError = error as? GlobalError {
                 throw globalError
             } else if error is URLError {
@@ -249,10 +249,10 @@ enum DownloadManager {
         }
     }
 
-    /// 计算文件的 SHA1 哈希值
-    /// - Parameter url: 文件路径
-    /// - Returns: SHA1 哈希字符串
-    /// - Throws: GlobalError 当操作失败时
+    /// Calculate the SHA1 hash of a file
+    /// - Parameter url: file path
+    /// - Returns: SHA1 hash string
+    /// - Throws: GlobalError when the operation fails
     static func calculateFileSHA1(at url: URL) throws -> String {
         try SHA1Calculator.sha1(ofFileAt: url)
     }

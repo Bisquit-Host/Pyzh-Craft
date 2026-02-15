@@ -15,21 +15,21 @@ struct MiniRangeSlider: View {
             let upperPos = position(for: range.upperBound, width: width)
 
             ZStack(alignment: .leading) {
-                // 背景轨道
+                // background track
                 Capsule()
-                    .strokeBorder(Color.secondary.opacity(0.05), lineWidth: 0.5 ) // 边框颜色和宽度
+                    .strokeBorder(Color.secondary.opacity(0.05), lineWidth: 0.5 ) // Border color and width
                     .background(
                         Capsule()
                             .fill(Color.secondary.opacity(0.1))
                     )
                     .frame(height: trackHeight)
-                // 选中范围轨道
+                // Selected range track
                 Capsule()
                     .fill(Color.accentColor)
                     .frame(width: max(upperPos - lowerPos, 0), height: trackHeight)
                     .offset(x: lowerPos)
 
-                // 左滑块
+                // left slider
                 Circle()
                     .fill(colorScheme == .dark ? Color.gray : Color.white)
                     .frame(width: thumbDiameter, height: thumbDiameter)
@@ -50,7 +50,7 @@ struct MiniRangeSlider: View {
                             }
                     )
 
-                // 右滑块
+                // right slider
                 Circle()
                     .fill(colorScheme == .dark ? Color.gray : Color.white)
                     .frame(width: thumbDiameter, height: thumbDiameter)

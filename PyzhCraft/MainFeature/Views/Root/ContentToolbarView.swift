@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 内容区域工具栏内容
+/// Content area toolbar content
 public struct ContentToolbarView: ToolbarContent {
     @EnvironmentObject var playerListViewModel: PlayerListViewModel
     @State private var showingAddPlayerSheet = false
@@ -22,12 +22,12 @@ public struct ContentToolbarView: ToolbarContent {
 
     // MARK: - Computed Properties
 
-    /// 当前玩家（计算属性，避免重复访问）
+    /// Current player (calculated attribute to avoid repeated access)
     private var currentPlayer: Player? {
         playerListViewModel.currentPlayer
     }
 
-    /// 是否为在线账户（计算属性）
+    /// Whether it is an online account (calculated attribute)
     private var isCurrentPlayerOnline: Bool {
         currentPlayer?.isOnlineAccount ?? false
     }
@@ -45,10 +45,10 @@ public struct ContentToolbarView: ToolbarContent {
             }
             .help("game.form.title".localized())
             .task {
-                // 延迟检查公告，不阻塞初始渲染
+                // Delay checking of announcements without blocking initial rendering
                 guard !hasCheckedAnnouncement else { return }
                 hasCheckedAnnouncement = true
-                // 使用低优先级任务在后台执行，不阻塞 UI 渲染
+                // Use low-priority tasks to execute in the background without blocking UI rendering
                 Task(priority: .utility) {
                     await checkAnnouncement()
                 }
@@ -60,7 +60,7 @@ public struct ContentToolbarView: ToolbarContent {
                     .presentationBackgroundInteraction(.automatic)
             }
             Spacer()
-            // 添加玩家按钮
+            // add player button
             Button {
                 playerName = ""
                 isPlayerNameValid = false
@@ -87,22 +87,22 @@ public struct ContentToolbarView: ToolbarContent {
                         isPlayerNameValid = false
 
                         showingAddPlayerSheet = false
-                        // 延迟清理认证状态，避免影响对话框关闭动画
+                        // Delay cleaning of authentication status to avoid affecting the dialog box closing animation
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                             MinecraftAuthService.shared.clearAuthenticationData()
                         }
                     },
                     onLogin: { profile in
-                        // 处理正版登录成功，使用Minecraft用户资料
+                        // Processing genuine login successfully, using Minecraft user profile
                         Logger.shared.debug("正版登录成功，用户: \(profile.name)")
-                        // 添加正版玩家
+                        // Add genuine players
                         _ = playerListViewModel.addOnlinePlayer(profile: profile)
 
-                        // 设置正版账户添加标记
+                        // Set up a genuine account and add a mark
                         PremiumAccountFlagManager.shared.setPremiumAccountAdded()
 
                         showingAddPlayerSheet = false
-                        // 延迟清理认证状态，让用户能看到成功状态
+                        // Delay cleaning of authentication status so users can see the success status
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                             MinecraftAuthService.shared.clearAuthenticationData()
                         }
@@ -119,7 +119,7 @@ public struct ContentToolbarView: ToolbarContent {
                 )
             }
 
-            // 皮肤管理按钮 - 仅在线账户显示
+            // Skin management button - only displayed on online accounts
             if isCurrentPlayerOnline {
                 Button {
                     Task {
@@ -141,14 +141,14 @@ public struct ContentToolbarView: ToolbarContent {
                         preloadedProfile: preloadedProfile
                     )
                     .onDisappear {
-                        // 清理预加载的数据
+                        // Clean preloaded data
                         preloadedSkinInfo = nil
                         preloadedProfile = nil
                     }
                 }
             }
 
-            // 启动信息按钮 - 仅在存在公告时显示
+            // Launch information button - only shown if there is an announcement
             if hasAnnouncement, let announcement = announcementData {
                 Button {
                     showStartupInfo = true
@@ -166,7 +166,7 @@ public struct ContentToolbarView: ToolbarContent {
 
     // MARK: - Private Methods
 
-    /// 打开皮肤管理器（先加载数据，再显示sheet）
+    /// Open the skin manager (load data first, then display the sheet)
     private func openSkinManager() async {
         guard let player = currentPlayer else { return }
 
@@ -174,9 +174,9 @@ public struct ContentToolbarView: ToolbarContent {
             isLoadingSkin = true
         }
 
-        // 如果是离线账户，直接使用，无需刷新token
+        // If it is an offline account, use it directly without refreshing the token
         guard player.isOnlineAccount else {
-            // 预加载皮肤数据
+            // Preload skin data
             async let skinInfo = PlayerSkinService.fetchCurrentPlayerSkinFromServices(player: player)
             async let profile = PlayerSkinService.fetchPlayerProfile(player: player)
             let (loadedSkinInfo, loadedProfile) = await (skinInfo, profile)
@@ -192,7 +192,7 @@ public struct ContentToolbarView: ToolbarContent {
 
         Logger.shared.info("打开皮肤管理器前验证玩家 \(player.name) 的Token")
 
-        // 从 Keychain 按需加载认证凭据（只针对当前玩家，避免一次性读取所有账号）
+        // Load authentication credentials on demand from Keychain (only for current player, avoid reading all accounts at once)
         var playerWithCredential = player
         if playerWithCredential.credential == nil {
             let dataManager = PlayerDataManager()
@@ -201,20 +201,20 @@ public struct ContentToolbarView: ToolbarContent {
             }
         }
 
-        // 使用已加载/更新后的玩家对象验证并尝试刷新Token
+        // Verify using the loaded/updated player object and try to refresh the token
         let authService = MinecraftAuthService.shared
         let validatedPlayer: Player
         do {
             validatedPlayer = try await authService.validateAndRefreshPlayerTokenThrowing(for: playerWithCredential)
 
-            // 如果Token被更新了，需要保存到PlayerDataManager
+            // If the Token is updated, it needs to be saved to PlayerDataManager
             if validatedPlayer.authAccessToken != player.authAccessToken {
                 Logger.shared.info("玩家 \(player.name) 的Token已更新，保存到数据管理器")
                 let dataManager = PlayerDataManager()
                 let success = dataManager.updatePlayerSilently(validatedPlayer)
                 if success {
                     Logger.shared.debug("已更新玩家数据管理器中的Token信息")
-                    // 同步更新内存中的玩家列表（避免下次启动仍使用旧 token）
+                    // Synchronously update the player list in memory (to avoid using old tokens at next startup)
                     NotificationCenter.default.post(
                         name: PlayerSkinService.playerUpdatedNotification,
                         object: nil,
@@ -224,11 +224,11 @@ public struct ContentToolbarView: ToolbarContent {
             }
         } catch {
             Logger.shared.error("刷新Token失败: \(error.localizedDescription)")
-            // Token刷新失败时，仍然尝试使用原有token加载皮肤数据
+            // When token refresh fails, still try to use the original token to load skin data
             validatedPlayer = playerWithCredential
         }
 
-        // 预加载皮肤数据（使用验证后的玩家对象）
+        // Preload skin data (using authenticated player object)
         async let skinInfo = PlayerSkinService.fetchCurrentPlayerSkinFromServices(player: validatedPlayer)
         async let profile = PlayerSkinService.fetchPlayerProfile(player: validatedPlayer)
         let (loadedSkinInfo, loadedProfile) = await (skinInfo, profile)
@@ -241,8 +241,8 @@ public struct ContentToolbarView: ToolbarContent {
         }
     }
 
-    /// 检查是否有公告
-    /// 启动时只调用一次
+    /// Check if there is an announcement
+    /// Only called once at startup
     private func checkAnnouncement() async {
         let version = Bundle.main.appVersion
         let language = LanguageManager.shared.selectedLanguage.isEmpty

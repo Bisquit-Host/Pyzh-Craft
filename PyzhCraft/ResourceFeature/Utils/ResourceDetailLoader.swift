@@ -1,14 +1,14 @@
 import Foundation
 
-/// 资源详情加载器
-/// 负责在打开 sheet 前加载项目详情和兼容游戏信息
+/// Resource details loader
+/// Responsible for loading project details and compatible game information before opening the sheet
 enum ResourceDetailLoader {
-    /// 加载普通资源的详情和兼容游戏列表
+    /// Load details of common resources and list of compatible games
     /// - Parameters:
-    ///   - projectId: 项目 ID
-    ///   - gameRepository: 游戏仓库
-    ///   - resourceType: 资源类型
-    /// - Returns: 项目详情和兼容游戏列表的元组，如果加载失败则返回 nil
+    ///   - projectId: project ID
+    ///   - gameRepository: game repository
+    ///   - resourceType: resource type
+    /// - Returns: tuple of project details and list of compatible games, or nil if loading fails
     static func loadProjectDetail(
         projectId: String,
         gameRepository: GameRepository,
@@ -23,7 +23,7 @@ enum ResourceDetailLoader {
             return nil
         }
 
-        // 检测兼容游戏
+        // Detect compatible games
         let compatibleGames = await filterCompatibleGames(
             detail: detail,
             gameRepository: gameRepository,
@@ -34,9 +34,9 @@ enum ResourceDetailLoader {
         return (detail, compatibleGames)
     }
 
-    /// 加载整合包详情
-    /// - Parameter projectId: 项目 ID
-    /// - Returns: 项目详情，如果加载失败则返回 nil
+    /// Load integration package details
+    /// - Parameter projectId: project ID
+    /// - Returns: project details, returns nil if loading fails
     static func loadModPackDetail(projectId: String) async -> ModrinthProjectDetail? {
         guard let detail = await ModrinthService.fetchProjectDetails(id: projectId) else {
             GlobalErrorHandler.shared.handle(GlobalError.resource(

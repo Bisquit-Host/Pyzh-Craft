@@ -23,9 +23,9 @@ struct AddPlayerSheetView: View {
     @FocusState private var isTextFieldFocused: Bool
     @State private var showErrorPopover: Bool = false
 
-    // 标记检查状态
-    @State private var isCheckingFlag: Bool = true  // 初始为true，进入页面时直接显示loading
-    // IP检查结果（仅在列表中没有正版账户且没有标记时使用）
+    // Mark check status
+    @State private var isCheckingFlag: Bool = true  // Initially true, loading will be displayed directly when entering the page
+    // IP check results (only used if there is no genuine account in the list and there is no mark)
     @State private var isForeignIP: Bool = false
 
     var body: some View {
@@ -43,7 +43,7 @@ struct AddPlayerSheetView: View {
                     if isCheckingFlag {
                         ProgressView()
                             .controlSize(.small)
-                            .frame(height: 20.5) // 设置固定高度，与 Picker 保持一致
+                            .frame(height: 20.5) // Set a fixed height consistent with Picker
                             .padding(.trailing, 10)
                     } else {
                         Picker("", selection: $selectedAuthType) {
@@ -51,7 +51,7 @@ struct AddPlayerSheetView: View {
                                 Text(type.displayName).tag(type)
                             }
                         }
-                        .pickerStyle(.menu)  // 用下拉菜单样式
+                        .pickerStyle(.menu)  // Use drop-down menu style
                         .labelStyle(.titleOnly)
                         .fixedSize()
                     }
@@ -79,7 +79,7 @@ struct AddPlayerSheetView: View {
                     }
                     Spacer()
                     if selectedAuthType == .premium {
-                        // 根据认证状态显示不同的按钮
+                        // Show different buttons based on authentication status
                         switch authService.authState {
                         case .notAuthenticated:
                             Button("addplayer.auth.start_login".localized()) {
@@ -129,39 +129,39 @@ struct AddPlayerSheetView: View {
             }
         )
         .task {
-            // 检查标记
+            // Check mark
             await checkPremiumAccountFlag()
         }
         .onDisappear {
-            // 页面关闭后清除所有数据
+            // Clear all data after closing the page
             clearAllData()
         }
     }
 
-    // MARK: - 检查逻辑
+    // MARK: - check logic
 
-    /// 检查是否可以添加离线账户
+    /// Check if you can add an offline account
     private func canAddOfflineAccount() -> Bool {
-        // 检查标记：如果曾经添加过正版账户（标记存在），则可以添加离线账户
+        // Check the mark: If a genuine account has been added (the mark exists), you can add an offline account
         let flagManager = PremiumAccountFlagManager.shared
         if flagManager.hasAddedPremiumAccount() {
             return true
         }
 
-        // 如果没有标记，需要检查IP地理位置
-        // 如果是国外IP，不允许添加离线账户
-        // 如果是国内IP（或检查失败），允许添加离线账户
+        // If there is no tag, you need to check the IP geolocation
+        // If it is a foreign IP, adding an offline account is not allowed
+        // If it is a domestic IP (or the check fails), offline accounts are allowed to be added
         return !isForeignIP
     }
 
-    /// 检查正版账户标记
+    /// Check genuine account mark
     private func checkPremiumAccountFlag() async {
-        // 检查标记
+        // Check mark
         let flagManager = PremiumAccountFlagManager.shared
         let hasFlag = flagManager.hasAddedPremiumAccount()
-        // 如果没有标记，同步检查IP地理位置
+        // If there is no tag, check the IP geolocation simultaneously
         if !hasFlag {
-            // loading状态已经显示，继续显示直到IP检查完成
+            // The loading status has been displayed and will continue to be displayed until the IP check is completed
             let locationService = IPLocationService.shared
             let foreign = await locationService.isForeignIP()
 
@@ -169,53 +169,53 @@ struct AddPlayerSheetView: View {
                 isForeignIP = foreign
                 isCheckingFlag = false
 
-                // selectedAuthType 落在可用选项中
+                // selectedAuthType falls among the available options
                 if !availableAuthTypes.contains(selectedAuthType) {
                     selectedAuthType = .premium
                 }
             }
         } else {
-            // 如果有标记，允许添加离线账户
+            // If marked, allow adding offline accounts
             await MainActor.run {
                 isCheckingFlag = false
             }
         }
     }
 
-    /// 获取可用的认证类型列表
+    /// Get a list of available authentication types
     private var availableAuthTypes: [AccountAuthType] {
-        // 如果可以添加离线账户，显示所有选项
+        // If offline accounts can be added, show all options
         if canAddOfflineAccount() {
             return AccountAuthType.allCases
         }
 
-        // 如果是国外IP且列表中没有正版账户，只显示正版选项
+        // If it is a foreign IP and there is no genuine account in the list, only the genuine option will be displayed
         return [.premium]
     }
 
-    // MARK: - 清除数据
-    /// 清除页面所有数据
+    // MARK: - clear data
+    /// Clear all data on the page
     private func clearAllData() {
-        // 清理玩家名称
+        // Clean up player names
         playerName = ""
         isPlayerNameValid = false
-        // 清理认证状态
+        // Clear authentication status
         authenticatedProfile = nil
         isPremium = false
-        // 重置认证服务状态
+        // Reset authentication service status
         authService.isLoading = false
-        // 重置焦点状态
+        // Reset focus state
         isTextFieldFocused = false
         showErrorPopover = false
-        // 重置认证类型
+        // Reset authentication type
         selectedAuthType = .premium
-        // 重置标记检查状态
+        // Reset tag check status
         isCheckingFlag = true
-        // 重置IP检查结果
+        // Reset IP check results
         isForeignIP = false
     }
 
-    // 说明区
+    // Description area
     private var playerInfoSection: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("addplayer.info.title".localized())
@@ -235,7 +235,7 @@ struct AddPlayerSheetView: View {
         }
     }
 
-    // 输入区
+    // input area
     private var playerNameInputSection: some View {
         VStack(alignment: .leading) {
             Text("addplayer.name.label".localized())
@@ -264,7 +264,7 @@ struct AddPlayerSheetView: View {
         }
     }
 
-    // 根据输入状态和焦点状态决定边框颜色
+    // Determine border color based on input state and focus state
     private var borderColor: Color {
         if isTextFieldFocused {
             .blue
@@ -273,20 +273,20 @@ struct AddPlayerSheetView: View {
         }
     }
 
-    // 获取错误信息（仅在不合法时，不包括空字符串）
+    // Get error information (only when illegal, excluding empty string)
     private var playerNameError: String? {
         let trimmedName = playerName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else { return nil }
         if playerListViewModel.playerExists(name: trimmedName) {
             return "addplayer.name.error.duplicate".localized()
         }
-        // 可添加其他校验规则
+        // Other verification rules can be added
         return nil
     }
 
     private func checkPlayerName(_ name: String) {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        // 基于 playerNameError 和是否为空来设置状态，避免重复检查
+        // Set status based on playerNameError and whether it is empty to avoid repeated checks
         let hasError = playerNameError != nil
         isPlayerNameValid = !trimmedName.isEmpty && !hasError
         showErrorPopover = hasError
@@ -309,7 +309,7 @@ enum AccountAuthType: String, CaseIterable, Identifiable {
     }
 }
 
-// 1. 给 AccountAuthType 扩展一个 symbol 配置
+// 1. Extend a symbol configuration to AccountAuthType
 extension AccountAuthType {
     var symbol: (name: String, mode: SymbolRenderingMode) {
         switch self {

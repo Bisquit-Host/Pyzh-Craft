@@ -17,7 +17,7 @@ struct PyzhCraftApp: App {
     private let notificationCenterDelegate = NotificationCenterDelegate()
 
     init() {
-        // 设置通知中心代理，确保前台时也能展示 Banner
+        // Set up the notification center proxy to ensure that Banner can also be displayed in the foreground
         UNUserNotificationCenter.current().delegate = notificationCenterDelegate
 
         Task {
@@ -41,7 +41,7 @@ struct PyzhCraftApp: App {
                 .errorAlert()
                 .windowOpener()
                 .onAppear {
-                    // 应用启动时清理所有窗口数据
+                    // Clear all window data when app starts
                     WindowDataStore.shared.cleanup(for: .aiChat)
                     WindowDataStore.shared.cleanup(for: .skinPreview)
                 }
@@ -104,13 +104,13 @@ struct PyzhCraftApp: App {
                 .errorAlert()
         }
 
-        // 应用窗口组
+        // Application window group
         appWindowGroups()
             .windowStyle(.titleBar)
             .applyRestorationBehaviorDisabled()
             .windowResizability(.contentSize)
 
-        // 右上角的状态栏(可以显示图标的)
+        // Status bar in the upper right corner (can display icons)
         MenuBarExtra(
             content: {
                 Button("ai.assistant.title".localized()) {

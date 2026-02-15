@@ -79,7 +79,7 @@ struct ModrinthLoaderLibrary: Codable {
     var downloadable: Bool
     var url: URL?
 
-    // 自定义初始化器，用于直接创建实例
+    // Custom initializer for creating instances directly
     init(
         downloads: LibraryDownloads?,
         name: String,

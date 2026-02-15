@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 窗口标识符枚举
+/// window identifier enum
 enum WindowID: String {
     case contributors, acknowledgements, aiChat, javaDownload, skinPreview
 }

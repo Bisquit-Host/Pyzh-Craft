@@ -16,42 +16,42 @@ class ModPackDownloadSheetViewModel: ObservableObject {
     @Published var isLoadingProjectDetails = true
     @Published var lastParsedIndexInfo: ModrinthIndexInfo?
 
-    // 整合包安装进度状态
+    // Integration package installation progress status
     @Published var modPackInstallState = ModPackInstallState()
 
-    // 整合包文件下载进度状态
-    @Published var modPackDownloadProgress: Int64 = 0  // 已下载字节数
-    @Published var modPackTotalSize: Int64 = 0  // 总文件大小
+    // Integration package file download progress status
+    @Published var modPackDownloadProgress: Int64 = 0  // Number of bytes downloaded
+    @Published var modPackTotalSize: Int64 = 0  // Total file size
     // MARK: - Memory Management
-    /// 清理不再需要的索引数据以释放内存
-    /// 在 ModPack 安装完成后调用
+    /// Clean up index data no longer needed to free up memory
+    /// Called after ModPack installation is complete
     func clearParsedIndexInfo() {
         lastParsedIndexInfo = nil
     }
 
-    /// 清理所有整合包导入相关的数据和临时文件
+    /// Clean up all integration package import related data and temporary files
     func cleanupAllData() {
-        // 清理索引数据
+        // Clean index data
         clearParsedIndexInfo()
 
-        // 清理项目详情数据
+        // Clean project details data
         projectDetail = nil
         availableGameVersions = []
         filteredModPackVersions = []
         allModPackVersions = []
 
-        // 清理安装状态
+        // Clean installation status
         modPackInstallState.reset()
 
-        // 清理下载进度
+        // Clean download progress
         modPackDownloadProgress = 0
         modPackTotalSize = 0
 
-        // 清理临时文件
+        // Clean temporary files
         cleanupTempFiles()
     }
 
-    /// 清理临时文件（modpack_download 和 modpack_extraction 目录），在后台执行避免主线程阻塞
+    /// Clean up temporary files (modpack_download and modpack_extraction directories) and execute them in the background to avoid blocking the main thread
     func cleanupTempFiles() {
         Task.detached(priority: .utility) {
             let fm = FileManager.default
@@ -84,7 +84,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
         self.gameRepository = repository
     }
 
-    /// 应用预加载的项目详情，避免在 sheet 内重复加载
+    /// Apply preloaded project details to avoid repeated loading within the sheet
     func applyPreloadedDetail(_ detail: ModrinthProjectDetail) {
         projectDetail = detail
         availableGameVersions = CommonUtil.sortMinecraftVersions(detail.gameVersions)
@@ -125,7 +125,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                     version.gameVersions.contains(gameVersion)
                 }
                 .sorted { version1, version2 in
-                    // 按发布日期排序，最新的在前
+                    // Sort by release date, newest first
                     version1.datePublished > version2.datePublished
                 }
         } catch {
@@ -143,15 +143,15 @@ class ModPackDownloadSheetViewModel: ObservableObject {
         projectDetail: ModrinthProjectDetail
     ) async -> URL? {
         do {
-            // 创建临时目录
+            // Create temporary directory
             let tempDir = try createTempDirectory(for: "modpack_download")
             let savePath = tempDir.appendingPathComponent(file.filename)
 
-            // 重置下载进度
+            // Reset download progress
             modPackDownloadProgress = 0
             modPackTotalSize = 0
 
-            // 使用支持进度回调的下载方法
+            // Use a download method that supports progress callbacks
             do {
                 _ = try await downloadFileWithProgress(
                     urlString: file.url,
@@ -173,13 +173,13 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             return nil
         }
     }
-    /// 下载文件并支持进度回调
+    /// Download files and support progress callbacks
     private func downloadFileWithProgress(
         urlString: String,
         destinationURL: URL,
         expectedSha1: String?
     ) async throws -> URL {
-        // 创建 URL
+        // Create URL
         guard let url = URL(string: urlString) else {
             throw GlobalError.validation(
                 chineseMessage: "无效的下载地址",
@@ -188,7 +188,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             )
         }
 
-        // 应用代理（如果需要）
+        // Apply proxy (if required)
         let finalURL: URL = {
             if let host = url.host,
                host == "github.com" || host == "raw.githubusercontent.com" {
@@ -197,19 +197,19 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             return url
         }()
 
-        // 创建目标目录
+        // Create target directory
         let fileManager = FileManager.default
         try fileManager.createDirectory(
             at: destinationURL.deletingLastPathComponent(),
             withIntermediateDirectories: true
         )
 
-        // 检查文件是否已存在
+        // Check if the file already exists
         if fileManager.fileExists(atPath: destinationURL.path) {
             if let expectedSha1 = expectedSha1, !expectedSha1.isEmpty {
                 let actualSha1 = try DownloadManager.calculateFileSHA1(at: destinationURL)
                 if actualSha1 == expectedSha1 {
-                    // 文件已存在且校验通过，设置进度为完成
+                    // The file already exists and the verification has passed, and the setting progress is completed
                     if let attributes = try? fileManager.attributesOfItem(atPath: destinationURL.path),
                        let fileSize = attributes[.size] as? Int64 {
                         modPackTotalSize = fileSize
@@ -218,7 +218,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                     return destinationURL
                 }
             } else {
-                // 没有 SHA1 校验，直接返回
+                // Without SHA1 verification, return directly
                 if let attributes = try? fileManager.attributesOfItem(atPath: destinationURL.path),
                    let fileSize = attributes[.size] as? Int64 {
                     modPackTotalSize = fileSize
@@ -228,11 +228,11 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             }
         }
 
-        // 获取文件大小
+        // Get file size
         let fileSize = try await getFileSize(from: finalURL)
         modPackTotalSize = fileSize
 
-        // 创建进度跟踪器
+        // Create a progress tracker
         let progressCallback: (Int64, Int64) -> Void = { [weak self] downloadedBytes, totalBytes in
             Task { @MainActor in
                 self?.modPackDownloadProgress = downloadedBytes
@@ -246,7 +246,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             progressCallback: progressCallback
         )
 
-        // 创建 URLSession
+        // Create URLSession
         let config = URLSessionConfiguration.default
         let session = URLSession(
             configuration: config,
@@ -254,13 +254,13 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             delegateQueue: nil
         )
 
-        // 下载文件
+        // Download file
         return try await withCheckedThrowingContinuation { continuation in
             progressTracker.completionHandler = { result in
                 switch result {
                 case .success(let tempURL):
                     do {
-                        // SHA1 校验
+                        // SHA1 verification
                         if let expectedSha1 = expectedSha1, !expectedSha1.isEmpty {
                             let actualSha1 = try DownloadManager.calculateFileSHA1(at: tempURL)
                             if actualSha1 != expectedSha1 {
@@ -272,7 +272,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                             }
                         }
 
-                        // 移动文件到目标位置
+                        // Move files to destination
                         if fileManager.fileExists(atPath: destinationURL.path) {
                             try fileManager.replaceItem(
                                 at: destinationURL,
@@ -299,7 +299,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
         }
     }
 
-    /// 获取远程文件大小
+    /// Get remote file size
     private func getFileSize(from url: URL) async throws -> Int64 {
         var request = URLRequest(url: url)
         request.httpMethod = "HEAD"
@@ -331,25 +331,25 @@ class ModPackDownloadSheetViewModel: ObservableObject {
         gameName: String
     ) async -> String? {
         do {
-            // 验证图标URL
+            // Verify icon URL
             guard let iconUrl = projectDetail.iconUrl else {
                 return nil
             }
 
-            // 获取游戏目录
+            // Get game directory
             let gameDirectory = AppPaths.profileDirectory(gameName: gameName)
 
-            // 确保游戏目录存在
+            // Make sure the game directory exists
             try FileManager.default.createDirectory(
                 at: gameDirectory,
                 withIntermediateDirectories: true
             )
 
-            // 确定图标文件名和路径
+            // Determine icon file name and path
             let iconFileName = "default_game_icon.png"
             let iconPath = gameDirectory.appendingPathComponent(iconFileName)
 
-            // 使用 DownloadManager 下载图标文件（已包含错误处理和临时文件清理）
+            // Use DownloadManager to download icon files (error handling and temporary file cleaning included)
             do {
                 _ = try await DownloadManager.downloadFile(
                     urlString: iconUrl,
@@ -377,7 +377,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
         do {
             let fileExtension = modPackPath.pathExtension.lowercased()
 
-            // 检查文件格式
+            // Check file format
             guard fileExtension == "zip" || fileExtension == "mrpack" else {
                 handleDownloadError(
                     "不支持的整合包格式: \(fileExtension)",
@@ -386,7 +386,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                 return nil
             }
 
-            // 检查源文件是否存在
+            // Check if the source file exists
             let modPackPathString = modPackPath.path
             guard FileManager.default.fileExists(atPath: modPackPathString)
             else {
@@ -397,7 +397,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                 return nil
             }
 
-            // 获取源文件大小
+            // Get source file size
             let sourceAttributes = try FileManager.default.attributesOfItem(
                 atPath: modPackPathString
             )
@@ -408,13 +408,13 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                 return nil
             }
 
-            // 创建临时解压目录
+            // Create a temporary decompression directory
             let tempDir = try createTempDirectory(for: "modpack_extraction")
 
-            // 使用 ZIPFoundation 解压文件
+            // Unzip files using ZIPFoundation
             try FileManager.default.unzipItem(at: modPackPath, to: tempDir)
 
-            // 仅保留关键日志
+            // Keep only critical logs
             return tempDir
         } catch {
             handleDownloadError(
@@ -426,19 +426,19 @@ class ModPackDownloadSheetViewModel: ObservableObject {
     }
 
     func parseModrinthIndex(extractedPath: URL) async -> ModrinthIndexInfo? {
-            // 优先解析 Modrinth 格式
+            // Parse Modrinth format first
         if let modrinthInfo = await parseModrinthIndexInternal(extractedPath: extractedPath) {
             return modrinthInfo
         }
 
-        // 如果不是 Modrinth 格式，尝试解析 CurseForge 格式
+        // If it is not Modrinth format, try to parse CurseForge format
         if let modrinthInfo = await CurseForgeManifestParser.parseManifest(extractedPath: extractedPath) {
-            // 设置 lastParsedIndexInfo 以便显示 mod 加载器进度条
+            // Set lastParsedIndexInfo to show mod loader progress bar
             lastParsedIndexInfo = modrinthInfo
             return modrinthInfo
         }
 
-        // 都不是支持的格式
+        // None of the formats are supported
         handleDownloadError(
             "不支持的整合包格式，请使用 Modrinth (.mrpack) 或 CurseForge (.zip) 格式的整合包",
             "error.resource.unsupported_modpack_format"
@@ -562,8 +562,8 @@ class ModPackDownloadSheetViewModel: ObservableObject {
     private func determineLoaderInfo(
         from dependencies: ModrinthIndexDependencies
     ) -> (type: String, version: String) {
-        // 检查各种加载器，按优先级排序
-        // 优先检查带 -loader 后缀的格式
+        // Check various loaders, sorted by priority
+        // Check formats with -loader suffix first
         if let forgeVersion = dependencies.forgeLoader {
             return ("forge", forgeVersion)
         } else if let fabricVersion = dependencies.fabricLoader {
@@ -574,7 +574,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             return ("neoforge", neoforgeVersion)
         }
 
-        // 检查不带 -loader 后缀的格式
+        // Check format without -loader suffix
         if let forgeVersion = dependencies.forge {
             return ("forge", forgeVersion)
         } else if let fabricVersion = dependencies.fabric {
@@ -585,7 +585,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             return ("neoforge", neoforgeVersion)
         }
 
-        // 默认返回 vanilla
+        // Returns to vanilla by default
         return ("vanilla", "unknown")
     }
 }
@@ -604,23 +604,23 @@ struct ModrinthIndex: Codable {
     }
 }
 
-// MARK: - File Hashes (优化内存使用)
-/// 优化的文件哈希结构，使用结构体替代字典以减少内存占用
-/// 常用哈希（sha1, sha512）作为属性存储，其他哈希存储在可选字典中
+// MARK: - File Hashes (optimize memory usage)
+/// Optimized file hash structure, using structures instead of dictionaries to reduce memory usage
+/// Common hashes (sha1, sha512) are stored as attributes, other hashes are stored in an optional dictionary
 struct ModrinthIndexFileHashes: Codable {
-    /// SHA1 哈希（最常用）
+    /// SHA1 hash (most commonly used)
     let sha1: String?
-    /// SHA512 哈希（次常用）
+    /// SHA512 hash (less commonly used)
     let sha512: String?
-    /// 其他哈希类型（不常用，延迟存储）
+    /// Other hash types (less commonly used, lazy storage)
     let other: [String: String]?
 
-    /// 从字典创建（用于 JSON 解码）
+    /// Created from dictionary (for JSON decoding)
     init(from dict: [String: String]) {
         self.sha1 = dict["sha1"]
         self.sha512 = dict["sha512"]
 
-        // 只存储非标准哈希
+        // Only store non-standard hashes
         var otherDict: [String: String] = [:]
         for (key, value) in dict {
             if key != "sha1" && key != "sha512" {
@@ -630,14 +630,14 @@ struct ModrinthIndexFileHashes: Codable {
         self.other = otherDict.isEmpty ? nil : otherDict
     }
 
-    /// 自定义解码，从 JSON 字典解码
+    /// Custom decoding, decoding from JSON dictionary
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let dict = try container.decode([String: String].self)
         self.init(from: dict)
     }
 
-    /// 编码为字典格式（用于 JSON 编码）
+    /// Encoded into dictionary format (for JSON encoding)
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         var dict: [String: String] = [:]
@@ -655,7 +655,7 @@ struct ModrinthIndexFileHashes: Codable {
         try container.encode(dict)
     }
 
-    /// 字典访问兼容性（向后兼容）
+    /// Dictionary access compatibility (backward compatibility)
     subscript(key: String) -> String? {
         switch key {
         case "sha1": sha1
@@ -672,7 +672,7 @@ struct ModrinthIndexFile: Codable {
     let fileSize: Int
     let env: ModrinthIndexFileEnv?
     let source: FileSource?
-    // CurseForge 特有字段，用于延迟获取文件详情
+    // CurseForge-specific fields, used to delay obtaining file details
     let curseForgeProjectId: Int?
     let curseForgeFileId: Int?
 
@@ -680,7 +680,7 @@ struct ModrinthIndexFile: Codable {
         case path, hashes, downloads, fileSize, env, source, curseForgeProjectId, curseForgeFileId
     }
 
-    // 为兼容性提供默认初始化器
+    // Provide a default initializer for compatibility
     init(
         path: String,
         hashes: ModrinthIndexFileHashes,
@@ -701,7 +701,7 @@ struct ModrinthIndexFile: Codable {
         self.curseForgeFileId = curseForgeFileId
     }
 
-    // 兼容旧版本字典格式的初始化器
+    // Initializers compatible with older versions of dictionary formats
     init(
         path: String,
         hashes: [String: String],
@@ -738,7 +738,7 @@ struct ModrinthIndexDependencies: Codable {
     let fabricLoader: String?
     let quiltLoader: String?
     let neoforgeLoader: String?
-    // 添加不带 -loader 后缀的属性
+    // Add properties without -loader suffix
     let forge: String?
     let fabric: String?
     let quilt: String?
@@ -841,20 +841,20 @@ class ModPackInstallState: ObservableObject {
     ) {
         self.filesTotal = filesTotal
         self.dependenciesTotal = dependenciesTotal
-        // 只有在 overrides 还没有开始时才设置 total，避免覆盖已完成的进度
+        // Only set total if overrides have not yet started to avoid overwriting completed progress
         if self.overridesTotal == 0 {
             self.overridesTotal = overridesTotal
         }
         self.isInstalling = true
         self.filesProgress = 0
         self.dependenciesProgress = 0
-        // 只有在 overrides 还没有完成时才重置进度，保留已完成的 overrides 进度
+        // Only reset progress if overrides have not completed yet, retain progress of completed overrides
         if self.overridesCompleted == 0 {
             self.overridesProgress = 0
         }
         self.filesCompleted = 0
         self.dependenciesCompleted = 0
-        // 保留已完成的 overrides 进度，不重置
+        // Keep completed overrides progress without resetting it
     }
 
     func updateFilesProgress(fileName: String, completed: Int, total: Int) {

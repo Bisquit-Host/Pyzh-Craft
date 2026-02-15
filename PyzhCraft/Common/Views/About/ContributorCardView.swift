@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// GitHub 贡献者卡片视图
+/// GitHub contributor card view
 struct ContributorCardView: View {
     let contributor: GitHubContributor
     let isTopContributor: Bool
@@ -21,10 +21,10 @@ struct ContributorCardView: View {
 
     private var contributorContent: some View {
         HStack(spacing: 12) {
-            // 头像
+            // avatar
             ContributorAvatarView(avatarUrl: contributor.avatarUrl)
 
-            // 信息
+            // information
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text(contributor.login)
@@ -43,10 +43,10 @@ struct ContributorCardView: View {
                 }
 
                 HStack(spacing: 4) {
-                    // 代码标签（统一标记为代码贡献者）
+                    // Code tags (uniformly marked as code contributors)
                     ContributionTagView(contribution: .code)
 
-                    // 贡献次数
+                    // Number of contributions
                     Text(contributionsText)
                         .font(.caption)
                         .foregroundColor(.secondary)
@@ -55,7 +55,7 @@ struct ContributorCardView: View {
 
             Spacer()
 
-            // 箭头
+            // arrow
             Image("github-mark")
                 .renderingMode(.template)
                 .resizable()

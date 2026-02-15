@@ -1,6 +1,6 @@
 import Foundation
 
-/// MultiMC/PrismLauncher 实例解析器
+/// MultiMC/PrismLauncher instance parser
 struct MultiMCInstanceParser: LauncherInstanceParser {
     let launcherType: ImportLauncherType
 
@@ -14,7 +14,7 @@ struct MultiMCInstanceParser: LauncherInstanceParser {
             return false
         }
 
-        // 验证文件可以解析
+        // Verify file can be parsed
         do {
             _ = try parseInstanceCfg(at: instanceCfgPath)
             _ = try parseMMCPack(at: mmcPackPath)
@@ -28,17 +28,17 @@ struct MultiMCInstanceParser: LauncherInstanceParser {
         let instanceCfgPath = instancePath.appendingPathComponent("instance.cfg")
         let mmcPackPath = instancePath.appendingPathComponent("mmc-pack.json")
 
-        // 解析配置文件
+        // Parse configuration file
         let instanceCfg = try parseInstanceCfg(at: instanceCfgPath)
         let mmcPack = try parseMMCPack(at: mmcPackPath)
 
-        // 提取游戏版本
+        // Extract game version
         let gameVersion = extractGameVersion(from: mmcPack)
 
-        // 提取 Mod 加载器信息
+        // Extract Mod Loader Information
         let (modLoader, modLoaderVersion) = extractModLoader(from: mmcPack)
 
-        // 提取游戏名称
+        // Extract game name
         let gameName = instanceCfg["name"] ?? instancePath.lastPathComponent
 
         return ImportInstanceInfo(
@@ -55,7 +55,7 @@ struct MultiMCInstanceParser: LauncherInstanceParser {
 
     // MARK: - Private Methods
 
-    /// 解析 instance.cfg 文件（INI 格式）
+    /// Parse instance.cfg file (INI format)
     private func parseInstanceCfg(at path: URL) throws -> [String: String] {
         let content = try String(contentsOf: path, encoding: .utf8)
         var config: [String: String] = [:]
@@ -76,13 +76,13 @@ struct MultiMCInstanceParser: LauncherInstanceParser {
         return config
     }
 
-    /// 解析 mmc-pack.json 文件
+    /// Parse mmc-pack.json file
     private func parseMMCPack(at path: URL) throws -> MMCPack {
         let data = try Data(contentsOf: path)
         return try JSONDecoder().decode(MMCPack.self, from: data)
     }
 
-    /// 从 mmc-pack.json 提取游戏版本
+    /// Extract game version from mmc-pack.json
     private func extractGameVersion(from pack: MMCPack) -> String {
         for component in pack.components where component.uid == "net.minecraft" {
             return component.version
@@ -90,7 +90,7 @@ struct MultiMCInstanceParser: LauncherInstanceParser {
         return ""
     }
 
-    /// 从 mmc-pack.json 提取 Mod 加载器信息
+    /// Extract Mod Loader information from mmc-pack.json
     private func extractModLoader(from pack: MMCPack) -> (loader: String, version: String) {
         for component in pack.components {
             switch component.uid {

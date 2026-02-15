@@ -1,8 +1,8 @@
 import Foundation
 import SQLite3
 
-/// Mod 缓存数据库存储层
-/// 使用 SQLite 存储 mod.json 数据（hash -> JSON BLOB）
+/// Mod cache database storage layer
+/// Use SQLite to store mod.json data (hash -> JSON BLOB)
 class ModCacheDatabase {
     // MARK: - Properties
 
@@ -11,22 +11,22 @@ class ModCacheDatabase {
 
     // MARK: - Initialization
 
-    /// - Parameter dbPath: 数据库文件路径
+    /// - Parameter dbPath: database file path
     init(dbPath: String) {
         self.db = SQLiteDatabase(path: dbPath)
     }
 
     // MARK: - Database Setup
 
-    /// 打开数据库连接并创建表（如果不存在）
-    /// - Throws: GlobalError 当操作失败时
+    /// Open a database connection and create the table if it does not exist
+    /// - Throws: GlobalError when the operation fails
     func open() throws {
         try db.open()
         try createTable()
     }
 
-    /// 创建 mod 缓存表
-    /// 用于存储 mod.json 数据（hash -> JSON BLOB）
+    /// Create mod cache table
+    /// Used to store mod.json data (hash -> JSON BLOB)
     private func createTable() throws {
         let createTableSQL = """
         CREATE TABLE IF NOT EXISTS \(tableName) (
@@ -39,7 +39,7 @@ class ModCacheDatabase {
 
         try db.execute(createTableSQL)
 
-        // 创建索引（如果不存在）
+        // Create index if it does not exist
         let createIndexSQL = """
         CREATE INDEX IF NOT EXISTS idx_mod_cache_updated_at ON \(tableName)(updated_at);
         """
@@ -48,18 +48,18 @@ class ModCacheDatabase {
         Logger.shared.debug("mod 缓存表已创建或已存在")
     }
 
-    /// 关闭数据库连接
+    /// Close database connection
     func close() {
         db.close()
     }
 
     // MARK: - CRUD Operations
 
-    /// 保存 mod 缓存数据
+    /// Save mod cache data
     /// - Parameters:
-    ///   - hash: mod 文件的 hash 值
-    ///   - jsonData: JSON 数据的 Data（原始 JSON bytes）
-    /// - Throws: GlobalError 当操作失败时
+    ///   - hash: the hash value of the mod file
+    ///   - jsonData: Data of JSON data (original JSON bytes)
+    /// - Throws: GlobalError when the operation fails
     func saveModCache(hash: String, jsonData: Data) throws {
         try db.transaction {
             let now = Date()
@@ -92,9 +92,9 @@ class ModCacheDatabase {
         }
     }
 
-    /// 批量保存 mod 缓存数据
-    /// - Parameter data: hash -> JSON Data 的字典
-    /// - Throws: GlobalError 当操作失败时
+    /// Save mod cache data in batches
+    /// - Parameter data: hash -> dictionary of JSON Data
+    /// - Throws: GlobalError when the operation fails
     func saveModCaches(_ data: [String: Data]) throws {
         try db.transaction {
             let now = Date()
@@ -130,10 +130,10 @@ class ModCacheDatabase {
         }
     }
 
-    /// 获取 mod 缓存数据
-    /// - Parameter hash: mod 文件的 hash 值
-    /// - Returns: JSON 数据的 Data（原始 JSON bytes），如果不存在则返回 nil
-    /// - Throws: GlobalError 当操作失败时
+    /// Get mod cache data
+    /// - Parameter hash: the hash value of the mod file
+    /// - Returns: Data of JSON data (original JSON bytes), or nil if it does not exist
+    /// - Throws: GlobalError when the operation fails
     func getModCache(hash: String) throws -> Data? {
         let sql = "SELECT json_data FROM \(tableName) WHERE hash = ? LIMIT 1"
 
@@ -150,9 +150,9 @@ class ModCacheDatabase {
         return jsonData
     }
 
-    /// 获取所有 mod 缓存数据
-    /// - Returns: hash -> JSON Data 的字典
-    /// - Throws: GlobalError 当操作失败时
+    /// Get all mod cache data
+    /// - Returns: hash -> dictionary of JSON Data
+    /// - Throws: GlobalError when the operation fails
     func getAllModCaches() throws -> [String: Data] {
         let sql = "SELECT hash, json_data FROM \(tableName)"
 
@@ -172,9 +172,9 @@ class ModCacheDatabase {
         return result
     }
 
-    /// 删除 mod 缓存数据
-    /// - Parameter hash: mod 文件的 hash 值
-    /// - Throws: GlobalError 当操作失败时
+    /// Delete mod cache data
+    /// - Parameter hash: the hash value of the mod file
+    /// - Throws: GlobalError when the operation fails
     func deleteModCache(hash: String) throws {
         try db.transaction {
             let sql = "DELETE FROM \(tableName) WHERE hash = ?"
@@ -195,9 +195,9 @@ class ModCacheDatabase {
         }
     }
 
-    /// 批量删除 mod 缓存数据
-    /// - Parameter hashes: 要删除的 hash 数组
-    /// - Throws: GlobalError 当操作失败时
+    /// Delete mod cache data in batches
+    /// - Parameter hashes: array of hashes to be deleted
+    /// - Throws: GlobalError when the operation fails
     func deleteModCaches(hashes: [String]) throws {
         try db.transaction {
             let sql = "DELETE FROM \(tableName) WHERE hash = ?"
@@ -221,8 +221,8 @@ class ModCacheDatabase {
         }
     }
 
-    /// 清空所有 mod 缓存数据
-    /// - Throws: GlobalError 当操作失败时
+    /// Clear all mod cache data
+    /// - Throws: GlobalError when the operation fails
     func clearAllModCaches() throws {
         try db.transaction {
             let sql = "DELETE FROM \(tableName)"
@@ -230,9 +230,9 @@ class ModCacheDatabase {
         }
     }
 
-    /// - Parameter hash: mod 文件的 hash 值
-    /// - Returns: 是否存在
-    /// - Throws: GlobalError 当操作失败时
+    /// - Parameter hash: the hash value of the mod file
+    /// - Returns: Does it exist?
+    /// - Throws: GlobalError when the operation fails
     func hasModCache(hash: String) throws -> Bool {
         let sql = "SELECT 1 FROM \(tableName) WHERE hash = ? LIMIT 1"
 

@@ -47,27 +47,27 @@ struct Arguments: Codable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        // 处理 game 参数，可能不存在
+        // Handle the game parameter, which may not exist
         if container.contains(.game) {
             let gameArgs = try container.decode([ArgumentValue].self, forKey: .game)
             game = gameArgs.compactMap { arg in
                 if case let .string(value) = arg {
                     return value
                 }
-                return nil // 丢弃 objectWithRules
+                return nil // discard objectWithRules
             }
         } else {
             game = nil
         }
 
-        // 处理 jvm 参数，可能不存在
+        // Handle jvm parameters, which may not exist
         if container.contains(.jvm) {
             let jvmArgs = try container.decode([ArgumentValue].self, forKey: .jvm)
             jvm = jvmArgs.compactMap { arg in
                 if case let .string(value) = arg {
                     return value
                 }
-                return nil // 丢弃 objectWithRules
+                return nil // discard objectWithRules
             }
         } else {
             jvm = nil
@@ -228,7 +228,7 @@ struct LibraryArtifact: Codable {
     let size: Int
     var url: URL?
 
-    // 自定义初始化器，用于直接创建实例
+    // Custom initializer for creating instances directly
     init(path: String?, sha1: String, size: Int, url: URL?) {
         self.path = path
         self.sha1 = sha1
@@ -239,12 +239,12 @@ struct LibraryArtifact: Codable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        // path 字段可能不存在（特别是对于 LWJGL 原生库）
+        // path field may not exist (especially for LWJGL native library)
         path = try container.decodeIfPresent(String.self, forKey: .path)
         sha1 = try container.decode(String.self, forKey: .sha1)
         size = try container.decode(Int.self, forKey: .size)
 
-        // 处理 URL，允许为空字符串
+        // Handles URLs, allowing empty strings
         let urlString = try container.decode(String.self, forKey: .url)
         if urlString.isEmpty {
             url = nil

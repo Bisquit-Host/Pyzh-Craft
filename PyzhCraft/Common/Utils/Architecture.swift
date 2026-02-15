@@ -1,10 +1,10 @@
 import Foundation
 
-/// 统一的架构辅助工具，集中处理编译期架构分支
+/// Unified architecture auxiliary tools to centrally handle compile-time architecture branches
 enum Architecture {
     case arm64, x86_64
 
-    /// 当前编译架构
+    /// Current compilation architecture
     static let current: Architecture = {
         #if arch(arm64)
         return .arm64
@@ -13,7 +13,7 @@ enum Architecture {
         #endif
     }()
 
-    /// Java 相关架构字符串
+    /// Java related schema strings
     var javaArch: String {
         switch self {
         case .arm64: "aarch64"
@@ -21,7 +21,7 @@ enum Architecture {
         }
     }
 
-    /// Sparkle / 通用架构字符串
+    /// Sparkle / Common Schema Strings
     var sparkleArch: String {
         switch self {
         case .arm64: "arm64"
@@ -29,7 +29,7 @@ enum Architecture {
         }
     }
 
-    /// 用于 Java Runtime API 的平台标识
+    /// Platform ID for Java Runtime API
     var macPlatformId: String {
         switch self {
         case .arm64: "mac-os-arm64"
@@ -37,8 +37,8 @@ enum Architecture {
         }
     }
 
-    /// 当前架构对应的 macOS 标识符列表（按优先级）
-    /// - Parameter isLowVersion: 是否为低版本（Minecraft < 1.19）
+    /// List of macOS identifiers for the current architecture (by priority)
+    /// - Parameter isLowVersion: Whether it is a low version (Minecraft < 1.19)
     func macOSIdentifiers(isLowVersion: Bool) -> [String] {
         switch self {
         case .arm64:

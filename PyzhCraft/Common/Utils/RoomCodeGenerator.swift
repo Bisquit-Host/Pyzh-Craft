@@ -1,17 +1,17 @@
 import Foundation
 
-/// 房间码生成器
-/// 生成符合 U/XXXX-XXXX-XXXX-XXXX 格式的房间码
-/// 使用 34 进制编码（0-9, A-Z，排除 I 和 O）
-/// 基于 Terracotta 的房间号生成机制
+/// room code generator
+/// Generate room codes in the format U/XXXX-XXXX-XXXX-XXXX
+/// Use hexadecimal encoding (0-9, A-Z, excluding I and O)
+/// Room number generation mechanism based on Terracotta
 enum RoomCodeGenerator {
     // MARK: - Constants
 
-    /// 字符集：34 个字符（0-9, A-Z，排除 I 和 O）
-    /// 字符索引对应：0-33
+    /// Character set: 34 characters (0-9, A-Z, excluding I and O)
+    /// Character index corresponding: 0-33
     private static let chars: [Character] = Array("0123456789ABCDEFGHJKLMNPQRSTUVWXYZ")
 
-    /// 字符到索引的映射（0-33）
+    /// Character to index mapping (0-33)
     private static let charToIndex: [Character: Int] = {
         var map: [Character: Int] = [:]
         for (index, char) in chars.enumerated() {
@@ -20,11 +20,11 @@ enum RoomCodeGenerator {
         return map
     }()
 
-    /// 字符查找函数（支持字符映射：I -> 1, O -> 0）
-    /// - Parameter char: 输入字符
-    /// - Returns: 字符索引（0-33），如果字符无效则返回 nil
+    /// Character search function (supports character mapping: I -> 1, O -> 0)
+    /// - Parameter char: input character
+    /// - Returns: character index (0-33), returns nil if the character is invalid
     private static func lookupChar(_ char: Character) -> Int? {
-        // 字符映射：I -> 1, O -> 0
+        // Character mapping: I -> 1, O -> 0
         let normalizedChar: Character
         switch char {
         case "I":
@@ -40,37 +40,37 @@ enum RoomCodeGenerator {
 
     // MARK: - Public Methods
 
-    /// 生成一个新的房间码
-    /// - Returns: 符合格式的房间码（U/XXXX-XXXX-XXXX-XXXX）
+    /// Generate a new room code
+    /// - Returns: Room code that matches the format (U/XXXX-XXXX-XXXX-XXXX)
     static func generate() -> String {
-        // 生成 16 个随机字符索引（每个在 [0, 33] 范围内）
+        // Generate 16 random character indices (each in the range [0, 33])
         var charIndices = [Int]()
         for _ in 0..<16 {
             charIndices.append(Int.random(in: 0..<34))
         }
 
-        // 步骤 3: 计算当前值的模 7
+        // Step 3: Calculate the current value modulo 7
         var mod7Value = 0
         for charIndex in charIndices {
-            // 使用模运算的性质：(a * 34 + b) % 7 = ((a % 7) * (34 % 7) + b) % 7
+            // Using the properties of modular arithmetic: (a * 34 + b) % 7 = ((a % 7) * (34 % 7) + b) % 7
             // 34 % 7 = 6
             mod7Value = (mod7Value * 6 + charIndex) % 7
         }
 
-        // 步骤 4: 调整为 7 的倍数（调整最后一个字符）
+        // Step 4: Adjust to a multiple of 7 (adjust the last character)
         if mod7Value != 0 {
-            // 模7值计算：mod7Value = (baseMod * 6 + lastCharIndex) % 7
-            // 其中 baseMod 是前15个字符的贡献
-            // 目标：0 = (baseMod * 6 + newLastChar) % 7
-            // 所以：newLastChar ≡ -baseMod * 6 (mod 7)
-            // 而：baseMod * 6 ≡ mod7Value - lastCharIndex (mod 7)
-            // 因此：newLastChar ≡ -(mod7Value - lastCharIndex) ≡ lastCharIndex - mod7Value (mod 7)
+            // Modulo 7 value calculation: mod7Value = (baseMod * 6 + lastCharIndex) % 7
+            // where baseMod is the contribution of the first 15 characters
+            // Target: 0 = (baseMod * 6 + newLastChar) % 7
+            // So: newLastChar ≡ -baseMod * 6 (mod 7)
+            // Also: baseMod * 6 ≡ mod7Value - lastCharIndex (mod 7)
+            // Therefore: newLastChar ≡ -(mod7Value - lastCharIndex) ≡ lastCharIndex - mod7Value (mod 7)
 
             let lastCharIndex = charIndices[15]
             let targetLastCharMod = (lastCharIndex - mod7Value + 7) % 7
 
-            // 在 [0, 33] 范围内找到一个值，其模 7 等于 targetLastCharMod
-            // 并且尽可能接近原来的值
+            // Find a value in the range [0, 33] modulo 7 equal to targetLastCharMod
+            // and as close as possible to the original value
             var bestNewLastChar = lastCharIndex
             var bestDistance = 34
 
@@ -85,7 +85,7 @@ enum RoomCodeGenerator {
             charIndices[15] = bestNewLastChar
         }
 
-        // 步骤 5: 编码为字符串
+        // Step 5: Encode to string
         var code = "U/"
         var networkName = "scaffolding-mc-"
         var networkSecret = ""
@@ -93,20 +93,20 @@ enum RoomCodeGenerator {
         for i in 0..<16 {
             let char = chars[charIndices[i]]
 
-            // 房间号编码（添加分隔符）
+            // Room number encoding (add separator)
             if i == 4 || i == 8 || i == 12 {
                 code.append("-")
             }
             code.append(char)
 
-            // 网络名称编码（前 8 个字符）
+            // Network name encoding (first 8 characters)
             if i < 8 {
                 if i == 4 {
                     networkName.append("-")
                 }
                 networkName.append(char)
             }
-            // 网络密钥编码（后 8 个字符）
+            // Network key encoding (last 8 characters)
             else {
                 if i == 12 {
                     networkSecret.append("-")
@@ -119,51 +119,51 @@ enum RoomCodeGenerator {
         return code
     }
 
-    /// 验证房间码是否有效
-    /// - Parameter roomCode: 房间码字符串（格式：U/XXXX-XXXX-XXXX-XXXX）
-    /// - Returns: 是否有效
+    /// Verify that the room code is valid
+    /// - Parameter roomCode: room code string (format: U/XXXX-XXXX-XXXX-XXXX)
+    /// - Returns: Is it valid?
     static func validate(_ roomCode: String) -> Bool {
         parse(roomCode) != nil
     }
 
-    /// 解析房间码字符串
-    /// 支持滑动窗口搜索和字符映射（I -> 1, O -> 0）
-    /// - Parameter code: 房间码字符串
-    /// - Returns: 解析后的房间码字符串（规范化格式），如果无效则返回 nil
+    /// Parse room code string
+    /// Support sliding window search and character mapping (I -> 1, O -> 0)
+    /// - Parameter code: room code string
+    /// - Returns: Parsed room code string (normalized format), if invalid, returns nil
     static func parse(_ code: String) -> String? {
-        // 步骤 1: 规范化输入（转换为大写）
+        // Step 1: Normalize input (convert to uppercase)
         let normalizedCode = code.uppercased()
         let codeChars = Array(normalizedCode)
 
-        // 步骤 2: 长度检查
-        // 房间号格式：U/XXXX-XXXX-XXXX-XXXX
-        // 前缀：U/ = 2 字符
-        // 主体：XXXX-XXXX-XXXX-XXXX = 16 字符 + 3 分隔符 = 19 字符
-        // 总计：21 字符
+        // Step 2: Length check
+        // Room number format: U/XXXX-XXXX-XXXX-XXXX
+        // Prefix: U/ = 2 characters
+        // Body: XXXX-XXXX-XXXX-XXXX = 16 characters + 3 separators = 19 characters
+        // Total: 21 characters
         let targetLength = 21
         guard codeChars.count >= targetLength else {
             return nil
         }
 
-        // 步骤 3: 滑动窗口查找
+        // Step 3: Sliding window search
         for startIndex in 0...(codeChars.count - targetLength) {
             let window = Array(codeChars[startIndex..<(startIndex + targetLength)])
 
-            // 步骤 4: 前缀验证
+            // Step 4: Prefix verification
             guard window[0] == "U", window[1] == "/" else {
                 continue
             }
 
-            // 步骤 5: 解码和校验
-            // 跳过前缀 "U/"（2 个字符），处理主体部分
-            // 主体部分结构：XXXX-XXXX-XXXX-XXXX
-            // 窗口位置：0-1(U/), 2-5(字符), 6(分隔符), 7-10(字符), 11(分隔符), 12-15(字符), 16(分隔符), 17-20(字符)
-            // 分隔符位置（窗口索引）：6, 11, 16
-            // 字符位置（窗口索引）：2-5, 7-10, 12-15, 17-20
+            // Step 5: Decoding and verification
+            // Skip the prefix "U/" (2 characters) and process the body
+            // Main part structure: XXXX-XXXX-XXXX-XXXX
+            // Window position: 0-1(U/), 2-5(Character), 6(Separator), 7-10(Character), 11(Separator), 12-15(Character), 16(Separator), 17-20(Character)
+            // Separator position (window index): 6, 11, 16
+            // Character position (window index): 2-5, 7-10, 12-15, 17-20
             let separatorPositions = [6, 11, 16]
             let charPositions = [2, 3, 4, 5, 7, 8, 9, 10, 12, 13, 14, 15, 17, 18, 19, 20]
 
-            // 检查分隔符
+            // Check delimiter
             var separatorsValid = true
             for sepPos in separatorPositions {
                 if sepPos >= window.count || window[sepPos] != "-" {
@@ -173,10 +173,10 @@ enum RoomCodeGenerator {
             }
 
             guard separatorsValid else {
-                continue  // 分隔符位置错误，尝试下一个窗口
+                continue  // Wrong separator position, try next window
             }
 
-            // 提取字符并解码
+            // Extract characters and decode
             var charIndices = [Int]()
             var charsValid = true
             for charPos in charPositions {
@@ -194,11 +194,11 @@ enum RoomCodeGenerator {
             }
 
             guard charsValid && charIndices.count == 16 else {
-                continue  // 字符无效或数量不足，尝试下一个窗口
+                continue  // Invalid or insufficient number of characters, try next window
             }
 
-            // 步骤 6: 数学校验（检查是否为 7 的倍数）
-            // 使用模运算的性质：(a * 34 + b) % 7 = ((a % 7) * (34 % 7) + b) % 7
+            // Step 6: Mathematical verification (check if it is a multiple of 7)
+            // Using the properties of modular arithmetic: (a * 34 + b) % 7 = ((a % 7) * (34 % 7) + b) % 7
             // 34 % 7 = 6
             var mod7Value = 0
             for charIndex in charIndices {
@@ -206,7 +206,7 @@ enum RoomCodeGenerator {
             }
 
             if mod7Value == 0 {
-                // 步骤 7: 重新编码（规范化）
+                // Step 7: Recode (normalize)
                 var normalizedRoomCode = "U/"
                 for i in 0..<16 {
                     if i == 4 || i == 8 || i == 12 {
@@ -221,9 +221,9 @@ enum RoomCodeGenerator {
         return nil
     }
 
-    /// 从房间码提取网络名称和密钥
-    /// - Parameter roomCode: 房间码（格式：U/XXXX-XXXX-XXXX-XXXX）
-    /// - Returns: (网络名称, 网络密钥)，如果格式无效则返回 nil
+    /// Extract network name and key from room code
+    /// - Parameter roomCode: room code (format: U/XXXX-XXXX-XXXX-XXXX)
+    /// - Returns: (network name, network key), or nil if the format is invalid
     static func extractNetworkInfo(from roomCode: String) -> (networkName: String, networkSecret: String)? {
         guard let normalizedCode = parse(roomCode) else {
             return nil

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 贡献类型标签视图
+/// Contribution type label view
 struct ContributionTagView: View {
     let contribution: Contribution
 

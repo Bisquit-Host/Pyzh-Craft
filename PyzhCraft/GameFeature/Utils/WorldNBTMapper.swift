@@ -1,10 +1,10 @@
 import Foundation
 
-/// 与 Minecraft 世界存档（level.dat / world_gen_settings.dat 等）相关的通用 NBT 解析工具
+/// Generic NBT parsing tool related to Minecraft world saves (level.dat / world_gen_settings.dat etc.)
 enum WorldNBTMapper {
-    // MARK: - 基本数值/布尔读取
+    // MARK: - Basic numerical/boolean reading
 
-    /// 尝试将任意 NBT 数值类型统一转换为 Int64，兼容 Int/Int8/Int16/Int32/UInt 等
+    /// Try to uniformly convert any NBT numerical type to Int64, compatible with Int/Int8/Int16/Int32/UInt, etc
     static func readInt64(_ any: Any?) -> Int64? {
         if let v = any as? Int64 { return v }
         if let v = any as? Int { return Int64(v) }
@@ -18,7 +18,7 @@ enum WorldNBTMapper {
         return nil
     }
 
-    /// 将 NBT 中的数值或布尔统一转换为 Bool（非 0 即 true），无法解析时返回 false
+    /// Convert the numeric value or Boolean in NBT to Bool (non-0 means true), and return false if it cannot be parsed
     static func readBoolFlag(_ any: Any?) -> Bool {
         guard let any else { return false }
         if let b = any as? Bool { return b }
@@ -26,7 +26,7 @@ enum WorldNBTMapper {
         return false
     }
 
-    // MARK: - 游戏模式 / 难度
+    // MARK: - Game Mode / Difficulty
 
     static func mapGameMode(_ value: Int) -> String {
         switch value {
@@ -48,7 +48,7 @@ enum WorldNBTMapper {
         }
     }
 
-    /// 将新版 difficulty_settings.difficulty（字符串）映射为本地化文本
+    /// Map new difficulty_settings.difficulty (string) to localized text
     static func mapDifficultyString(_ value: String) -> String {
         switch value.lowercased() {
         case "peaceful": "saveinfo.world.difficulty.peaceful".localized()
@@ -59,19 +59,19 @@ enum WorldNBTMapper {
         }
     }
 
-    // MARK: - 种子读取
+    // MARK: - seed reading
 
-    /// 从 level.dat 的 Data 标签和可选的 world 路径中解析种子
-    /// - 优先 RandomSeed
-    /// - 其次 WorldGenSettings/worldGenSettings.seed
-    /// - 最后（如有 worldPath）尝试 data/minecraft/world_gen_settings.dat -> data.seed
+    /// Parse the seed from the Data tag of level.dat and the optional world path
+    /// - Prioritize RandomSeed
+    /// - Then WorldGenSettings/worldGenSettings.seed
+    /// - Finally (if there is a worldPath) try data/minecraft/world_gen_settings.dat -> data.seed
     static func readSeed(from dataTag: [String: Any], worldPath: URL?) -> Int64? {
-        // 旧版：优先从 RandomSeed 读取
+        // Old version: read from RandomSeed first
         if let seed = readInt64(dataTag["RandomSeed"]) {
             return seed
         }
 
-        // 其次：level.dat 中 WorldGenSettings / worldGenSettings.seed
+        // Then: WorldGenSettings / worldGenSettings.seed in level.dat
         if let worldGenSettings = dataTag["WorldGenSettings"] as? [String: Any],
            let seed = readInt64(worldGenSettings["seed"]) {
             return seed
@@ -81,12 +81,12 @@ enum WorldNBTMapper {
             return seed
         }
 
-        // 新版：world_gen_settings.dat
+        // New version: world_gen_settings.dat
         guard let worldPath else { return nil }
         return readSeedFromWorldGenSettings(worldPath: worldPath)
     }
 
-    /// 从 26+ 新版存档的 world_gen_settings.dat 读取 seed（路径: data/minecraft/world_gen_settings.dat）
+    /// Read the seed from world_gen_settings.dat in the 26+ new version archive (path: data/minecraft/world_gen_settings.dat)
     private static func readSeedFromWorldGenSettings(worldPath: URL) -> Int64? {
         let fm = FileManager.default
         let wgsPath = worldPath
@@ -98,7 +98,7 @@ enum WorldNBTMapper {
             let raw = try Data(contentsOf: wgsPath)
             let parser = NBTParser(data: raw)
             let nbt = try parser.parse()
-            // 新版文件结构：root = { DataVersion: ..., data: { seed: ... } }
+            // New version file structure: root = { DataVersion: ..., data: { seed: ... } }
             if let dataTag = nbt["data"] as? [String: Any],
                let seed = readInt64(dataTag["seed"]) {
                 return seed

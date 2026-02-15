@@ -1,6 +1,6 @@
 import Foundation
 
-/// XMCL 实例解析器
+/// XMCL instance parser
 struct XMCLInstanceParser: LauncherInstanceParser {
     let launcherType: ImportLauncherType = .xmcl
 
@@ -12,7 +12,7 @@ struct XMCLInstanceParser: LauncherInstanceParser {
             return false
         }
 
-        // 验证 JSON 文件可以解析
+        // Verify that the JSON file can be parsed
         do {
             _ = try parseInstanceJson(at: instanceJsonPath)
             return true
@@ -25,13 +25,13 @@ struct XMCLInstanceParser: LauncherInstanceParser {
         let instanceJsonPath = instancePath.appendingPathComponent("instance.json")
         let instance = try parseInstanceJson(at: instanceJsonPath)
 
-        // 提取游戏版本
+        // Extract game version
         let gameVersion = instance.runtime.minecraft
 
-        // 提取 Mod 加载器信息
+        // Extract Mod Loader Information
         let (modLoader, modLoaderVersion) = extractModLoader(from: instance)
 
-        // 提取游戏名称
+        // Extract game name
         let gameName = instance.name.isEmpty ? "XMCL-\(instancePath.lastPathComponent)" : instance.name
 
         return ImportInstanceInfo(
@@ -48,17 +48,17 @@ struct XMCLInstanceParser: LauncherInstanceParser {
 
     // MARK: - Private Methods
 
-    /// 解析 instance.json 文件
+    /// Parse instance.json file
     private func parseInstanceJson(at path: URL) throws -> XMCLInstance {
         let data = try Data(contentsOf: path)
         return try JSONDecoder().decode(XMCLInstance.self, from: data)
     }
 
-    /// 提取 Mod Loader 信息
+    /// Extract Mod Loader information
     private func extractModLoader(from instance: XMCLInstance) -> (loader: String, version: String) {
         let runtime = instance.runtime
 
-        // 按优先级检查：Forge -> NeoForged -> Fabric -> Quilt -> Vanilla
+        // Check by priority: Forge -> NeoForged -> Fabric -> Quilt -> Vanilla
         if !runtime.forge.isEmpty {
             return ("forge", runtime.forge)
         } else if !runtime.neoForged.isEmpty {
@@ -107,5 +107,5 @@ private struct XMCLRuntime: Codable {
 }
 
 private struct XMCLServer: Codable {
-    // 服务器信息，如果需要可以添加字段
+    // Server information, add fields if needed
 }

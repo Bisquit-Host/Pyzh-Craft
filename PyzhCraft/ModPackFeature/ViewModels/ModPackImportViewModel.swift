@@ -33,7 +33,7 @@ class ModPackImportViewModel: BaseGameFormViewModel {
         self.gameRepository = gameRepository
         modPackViewModel.setGameRepository(gameRepository)
 
-        // 如果有预选文件，启动处理
+        // If there are preselected files, start processing
         if selectedModPackFile != nil && isProcessingModPack {
             Task {
                 await parseSelectedModPack()
@@ -52,20 +52,20 @@ class ModPackImportViewModel: BaseGameFormViewModel {
 
     override func handleCancel() {
         if computeIsDownloading() {
-            // 停止下载任务
+            // Stop download task
             downloadTask?.cancel()
             downloadTask = nil
 
-            // 取消下载状态
+            // Cancel download status
             gameSetupService.downloadState.cancel()
-            // ModPackInstallState没有专门的cancel方法，直接重置状态
+            // ModPackInstallState does not have a dedicated cancel method and directly resets the state
             modPackViewModel.modPackInstallState.reset()
 
-            // 停止处理状态
+            // Stop processing status
             isProcessingModPack = false
             onProcessingStateChanged(false)
 
-            // 执行取消后的清理工作
+            // Perform post-cancellation cleanup
             Task {
                 await performCancelCleanup()
             }
@@ -78,7 +78,7 @@ class ModPackImportViewModel: BaseGameFormViewModel {
         let gameName = gameNameValidator.gameName.trimmingCharacters(in: .whitespacesAndNewlines)
         let extractedPath = extractedModPackPath
 
-        // 在后台执行文件删除，避免主线程 FileManager
+        // Perform file deletion in the background to avoid the main thread FileManager
         await Task.detached(priority: .utility) {
             let fm = FileManager.default
             if !gameName.isEmpty {
@@ -127,7 +127,7 @@ class ModPackImportViewModel: BaseGameFormViewModel {
         isProcessingModPack = true
         onProcessingStateChanged(true)
 
-        // 解压整合包
+        // Unzip the integration package
         guard let extracted = await modPackViewModel.extractModPack(modPackPath: selectedFile) else {
             isProcessingModPack = false
             onProcessingStateChanged(false)
@@ -136,7 +136,7 @@ class ModPackImportViewModel: BaseGameFormViewModel {
 
         extractedModPackPath = extracted
 
-        // 解析索引信息
+        // Parse index information
         if let parsed = await modPackViewModel.parseModrinthIndex(extractedPath: extracted) {
             modPackIndexInfo = parsed
             let defaultName = GameNameGenerator.generateImportName(
@@ -162,7 +162,7 @@ class ModPackImportViewModel: BaseGameFormViewModel {
 
         isProcessingModPack = true
 
-        // 1. 创建 profile 文件夹
+        // 1. Create profile folder
         let profileCreated = await createProfileDirectories(for: gameNameValidator.gameName)
 
         if !profileCreated {
@@ -170,13 +170,13 @@ class ModPackImportViewModel: BaseGameFormViewModel {
             return
         }
 
-        // 2. 复制 overrides 文件（在安装依赖之前）
+        // 2. Copy the overrides file (before installing dependencies)
         let resourceDir = AppPaths.profileDirectory(gameName: gameNameValidator.gameName)
-        // 先计算 overrides 文件总数
+        // First calculate the total number of overrides files
         let overridesTotal = await calculateOverridesTotal(extractedPath: extractedPath)
 
-        // 只有当有 overrides 文件时，才提前设置 isInstalling 和 overridesTotal
-        // 确保进度条能在复制开始前显示（updateOverridesProgress 会在回调中更新其他状态）
+        // Only when there is an overrides file, isInstalling and overridesTotal are set in advance
+        // Make sure the progress bar is displayed before copying starts (updateOverridesProgress will update other status in the callback)
         if overridesTotal > 0 {
             await MainActor.run {
                 modPackViewModel.modPackInstallState.isInstalling = true
@@ -185,8 +185,8 @@ class ModPackImportViewModel: BaseGameFormViewModel {
             }
         }
 
-        // 等待一小段时间，确保 UI 更新
-        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1秒
+        // Wait a short period of time to ensure the UI is updated
+        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
 
         let overridesSuccess = await ModPackDependencyInstaller.installOverrides(
             extractedPath: extractedPath,
@@ -208,7 +208,7 @@ class ModPackImportViewModel: BaseGameFormViewModel {
             return
         }
 
-        // 3. 准备安装
+        // 3. Prepare for installation
         let tempGameInfo = GameVersionInfo(
             id: UUID(),
             gameName: gameNameValidator.gameName,
@@ -227,7 +227,7 @@ class ModPackImportViewModel: BaseGameFormViewModel {
 
         isProcessingModPack = false
 
-        // 4. 下载整合包文件（mod 文件）
+        // 4. Download the integration package file (mod file)
         let filesSuccess = await ModPackDependencyInstaller.installModPackFiles(
             files: indexInfo.files,
             resourceDir: resourceDir,
@@ -249,7 +249,7 @@ class ModPackImportViewModel: BaseGameFormViewModel {
             return
         }
 
-        // 5. 安装依赖
+        // 5. Install dependencies
         let dependencySuccess = await ModPackDependencyInstaller.installModPackDependencies(
             dependencies: indexInfo.dependencies,
             gameInfo: tempGameInfo,
@@ -271,7 +271,7 @@ class ModPackImportViewModel: BaseGameFormViewModel {
             return
         }
 
-        // 6. 安装游戏本体
+        // 6. Install the game itself
         let gameSuccess = await withCheckedContinuation { continuation in
             Task {
                 await gameSetupService.saveGame(
@@ -302,10 +302,10 @@ class ModPackImportViewModel: BaseGameFormViewModel {
 
     // MARK: - Helper Methods
     private func calculateOverridesTotal(extractedPath: URL) async -> Int {
-        // 优先检查 Modrinth 格式的 overrides
+        // Check Modrinth format overrides first
         var overridesPath = extractedPath.appendingPathComponent("overrides")
 
-        // 如果不存在，检查 CurseForge 格式的 overrides 文件夹
+        // If not present, check the CurseForge format overrides folder
         if !FileManager.default.fileExists(atPath: overridesPath.path) {
             let possiblePaths = ["overrides", "Override", "override"]
             for pathName in possiblePaths {
@@ -317,12 +317,12 @@ class ModPackImportViewModel: BaseGameFormViewModel {
             }
         }
 
-        // 如果 overrides 文件夹不存在，返回 0
+        // If the overrides folder does not exist, returns 0
         guard FileManager.default.fileExists(atPath: overridesPath.path) else {
             return 0
         }
 
-        // 计算文件总数
+        // Count total number of files
         do {
             let allFiles = try InstanceFileCopier.getAllFiles(in: overridesPath)
             return allFiles.count
@@ -409,12 +409,12 @@ class ModPackImportViewModel: BaseGameFormViewModel {
     private func handleModPackInstallationResult(success: Bool, gameName: String) {
         if success {
             Logger.shared.info("本地整合包导入完成: \(gameName)")
-            // 清理不再需要的索引数据以释放内存
+            // Clean up index data no longer needed to free up memory
             modPackViewModel.clearParsedIndexInfo()
             configuration.actions.onCancel() // Use cancel to dismiss
         } else {
             Logger.shared.error("本地整合包导入失败: \(gameName)")
-            // 清理已创建的游戏文件夹
+            // Clean created game folders
             Task {
                 await cleanupGameDirectories(gameName: gameName)
             }
@@ -426,7 +426,7 @@ class ModPackImportViewModel: BaseGameFormViewModel {
             GlobalErrorHandler.shared.handle(globalError)
             modPackViewModel.modPackInstallState.reset()
             gameSetupService.downloadState.reset()
-            // 清理不再需要的索引数据以释放内存
+            // Clean up index data no longer needed to free up memory
             modPackViewModel.clearParsedIndexInfo()
         }
         isProcessingModPack = false

@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - 游戏选择区块
+// MARK: - Game selection block
 struct CommonSheetGameBody: View {
     let compatibleGames: [GameVersionInfo]
     @Binding var selectedGame: GameVersionInfo?

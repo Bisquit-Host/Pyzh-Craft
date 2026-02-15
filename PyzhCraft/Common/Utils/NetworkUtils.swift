@@ -1,39 +1,39 @@
 import Foundation
 import Network
 
-/// 服务器连接状态
+/// Server connection status
 enum ServerConnectionStatus {
     case unknown, checking,
          success(serverInfo: MinecraftServerInfo?),
          timeout, failed
 }
 
-/// 解析后的服务器地址信息
+/// Parsed server address information
 struct ResolvedServerAddress {
-    let address: String  // 实际连接的地址（SRV target 或原始地址）
-    let port: Int        // 实际连接的端口（SRV port 或原始端口）
-    let originalAddress: String  // 原始域名（用于 handshake）
-    let originalPort: Int        // 原始端口（用于 handshake）
+    let address: String  // The address of the actual connection (SRV target or original address)
+    let port: Int        // The actual connected port (SRV port or raw port)
+    let originalAddress: String  // Original domain name (used for handshake)
+    let originalPort: Int        // Raw port (used for handshake)
 }
 
-/// 网络工具类
-/// 提供网络连接检测等功能
+/// Network tools
+/// Provides functions such as network connection detection
 enum NetworkUtils {
-    /// 智能解析服务器地址
-    /// 根据用户输入自动判断端口，如果没有端口则查询 SRV 记录
-    /// - Parameter input: 用户输入的地址（可能包含端口，如 "example.com:25565" 或 "example.com"）
-    /// - Returns: 解析后的地址和端口（包含原始地址信息）
+    /// Intelligent resolution of server address
+    /// Automatically determine the port based on user input. If there is no port, query the SRV record
+    /// - Parameter input: The address entered by the user (may include a port, such as "example.com:25565" or "example.com")
+    /// - Returns: parsed address and port (including original address information)
     static func resolveServerAddress(_ input: String) async -> ResolvedServerAddress {
         let trimmed = input.trimmingCharacters(in: .whitespaces)
         var originalAddress = trimmed
         var originalPort = 25565
 
-        // 检查是否包含端口
+        // Check if the port is included
         if let colonIndex = trimmed.lastIndex(of: ":") {
-            // 检查冒号后的内容是否为数字（端口）
+            // Check whether the content after the colon is a number (port)
             let afterColon = String(trimmed[trimmed.index(after: colonIndex)...])
             if let port = Int(afterColon), port > 0 && port <= 65535 {
-                // 包含有效端口，直接使用
+                // Contains valid ports, use them directly
                 let address = String(trimmed[..<colonIndex])
                 originalAddress = address
                 originalPort = port
@@ -46,18 +46,18 @@ enum NetworkUtils {
             }
         }
 
-        // 不包含端口，查询 SRV 记录
+        // Does not contain port, query SRV record
         if let srvResult = await querySRVRecord(for: trimmed) {
-            // SRV 记录返回的是连接地址，原始地址是输入的域名
+            // The SRV record returns the connection address, and the original address is the entered domain name
             return ResolvedServerAddress(
                 address: srvResult.address,
                 port: srvResult.port,
                 originalAddress: trimmed,
-                originalPort: 25565  // 默认端口
+                originalPort: 25565  // Default port
             )
         }
 
-        // 没有 SRV 记录，使用默认端口 25565
+        // No SRV records, default port 25565 is used
         return ResolvedServerAddress(
             address: trimmed,
             port: 25565,
@@ -66,17 +66,17 @@ enum NetworkUtils {
         )
     }
 
-    /// 查询 Minecraft SRV 记录
-    /// - Parameter domain: 域名
-    /// - Returns: SRV 记录中的地址和端口（仅连接信息），如果没有则返回 nil
+    /// Query Minecraft SRV records
+    /// - Parameter domain: domain name
+    /// - Returns: Address and port in the SRV record (only connection information), or nil if none
     private static func querySRVRecord(for domain: String) async -> (address: String, port: Int)? {
         let srvName = "_minecraft._tcp.\(domain)"
 
-        // 使用系统的 dig 命令查询 SRV 记录（更简单可靠）
+        // Use the system's dig command to query SRV records (easier and more reliable)
         guard let output = await runDigShortSRVQuery(srvName: srvName) else { return nil }
 
-        // 解析 SRV 记录格式: priority weight port target
-        // 例如: "5 0 25565 mc.example.com."
+        // Parse SRV record format: priority weight port target
+        // For example: "5 0 25565 mc.example.com."
         let lines = output.trimmingCharacters(in: .whitespacesAndNewlines).components(separatedBy: .newlines)
         guard let firstLine = lines.first, !firstLine.isEmpty else {
             return nil
@@ -92,7 +92,7 @@ enum NetworkUtils {
         }
 
         var target = components[3]
-        // 移除末尾的点（如果有）
+        // Remove the trailing dot (if any)
         if target.hasSuffix(".") {
             target = String(target.dropLast())
         }
@@ -100,7 +100,7 @@ enum NetworkUtils {
         return (address: target, port: port)
     }
 
-    /// 异步执行 `dig +short SRV <srvName>` 并返回 stdout 文本
+    /// Asynchronously execute `dig +short SRV <srvName>` and return stdout text
     private static func runDigShortSRVQuery(srvName: String) async -> String? {
         await withCheckedContinuation { continuation in
             final class ResumeGuard: @unchecked Sendable {
@@ -156,22 +156,22 @@ enum NetworkUtils {
             }
         }
     }
-    /// 检测服务器连接状态（使用 Minecraft Server List Ping 协议）
+    /// Check server connection status (using Minecraft Server List Ping protocol)
     /// - Parameters:
-    ///   - address: 服务器地址
-    ///   - port: 服务器端口
-    ///   - timeout: 超时时间（秒），默认 5 秒
-    /// - Returns: 连接状态，成功时包含服务器信息
+    ///   - address: server address
+    ///   - port: server port
+    ///   - timeout: timeout (seconds), default 5 seconds
+    /// - Returns: connection status, including server information when successful
     static func checkServerConnectionStatus(
         address: String,
         port: Int,
         timeout: TimeInterval = 5.0
     ) async -> ServerConnectionStatus {
-        // 解析服务器地址（查询 SRV 记录）
+        // Resolve server address (query SRV record)
         let resolved = await resolveServerAddress(address)
 
-        // 使用 Minecraft Server List Ping 协议获取服务器信息
-        // 使用 SRV target + port 建立连接，但 handshake 使用原始域名
+        // Get server information using the Minecraft Server List Ping protocol
+        // Use SRV target + port to establish connection, but handshake uses original domain name
         if let serverInfo = await MinecraftServerPing.ping(
             connectAddress: resolved.address,
             connectPort: resolved.port,
@@ -185,13 +185,13 @@ enum NetworkUtils {
         }
     }
 
-    /// 检测服务器连接是否可用（兼容旧接口）
+    /// Detect whether the server connection is available (compatible with old interfaces)
     /// - Parameters:
-    ///   - address: 服务器地址
-    ///   - port: 服务器端口
-    ///   - timeout: 超时时间（秒），默认 5 秒
-    /// - Returns: 检测结果，true 表示连接成功，false 表示连接失败
-    /// - Throws: 检测过程中的错误
+    ///   - address: server address
+    ///   - port: server port
+    ///   - timeout: timeout (seconds), default 5 seconds
+    /// - Returns: detection result, true means the connection is successful, false means the connection failed
+    /// - Throws: Errors in the detection process
     static func checkServerConnection(
         address: String,
         port: Int,

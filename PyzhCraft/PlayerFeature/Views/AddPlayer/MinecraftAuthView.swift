@@ -6,7 +6,7 @@ struct MinecraftAuthView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            // 认证状态显示
+            // Authentication status display
             switch authService.authState {
             case .notAuthenticated:
                 notAuthenticatedView
@@ -26,22 +26,22 @@ struct MinecraftAuthView: View {
         }
         .padding()
         .onDisappear {
-            // 页面关闭后清除所有数据
+            // Clear all data after closing the page
             clearAllData()
         }
     }
 
-    // MARK: - 清除数据
-    /// 清除页面所有数据
+    // MARK: - clear data
+    /// Clear all data on the page
     private func clearAllData() {
-        // 重置认证服务状态（如果未完成认证）
+        // Reset authentication service status (if authentication is not completed)
         if case .notAuthenticated = authService.authState {
             authService.isLoading = false
         }
-        // 认证成功时不清除状态，可能仍需认证信息
+        // The status is not cleared when authentication is successful, and authentication information may still be required
     }
 
-    // MARK: - 未认证状态
+    // MARK: - Uncertified status
     private var notAuthenticatedView: some View {
         VStack(spacing: 16) {
             Image(systemName: "person.crop.circle.badge.plus")
@@ -60,10 +60,10 @@ struct MinecraftAuthView: View {
         }
     }
 
-    // MARK: - 等待浏览器授权状态
+    // MARK: - Wait for browser authorization status
     private var waitingForBrowserAuthView: some View {
         VStack(spacing: 16) {
-            // 浏览器图标
+            // browser icon
             Image(systemName: "person.crop.circle.badge.clock")
                 .font(.system(size: 46))
                 .foregroundColor(.secondary)
@@ -79,7 +79,7 @@ struct MinecraftAuthView: View {
         }
     }
 
-    // MARK: - 处理授权码状态
+    // MARK: - Handle authorization code status
     private var processingAuthCodeView: some View {
         VStack(spacing: 16) {
             ProgressView().controlSize(.small)
@@ -95,12 +95,12 @@ struct MinecraftAuthView: View {
         }
     }
 
-    // MARK: - 认证成功状态
+    // MARK: - Authentication success status
     private func authenticatedView(
         profile: MinecraftProfileResponse
     ) -> some View {
         VStack(spacing: 20) {
-            // 用户头像
+            // User avatar
             if let skinUrl = profile.skins.first?.url {
                 MinecraftSkinUtils(type: .url, src: skinUrl.httpToHttps())
             } else {
@@ -141,7 +141,7 @@ struct MinecraftAuthView: View {
         }
     }
 
-    // MARK: - 错误状态
+    // MARK: - error status
     private func errorView(message: String) -> some View {
         VStack(spacing: 16) {
             Image(systemName: "exclamationmark.triangle")

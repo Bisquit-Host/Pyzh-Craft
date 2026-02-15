@@ -1,6 +1,6 @@
 import Foundation
 
-// MARK: - Mac 规则评估器
+// MARK: - Mac rule evaluator
 
 enum MacOS: String {
     case osx,
@@ -45,11 +45,11 @@ enum MacRuleEvaluator {
         let major = versionComponents[0]
         let minor = versionComponents[1]
 
-        // 1.19 以下版本使用严格架构匹配
+        // Versions below 1.19 use strict schema matching
         return major < 1 || (major == 1 && minor < 19)
     }
 
-    // 返回支持的 macOS 标识符列表，按优先级排序
+    // Returns a list of supported macOS identifiers, sorted by priority
     static func getSupportedMacOSIdentifiers(minecraftVersion: String? = nil) -> [String] {
         #if os(macOS)
         let isLowVersion = minecraftVersion.map { Self.isLowVersion($0) } ?? false
@@ -76,9 +76,9 @@ enum MacRuleEvaluator {
             if let osName = rule.os?.name, let validMacOS = MacOS(rawValue: osName) {
                 macOS = validMacOS
             } else if rule.os?.name != nil {
-                return nil // 非 macOS 规则
+                return nil // Non-macOS rules
             } else {
-                macOS = nil // 无 OS 限制
+                macOS = nil // No OS restrictions
             }
 
             return MacRule(action: action, os: macOS)
@@ -90,18 +90,18 @@ enum MacRuleEvaluator {
 
         let macRules = convertFromMinecraftRules(rules)
 
-        // 如果原始规则不为空但转换后为空，说明都是非 macOS 规则
+        // If the original rules are not empty but are empty after conversion, it means they are non-macOS rules
         if macRules.isEmpty {
             return false
         }
 
-        // 获取当前平台支持的标识符列表
+        // Get the list of identifiers supported by the current platform
         let supportedIdentifiers = getSupportedMacOSIdentifiers(minecraftVersion: minecraftVersion)
 
-        // 根据支持的标识符获取适用的规则（按优先级排序）
+        // Get applicable rules based on supported identifiers (ordered by priority)
         var applicableRules: [MacRule] = []
 
-        // 优先查找高优先级的规则
+        // Find high-priority rules first
         for identifier in supportedIdentifiers {
             let macOS = MacOS(rawValue: identifier)
             let matchingRules = macRules.filter { rule in
@@ -113,19 +113,19 @@ enum MacRuleEvaluator {
             }
         }
 
-        // 如果没有找到匹配的规则，使用无 OS 限制的规则
+        // If no matching rule is found, use the rule without OS restrictions
         if applicableRules.isEmpty {
             applicableRules = macRules.filter { $0.os == nil }
         }
 
         guard !applicableRules.isEmpty else { return false }
 
-        // 优先检查 disallow 规则
+        // Check disallow rules first
         if applicableRules.contains(where: { $0.action == .disallow }) {
             return false
         }
 
-        // 检查 allow 规则
+        // Check allow rules
         return applicableRules.contains { $0.action == .allow }
     }
 }

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 贡献类型枚举
+/// Contribution type enum
 enum Contribution: String, CaseIterable {
     case code = "contributor.contribution.code"
     case design = "contributor.contribution.design"
@@ -25,7 +25,7 @@ enum Contribution: String, CaseIterable {
     }
 }
 
-/// 静态贡献者
+/// static contributor
 struct StaticContributor {
     let name: String
     let url: String
@@ -33,7 +33,7 @@ struct StaticContributor {
     let contributions: [Contribution]
 }
 
-/// JSON 数据模型
+/// JSON data model
 struct ContributorsData: Codable {
     let contributors: [ContributorData]
 }

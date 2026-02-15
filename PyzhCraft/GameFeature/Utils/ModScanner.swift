@@ -6,7 +6,7 @@ class ModScanner {
 
     private init() {}
 
-    /// 主入口：获取 ModrinthProjectDetail（静默版本）
+    /// Main entrance: Get ModrinthProjectDetail (silent version)
     func getModrinthProjectDetail(
         for fileURL: URL,
         completion: @escaping (ModrinthProjectDetail?) -> Void
@@ -28,7 +28,7 @@ class ModScanner {
         }
     }
 
-    /// 主入口：获取 ModrinthProjectDetail（抛出异常版本）
+    /// Main entrance: Get ModrinthProjectDetail (throws exception version)
     func getModrinthProjectDetailThrowing(
         for fileURL: URL
     ) async throws -> ModrinthProjectDetail? {
@@ -41,13 +41,13 @@ class ModScanner {
         }
 
         if let cached = getModCacheFromDatabase(hash: hash) {
-            // 更新文件名为当前实际文件名（可能已重命名为 .disabled）
+            // Update file name to current actual file name (may have been renamed to .disabled)
             var updatedCached = cached
             updatedCached.fileName = fileURL.lastPathComponent
             return updatedCached
         }
 
-        // 使用 fetchModrinthDetail 通过文件 hash 查询
+        // Query by file hash using fetchModrinthDetail
         let detail = await withCheckedContinuation { continuation in
             ModrinthService.fetchModrinthDetail(by: hash) { detail in
                 continuation.resume(returning: detail)
@@ -55,19 +55,19 @@ class ModScanner {
         }
 
         if let detail = detail {
-            // 设置本地文件名
+            // Set local file name
             var detailWithFileName = detail
             detailWithFileName.fileName = fileURL.lastPathComponent
             saveToCache(hash: hash, detail: detailWithFileName)
             return detailWithFileName
         } else {
-            // 尝试本地解析
+            // Try local parsing
             let (modid, version) =
                 try ModMetadataParser.parseModMetadataThrowing(fileURL: fileURL)
 
-            // 如果 CF 查询失败或没有解析到 modid，则回退到本地兜底逻辑
+            // If the CF query fails or modid is not parsed, it will fall back to the local logic
             if let modid = modid, let version = version {
-                // 使用解析到的元数据创建兜底对象
+                // Create a back-up object using the parsed metadata
                 let fallbackDetail = createFallbackDetail(
                     fileURL: fileURL,
                     modid: modid,
@@ -76,7 +76,7 @@ class ModScanner {
                 saveToCache(hash: hash, detail: fallbackDetail)
                 return fallbackDetail
             } else {
-                // 最终兜底策略：使用文件名创建基础信息
+                // The ultimate back-up strategy: Use filenames to create basic information
                 let fallbackDetail = createFallbackDetailFromFileName(
                     fileURL: fileURL
                 )
@@ -127,7 +127,7 @@ class ModScanner {
 
     // MARK: - Fallback Methods
 
-    /// 兜底 ModrinthProjectDetail 的公共字段结构体
+    /// A closer look at the public field structure of ModrinthProjectDetail
     private struct CommonFallbackFields {
         let description: String
         let categories: [String]
@@ -152,7 +152,7 @@ class ModScanner {
         let type: String?
     }
 
-    /// 创建基础 ModrinthProjectDetail 的公共字段
+    /// Create public fields of the base ModrinthProjectDetail
     private func createBaseFallbackDetail(fileURL: URL) -> (fileName: String, baseFileName: String) {
         let fileName = fileURL.lastPathComponent
         let baseFileName = fileName.replacingOccurrences(
@@ -162,7 +162,7 @@ class ModScanner {
         return (fileName, baseFileName)
     }
 
-    /// 创建兜底 ModrinthProjectDetail 的公共部分
+    /// Create a public part of ModrinthProjectDetail
     private func createCommonFallbackFields(fileName: String, baseFileName: String) -> CommonFallbackFields {
         return CommonFallbackFields(
             description: "local：\(fileName)",
@@ -189,7 +189,7 @@ class ModScanner {
         )
     }
 
-    /// 使用解析到的元数据创建兜底 ModrinthProjectDetail
+    /// Use the parsed metadata to create a backend ModrinthProjectDetail
     private func createFallbackDetail(
         fileURL: URL,
         modid: String,
@@ -228,7 +228,7 @@ class ModScanner {
         )
     }
 
-    /// 使用文件名创建最基础的兜底 ModrinthProjectDetail
+    /// Use file names to create the most basic template ModrinthProjectDetail
     private func createFallbackDetailFromFileName(
         fileURL: URL
     ) -> ModrinthProjectDetail {
@@ -270,9 +270,9 @@ class ModScanner {
 }
 
 extension ModScanner {
-    // MARK: - 公共辅助方法
+    // MARK: - public helper method
 
-    /// 读取目录并过滤 jar/zip 文件（抛出异常版本）
+    /// Read directory and filter jar/zip files (throws exception version)
     private func readJarZipFiles(from dir: URL) throws -> [URL] {
         guard FileManager.default.fileExists(atPath: dir.path) else {
             throw GlobalError.resource(
@@ -302,7 +302,7 @@ extension ModScanner {
         }
     }
 
-    /// 读取目录并过滤 jar/zip 文件（静默版本，目录不存在时返回空数组）
+    /// Read the directory and filter jar/zip files (silent version, returns an empty array when the directory does not exist)
     private func readJarZipFilesSilent(from dir: URL) -> [URL] {
         guard FileManager.default.fileExists(atPath: dir.path) else {
             return []
@@ -321,7 +321,7 @@ extension ModScanner {
         }
     }
 
-    /// 检查 mod 是否已安装
+    /// Check if the mod is installed
     private func checkModInstalledCore(
         hash: String,
         gameName: String
@@ -330,7 +330,7 @@ extension ModScanner {
         return cachedMods.contains(hash)
     }
 
-    /// 获取目录下所有 jar/zip 文件及其 hash、缓存 detail（静默版本）
+    /// Get all jar/zip files in the directory and their hash and cache details (silent version)
     public func localModDetails(in dir: URL) -> [(
         file: URL, hash: String, detail: ModrinthProjectDetail?
     )] {
@@ -344,7 +344,7 @@ extension ModScanner {
         }
     }
 
-    /// 获取目录下所有 jar/zip 文件及其 hash、缓存 detail（抛出异常版本）
+    /// Get all jar/zip files in the directory and their hash and cache details (throws exception version)
     public func localModDetailsThrowing(in dir: URL) throws -> [(
         file: URL, hash: String, detail: ModrinthProjectDetail?
     )] {
@@ -353,15 +353,15 @@ extension ModScanner {
             if let hash = ModScanner.sha1Hash(of: fileURL) {
                 var detail = getModCacheFromDatabase(hash: hash)
 
-                // 如果缓存中没有找到，使用兜底策略创建基础信息
+                // If it is not found in the cache, use the cover-up strategy to create basic information
                 if detail == nil {
                     detail = createFallbackDetailFromFileName(fileURL: fileURL)
-                    // 保存兜底信息到缓存，避免重复创建
+                    // Save detailed information to the cache to avoid repeated creation
                     if let detail = detail {
                         saveToCache(hash: hash, detail: detail)
                     }
                 } else {
-                    // 更新文件名为当前实际文件名（可能已重命名为 .disabled）
+                    // Update file name to current actual file name (may have been renamed to .disabled)
                     detail?.fileName = fileURL.lastPathComponent
                 }
 
@@ -371,8 +371,8 @@ extension ModScanner {
         }
     }
 
-    /// 异步扫描：仅获取所有 detailId（静默版本）
-    /// 在后台线程执行，只从缓存读取，不创建 fallback
+    /// Asynchronous scan: only get all detailId (silent version)
+    /// Execute in background thread, only read from cache, do not create fallback
     public func scanAllDetailIds(
         in dir: URL,
         completion: @escaping (Set<String>) -> Void
@@ -390,12 +390,12 @@ extension ModScanner {
         }
     }
 
-    // 返回 Set 以提高查找性能（O(1)）
+    // Return Set to improve lookup performance (O(1))
     public func scanAllDetailIdsThrowing(in dir: URL) async throws -> Set<String> {
-        // 如果是 mods 目录，优先返回缓存
+        // If it is the mods directory, the cache will be returned first
         if isModsDirectory(dir) {
             if let gameName = extractGameName(from: dir) {
-                // 检查缓存是否存在（即使为空也返回缓存）
+                // Check if cache exists (return cache even if empty)
                 let hasCache = await ModInstallationCache.shared.hasCache(for: gameName)
                 if hasCache {
                     let cachedMods = await ModInstallationCache.shared.getAllModsInstalled(for: gameName)
@@ -404,11 +404,11 @@ extension ModScanner {
             }
         }
 
-        // 在后台线程执行文件系统操作
+        // Perform file system operations on a background thread
         return try await Task.detached(priority: .userInitiated) {
             let jarFiles = try self.readJarZipFiles(from: dir)
 
-            // 使用 TaskGroup 并发计算 hash 和读取缓存
+            // Use TaskGroup to concurrently calculate hash and read cache
             let concurrentCount = GeneralSettingsManager.shared.concurrentDownloads
             let semaphore = AsyncSemaphore(value: concurrentCount)
 
@@ -422,7 +422,7 @@ extension ModScanner {
                             return nil
                         }
 
-                        // 直接返回 hash，不再使用 slug
+                        // Return hash directly without using slug
                         return hash
                     }
                 }
@@ -434,7 +434,7 @@ extension ModScanner {
                     }
                 }
 
-                // 如果是 mods 目录，自动缓存结果
+                // If it is the mods directory, automatically cache the results
                 if self.isModsDirectory(dir) {
                     if let gameName = self.extractGameName(from: dir) {
                         await ModInstallationCache.shared.setAllModsInstalled(
@@ -452,7 +452,7 @@ extension ModScanner {
     public func scanGameModsDirectory(game: GameVersionInfo) async {
         let modsDir = AppPaths.modsDirectory(gameName: game.gameName)
 
-        // 检查目录是否存在
+        // Check if directory exists
         guard FileManager.default.fileExists(atPath: modsDir.path) else {
             Logger.shared.debug("游戏 \(game.gameName) 的 mods 目录不存在，跳过扫描")
             return
@@ -464,20 +464,20 @@ extension ModScanner {
         } catch {
             let globalError = GlobalError.from(error)
             Logger.shared.warning("扫描游戏 \(game.gameName) 的 mods 目录失败: \(globalError.chineseMessage)")
-            // 不显示错误通知，因为这是后台扫描
+            // No error notifications are shown because this is a background scan
         }
     }
 
     public func scanGameModsDirectorySync(game: GameVersionInfo) {
         let modsDir = AppPaths.modsDirectory(gameName: game.gameName)
 
-        // 检查目录是否存在
+        // Check if directory exists
         guard FileManager.default.fileExists(atPath: modsDir.path) else {
             Logger.shared.debug("游戏 \(game.gameName) 的 mods 目录不存在，跳过扫描")
             return
         }
 
-        // 使用 Task 同步等待异步操作完成
+        // Use Task to wait synchronously for asynchronous operations to complete
         let semaphore = DispatchSemaphore(value: 0)
         Task {
             defer { semaphore.signal() }
@@ -487,7 +487,7 @@ extension ModScanner {
             } catch {
                 let globalError = GlobalError.from(error)
                 Logger.shared.warning("扫描游戏 \(game.gameName) 的 mods 目录失败: \(globalError.chineseMessage)")
-                // 不显示错误通知，因为这是后台扫描
+                // No error notifications are shown because this is a background scan
             }
         }
         semaphore.wait()
@@ -497,13 +497,13 @@ extension ModScanner {
         dir.lastPathComponent.lowercased() == "mods"
     }
 
-    // mods 目录结构：profileRootDirectory/gameName/mods
+    // mods directory structure: profileRootDirectory/gameName/mods
     private func extractGameName(from modsDir: URL) -> String? {
         let parentDir = modsDir.deletingLastPathComponent()
         return parentDir.lastPathComponent
     }
 
-    /// 同步：仅查缓存（通过文件hash检查）
+    /// Synchronization: Check cache only (checked by file hash)
     func isModInstalledSync(hash: String, in modsDir: URL) -> Bool {
         do {
             return try isModInstalledSyncThrowing(
@@ -518,7 +518,7 @@ extension ModScanner {
         }
     }
 
-    /// 同步：仅查缓存（抛出异常版本）
+    /// Synchronization: only check cache (throws exception version)
     func isModInstalledSyncThrowing(
         hash: String,
         in modsDir: URL
@@ -527,7 +527,7 @@ extension ModScanner {
             return false
         }
 
-        // 使用 DispatchSemaphore 在同步函数中等待异步结果
+        // Use DispatchSemaphore to wait for asynchronous results in a synchronous function
         let semaphore = DispatchSemaphore(value: 0)
         var result = false
 
@@ -540,7 +540,7 @@ extension ModScanner {
         return result
     }
 
-    /// 异步：仅查缓存（静默版本）
+    /// Asynchronous: only check cache (silent version)
     func isModInstalled(
         hash: String,
         in modsDir: URL,
@@ -564,7 +564,7 @@ extension ModScanner {
         }
     }
 
-    /// 异步：仅查缓存（抛出异常版本）
+    /// Asynchronous: only check cache (throw exception version)
     func isModInstalledThrowing(
         hash: String,
         in modsDir: URL
@@ -576,7 +576,7 @@ extension ModScanner {
         return await checkModInstalledCore(hash: hash, gameName: gameName)
     }
 
-    /// 扫描目录，返回所有已识别的 ModrinthProjectDetail（静默版本）
+    /// Scan directory and return all identified ModrinthProjectDetail (silent version)
     func scanResourceDirectory(
         _ dir: URL,
         completion: @escaping ([ModrinthProjectDetail]) -> Void
@@ -594,7 +594,7 @@ extension ModScanner {
         }
     }
 
-    /// 扫描目录，返回所有已识别的 ModrinthProjectDetail（抛出异常版本）
+    /// Scan the directory and return all identified ModrinthProjectDetail (throws exception version)
     func scanResourceDirectoryThrowing(
         _ dir: URL
     ) async throws -> [ModrinthProjectDetail] {
@@ -603,11 +603,11 @@ extension ModScanner {
             return []
         }
 
-        // 创建信号量控制并发数量
+        // Create a semaphore to control the number of concurrencies
         let concurrentCount = GeneralSettingsManager.shared.concurrentDownloads
         let semaphore = AsyncSemaphore(value: concurrentCount)
 
-        // 使用 TaskGroup 并发扫描文件
+        // Scan files concurrently using TaskGroup
         let results = await withTaskGroup(of: ModrinthProjectDetail?.self) { group in
             for fileURL in jarFiles {
                 group.addTask {
@@ -620,7 +620,7 @@ extension ModScanner {
                 }
             }
 
-            // 收集结果
+            // Collect results
             var results: [ModrinthProjectDetail] = []
             for await result in group {
                 if let detail = result {
@@ -633,9 +633,9 @@ extension ModScanner {
         return results
     }
 
-    // MARK: - 分页扫描
+    // MARK: - Page scanning
 
-    /// 计算分页范围
+    /// Calculate paging range
     private func calculatePageRange(
         totalCount: Int,
         page: Int,
@@ -657,7 +657,7 @@ extension ModScanner {
         return (startIndex, endIndex, endIndex < totalCount)
     }
 
-    /// 并发扫描文件列表并返回详情
+    /// Concurrently scan the file list and return details
     private func scanFilesConcurrently(
         fileURLs: [URL],
         semaphore: AsyncSemaphore
@@ -684,7 +684,7 @@ extension ModScanner {
         }
     }
 
-    /// 获取目录下所有 jar/zip 文件列表（不解析详情，快速）
+    /// Get a list of all jar/zip files in the directory (no parsing details, fast)
     func getAllResourceFiles(_ dir: URL) -> [URL] {
         do {
             return try getAllResourceFilesThrowing(dir)
@@ -696,9 +696,9 @@ extension ModScanner {
         }
     }
 
-    /// 获取目录下所有 jar/zip 文件列表（抛出异常版本）
+    /// Get the list of all jar/zip files in the directory (throws exception version)
     func getAllResourceFilesThrowing(_ dir: URL) throws -> [URL] {
-        // 目录不存在时返回空数组（不抛出异常，因为这是正常情况）
+        // Returns an empty array if the directory does not exist (no exception is thrown as this is the normal case)
         guard FileManager.default.fileExists(atPath: dir.path) else {
             return []
         }
@@ -706,7 +706,7 @@ extension ModScanner {
         return try readJarZipFiles(from: dir)
     }
 
-    /// 分页扫描目录，仅对当前页的文件进行解析（静默版本）
+    /// Scan the directory in pages and parse only the files on the current page (silent version)
     func scanResourceDirectoryPage(
         _ dir: URL,
         page: Int,
@@ -730,7 +730,7 @@ extension ModScanner {
         }
     }
 
-    /// 基于文件列表分页扫描，仅对当前页的文件进行解析（静默版本）
+    /// Paging scanning based on the file list, only parsing the files of the current page (silent version)
     func scanResourceFilesPage(
         fileURLs: [URL],
         page: Int,
@@ -754,7 +754,7 @@ extension ModScanner {
         }
     }
 
-    /// 基于文件列表分页扫描，仅对当前页的文件进行解析（抛出异常版本）
+    /// Paging scanning based on the file list, only parsing the files of the current page (throws an exception version)
     func scanResourceFilesPageThrowing(
         fileURLs: [URL],
         page: Int,
@@ -776,7 +776,7 @@ extension ModScanner {
         return (results, pageRange.hasMore)
     }
 
-    /// 分页扫描目录，仅对当前页的文件进行解析（抛出异常版本）
+    /// Paging scans the directory and only parses the files on the current page (throws an exception version)
     func scanResourceDirectoryPageThrowing(
         _ dir: URL,
         page: Int,
@@ -805,7 +805,7 @@ extension ModScanner {
                 cached.insert(hash)
                 cache[gameName] = cached
             } else {
-                // 如果缓存不存在，创建一个新的集合
+                // If cache does not exist, create a new collection
                 cache[gameName] = [hash]
             }
         }

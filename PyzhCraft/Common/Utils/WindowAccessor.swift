@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// SwiftUI 组件，用于访问和操作底层的 macOS NSWindow 对象
+/// SwiftUI component for accessing and manipulating underlying macOS NSWindow objects
 struct WindowAccessor: NSViewRepresentable {
     var synchronous: Bool = false
     var callback: (NSWindow) -> Void
@@ -11,14 +11,14 @@ struct WindowAccessor: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: NSView, context: Context) {
-        // 在更新时也尝试获取窗口（如果之前没有获取到）
+        // Also tries to get the window when updating (if not obtained before)
         if let accessorView = nsView as? WindowAccessorView, let window = nsView.window {
             accessorView.configureWindow(window)
         }
     }
 }
 
-/// 自定义 NSView 用于监听窗口变化
+/// Custom NSView is used to monitor window changes
 private class WindowAccessorView: NSView {
     var callback: (NSWindow) -> Void
     var synchronous: Bool
@@ -30,7 +30,7 @@ private class WindowAccessorView: NSView {
         super.init(frame: .zero)
     }
 
-    /// 仅用于从 xib/storyboard 加载（本视图仅代码创建），避免生产环境闪退
+    /// Only used to load from xib/storyboard (this view is only created by code) to avoid crashing in the production environment
     required init?(coder: NSCoder) {
         self.callback = { _ in }
         self.synchronous = false
@@ -40,15 +40,15 @@ private class WindowAccessorView: NSView {
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
 
-        // 当视图添加到窗口时，立即配置窗口
+        // Configure the window immediately when the view is added to the window
         if let window = window, !hasConfigured {
             hasConfigured = true
 
             if synchronous {
-                // 同步执行，避免延迟导致的闪烁
+                // Synchronous execution to avoid flickering caused by delays
                 configureWindow(window)
             } else {
-                // 异步执行
+                // Asynchronous execution
                 DispatchQueue.main.async { [weak self] in
                     self?.configureWindow(window)
                 }

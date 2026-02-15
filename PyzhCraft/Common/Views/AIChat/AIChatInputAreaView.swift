@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// AI 聊天输入区域视图
+/// AI chat input area view
 struct AIChatInputAreaView: View {
     @Binding var inputText: String
     @Binding var selectedGameId: String?
@@ -20,9 +20,9 @@ struct AIChatInputAreaView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 游戏选择器
+            // game selector
             HStack(spacing: Constants.messageSpacing) {
-                // 只有当游戏列表不为空时才显示 Picker
+                // Show Picker only if game list is not empty
                 if !games.isEmpty {
                     gameSelector
                 }

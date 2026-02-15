@@ -1,6 +1,6 @@
 import Foundation
 
-// Modrinth 项目模型
+// Modrinth project model
 public struct ModrinthProject: Codable {
     let projectId: String
     let projectType: String
@@ -80,7 +80,7 @@ public struct ModrinthProjectDetail: Codable, Hashable, Equatable {
     }
 }
 
-// Modrinth 搜索结果模型
+// Modrinth search results model
 struct ModrinthResult: Codable {
     let hits: [ModrinthProject]
     let offset: Int
@@ -93,7 +93,7 @@ struct ModrinthResult: Codable {
     }
 }
 
-// 游戏版本
+// game version
 struct GameVersion: Codable, Identifiable, Hashable {
     let version: String
     let version_type: String
@@ -103,7 +103,7 @@ struct GameVersion: Codable, Identifiable, Hashable {
     var id: String { version }
 }
 
-// 加载器
+// loader
 struct Loader: Codable, Identifiable {
     let name: String
     let icon: String
@@ -112,7 +112,7 @@ struct Loader: Codable, Identifiable {
     var id: String { name }
 }
 
-// 分类
+// Classification
 struct Category: Codable, Identifiable, Hashable {
     let name: String
     let project_type: String
@@ -121,7 +121,7 @@ struct Category: Codable, Identifiable, Hashable {
     var id: String { name }
 }
 
-// 许可证
+// license
 struct License: Codable, Equatable, Hashable {
     let id: String
     let name: String
@@ -257,7 +257,7 @@ public struct ModrinthProjectDependency: Codable, Hashable, Equatable {
 }
 
 extension ModrinthProject {
-    /// 从 ModrinthProjectDetail 构建 ModrinthProject
+    /// Build ModrinthProject from ModrinthProjectDetail
     public static func from(detail: ModrinthProjectDetail) -> ModrinthProject {
         ModrinthProject(
             projectId: detail.id,
@@ -279,7 +279,7 @@ extension ModrinthProject {
         )
     }
 
-    /// 从 ModrinthProject 构建 ModrinthProjectDetail
+    /// Build ModrinthProjectDetail from ModrinthProject
     public func toDetail() -> ModrinthProjectDetail {
         ModrinthProjectDetail(
             slug: self.slug,

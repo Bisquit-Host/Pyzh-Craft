@@ -9,7 +9,7 @@ class Logger: AppLogging {
         category: Bundle.main.appCategory
     )
 
-    // 文件日志相关属性
+    // File log related attributes
     private var logFileHandle: FileHandle?
     private let logQueue = DispatchQueue(label: AppConstants.logTag, qos: .utility)
     private let dateFormatter: DateFormatter = {
@@ -18,18 +18,18 @@ class Logger: AppLogging {
         return formatter
     }()
 
-    // 日志文件路径
+    // Log file path
     private var logFileURL: URL? {
-        // 使用AppPaths中定义的logsDirectory（现在总是返回有效路径）
+        // Use logsDirectory defined in AppPaths (now always returns a valid path)
         let logsDirectory = AppPaths.logsDirectory
 
-        // 获取应用名称，移除空格并转换为小写
+        // Get the app name, remove spaces and convert to lowercase
         let appName = Bundle.main.appName.replacingOccurrences(of: " ", with: "-").lowercased()
 
-        // 创建 logs 目录
+        // Create logs directory
         try? FileManager.default.createDirectory(at: logsDirectory, withIntermediateDirectories: true)
 
-        // 使用应用名称-日期格式作为文件名
+        // Use app name-date format as file name
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         let today = dateFormatter.string(from: Date())
@@ -37,7 +37,7 @@ class Logger: AppLogging {
     }
 
     private init() {
-        // 启动时清理旧日志文件
+        // Clean old log files on startup
         cleanupOldLogs()
         setupLogFile()
     }
@@ -46,23 +46,23 @@ class Logger: AppLogging {
         closeLogFile()
     }
 
-    // MARK: - 文件日志设置
+    // MARK: - File log settings
 
     private func setupLogFile() {
         guard let logURL = logFileURL else { return }
 
-        // 如果文件不存在，创建文件
+        // If the file does not exist, create the file
         if !FileManager.default.fileExists(atPath: logURL.path) {
             FileManager.default.createFile(atPath: logURL.path, contents: nil)
         }
 
-        // 打开文件句柄
+        // open file handle
         do {
             logFileHandle = try FileHandle(forWritingTo: logURL)
-            // 移动到文件末尾
+            // Move to end of file
             logFileHandle?.seekToEndOfFile()
 
-            // 写入启动日志
+            // Write startup log
             let startupMessage = "=== Launcher Started at \(dateFormatter.string(from: Date())) ===\n"
             if let data = startupMessage.data(using: .utf8) {
                 logFileHandle?.write(data)
@@ -77,11 +77,11 @@ class Logger: AppLogging {
         logFileHandle = nil
     }
 
-    // MARK: - 写入日志文件
+    // MARK: - Write to log file
 
     private func writeToLogFile(_ message: String) {
         logQueue.async {
-            // 检查是否需要切换到新的日志文件（日期变化）
+            // Check if you need to switch to a new log file (date changes)
             self.checkAndSwitchLogFile()
 
             let timestamp = self.dateFormatter.string(from: Date())
@@ -89,44 +89,44 @@ class Logger: AppLogging {
 
             if let data = logEntry.data(using: .utf8) {
                 self.logFileHandle?.write(data)
-                // 强制同步到磁盘
+                // Force sync to disk
                 self.logFileHandle?.synchronizeFile()
             }
         }
     }
 
-    // MARK: - 日志文件切换
+    // MARK: - Log file switching
 
     private func checkAndSwitchLogFile() {
         guard let currentLogURL = logFileURL else { return }
 
-        // 检查当前文件句柄是否指向正确的文件
+        // Check if the current file handle points to the correct file
         if let currentHandle = logFileHandle {
-            // 如果文件句柄存在但指向的文件路径不匹配，需要切换
+            // If the file handle exists but the file path pointed to does not match, you need to switch
             if currentHandle.fileDescriptor != -1 {
-                // 检查文件路径是否匹配当前日期
+                // Check if file path matches current date
                 let expectedFileName = currentLogURL.lastPathComponent
                 let currentFileName = currentLogURL.lastPathComponent
 
                 if expectedFileName != currentFileName {
-                    // 日期变化，切换到新文件
+                    // Date changes, switch to new file
                     switchToNewLogFile()
                 }
             }
         } else {
-            // 文件句柄不存在，重新设置
+            // File handle does not exist, reset it
             setupLogFile()
         }
     }
 
     private func switchToNewLogFile() {
-        // 关闭当前文件句柄
+        // Close current file handle
         closeLogFile()
 
-        // 设置新的日志文件
+        // Set up new log file
         setupLogFile()
 
-        // 记录文件切换日志
+        // Record file switching log
         let switchMessage = "=== Log file switched at \(dateFormatter.string(from: Date())) ===\n"
         if let data = switchMessage.data(using: .utf8) {
             logFileHandle?.write(data)
@@ -222,7 +222,7 @@ class Logger: AppLogging {
         line: Int
     ) {
         let fileName = (file as NSString).lastPathComponent
-        // 优化：使用 NSMutableString 减少临时对象创建
+        // Optimization: Use NSMutableString to reduce temporary object creation
         let message = NSMutableString()
         for (index, item) in items.enumerated() {
             if index > 0 {
@@ -232,21 +232,21 @@ class Logger: AppLogging {
         }
         let logMessage = "\(prefix) [\(fileName):\(line)] \(function): \(message)"
 
-        // 输出到控制台。 本地调试可以开启
+        // Output to the console. Local debugging can be enabled
         os_log("%{public}@", log: logger, type: type, logMessage)
 
-        // 写入到文件
+        // write to file
         writeToLogFile(logMessage)
     }
 
-    // MARK: - 日志文件管理
+    // MARK: - Log file management
 
-    /// 获取日志文件路径
+    /// Get log file path
     func getLogFilePath() -> String? {
         logFileURL?.path
     }
 
-    /// 获取当前日志文件信息
+    /// Get current log file information
     func getCurrentLogInfo() -> (path: String, fileName: String, date: String)? {
         guard let logURL = logFileURL else { return nil }
 
@@ -261,29 +261,29 @@ class Logger: AppLogging {
         )
     }
 
-    /// 手动触发日志清理
+    /// Manually trigger log cleanup
     func manualCleanup() {
         cleanupOldLogs()
     }
 
-    /// 打开当前日志文件
+    /// Open current log file
     func openLogFile() {
         guard let logURL = logFileURL else {
             Self.shared.error("无法获取日志文件路径")
             return
         }
 
-        // 检查文件是否存在
+        // Check if the file exists
         if FileManager.default.fileExists(atPath: logURL.path) {
-            // 使用系统默认应用打开日志文件
+            // Open the log file using the system default application
             NSWorkspace.shared.open(logURL)
         } else {
-            // 如果日志文件不存在，创建并打开
+            // If the log file does not exist, create and open it
             do {
-                // 确保目录存在
+                // Make sure the directory exists
                 try FileManager.default.createDirectory(at: logURL.deletingLastPathComponent(), withIntermediateDirectories: true)
 
-                // 创建日志文件
+                // Create log file
                 let dateFormatter = DateFormatter()
                 dateFormatter.dateFormat = "yyyy-MM-dd"
                 let dateString = dateFormatter.string(from: Date())
@@ -296,22 +296,22 @@ class Logger: AppLogging {
         }
     }
 
-    /// 清理旧日志文件（保留最近7天的日志）
+    /// Clean old log files (keep the last 7 days of logs)
     func cleanupOldLogs() {
         logQueue.async {
             let calendar = Calendar.current
             let sevenDaysAgo = calendar.date(byAdding: .day, value: -7, to: Date()) ?? Date()
 
-            // 使用AppPaths中定义的logsDirectory进行清理（现在总是返回有效路径）
+            // Clean using logsDirectory defined in AppPaths (valid paths are now always returned)
             let logsDirectory = AppPaths.logsDirectory
             self.cleanupLogsInDirectory(logsDirectory, sevenDaysAgo: sevenDaysAgo)
         }
     }
 
     private func cleanupLogsInDirectory(_ directory: URL, sevenDaysAgo: Date) {
-        // 检查目录是否存在，如果不存在则跳过清理
+        // Check if directory exists, skip cleaning if not
         guard FileManager.default.fileExists(atPath: directory.path) else {
-            // 目录不存在是正常情况（首次运行），不需要记录错误
+            // It is normal (first run) that the directory does not exist and there is no need to log errors
             return
         }
 
@@ -351,8 +351,8 @@ class Logger: AppLogging {
         case let data as Data:
             return String(data: data, encoding: .utf8) ?? "<Data>"
         case let array as [Any]:
-            // 优化：使用 NSMutableString 减少临时对象创建
-            // 限制数组长度，避免处理超大数组时创建过多对象
+            // Optimization: Use NSMutableString to reduce temporary object creation
+            // Limit the array length to avoid creating too many objects when dealing with very large arrays
             let maxElements = 100
             let result = NSMutableString()
             result.append("[")
@@ -371,8 +371,8 @@ class Logger: AppLogging {
             }
             return result as String
         case let dict as [String: Any]:
-            // 优化：使用 NSMutableString 减少临时对象创建
-            // 限制字典大小，避免处理超大字典时创建过多对象
+            // Optimization: Use NSMutableString to reduce temporary object creation
+            // Limit dictionary size to avoid creating too many objects when dealing with very large dictionaries
             let maxEntries = 50
             let result = NSMutableString()
             result.append("{")
@@ -393,12 +393,12 @@ class Logger: AppLogging {
             result.append("}")
             return result as String
         case let codable as Encodable:
-            // 优化：限制 JSON 编码大小，避免创建过大的字符串
+            // Optimization: Limit JSON encoding size to avoid creating overly large strings
             let encoder = JSONEncoder()
-            encoder.outputFormatting = [] // 不使用 prettyPrinted 以减少字符串大小
+            encoder.outputFormatting = [] // Not using prettyPrinted to reduce string size
             if let data = try? encoder.encode(AnyEncodable(codable)),
                let json = String(data: data, encoding: .utf8) {
-                // 限制 JSON 字符串长度
+                // Limit JSON string length
                 let maxLength = 1000
                 if json.count > maxLength {
                     return String(json.prefix(maxLength)) + "... (truncated)"

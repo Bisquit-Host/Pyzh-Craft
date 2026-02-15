@@ -6,8 +6,8 @@ enum AppConstants {
     static let modrinthIndex = "relevance"
     static let modrinthIndexFileName = "modrinth.index.json"
 
-    // Minecraft 客户端ID - 构建时会被替换
-    // Minecraft/Xbox认证
+    // Minecraft client ID - will be replaced when building
+    // Minecraft/Xbox certification
     static let minecraftClientId: String = {
         let encrypted = "$(CLIENTID)"
         return Obfuscator.decryptClientID(encrypted)
@@ -15,18 +15,18 @@ enum AppConstants {
     static let minecraftScope = "XboxLive.signin offline_access"
     static let callbackURLScheme = "swift-craft-launcher"
 
-    // CurseForge API Key - 构建时会被替换
+    // CurseForge API Key - will be replaced when building
     static let curseForgeAPIKey: String? = {
         let encrypted = "$(CURSEFORGE_API_KEY)"
         return Obfuscator.decryptAPIKey(encrypted)
     }()
-    // 缓存资源类型
+    // Cache resource type
     static let cacheResourceTypes = [DirectoryNames.libraries, DirectoryNames.natives, DirectoryNames.assets, DirectoryNames.versions]
 
     static let logTag = Bundle.main.identifier + ".logger"
 
     // MARK: - Directory Names
-    /// Minecraft 目录名称常量
+    /// Minecraft directory name constants
     enum DirectoryNames {
         static let mods = "mods"
         static let libraries = "libraries"
@@ -49,7 +49,7 @@ enum AppConstants {
     }
 
     // MARK: - File Extensions
-    /// 文件扩展名常量（不包含点号）
+    /// File extension constants (without dot)
     enum FileExtensions {
         static let jar = "jar"
         static let png = "png"
@@ -59,14 +59,14 @@ enum AppConstants {
     }
 
     // MARK: - Environment Types
-    /// 环境类型常量
+    /// environment type constant
     enum EnvironmentTypes {
         static let client = "client"
         static let server = "server"
     }
 
     // MARK: - Processor Placeholders
-    /// Processor 占位符常量
+    /// Processor placeholder constant
     enum ProcessorPlaceholders {
         static let side = "{SIDE}"
         static let version = "{VERSION}"
@@ -76,13 +76,13 @@ enum AppConstants {
     }
 
     // MARK: - UserDefaults Keys
-    /// UserDefaults 存储键常量
+    /// UserDefaults storage key constants
     enum UserDefaultsKeys {
         static let savedGames = "savedGames"
     }
 
     // MARK: - Database Tables
-    /// 数据库表名常量
+    /// Database table name constants
     enum DatabaseTables {
         static let gameVersions = "game_versions"
         static let modCache = "mod_cache"

@@ -1,7 +1,7 @@
 import CryptoKit
 import SwiftUI
 
-/// 玩家工具类
+/// Player Tools
 enum PlayerUtils {
     // MARK: - Constants
 
@@ -28,7 +28,7 @@ enum PlayerUtils {
         }
 
         var bytes = [UInt8](Insecure.MD5.hash(data: data))
-        bytes[6] = (bytes[6] & 0x0F) | 0x30 // 版本3
+        bytes[6] = (bytes[6] & 0x0F) | 0x30 // Version 3
         bytes[8] = (bytes[8] & 0x3F) | 0x80 // RFC 4122
         let uuid = bytes.withUnsafeBytes { UUID(uuid: $0.load(as: uuid_t.self)) }
         let uuidString = uuid.uuidString.lowercased()

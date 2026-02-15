@@ -1,7 +1,7 @@
 import Foundation
 
 // MARK: - Cache Entry
-/// 搜索结果缓存条目
+/// Search results cache entries
 struct SearchCacheEntry {
     let results: [ModrinthProject]
     let totalHits: Int
@@ -10,7 +10,7 @@ struct SearchCacheEntry {
 }
 
 // MARK: - Cache Key
-/// 搜索缓存键，用于唯一标识一次搜索
+/// Search cache key, used to uniquely identify a search
 struct SearchCacheKey: Hashable {
     let query: String
     let projectType: String
@@ -49,40 +49,40 @@ struct SearchCacheKey: Hashable {
 }
 
 // MARK: - Cache Manager
-/// 资源搜索缓存管理器
+/// Resource Search Cache Manager
 @MainActor
 final class ResourceSearchCacheManager {
     // MARK: - Singleton
     static let shared = ResourceSearchCacheManager()
     // MARK: - Properties
     private var cache: [SearchCacheKey: SearchCacheEntry] = [:]
-    private let cacheTimeout: TimeInterval = 300 // 5分钟
-    private let maxCacheSize: Int = 50 // 最多缓存50个搜索结果
+    private let cacheTimeout: TimeInterval = 300 // 5 minutes
+    private let maxCacheSize: Int = 50 // Cache up to 50 search results
     // MARK: - Initialization
     private init() {}
     // MARK: - Public Methods
-    /// 获取缓存的搜索结果
-    /// - Parameter key: 搜索缓存键
-    /// - Returns: 如果缓存存在且有效，返回缓存的搜索结果，否则返回 nil
+    /// Get cached search results
+    /// - Parameter key: Search cache key
+    /// - Returns: If the cache exists and is valid, return the cached search results, otherwise return nil
     func getCachedResult(for key: SearchCacheKey) -> SearchCacheEntry? {
         guard let entry = cache[key] else {
             return nil
         }
-        // 检查缓存是否过期
+        // Check if cache is expired
         let timeElapsed = Date().timeIntervalSince(entry.timestamp)
         if timeElapsed > cacheTimeout {
-            // 缓存已过期，移除并返回 nil
+            // Cache has expired, remove and return nil
             cache.removeValue(forKey: key)
             return nil
         }
         return entry
     }
-    /// 缓存搜索结果
+    /// Caching search results
     /// - Parameters:
-    ///   - key: 搜索缓存键
-    ///   - results: 搜索结果列表
-    ///   - totalHits: 总结果数
-    ///   - page: 当前页码
+    ///   - key: search cache key
+    ///   - results: search result list
+    ///   - totalHits: number of results
+    ///   - page: current page number
     func cacheResult(for key: SearchCacheKey, results: [ModrinthProject], totalHits: Int, page: Int) {
         let entry = SearchCacheEntry(
             results: results,
@@ -91,34 +91,34 @@ final class ResourceSearchCacheManager {
             page: page
         )
         cache[key] = entry
-        // 检查缓存大小，如果超过限制则清理最旧的条目
+        // Check the cache size and clear the oldest entries if it exceeds the limit
         cleanupIfNeeded()
     }
-    /// 清除所有缓存
+    /// clear all cache
     func clearAll() {
         cache.removeAll()
     }
-    /// 清除特定项目类型的缓存
-    /// - Parameter projectType: 项目类型
+    /// Clear cache for specific project types
+    /// - Parameter projectType: project type
     func clear(for projectType: String) {
         cache = cache.filter { key, _ in
             key.projectType != projectType
         }
     }
-    /// 清除特定数据源的缓存
-    /// - Parameter dataSource: 数据源
+    /// Clear the cache for a specific data source
+    /// - Parameter dataSource: data source
     func clear(for dataSource: DataSource) {
         cache = cache.filter { key, _ in
             key.dataSource != dataSource
         }
     }
     // MARK: - Private Methods
-    /// 清理缓存，如果超过最大缓存大小
+    /// Clean cache if maximum cache size is exceeded
     private func cleanupIfNeeded() {
         guard cache.count > maxCacheSize else { return }
-        // 找出最旧的条目
+        // Find the oldest entry
         let sortedEntries = cache.sorted { $0.value.timestamp < $1.value.timestamp }
-        // 移除最旧的条目，直到缓存大小在限制内
+        // Remove oldest entries until cache size is within limit
         let entriesToRemove = sortedEntries.prefix(cache.count - maxCacheSize)
         for (key, _) in entriesToRemove {
             cache.removeValue(forKey: key)

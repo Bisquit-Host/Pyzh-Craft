@@ -1,6 +1,6 @@
 import Foundation
 
-/// 支持的启动器类型
+/// Supported launcher types
 enum ImportLauncherType: String, CaseIterable {
     case multiMC = "MultiMC"
     case prismLauncher = "PrismLauncher"

@@ -1,14 +1,14 @@
 import Foundation
 
-/// 用户基本信息存储管理器
-/// 使用 UserDefaults (plist) 存储用户基本信息
+/// User basic information storage manager
+/// Use UserDefaults (plist) to store basic user information
 class UserProfileStore {
     private let profilesKey = "userProfiles"
 
     // MARK: - Public Methods
 
-    /// 加载所有用户基本信息
-    /// - Returns: 用户基本信息数组
+    /// Load all user basic information
+    /// - Returns: array of user basic information
     func loadProfiles() -> [UserProfile] {
         guard let profilesData = UserDefaults.standard.data(forKey: profilesKey) else {
             return []
@@ -23,9 +23,9 @@ class UserProfileStore {
         }
     }
 
-    /// 加载所有用户基本信息（抛出异常版本）
-    /// - Returns: 用户基本信息数组
-    /// - Throws: GlobalError 当操作失败时
+    /// Load all user basic information (throws exception version)
+    /// - Returns: array of user basic information
+    /// - Throws: GlobalError when the operation fails
     func loadProfilesThrowing() throws -> [UserProfile] {
         guard let profilesData = UserDefaults.standard.data(forKey: profilesKey) else {
             return []
@@ -43,8 +43,8 @@ class UserProfileStore {
         }
     }
 
-    /// 保存用户基本信息数组
-    /// - Parameter profiles: 要保存的用户基本信息数组
+    /// Save array of user basic information
+    /// - Parameter profiles: Array of basic user information to be saved
     func saveProfiles(_ profiles: [UserProfile]) {
         do {
             try saveProfilesThrowing(profiles)
@@ -55,9 +55,9 @@ class UserProfileStore {
         }
     }
 
-    /// 保存用户基本信息数组（抛出异常版本）
-    /// - Parameter profiles: 要保存的用户基本信息数组
-    /// - Throws: GlobalError 当操作失败时
+    /// Save the user's basic information array (throws an exception version)
+    /// - Parameter profiles: Array of basic user information to be saved
+    /// - Throws: GlobalError when the operation fails
     func saveProfilesThrowing(_ profiles: [UserProfile]) throws {
         do {
             let encoder = JSONEncoder()
@@ -73,9 +73,9 @@ class UserProfileStore {
         }
     }
 
-    /// 添加用户基本信息
-    /// - Parameter profile: 要添加的用户基本信息
-    /// - Throws: GlobalError 当操作失败时
+    /// Add basic user information
+    /// - Parameter profile: Basic information of the user to be added
+    /// - Throws: GlobalError when the operation fails
     func addProfile(_ profile: UserProfile) throws {
         var profiles = try loadProfilesThrowing()
 
@@ -87,7 +87,7 @@ class UserProfileStore {
             )
         }
 
-        // 如果是第一个用户，设置为当前用户
+        // If it is the first user, set it to the current user
         if profiles.isEmpty {
             var newProfile = profile
             newProfile.isCurrent = true
@@ -100,9 +100,9 @@ class UserProfileStore {
         Logger.shared.debug("已添加新用户: \(profile.name)")
     }
 
-    /// 更新用户基本信息
-    /// - Parameter profile: 更新后的用户基本信息
-    /// - Throws: GlobalError 当操作失败时
+    /// Update basic user information
+    /// - Parameter profile: updated user basic information
+    /// - Throws: GlobalError when the operation fails
     func updateProfile(_ profile: UserProfile) throws {
         var profiles = try loadProfilesThrowing()
 
@@ -119,20 +119,20 @@ class UserProfileStore {
         Logger.shared.debug("已更新用户信息: \(profile.name)")
     }
 
-    /// 删除用户基本信息
-    /// - Parameter id: 要删除的用户ID
-    /// - Throws: GlobalError 当操作失败时
+    /// Delete basic user information
+    /// - Parameter id: User ID to be deleted
+    /// - Throws: GlobalError when the operation fails
     func deleteProfile(byID id: String) throws {
         var profiles = try loadProfilesThrowing()
         let initialCount = profiles.count
 
-        // 检查要删除的用户是否为当前用户
+        // Check if the user to be deleted is the current user
         let isDeletingCurrentUser = profiles.contains { $0.id == id && $0.isCurrent }
 
         profiles.removeAll { $0.id == id }
 
         if profiles.count < initialCount {
-            // 如果删除的是当前用户，需要设置新的当前用户
+            // If the current user is deleted, a new current user needs to be set up
             if isDeletingCurrentUser && !profiles.isEmpty {
                 profiles[0].isCurrent = true
                 Logger.shared.debug("当前用户被删除，已设置第一个用户为当前用户: \(profiles[0].name)")
@@ -149,9 +149,9 @@ class UserProfileStore {
         }
     }
 
-    /// 检查用户是否存在
-    /// - Parameter id: 要检查的用户ID
-    /// - Returns: 如果存在则返回 true，否则返回 false
+    /// Check if user exists
+    /// - Parameter id: User ID to check
+    /// - Returns: true if exists, false otherwise
     func profileExists(id: String) -> Bool {
         do {
             let profiles = try loadProfilesThrowing()

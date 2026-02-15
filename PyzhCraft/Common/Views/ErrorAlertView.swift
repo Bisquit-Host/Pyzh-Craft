@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 错误弹窗修饰符
+/// Error popup modifier
 struct ErrorAlertModifier: ViewModifier {
     @StateObject private var errorHandler = GlobalErrorHandler.shared
 
@@ -24,7 +24,7 @@ struct ErrorAlertModifier: ViewModifier {
 // MARK: - View Extension
 
 extension View {
-    /// 添加错误弹窗处理
+    /// Add error popup window handling
     func errorAlert() -> some View {
         self.modifier(ErrorAlertModifier())
     }

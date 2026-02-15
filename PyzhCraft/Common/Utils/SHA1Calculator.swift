@@ -2,12 +2,12 @@ import Foundation
 import CommonCrypto
 import CryptoKit
 
-/// 统一的 SHA1 计算工具类
+/// Unified SHA1 calculation tool class
 public enum SHA1Calculator {
 
-    /// 计算 Data 的 SHA1 哈希值（适用于小文件或内存中的数据）
-    /// - Parameter data: 要计算哈希的数据
-    /// - Returns: SHA1 哈希字符串
+    /// Computes the SHA1 hash of Data (good for small files or in-memory data)
+    /// - Parameter data: The data to calculate the hash
+    /// - Returns: SHA1 hash string
     public static func sha1(of data: Data) -> String {
         var digest = [UInt8](repeating: 0, count: Int(CC_SHA1_DIGEST_LENGTH))
         data.withUnsafeBytes { buffer in
@@ -16,10 +16,10 @@ public enum SHA1Calculator {
         return digest.map { String(format: "%02hhx", $0) }.joined()
     }
 
-    /// 计算文件的 SHA1 哈希值（流式处理，适用于大文件）
-    /// - Parameter url: 文件路径
-    /// - Returns: SHA1 哈希字符串
-    /// - Throws: GlobalError 当操作失败时
+    /// Calculate the SHA1 hash of a file (streaming, for large files)
+    /// - Parameter url: file path
+    /// - Returns: SHA1 hash string
+    /// - Throws: GlobalError when the operation fails
     public static func sha1(ofFileAt url: URL) throws -> String {
         do {
             let fileHandle = try FileHandle(forReadingFrom: url)
@@ -28,7 +28,7 @@ public enum SHA1Calculator {
             var context = CC_SHA1_CTX()
             CC_SHA1_Init(&context)
 
-            // 使用 1MB 缓冲区进行流式处理
+            // Use 1MB buffer for streaming
             let bufferSize = 1024 * 1024
 
             while autoreleasepool(invoking: {
@@ -55,9 +55,9 @@ public enum SHA1Calculator {
         }
     }
 
-    /// 计算文件的 SHA1 哈希值（静默版本，返回可选值）
-    /// - Parameter url: 文件路径
-    /// - Returns: SHA1 哈希字符串，如果计算失败则返回 nil
+    /// Compute SHA1 hash of file (silent version, returns optional value)
+    /// - Parameter url: file path
+    /// - Returns: SHA1 hash string, or nil if the calculation fails
     public static func sha1Silent(ofFileAt url: URL) -> String? {
         do {
             return try sha1(ofFileAt: url)
@@ -69,18 +69,18 @@ public enum SHA1Calculator {
         }
     }
 
-    /// 使用 CryptoKit 计算 SHA1（适用于需要 CryptoKit 特性的场景）
-    /// - Parameter data: 要计算哈希的数据
-    /// - Returns: SHA1 哈希字符串
+    /// Calculate SHA1 using CryptoKit (for scenarios requiring CryptoKit features)
+    /// - Parameter data: The data to calculate the hash
+    /// - Returns: SHA1 hash string
     public static func sha1WithCryptoKit(of data: Data) -> String {
         let hash = Insecure.SHA1.hash(data: data)
         return hash.map { String(format: "%02hhx", $0) }.joined()
     }
 }
 
-// MARK: - Data Extension (保持向后兼容)
+// MARK: - Data Extension (maintains backward compatibility)
 extension Data {
-    /// 计算当前 Data 的 SHA1 哈希值
+    /// Calculate the SHA1 hash value of the current Data
     var sha1: String {
         SHA1Calculator.sha1(of: self)
     }

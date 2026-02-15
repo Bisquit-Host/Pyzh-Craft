@@ -1,22 +1,22 @@
 import Foundation
 
-/// 占位符实例解析器
-/// 用于尚未实现解析逻辑的启动器
+/// Placeholder instance parser
+/// For starters that have not yet implemented parsing logic
 struct PlaceholderInstanceParser: LauncherInstanceParser {
     let launcherType: ImportLauncherType
 
     func isValidInstance(at instancePath: URL) -> Bool {
-        // 暂未实现，返回 false
+        // Not implemented yet, returns false
         return false
     }
 
     func parseInstance(at instancePath: URL, basePath: URL) throws -> ImportInstanceInfo? {
-        // 暂未实现，抛出错误
+        // Not implemented yet, throws an error
         throw LauncherImportError.parserNotImplemented(launcherType: launcherType.rawValue)
     }
 }
 
-/// 启动器导入错误
+/// Launcher import error
 enum LauncherImportError: LocalizedError {
     case parserNotImplemented(launcherType: String)
 

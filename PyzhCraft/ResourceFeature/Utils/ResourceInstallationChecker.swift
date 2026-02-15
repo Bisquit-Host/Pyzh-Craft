@@ -1,17 +1,17 @@
 import Foundation
 
-/// 资源安装状态检查器
-/// 负责检查资源是否已安装在指定游戏中
+/// Resource installation status checker
+/// Responsible for checking whether the resource has been installed in the specified game
 enum ResourceInstallationChecker {
-    /// 检查资源在服务端模式下是否已安装
+    /// Check if the resource is installed in server mode
     /// - Parameters:
-    ///   - project: Modrinth 项目
-    ///   - resourceType: 资源类型
-    ///   - installedHashes: 已安装资源的 hash 集合
-    ///   - selectedVersions: 选中的游戏版本列表
-    ///   - selectedLoaders: 选中的加载器列表
-    ///   - gameInfo: 游戏信息（可选，用于兜底）
-    /// - Returns: 是否已安装
+    ///   - project: Modrinth project
+    ///   - resourceType: resource type
+    ///   - installedHashes: a collection of hashes of installed resources
+    ///   - selectedVersions: List of selected game versions
+    ///   - selectedLoaders: selected loader list
+    ///   - gameInfo: game information (optional, used for details)
+    /// - Returns: Whether it is installed
     static func checkInstalledStateForServerMode(
         project: ModrinthProject,
         resourceType: String,
@@ -22,7 +22,7 @@ enum ResourceInstallationChecker {
     ) async -> Bool {
         guard !installedHashes.isEmpty else { return false }
 
-        // 构造版本/loader 过滤条件（优先使用用户选择，其次使用当前游戏信息）
+        // Construct version/loader filter conditions (user selection is used first, and current game information is used secondly)
         let versionFilters: [String] = {
             if !selectedVersions.isEmpty {
                 return selectedVersions

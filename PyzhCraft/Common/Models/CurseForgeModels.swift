@@ -73,17 +73,17 @@ struct CurseForgeModDetail: Codable {
     let latestFilesIndexes: [CurseForgeFileIndex]?
     let body: String?
 
-    /// 获取对应的内容类型枚举
+    /// Get the corresponding content type enumeration
     var contentType: CurseForgeClassId? {
         CurseForgeClassId(rawValue: classId)
     }
 
-    /// 获取目录名称
+    /// Get directory name
     var directoryName: String {
         contentType?.directoryName ?? AppConstants.DirectoryNames.mods
     }
 
-    /// 转换为 Modrinth 项目类型字符串
+    /// Convert to Modrinth item type string
     var projectType: String {
         switch contentType {
         case .mods:
@@ -109,12 +109,12 @@ struct CurseForgeFileIndex: Codable {
     let modLoader: Int?
 }
 
-/// CurseForge 内容类型枚举
+/// CurseForge content type enum
 enum CurseForgeClassId: Int, CaseIterable {
-    case mods = 6           // 模组
-    case resourcePacks = 12 // 资源包
-    case shaders = 6552     // 光影
-    case datapacks = 6945   // 数据包
+    case mods = 6           // module
+    case resourcePacks = 12 // Resource pack
+    case shaders = 6552     // light and shadow
+    case datapacks = 6945   // packet
 
     var directoryName: String {
         switch self {
@@ -130,16 +130,16 @@ enum CurseForgeClassId: Int, CaseIterable {
     }
 }
 
-/// CurseForge ModLoaderType 枚举
+/// CurseForge ModLoaderType enumeration
 enum CurseForgeModLoaderType: Int, CaseIterable {
     case forge = 1
     case fabric = 4
     case quilt = 5
     case neoforge = 6
 
-    /// 根据字符串获取对应的枚举值
-    /// - Parameter loaderName: 加载器名称字符串
-    /// - Returns: 对应的枚举值，如果没有匹配则返回 nil
+    /// Get the corresponding enumeration value based on the string
+    /// - Parameter loaderName: loader name string
+    /// - Returns: corresponding enumeration value, if there is no match, return nil
     static func from(_ loaderName: String) -> Self? {
         switch loaderName.lowercased() {
         case "forge":
@@ -170,12 +170,12 @@ struct CurseForgeCategory: Codable, Identifiable, Hashable {
     let dateModified: String?
 }
 
-/// CurseForge 分类列表响应
+/// CurseForge category list response
 struct CurseForgeCategoriesResponse: Codable {
     let data: [CurseForgeCategory]
 }
 
-/// CurseForge 游戏版本
+/// CurseForge game version
 struct CurseForgeGameVersion: Codable, Identifiable, Hashable {
     let id: Int
     let gameVersionId: Int?
@@ -191,7 +191,7 @@ struct CurseForgeGameVersion: Codable, Identifiable, Hashable {
     var identifier: String { versionString }
 
     var version_type: String {
-        // CurseForge 没有明确的版本类型，根据版本号推断
+        // CurseForge does not have a clear version type, it is inferred based on the version number
         if versionString.contains("snapshot") || versionString.contains("pre") || versionString.contains("rc") {
             return "snapshot"
         }
@@ -199,7 +199,7 @@ struct CurseForgeGameVersion: Codable, Identifiable, Hashable {
     }
 }
 
-/// CurseForge 游戏版本列表响应
+/// CurseForge game version list response
 struct CurseForgeGameVersionsResponse: Codable {
     let data: [CurseForgeGameVersion]
 }
@@ -234,7 +234,7 @@ struct CurseForgeModFileDetail: Codable {
     let projectName: String?
     let authors: [CurseForgeAuthor]?
 
-    /// 从 hashes 数组中提取 algo 为 1 的 hash（SHA1）
+    /// Extract hash (SHA1) with algo = 1 from hashes array
     var sha1Hash: CurseForgeHash? {
         if let hashes = hashes {
             return hashes.first { $0.algo == 1 }
@@ -265,13 +265,13 @@ struct CurseForgeAuthor: Codable {
 
 // MARK: - CurseForge Manifest Models
 
-/// CurseForge 整合包的 manifest.json 格式
+/// Manifest.json format of CurseForge integration package
 struct CurseForgeManifest: Codable {
     let minecraft: CurseForgeMinecraft
     let manifestType: String
     let manifestVersion: Int
     let name: String
-    let version: String?  // 修改为可选类型，因为某些整合包可能缺少此字段
+    let version: String?  // Modified to optional as some modpacks may lack this field
     let author: String?
     let files: [CurseForgeManifestFile]
     let overrides: String?
@@ -281,19 +281,19 @@ struct CurseForgeManifest: Codable {
     }
 }
 
-/// CurseForge manifest 中的 Minecraft 配置
+/// Minecraft configuration in CurseForge manifest
 struct CurseForgeMinecraft: Codable {
     let version: String
     let modLoaders: [CurseForgeModLoader]
 }
 
-/// CurseForge manifest 中的模组加载器配置
+/// Mod loader configuration in CurseForge manifest
 struct CurseForgeModLoader: Codable {
     let id: String
     let primary: Bool
 }
 
-/// CurseForge manifest 中的文件信息
+/// File information in CurseForge manifest
 struct CurseForgeManifestFile: Codable {
     let projectID: Int
     let fileID: Int
@@ -304,7 +304,7 @@ struct CurseForgeManifestFile: Codable {
     }
 }
 
-/// CurseForge 整合包索引信息（转换后的格式）
+/// CurseForge integrated package index information (converted format)
 struct CurseForgeIndexInfo {
     let gameVersion: String
     let loaderType: String

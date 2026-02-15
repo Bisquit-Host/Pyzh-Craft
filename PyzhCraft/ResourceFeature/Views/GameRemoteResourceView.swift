@@ -13,7 +13,7 @@ struct GameRemoteResourceView: View {
     @Binding var selectedItem: SidebarItem
     @Binding var gameType: Bool
     let header: AnyView?
-    @Binding var scannedDetailIds: Set<String> // 从父视图传入的 detailId Set，用于快速查找
+    @Binding var scannedDetailIds: Set<String> // detailId Set passed in from the parent view for quick search
     @Binding var dataSource: DataSource
     @Binding var searchText: String
 

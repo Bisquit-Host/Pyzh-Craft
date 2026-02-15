@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - 版本选择区块
+// MARK: - version selection block
 struct VersionPickerForSheet: View {
     let project: ModrinthProject
     let resourceType: String
@@ -47,7 +47,7 @@ struct VersionPickerForSheet: View {
         .onAppear(perform: loadVersions)
         .onChange(of: selectedGame) { loadVersions() }
         .onChange(of: selectedVersion) { _, newValue in
-            // 更新主版本ID
+            // Update major version ID
             if let newValue = newValue {
                 mainVersionId = newValue.id
             } else {
@@ -92,7 +92,7 @@ struct VersionPickerForSheet: View {
             return
         }
 
-        // 使用服务端的过滤方法，减少客户端过滤
+        // Use server-side filtering methods to reduce client-side filtering
         let filtered = try await ModrinthService.fetchProjectVersionsFilter(
             id: project.projectId,
             selectedVersions: [game.gameVersion],
@@ -103,7 +103,7 @@ struct VersionPickerForSheet: View {
         _ = await MainActor.run {
             availableVersions = filtered
             selectedVersion = filtered.first
-            // 更新主版本ID
+            // Update major version ID
             if let firstVersion = filtered.first {
                 mainVersionId = firstVersion.id
             } else {

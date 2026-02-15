@@ -1,6 +1,6 @@
 import Foundation
 
-/// 公告响应模型
+/// Announcement response model
 public struct AnnouncementResponse: Codable {
     public let success: Bool
     public let data: AnnouncementData?
@@ -11,7 +11,7 @@ public struct AnnouncementResponse: Codable {
     }
 }
 
-/// 公告数据模型
+/// Announcement data model
 public struct AnnouncementData: Codable {
     public let title: String
     public let content: String

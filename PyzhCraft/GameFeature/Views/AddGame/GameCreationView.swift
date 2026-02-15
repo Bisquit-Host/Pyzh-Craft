@@ -64,38 +64,38 @@ struct GameCreationView: View {
         }
         .gameFormStateListeners(viewModel: viewModel, triggerConfirm: triggerConfirm, triggerCancel: triggerCancel)
         .onChange(of: viewModel.selectedLoaderVersion) { oldValue, newValue in
-            // 优化：仅在值实际变化时更新
+            // Optimization: only update when the value actually changes
             if oldValue != newValue {
                 viewModel.updateParentState()
             }
         }
         .onChange(of: viewModel.selectedModLoader) { oldValue, newLoader in
-            // 优化：仅在值实际变化时处理
+            // Optimization: only handle when the value actually changes
             if oldValue != newLoader {
                 viewModel.handleModLoaderChange(newLoader)
             }
         }
         .onChange(of: viewModel.selectedGameVersion) { oldValue, newVersion in
-            // 优化：仅在值实际变化时处理
+            // Optimization: only handle when the value actually changes
             if oldValue != newVersion {
                 viewModel.handleGameVersionChange(newVersion)
             }
         }
         .onDisappear {
-            // 页面关闭后清除所有数据
+            // Clear all data after closing the page
             clearAllData()
         }
     }
 
-    // MARK: - 清除数据
-    /// 清除页面所有数据
+    // MARK: - clear data
+    /// Clear all data on the page
     private func clearAllData() {
-        // 如果正在下载，取消下载任务
+        // If downloading is in progress, cancel the download task
         if viewModel.isDownloading {
             viewModel.handleCancel()
         }
-        // ViewModel 的数据会在下次打开时重新初始化，这里主要清理临时文件
-        // 不重置 ViewModel 状态，可能正在使用
+        // The data of ViewModel will be re-initialized the next time it is opened. Here we mainly clean up temporary files
+        // Does not reset ViewModel state, may be using
     }
 
     // MARK: - View Components

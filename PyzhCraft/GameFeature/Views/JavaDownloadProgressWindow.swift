@@ -6,10 +6,10 @@ struct JavaDownloadProgressWindow: View {
     private var dismiss
 
     var body: some View {
-        // 下载项列表
+        // Download list
         VStack {
             if downloadState.hasError {
-                // 错误状态 要显示重试按钮
+                // Error status To show the retry button
                 DownloadItemView(
                     icon: "exclamationmark.triangle.fill",
                     title: downloadState.version,
@@ -21,7 +21,7 @@ struct JavaDownloadProgressWindow: View {
                     downloadState: downloadState
                 )
             } else if downloadState.isDownloading {
-                // 下载中状态
+                // Downloading status
                 DownloadItemView(
                     icon: "cup.and.saucer.fill",
                     title: downloadState.version,
@@ -33,7 +33,7 @@ struct JavaDownloadProgressWindow: View {
                     downloadState: downloadState
                 )
             } else {
-                // 没有下载任务时的空状态
+                // Empty status when there is no download task
                 VStack(spacing: 16) {
                     Image(systemName: "tray")
                         .font(.system(size: 24))
@@ -47,7 +47,7 @@ struct JavaDownloadProgressWindow: View {
         }
         .padding()
         .onAppear {
-            // 设置窗口关闭回调
+            // Set window close callback
             JavaDownloadManager.shared.setDismissCallback {
                 dismiss()
             }
@@ -57,13 +57,13 @@ struct JavaDownloadProgressWindow: View {
         }
     }
 
-    /// 清理所有数据
+    /// Clean all data
     private func clearAllData() {
-        // 窗口关闭时清理数据
+        // Clean data when window is closed
     }
 }
 
-// 下载项视图
+// Downloads view
 struct DownloadItemView: View {
     let icon: String
     let title: String
@@ -74,14 +74,14 @@ struct DownloadItemView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // 图标
+            // icon
             ZStack {
                 Image(systemName: icon)
                     .font(.system(size: 24))
                     .foregroundColor(iconColor)
             }
 
-            // 内容
+            // content
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text(title)
@@ -93,7 +93,7 @@ struct DownloadItemView: View {
                         .foregroundColor(.secondary)
                 }
 
-                // 进度条和进度信息（仅在下载中时显示）
+                // Progress bar and progress information (only displayed when downloading is in progress)
                 if case .downloading(let progress) = status {
                     VStack(alignment: .leading, spacing: 2) {
                         ProgressView(value: progress)
@@ -103,7 +103,7 @@ struct DownloadItemView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            // 操作按钮（取消/重试）
+            // Action button (Cancel/Retry)
             Button(action: onCancel) {
                 Image(systemName: buttonIcon)
                     .foregroundColor(buttonColor)
@@ -131,22 +131,22 @@ struct DownloadItemView: View {
 
     private var buttonIcon: String {
         switch status {
-        case .downloading: "xmark.circle.fill"  // 取消图标
-        case .error: "arrow.clockwise.circle.fill"  // 重试图标
-        case .completed, .cancelled: "xmark.circle.fill"  // 默认关闭图标
+        case .downloading: "xmark.circle.fill"  // cancel icon
+        case .error: "arrow.clockwise.circle.fill"  // Retry goal
+        case .completed, .cancelled: "xmark.circle.fill"  // Default close icon
         }
     }
 
     private var buttonColor: Color {
         switch status {
-        case .downloading: .secondary  // 取消按钮用次要颜色
-        case .error: .blue  // 重试按钮用蓝色
-        case .completed, .cancelled: .secondary  // 默认次要颜色
+        case .downloading: .secondary  // Use secondary color for cancel button
+        case .error: .blue  // Retry button in blue
+        case .completed, .cancelled: .secondary  // Default secondary color
         }
     }
 }
 
-// 下载状态枚举
+// Download status enum
 enum DownloadStatus {
     case downloading(progress: Double)
     case completed, error, cancelled

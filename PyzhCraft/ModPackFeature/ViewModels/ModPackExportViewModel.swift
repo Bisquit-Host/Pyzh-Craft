@@ -1,60 +1,60 @@
 import SwiftUI
 
-/// 整合包导出视图模型
-/// 管理整合包导出流程的状态和业务逻辑
+/// Integration package export view model
+/// Manage the status and business logic of the integration package export process
 @MainActor
 class ModPackExportViewModel: ObservableObject {
     // MARK: - Export State
 
-    /// 导出状态枚举
+    /// Export status enum
     enum ExportState: Equatable {
-        case idle              // 空闲状态，显示表单
-        case exporting         // 正在导出，显示进度
-        case completed         // 导出完成，等待保存，显示进度（100%）
+        case idle              // Idle state, display form
+        case exporting         // Exporting, showing progress
+        case completed         // Export completed, waiting to save, display progress (100%)
     }
 
     // MARK: - Published Properties
 
-    /// 导出状态
+    /// export status
     @Published var exportState: ExportState = .idle
 
-    /// 导出进度信息
+    /// Export progress information
     @Published var exportProgress = ModPackExporter.ExportProgress()
 
-    /// 整合包名称
+    /// Integrated package name
     @Published var modPackName: String = ""
 
-    /// 整合包版本
+    /// Integrated package version
     @Published var modPackVersion: String = "1.0.0"
 
-    /// 整合包描述
+    /// Integration package description
     @Published var summary: String = ""
 
-    /// 导出错误信息
+    /// Export error message
     @Published var exportError: String?
 
-    /// 临时文件路径，当有值时表示打包完成，需要显示保存对话框
+    /// Temporary file path. When there is a value, it means that the packaging is completed and the save dialog box needs to be displayed
     @Published var tempExportPath: URL?
 
-    /// 保存文件时的错误信息
+    /// Error message when saving file
     @Published var saveError: String?
 
     // MARK: - Private Properties
 
-    /// 导出任务
+    /// Export tasks
     private var exportTask: Task<Void, Never>?
 
-    /// 是否已显示保存对话框（防止重复显示）
+    /// Whether the save dialog box has been displayed (to prevent repeated display)
     private var hasShownSaveDialog = false
 
     // MARK: - Computed Properties
 
-    /// 是否正在导出
+    /// Is exporting
     var isExporting: Bool {
         exportState == .exporting
     }
 
-    /// 是否应该显示保存对话框
+    /// Whether the save dialog should be shown
     var shouldShowSaveDialog: Bool {
         tempExportPath != nil && !hasShownSaveDialog
     }
@@ -107,7 +107,7 @@ class ModPackExportViewModel: ObservableObject {
         }
     }
 
-    /// 取消导出任务
+    /// Cancel export task
     func cancelExport() {
         exportTask?.cancel()
         cleanupTempFile()
@@ -120,7 +120,7 @@ class ModPackExportViewModel: ObservableObject {
 
     // MARK: - Save Dialog Actions
 
-    /// 标记保存对话框已显示（防止重复显示）
+    /// Mark save dialog is shown (to prevent repeated display)
     func markSaveDialogShown() {
         hasShownSaveDialog = true
     }

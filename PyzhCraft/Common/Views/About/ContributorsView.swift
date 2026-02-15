@@ -21,11 +21,11 @@ public struct ContributorsView: View {
             .padding(.vertical, 8)
         }
         .onAppear {
-            // 每次打开都重新获取GitHub贡献者数据
+            // Re-fetch GitHub contributor data every time you open it
             Task {
                 await viewModel.fetchContributors()
             }
-            // 每次打开都重新加载静态贡献者数据
+            // Static contributor data is reloaded every time it is opened
             loadStaticContributors()
         }
         .onDisappear {
@@ -44,11 +44,11 @@ public struct ContributorsView: View {
     // MARK: - Contributors Content
     private var contributorsContent: some View {
         LazyVStack(spacing: 16) {
-            // GitHub贡献者列表
+            // GitHub contributor list
             if !viewModel.contributors.isEmpty {
                 contributorsList
             }
-            // 静态贡献者列表（只有成功加载时才显示）
+            // Static contributor list (only displayed if loaded successfully)
             if staticContributorsLoaded && !staticContributorsLoadFailed {
                 staticContributorsList
             }
@@ -80,7 +80,7 @@ public struct ContributorsView: View {
     // MARK: - Contributors List
     private var contributorsList: some View {
         VStack(spacing: 0) {
-            // GitHub贡献者标题
+            // GitHub contributor titles
             Text("contributors.github_contributors")
                 .font(.title3)
                 .fontWeight(.semibold)
@@ -88,7 +88,7 @@ public struct ContributorsView: View {
                 .padding(.bottom, 8)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            // 顶级贡献者
+            // top contributors
             if !viewModel.topContributors.isEmpty {
                 ForEach(
                     Array(viewModel.topContributors.enumerated()),
@@ -120,7 +120,7 @@ public struct ContributorsView: View {
                 }
             }
 
-            // 其他贡献者
+            // Other contributors
             ForEach(
                 Array(viewModel.otherContributors.enumerated()),
                 id: \.element.id
@@ -155,7 +155,7 @@ public struct ContributorsView: View {
     }
     // MARK: - Load Static Contributors
     private func loadStaticContributors() {
-        // 重置状态
+        // reset state
         staticContributorsLoaded = false
         staticContributorsLoadFailed = false
         Task {
@@ -198,12 +198,12 @@ public struct ContributorsView: View {
         Logger.shared.info("Static contributors data cleared")
     }
 
-    /// 清理所有数据
+    /// Clean all data
     private func clearAllData() {
         clearStaticContributorsData()
-        // 清理 ViewModel 的贡献者数据，释放内存
+        // Clean up ViewModel’s contributor data and release memory
         viewModel.clearContributors()
-        // 清理图片缓存，释放内存
+        // Clean image cache and free up memory
         ContributorAvatarCache.shared.clearCache()
         StaticContributorAvatarCache.shared.clearCache()
         Logger.shared.info("All contributors data cleared")

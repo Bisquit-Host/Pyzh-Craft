@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 静态贡献者卡片视图
+/// Static contributor card view
 struct StaticContributorCardView: View {
     let contributor: StaticContributor
 
@@ -18,18 +18,18 @@ struct StaticContributorCardView: View {
 
     private var contributorContent: some View {
         HStack(spacing: 12) {
-            // 头像（emoji）
+            // Avatar (emoji)
             StaticContributorAvatarView(avatar: contributor.avatar)
 
-            // 信息部分
+            // Information section
             VStack(alignment: .leading, spacing: 4) {
-                // 用户名
+                // username
                 Text(contributor.name)
                     .font(.body)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
 
-                // 贡献标签行
+                // Contribution tag line
                 HStack(spacing: 6) {
                     ForEach(contributor.contributions, id: \.self) { contribution in
                         ContributionTagView(contribution: contribution)
@@ -39,7 +39,7 @@ struct StaticContributorCardView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            // 显示箭头图标（如果有URL）
+            // Show arrow icon if there is a URL
             if !contributor.url.isEmpty {
                 Image(systemName: "globe")
                     .font(.system(size: 16, weight: .medium))
