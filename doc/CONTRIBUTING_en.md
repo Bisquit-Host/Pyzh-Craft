@@ -1,7 +1,7 @@
 # Contributing Guide 📘
   [🇨🇳简体中文](../CONTRIBUTING.md) | 🇬🇧English
 
-Welcome to **SwiftCraftLauncher**! We’re so glad you’re here 🙌. This guide will help you contribute effectively and ensure your work is smoothly integrated.
+Welcome to **PyzhCraft**! We’re so glad you’re here 🙌. This guide will help you contribute effectively and ensure your work is smoothly integrated.
 
 ---
 
@@ -24,7 +24,7 @@ When you find a bug or have a suggestion:
 3. Include:
 
    * OS version (e.g. macOS 14.1)
-   * SwiftCraftLauncher version (release or commit hash)
+   * PyzhCraft version (release or commit hash)
    * Steps to reproduce → Expected behavior → Actual behavior
    * Logs, screenshots, or crash reports if available
 
@@ -49,7 +49,7 @@ When you find a bug or have a suggestion:
 6. Push the branch to your fork.
 7. Open a **Pull Request**:
 
-   * **Base repository**: original SwiftCraftLauncher repo
+   * **Base repository**: original PyzhCraft repo
    * **Base branch**: `dev`
    * **Compare branch**: your feature branch
 8. In your PR description, include:

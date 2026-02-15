@@ -1,7 +1,7 @@
 # 贡献指南 📘
   🇨🇳简体中文 | [🇬🇧English](/doc/CONTRIBUTING_en.md)
 
-#### 欢迎你为 SwiftCraftLauncher 贡献！谢谢你愿意参与 🙌。请先看这份指南，可以让我们协作更顺畅，也能让你的贡献更容易被接纳。
+#### 欢迎你为 PyzhCraft 贡献！谢谢你愿意参与 🙌。请先看这份指南，可以让我们协作更顺畅，也能让你的贡献更容易被接纳。
 
 ### 1. 行为准则 （Code of Conduct）✨
 
@@ -27,7 +27,7 @@
 
 操作系统版本（macOS + 版本号）
 
-SwiftCraftLauncher 的版本（release 或者 commit hash）
+PyzhCraft 的版本（release 或者 commit hash）
 
 你做了什么 → 期望是什么 → 实际发生什么
 

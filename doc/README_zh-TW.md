@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="../SwiftCraftLauncher/Assets.xcassets/AppIcon.appiconset/mac512pt2x.png" alt="SwiftCraftLauncher" width="128" height="128">
+  <img src="../PyzhCraft/Assets.xcassets/AppIcon.appiconset/mac512pt2x.png" alt="PyzhCraft" width="128" height="128">
   
   # 🚀 Swift Craft Launcher
   
@@ -29,7 +29,7 @@
 Swift Craft Launcher 是一款採用 SwiftUI 構建的原生 macOS Minecraft 啟動器 🍎，提供流暢高效的遊戲體驗。專為現代 macOS 系統設計，整合全面的模組載入器支援、Microsoft 帳戶認證和直觀的遊戲管理功能。
 
 <div align="center">
-  <img src="https://s2.loli.net/2025/08/12/pTPxSJh1bCzmGKo.png" alt="SwiftCraftLauncher 截圖" width="800">
+  <img src="https://s2.loli.net/2025/08/12/pTPxSJh1bCzmGKo.png" alt="PyzhCraft 截圖" width="800">
 </div>
 
 ## ✨ 核心特色
@@ -87,7 +87,7 @@ brew install --cask swift-craft-launcher
 
 2. **🛠️ 在 Xcode 中開啟**
    ```bash
-   open SwiftCraftLauncher.xcodeproj
+   open PyzhCraft.xcodeproj
    ```
 
 3. **🚀 建置並執行** 使用 Xcode (⌘R)
