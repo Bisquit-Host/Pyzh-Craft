@@ -11,19 +11,26 @@ private enum CategoryConstants {
 final class CategoryDataCacheManager {
     static let shared = CategoryDataCacheManager()
     private var viewModels: [String: CategoryContentViewModel] = [:]
+    
     private init() {
+        
     }
+    
     func getViewModel(for project: String) -> CategoryContentViewModel {
         if let existing = viewModels[project] {
             return existing
         }
+        
         let viewModel = CategoryContentViewModel(project: project)
         viewModels[project] = viewModel
+        
         return viewModel
     }
+    
     func clearAll() {
         viewModels.removeAll()
     }
+    
     func clear(for project: String) {
         viewModels.removeValue(forKey: project)
     }
