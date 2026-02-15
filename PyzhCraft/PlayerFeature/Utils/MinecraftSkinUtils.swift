@@ -373,7 +373,7 @@ struct MinecraftSkinUtils: View {
                 // 在后台线程进行渲染，避免阻塞主线程
                 let cacheKeyValue = cacheKey
                 let renderedCache = await Task.detached {
-                    return await Self.renderAndCacheImage(ciImage, for: cacheKeyValue, context: Self.ciContext)
+                    await Self.renderAndCacheImage(ciImage, for: cacheKeyValue, context: Self.ciContext)
                 }.value
 
                 await MainActor.run {

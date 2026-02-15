@@ -7,7 +7,7 @@ class JavaManager {
     private let fileManager = FileManager.default
 
     func getJavaExecutablePath(version: String) -> String {
-        return AppPaths.javaExecutablePath(version: version)
+        AppPaths.javaExecutablePath(version: version)
     }
 
     func findJavaExecutable(version: String) -> String {

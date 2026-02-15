@@ -30,15 +30,15 @@ class SQLiteDatabase {
     // MARK: - Connection Management
 
     private var isOnQueue: Bool {
-        return DispatchQueue.getSpecific(key: Self.queueKey) != nil
+        DispatchQueue.getSpecific(key: Self.queueKey) != nil
     }
 
     /// 在队列中执行操作（如果已在队列内则直接执行）
     private func sync<T>(_ block: () throws -> T) rethrows -> T {
         if isOnQueue {
-            return try block()
+            try block()
         } else {
-            return try queue.sync(execute: block)
+            try queue.sync(execute: block)
         }
     }
 
@@ -297,7 +297,7 @@ extension SQLiteDatabase {
 
     /// 读取整数列
     static func intColumn(_ statement: OpaquePointer, index: Int32) -> Int {
-        return Int(sqlite3_column_int64(statement, index))
+        Int(sqlite3_column_int64(statement, index))
     }
 
     /// 读取日期列

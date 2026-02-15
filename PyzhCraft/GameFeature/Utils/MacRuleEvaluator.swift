@@ -3,12 +3,13 @@ import Foundation
 // MARK: - Mac 规则评估器
 
 enum MacOS: String {
-    case osx = "osx"
-    case osxArm64 = "osx-arm64"
-    case osxX86_64 = "osx-x86_64"
+    case osx,
+         osxArm64 = "osx-arm64",
+         osxX86_64 = "osx-x86_64"
 
     static func fromJavaArch(_ javaArch: String) -> Self {
         let arch = javaArch.lowercased()
+        
         if arch.contains("aarch64") {
             return .osxArm64
         } else if arch.contains("x86_64") || arch.contains("amd64") {
@@ -20,8 +21,7 @@ enum MacOS: String {
 }
 
 enum RuleAction: String {
-    case allow = "allow"
-    case disallow = "disallow"
+    case allow, disallow
 }
 
 struct MacRule {
@@ -30,12 +30,11 @@ struct MacRule {
 }
 
 enum MacRuleEvaluator {
-
     static func getCurrentJavaArch() -> String {
         #if os(macOS)
-        return Architecture.current.javaArch
+        Architecture.current.javaArch
         #else
-        return "x86_64"
+        "x86_64"
         #endif
     }
 
@@ -66,7 +65,7 @@ enum MacRuleEvaluator {
     }
 
     static func isPlatformIdentifierSupported(_ identifier: String, minecraftVersion: String? = nil) -> Bool {
-        return getSupportedMacOSIdentifiers(minecraftVersion: minecraftVersion).contains(identifier)
+        getSupportedMacOSIdentifiers(minecraftVersion: minecraftVersion).contains(identifier)
     }
 
     static func convertFromMinecraftRules(_ rules: [Rule]) -> [MacRule] {

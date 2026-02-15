@@ -78,9 +78,7 @@ private struct GDLauncherInstanceConfig: Codable {
     let gameConfiguration: GDLauncherGameConfiguration
 
     enum CodingKeys: String, CodingKey {
-        case name
-        case icon
-        case gameConfiguration = "game_configuration"
+        case name, icon, gameConfiguration = "game_configuration"
     }
 }
 

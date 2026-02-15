@@ -5,10 +5,7 @@ import Foundation
 enum ResourceScanner {
     /// 资源类型
     enum ResourceType: String, CaseIterable {
-        case mods = "mods"
-        case datapacks = "datapacks"
-        case resourcepacks = "resourcepacks"
-        case shaderpacks = "shaderpacks"
+        case mods, datapacks, resourcepacks, shaderpacks
     }
 
     /// 扫描结果

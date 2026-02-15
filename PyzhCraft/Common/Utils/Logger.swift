@@ -243,7 +243,7 @@ class Logger: AppLogging {
 
     /// 获取日志文件路径
     func getLogFilePath() -> String? {
-        return logFileURL?.path
+        logFileURL?.path
     }
 
     /// 获取当前日志文件信息

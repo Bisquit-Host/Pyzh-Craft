@@ -3,11 +3,9 @@ import Network
 
 /// 服务器连接状态
 enum ServerConnectionStatus {
-    case unknown
-    case checking
-    case success(serverInfo: MinecraftServerInfo?)
-    case timeout
-    case failed
+    case unknown, checking,
+         success(serverInfo: MinecraftServerInfo?),
+         timeout, failed
 }
 
 /// 解析后的服务器地址信息

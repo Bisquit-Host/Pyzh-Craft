@@ -62,32 +62,21 @@ public struct ModrinthProjectDetail: Codable, Hashable, Equatable {
     var fileName: String?
 
     enum CodingKeys: String, CodingKey {
-        case slug
-        case title
-        case description
-        case categories
-        case clientSide = "client_side"
-        case serverSide = "server_side"
-        case body
-        case additionalCategories = "additional_categories"
-        case issuesUrl = "issues_url"
-        case sourceUrl = "source_url"
-        case wikiUrl = "wiki_url"
-        case discordUrl = "discord_url"
-        case projectType = "project_type"
-        case downloads
-        case iconUrl = "icon_url"
-        case id
-        case team
-        case published
-        case updated
-        case followers
-        case license
-        case versions
-        case gameVersions = "game_versions"
-        case loaders
-        case type
-        case fileName
+        case slug, title, description, categories,
+             clientSide = "client_side",
+             serverSide = "server_side",
+             body,
+             additionalCategories = "additional_categories",
+             issuesUrl = "issues_url",
+             sourceUrl = "source_url",
+             wikiUrl = "wiki_url",
+             discordUrl = "discord_url",
+             projectType = "project_type",
+             downloads,
+             iconUrl = "icon_url",
+             id, team, published, updated, followers, license, versions,
+             gameVersions = "game_versions",
+             loaders, type, fileName
     }
 }
 
@@ -193,23 +182,20 @@ public struct ModrinthProjectDetailVersion: Codable, Identifiable, Equatable, Ha
     public let dependencies: [ModrinthVersionDependency]
 
     enum CodingKeys: String, CodingKey {
-        case gameVersions = "game_versions"
-        case loaders
-        case id
-        case projectId = "project_id"
-        case authorId = "author_id"
-        case featured
-        case name
-        case versionNumber = "version_number"
-        case changelog
-        case changelogUrl = "changelog_url"
-        case datePublished = "date_published"
-        case downloads
-        case versionType = "version_type"
-        case status
-        case requestedStatus = "requested_status"
-        case files
-        case dependencies
+        case gameVersions = "game_versions",
+             loaders, id,
+             projectId = "project_id",
+             authorId = "author_id",
+             featured, name,
+             versionNumber = "version_number",
+             changelog,
+             changelogUrl = "changelog_url",
+             datePublished = "date_published",
+             downloads,
+             versionType = "version_type",
+             status,
+             requestedStatus = "requested_status",
+             files, dependencies
     }
 }
 
@@ -234,12 +220,8 @@ public struct ModrinthVersionFile: Codable, Equatable, Hashable {
     public let fileType: String?
 
     enum CodingKeys: String, CodingKey {
-        case hashes
-        case url
-        case filename
-        case primary
-        case size
-        case fileType = "file_type"
+        case hashes, url, filename, primary, size,
+             fileType = "file_type"
     }
 }
 

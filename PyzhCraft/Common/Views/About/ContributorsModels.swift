@@ -10,17 +10,17 @@ enum Contribution: String, CaseIterable {
     case infra = "contributor.contribution.infra"
 
     var localizedString: String {
-        return rawValue.localized()
+        rawValue.localized()
     }
 
     var color: Color {
         switch self {
-        case .code: return .blue
-        case .design: return .purple
-        case .test: return .green
-        case .feedback: return .orange
-        case .documentation: return .indigo
-        case .infra: return .red
+        case .code: .blue
+        case .design: .purple
+        case .test: .green
+        case .feedback: .orange
+        case .documentation: .indigo
+        case .infra: .red
         }
     }
 }

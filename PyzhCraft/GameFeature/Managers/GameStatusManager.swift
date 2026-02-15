@@ -82,7 +82,7 @@ class GameStatusManager: ObservableObject {
 
     /// 获取所有游戏状态
     var allGameStates: [String: Bool] {
-        return gameRunningStates
+        gameRunningStates
     }
 
     // MARK: - 启动中状态管理
@@ -104,7 +104,7 @@ class GameStatusManager: ObservableObject {
     /// - Parameter gameId: 游戏ID
     /// - Returns: 是否正在启动
     func isGameLaunching(gameId: String) -> Bool {
-        return gameLaunchingStates[gameId] ?? false
+        gameLaunchingStates[gameId] ?? false
     }
 
     /// - Parameter gameId: 游戏ID

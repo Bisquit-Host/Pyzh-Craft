@@ -118,11 +118,11 @@ class ModScanner {
     // MARK: - Hash
 
     static func sha1Hash(of url: URL) -> String? {
-        return SHA1Calculator.sha1Silent(ofFileAt: url)
+        SHA1Calculator.sha1Silent(ofFileAt: url)
     }
 
     static func sha1HashThrowing(of url: URL) throws -> String? {
-        return try SHA1Calculator.sha1(ofFileAt: url)
+        try SHA1Calculator.sha1(ofFileAt: url)
     }
 
     // MARK: - Fallback Methods
@@ -494,7 +494,7 @@ extension ModScanner {
     }
 
     private func isModsDirectory(_ dir: URL) -> Bool {
-        return dir.lastPathComponent.lowercased() == "mods"
+        dir.lastPathComponent.lowercased() == "mods"
     }
 
     // mods 目录结构：profileRootDirectory/gameName/mods
@@ -818,11 +818,11 @@ extension ModScanner {
         }
 
         func getAllModsInstalled(for gameName: String) -> Set<String> {
-            return cache[gameName] ?? Set<String>()
+            cache[gameName] ?? Set<String>()
         }
 
         func hasCache(for gameName: String) -> Bool {
-            return cache[gameName] != nil
+            cache[gameName] != nil
         }
 
         func setAllModsInstalled(for gameName: String, hashes: Set<String>) {
@@ -847,7 +847,7 @@ extension ModScanner {
     }
 
     func getAllModsInstalled(for gameName: String) async -> Set<String> {
-        return await ModInstallationCache.shared.getAllModsInstalled(for: gameName)
+        await ModInstallationCache.shared.getAllModsInstalled(for: gameName)
     }
 
     func clearModCache(for gameName: String) async {

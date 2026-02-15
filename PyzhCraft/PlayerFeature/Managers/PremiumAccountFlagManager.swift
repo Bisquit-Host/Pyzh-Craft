@@ -13,7 +13,7 @@ class PremiumAccountFlagManager {
     /// 检查是否曾经添加过正版账户
     /// - Returns: 如果曾经添加过正版账户则返回 true
     func hasAddedPremiumAccount() -> Bool {
-        return UserDefaults.standard.bool(forKey: flagKey)
+        UserDefaults.standard.bool(forKey: flagKey)
     }
 
     /// 设置已添加正版账户标记

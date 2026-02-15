@@ -194,7 +194,7 @@ class AIChatManager: ObservableObject {
 
         for message in messages {
             var messageDict: [String: Any] = [
-                "role": message.apiRoleString
+                "role": message.role.rawValue
             ]
 
             // 处理文本内容和文件附件
@@ -317,7 +317,7 @@ class AIChatManager: ObservableObject {
 
         for message in messages {
             var messageDict: [String: Any] = [
-                "role": message.apiRoleString
+                "role": message.role.rawValue
             ]
 
             // 处理文本内容和文件附件
@@ -520,6 +520,7 @@ class AIChatManager: ObservableObject {
     /// 格式化文件大小
     private func formatFileSize(_ bytes: Int64) -> String {
         let sizeInKB = Double(bytes) / 1024.0
+        
         if sizeInKB < 1024 {
             return String(format: "%.1f KB", sizeInKB)
         } else {

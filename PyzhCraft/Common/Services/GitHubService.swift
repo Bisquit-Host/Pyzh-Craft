@@ -84,6 +84,5 @@ public class GitHubService: ObservableObject {
 
 public enum GitHubServiceError: Error {
     case httpError(statusCode: Int)
-    case invalidResponse
-    case announcementNotSuccessful
+    case invalidResponse, announcementNotSuccessful
 }

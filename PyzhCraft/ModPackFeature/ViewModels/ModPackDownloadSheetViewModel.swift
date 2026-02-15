@@ -600,13 +600,7 @@ struct ModrinthIndex: Codable {
     let dependencies: ModrinthIndexDependencies
 
     enum CodingKeys: String, CodingKey {
-        case formatVersion = "formatVersion"
-        case game
-        case versionId = "versionId"
-        case name
-        case summary
-        case files
-        case dependencies
+        case formatVersion, game, versionId, name, summary, files, dependencies
     }
 }
 
@@ -664,9 +658,9 @@ struct ModrinthIndexFileHashes: Codable {
     /// 字典访问兼容性（向后兼容）
     subscript(key: String) -> String? {
         switch key {
-        case "sha1": return sha1
-        case "sha512": return sha512
-        default: return other?[key]
+        case "sha1": sha1
+        case "sha512": sha512
+        default: other?[key]
         }
     }
 }
@@ -683,14 +677,7 @@ struct ModrinthIndexFile: Codable {
     let curseForgeFileId: Int?
 
     enum CodingKeys: String, CodingKey {
-        case path
-        case hashes
-        case downloads
-        case fileSize = "fileSize"
-        case env
-        case source
-        case curseForgeProjectId
-        case curseForgeFileId
+        case path, hashes, downloads, fileSize, env, source, curseForgeProjectId, curseForgeFileId
     }
 
     // 为兼容性提供默认初始化器
@@ -737,8 +724,7 @@ struct ModrinthIndexFile: Codable {
 }
 
 enum FileSource: String, Codable {
-    case modrinth = "modrinth"
-    case curseforge = "curseforge"
+    case modrinth, curseforge
 }
 
 struct ModrinthIndexFileEnv: Codable {
@@ -760,16 +746,12 @@ struct ModrinthIndexDependencies: Codable {
     let dependencies: [ModrinthIndexProjectDependency]?
 
     enum CodingKeys: String, CodingKey {
-        case minecraft
-        case forgeLoader = "forge-loader"
-        case fabricLoader = "fabric-loader"
-        case quiltLoader = "quilt-loader"
-        case neoforgeLoader = "neoforge-loader"
-        case forge
-        case fabric
-        case quilt
-        case neoforge
-        case dependencies
+        case minecraft,
+             forgeLoader = "forge-loader",
+             fabricLoader = "fabric-loader",
+             quiltLoader = "quilt-loader",
+             neoforgeLoader = "neoforge-loader",
+             forge, fabric, quilt, neoforge, dependencies
     }
 }
 
@@ -779,9 +761,9 @@ struct ModrinthIndexProjectDependency: Codable {
     let dependencyType: String
 
     enum CodingKeys: String, CodingKey {
-        case projectId = "project_id"
-        case versionId = "version_id"
-        case dependencyType = "dependency_type"
+        case projectId = "project_id",
+             versionId = "version_id",
+             dependencyType = "dependency_type"
     }
 }
 

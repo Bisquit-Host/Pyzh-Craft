@@ -120,7 +120,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
     }
 
     override func computeIsDownloading() -> Bool {
-        return gameSetupService.downloadState.isDownloading || isImporting
+        gameSetupService.downloadState.isDownloading || isImporting
     }
 
     override func computeIsFormValid() -> Bool {
@@ -349,14 +349,18 @@ class LauncherImportViewModel: BaseGameFormViewModel {
         // 向上查找，最多查找5层
         for _ in 0..<5 {
             let iconsPath = currentPath.appendingPathComponent("icons")
+            
             if fileManager.fileExists(atPath: iconsPath.path) {
                 return currentPath
             }
+            
             let parentPath = currentPath.deletingLastPathComponent()
+            
             if parentPath.path == currentPath.path {
                 // 已经到达根目录
                 break
             }
+            
             currentPath = parentPath
         }
 

@@ -9,8 +9,7 @@ public struct GitHubContributor: Codable, Identifiable {
     public let contributions: Int
 
     enum CodingKeys: String, CodingKey {
-        case id
-        case login
+        case id, login
         case avatarUrl = "avatar_url"
         case htmlUrl = "html_url"
         case contributions

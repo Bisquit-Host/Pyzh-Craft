@@ -33,17 +33,7 @@ struct CurseForgeMod: Codable {
 
     enum CodingKeys: String, CodingKey {
         case id, name, summary, slug, authors, logo
-        case downloadCount
-        case gamePopularityRank
-        case links
-        case dateCreated
-        case dateModified
-        case dateReleased
-        case gameId
-        case classId
-        case categories
-        case latestFiles
-        case latestFilesIndexes
+        case downloadCount, gamePopularityRank, links, dateCreated, dateModified, dateReleased, gameId, classId, categories, latestFiles, latestFilesIndexes
     }
 }
 
@@ -85,12 +75,12 @@ struct CurseForgeModDetail: Codable {
 
     /// 获取对应的内容类型枚举
     var contentType: CurseForgeClassId? {
-        return CurseForgeClassId(rawValue: classId)
+        CurseForgeClassId(rawValue: classId)
     }
 
     /// 获取目录名称
     var directoryName: String {
-        return contentType?.directoryName ?? AppConstants.DirectoryNames.mods
+        contentType?.directoryName ?? AppConstants.DirectoryNames.mods
     }
 
     /// 转换为 Modrinth 项目类型字符串
@@ -287,14 +277,7 @@ struct CurseForgeManifest: Codable {
     let overrides: String?
 
     enum CodingKeys: String, CodingKey {
-        case minecraft
-        case manifestType
-        case manifestVersion
-        case name
-        case version
-        case author
-        case files
-        case overrides
+        case minecraft, manifestType, manifestVersion, name, version, author, files, overrides
     }
 }
 
@@ -317,9 +300,7 @@ struct CurseForgeManifestFile: Codable {
     let required: Bool
 
     enum CodingKeys: String, CodingKey {
-        case projectID
-        case fileID
-        case required
+        case projectID, fileID, required
     }
 }
 

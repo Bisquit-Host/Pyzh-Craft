@@ -17,8 +17,7 @@ struct MinecraftVersionManifest: Codable {
     let type: String
 
     enum CodingKeys: String, CodingKey {
-        case arguments, assetIndex, assets, downloads, id, javaVersion, libraries, logging, mainClass, minimumLauncherVersion, releaseTime, time, type
-        case complianceLevel = "complianceLevel"
+        case arguments, assetIndex, assets, downloads, id, javaVersion, libraries, logging, mainClass, minimumLauncherVersion, releaseTime, time, type, complianceLevel
     }
 
     init(from decoder: Decoder) throws {

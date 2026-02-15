@@ -321,7 +321,7 @@ enum CommonService {
     static func convertMavenCoordinateWithAtSymbolForURL(
         _ coordinate: String
     ) -> String {
-        return parseMavenCoordinateWithAtSymbol(coordinate)
+        parseMavenCoordinateWithAtSymbol(coordinate)
     }
 
     /// Maven 坐标转 FabricMC Maven 仓库 URL

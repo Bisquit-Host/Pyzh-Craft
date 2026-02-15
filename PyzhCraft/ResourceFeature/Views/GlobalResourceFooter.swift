@@ -81,6 +81,7 @@ struct GlobalResourceFooter: View {
                 Logger.shared.error("下载主资源失败: \(globalError.chineseMessage)")
                 GlobalErrorHandler.shared.handle(globalError)
             }
+            
             _ = await MainActor.run {
                 isDownloadingMainOnly = false
                 isPresented = false

@@ -6,31 +6,31 @@ private let aiApiKeyKeychainKey = "apiKey"
 
 /// AI 提供商枚举
 enum AIProvider: String, CaseIterable, Identifiable {
-    case openai = "openai"
-    case ollama = "ollama"
-//    case gemini = "gemini"
+    case openai,
+         ollama
+//    gemini
 
     var id: String { rawValue }
 
     var displayName: String {
         switch self {
         case .openai:
-            return "OpenAI"
+            "OpenAI"
         case .ollama:
-            return "Ollama"
+            "Ollama"
 //        case .gemini:
-//            return "Google Gemini"
+//            "Google Gemini"
         }
     }
 
     var baseURL: String {
         switch self {
         case .openai:
-            return "https://api.openai.com"
+            "https://api.openai.com"
         case .ollama:
-            return "http://localhost:11434"
+            "http://localhost:11434"
 //        case .gemini:
-//            return "https://generativelanguage.googleapis.com"
+//            "https://generativelanguage.googleapis.com"
         }
     }
 
@@ -38,11 +38,11 @@ enum AIProvider: String, CaseIterable, Identifiable {
     var apiFormat: APIFormat {
         switch self {
         case .openai:
-            return .openAI
+            .openAI
         case .ollama:
-            return .ollama
+            .ollama
 //        case .gemini:
-//            return .gemini
+//            .gemini
         }
     }
 
@@ -50,19 +50,19 @@ enum AIProvider: String, CaseIterable, Identifiable {
     var apiPath: String {
         switch self {
         case .openai:
-            return "/v1/chat/completions"
+            "/v1/chat/completions"
         case .ollama:
-            return "/api/chat"
+            "/api/chat"
 //        case .gemini:
-//            return "/v1/models/\(defaultModel):streamGenerateContent"
+//            "/v1/models/\(defaultModel):streamGenerateContent"
         }
     }
 }
 
 /// API 格式枚举
 enum APIFormat {
-    case openAI  // OpenAI 格式（兼容 DeepSeek 等）
-    case ollama
+    case openAI,  // OpenAI 格式（兼容 DeepSeek 等）
+         ollama
 //    case gemini
 }
 
@@ -75,9 +75,8 @@ class AISettingsManager: ObservableObject {
 
     var selectedProvider: AIProvider {
         get {
-            return AIProvider(rawValue: _selectedProviderRawValue) ?? .openai
-        }
-        set {
+            AIProvider(rawValue: _selectedProviderRawValue) ?? .openai
+        } set {
             _selectedProviderRawValue = newValue.rawValue
             objectWillChange.send()
         }
@@ -103,8 +102,7 @@ class AISettingsManager: ObservableObject {
             // Keychain 中没有数据，缓存空字符串
             _cachedApiKey = ""
             return ""
-        }
-        set {
+        } set {
             // 更新缓存
             _cachedApiKey = newValue.isEmpty ? "" : newValue
 
@@ -166,7 +164,7 @@ class AISettingsManager: ObservableObject {
 
     /// 获取当前提供商的模型名称（必填）
     func getModel() -> String {
-        return modelOverride.trimmingCharacters(in: .whitespacesAndNewlines)
+        modelOverride.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private init() {

@@ -3,8 +3,8 @@ import Combine
 
 /// 主界面布局风格：经典（列表在左、内容在右）/ 聚焦（内容在左、列表在右）
 public enum InterfaceLayoutStyle: String, CaseIterable {
-    case classic = "classic"   // 经典
-    case focused = "focused"  // 聚焦
+    case classic,   // 经典
+         focused  // 聚焦
 
     public var localizedName: String {
         "settings.interface_style.\(rawValue)".localized()
@@ -12,9 +12,7 @@ public enum InterfaceLayoutStyle: String, CaseIterable {
 }
 
 public enum ThemeMode: String, CaseIterable {
-    case light = "light"
-    case dark = "dark"
-    case system = "system"
+    case light, dark, system
 
     public var localizedName: String {
         "settings.theme.\(rawValue)".localized()
@@ -24,8 +22,10 @@ public enum ThemeMode: String, CaseIterable {
         switch self {
         case .light:
             return .light
+            
         case .dark:
             return .dark
+            
         case .system:
             // 在主线程上安全访问系统外观
             if Thread.isMainThread {
@@ -43,12 +43,9 @@ public enum ThemeMode: String, CaseIterable {
     /// 对应的 AppKit 外观，用于影响基于 AppKit 的 UI（如 Sparkle）
     public var nsAppearance: NSAppearance? {
         switch self {
-        case .light:
-            return NSAppearance(named: .aqua)
-        case .dark:
-            return NSAppearance(named: .darkAqua)
-        case .system:
-            return nil
+        case .light: NSAppearance(named: .aqua)
+        case .dark: NSAppearance(named: .darkAqua)
+        case .system: nil
         }
     }
 }

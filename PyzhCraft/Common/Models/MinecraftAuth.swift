@@ -7,11 +7,11 @@ struct AuthorizationCodeResponse {
     let errorDescription: String?
 
     var isSuccess: Bool {
-        return code != nil && error == nil
+        code != nil && error == nil
     }
 
     var isUserDenied: Bool {
-        return error == "access_denied"
+        error == "access_denied"
     }
 
     init?(from url: URL) {
@@ -54,7 +54,7 @@ struct DisplayClaims: Codable {
     let xui: [XUI]
 
     enum CodingKeys: String, CodingKey {
-        case xui = "xui"
+        case xui
     }
 }
 
@@ -77,10 +77,7 @@ struct MinecraftProfileResponse: Codable, Equatable {
     let refreshToken: String
 
     enum CodingKeys: String, CodingKey {
-        case id
-        case name
-        case skins
-        case capes
+        case id, name, skins, capes
         // accessToken 和 authXuid 不参与解码，因为它们不是从 API 响应中获取的
     }
 

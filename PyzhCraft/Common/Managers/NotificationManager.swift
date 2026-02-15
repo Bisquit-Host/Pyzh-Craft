@@ -110,7 +110,7 @@ enum NotificationManager {
 
     /// - Returns: 权限状态
     static func checkAuthorizationStatus() async -> UNAuthorizationStatus {
-        return await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+        await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
     }
 
     /// 检查是否有通知权限

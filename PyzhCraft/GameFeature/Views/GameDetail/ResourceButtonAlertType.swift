@@ -2,8 +2,7 @@ import SwiftUI
 
 /// 资源按钮的 Alert 类型枚举
 enum ResourceButtonAlertType: Identifiable {
-    case noGame
-    case noPlayer
+    case noGame, noPlayer
 
     var id: Self { self }
 

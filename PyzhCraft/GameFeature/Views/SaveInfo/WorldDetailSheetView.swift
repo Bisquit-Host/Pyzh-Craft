@@ -1,8 +1,7 @@
 import SwiftUI
 
 private enum WorldDetailLoadError: Error {
-    case levelDatNotFound
-    case invalidStructure
+    case levelDatNotFound, invalidStructure
 }
 
 /// 世界详细信息视图（读取 level.dat）

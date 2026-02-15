@@ -361,7 +361,7 @@ enum PlayerSkinService {
     ///   - currentActiveCapeId: 当前激活的披风ID
     /// - Returns: 是否有披风变化
     static func hasCapeChanges(selectedCapeId: String?, currentActiveCapeId: String?) -> Bool {
-        return selectedCapeId != currentActiveCapeId
+        selectedCapeId != currentActiveCapeId
     }
 
     // MARK: - Cape Management

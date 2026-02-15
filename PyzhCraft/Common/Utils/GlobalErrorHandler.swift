@@ -4,21 +4,17 @@ import SwiftUI
 
 /// 错误等级枚举
 enum ErrorLevel: String, CaseIterable {
-    case popup = "popup"           // 弹窗显示
-    case notification = "notification" // 通知显示
-    case silent = "silent"         // 静默处理，只记录日志
-    case disabled = "disabled"     // 什么都不做，不记录
+    case popup,           // 弹窗显示
+         notification, // 通知显示
+         silent,         // 静默处理，只记录日志
+         disabled     // 什么都不做，不记录
 
     var displayName: String {
         switch self {
-        case .popup:
-            return "弹窗"
-        case .notification:
-            return "通知"
-        case .silent:
-            return "静默"
-        case .disabled:
-            return "无操作"
+        case .popup: "弹窗"
+        case .notification: "通知"
+        case .silent: "静默"
+        case .disabled: "无操作"
         }
     }
 }
@@ -196,7 +192,7 @@ enum GlobalError: Error, LocalizedError, Identifiable {
 
     /// 本地化错误描述（使用国际化key）
     var errorDescription: String? {
-        return i18nKey.localized()
+        i18nKey.localized()
     }
 
     /// 本地化描述：优先使用 i18nKey，找不到时回退到 chineseMessage
@@ -395,46 +391,46 @@ extension View {
 
 extension GlobalErrorHandler {
     static func network(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
-        return .network(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+        .network(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
     }
 
     static func fileSystem(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
-        return .fileSystem(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+        .fileSystem(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
     }
 
     static func authentication(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .popup) -> GlobalError {
-        return .authentication(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+        .authentication(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
     }
 
     static func validation(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
-        return .validation(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+        .validation(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
     }
 
     static func download(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
-        return .download(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+        .download(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
     }
 
     static func installation(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
-        return .installation(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+        .installation(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
     }
 
     static func gameLaunch(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .popup) -> GlobalError {
-        return .gameLaunch(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+        .gameLaunch(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
     }
 
     static func resource(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
-        return .resource(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+        .resource(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
     }
 
     static func player(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
-        return .player(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+        .player(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
     }
 
     static func configuration(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
-        return .configuration(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+        .configuration(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
     }
 
     static func unknown(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .silent) -> GlobalError {
-        return .unknown(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+        .unknown(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
     }
 }

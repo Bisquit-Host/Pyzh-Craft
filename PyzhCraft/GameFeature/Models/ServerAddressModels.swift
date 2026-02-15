@@ -52,6 +52,6 @@ struct ServerAddress: Codable, Identifiable, Hashable {
 
     /// 获取完整的服务器地址（包含端口）
     var fullAddress: String {
-        return "\(address):\(String(port))"
+        "\(address):\(String(port))"
     }
 }

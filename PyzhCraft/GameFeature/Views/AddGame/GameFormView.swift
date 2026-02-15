@@ -26,8 +26,7 @@ struct GameFormView: View {
 
     // MARK: - File Picker Type
     enum FilePickerType {
-        case modPack
-        case gameIcon
+        case modPack, gameIcon
     }
 
     // MARK: - State

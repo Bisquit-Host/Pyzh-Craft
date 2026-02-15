@@ -277,7 +277,7 @@ class JavaRuntimeService {
     }
     /// 获取当前macOS平台标识
     private func getCurrentMacPlatform() -> String {
-        return Architecture.current.macPlatformId
+        Architecture.current.macPlatformId
     }
 
     /// 为文件设置执行权限
@@ -613,6 +613,6 @@ private actor CancelActor {
     }
 
     func shouldCancel() -> Bool {
-        return callback?() ?? false
+        callback?() ?? false
     }
 }

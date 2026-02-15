@@ -83,9 +83,9 @@ struct VersionGroupedView: View {
     /// 判断项目是否被选中
     private func isSelected(_ itemId: String) -> Bool {
         if isMultiSelect {
-            return selectedItems.contains(itemId)
+            selectedItems.contains(itemId)
         } else {
-            return selectedItem == itemId
+            selectedItem == itemId
         }
     }
 

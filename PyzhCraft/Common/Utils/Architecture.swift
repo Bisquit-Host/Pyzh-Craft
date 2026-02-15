@@ -2,8 +2,7 @@ import Foundation
 
 /// 统一的架构辅助工具，集中处理编译期架构分支
 enum Architecture {
-    case arm64
-    case x86_64
+    case arm64, x86_64
 
     /// 当前编译架构
     static let current: Architecture = {
@@ -17,24 +16,24 @@ enum Architecture {
     /// Java 相关架构字符串
     var javaArch: String {
         switch self {
-        case .arm64: return "aarch64"
-        case .x86_64: return "x86_64"
+        case .arm64: "aarch64"
+        case .x86_64: "x86_64"
         }
     }
 
     /// Sparkle / 通用架构字符串
     var sparkleArch: String {
         switch self {
-        case .arm64: return "arm64"
-        case .x86_64: return "x86_64"
+        case .arm64: "arm64"
+        case .x86_64: "x86_64"
         }
     }
 
     /// 用于 Java Runtime API 的平台标识
     var macPlatformId: String {
         switch self {
-        case .arm64: return "mac-os-arm64"
-        case .x86_64: return "mac-os"
+        case .arm64: "mac-os-arm64"
+        case .x86_64: "mac-os"
         }
     }
 

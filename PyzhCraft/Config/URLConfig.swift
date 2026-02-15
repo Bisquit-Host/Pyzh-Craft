@@ -120,7 +120,7 @@ enum URLConfig {
             /// - Parameter manifestURL: 清单URL
             /// - Returns: 清单URL
             static func manifest(_ manifestURL: String) -> URL {
-                return URLConfig.url(manifestURL)
+                URLConfig.url(manifestURL)
             }
         }
 
@@ -313,18 +313,18 @@ enum URLConfig {
 
             // Loader API
             static func loaderManifest(loader: String) -> URL {
-                return URLConfig.url("https://launcher-meta.modrinth.com/\(loader)/v0/manifest.json")
+                URLConfig.url("https://launcher-meta.modrinth.com/\(loader)/v0/manifest.json")
             }
 
             // Minecraft Version API
             static func versionInfo(version: String) -> URL {
-                return URLConfig.url("https://launcher-meta.modrinth.com/minecraft/v0/versions/\(version).json")
+                URLConfig.url("https://launcher-meta.modrinth.com/minecraft/v0/versions/\(version).json")
             }
 
             static let maven = URLConfig.url("https://launcher-meta.modrinth.com/maven/")
 
             static func loaderProfile(loader: String, version: String) -> URL {
-                return URLConfig.url("https://launcher-meta.modrinth.com/\(loader)/v0/versions/\(version).json")
+                URLConfig.url("https://launcher-meta.modrinth.com/\(loader)/v0/versions/\(version).json")
             }
 
             // 下载 URL

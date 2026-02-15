@@ -7,10 +7,10 @@ enum DownloadManager {
 
         var folderName: String {
             switch self {
-            case .mod: return AppConstants.DirectoryNames.mods
-            case .datapack: return AppConstants.DirectoryNames.datapacks
-            case .shader: return AppConstants.DirectoryNames.shaderpacks
-            case .resourcepack: return AppConstants.DirectoryNames.resourcepacks
+            case .mod: AppConstants.DirectoryNames.mods
+            case .datapack: AppConstants.DirectoryNames.datapacks
+            case .shader: AppConstants.DirectoryNames.shaderpacks
+            case .resourcepack: AppConstants.DirectoryNames.resourcepacks
             }
         }
 
@@ -254,6 +254,6 @@ enum DownloadManager {
     /// - Returns: SHA1 哈希字符串
     /// - Throws: GlobalError 当操作失败时
     static func calculateFileSHA1(at url: URL) throws -> String {
-        return try SHA1Calculator.sha1(ofFileAt: url)
+        try SHA1Calculator.sha1(ofFileAt: url)
     }
 }

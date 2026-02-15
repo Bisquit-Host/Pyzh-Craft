@@ -282,7 +282,7 @@ enum LoaderVersionResolver {
 
     /// 从字符串中提取版本号
     private static func extractVersionFromString(_ string: String) -> String? {
-        return extractVersionFromFileName(string.lowercased())
+        extractVersionFromFileName(string.lowercased())
     }
 
     /// 缓存 Modrinth 项目的 server_side 和 client_side 信息

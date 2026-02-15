@@ -6,9 +6,7 @@ enum ModPackDependencyInstaller {
 
     // MARK: - Download Type
     enum DownloadType {
-        case files
-        case dependencies
-        case overrides
+        case files, dependencies, overrides
     }
 
     // MARK: - Main Installation Method

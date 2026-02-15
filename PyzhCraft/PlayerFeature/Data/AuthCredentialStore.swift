@@ -40,20 +40,20 @@ class AuthCredentialStore {
     /// - Parameter userId: 用户ID
     /// - Returns: 是否删除成功
     func deleteCredential(userId: String) -> Bool {
-        return KeychainManager.delete(account: userId, key: "authCredential")
+        KeychainManager.delete(account: userId, key: "authCredential")
     }
 
     /// 删除用户的所有认证凭据
     /// - Parameter userId: 用户ID
     /// - Returns: 是否删除成功
     func deleteAllCredentials(userId: String) -> Bool {
-        return KeychainManager.deleteAll(account: userId)
+        KeychainManager.deleteAll(account: userId)
     }
 
     /// 更新认证凭据
     /// - Parameter credential: 更新后的认证凭据
     /// - Returns: 是否更新成功
     func updateCredential(_ credential: AuthCredential) -> Bool {
-        return saveCredential(credential)
+        saveCredential(credential)
     }
 }

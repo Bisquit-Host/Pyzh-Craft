@@ -92,28 +92,28 @@ enum AppConstants {
 // MARK: - Bundle Extension
 extension Bundle {
     var appVersion: String {
-        return infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+        infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
     }
 
     var buildNumber: String {
-        return infoDictionary?["CFBundleVersion"] as? String ?? "beta"
+        infoDictionary?["CFBundleVersion"] as? String ?? "beta"
     }
 
     var fullVersion: String {
-        return "\(appVersion)-\(buildNumber)"
+        "\(appVersion)-\(buildNumber)"
     }
     var appName: String {
-        return Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "Swift Craft Launcher"
+        Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "Swift Craft Launcher"
     }
     var copyright: String {
-        return infoDictionary?["NSHumanReadableCopyright"] as? String ?? "Copyright © 2025 \(appName)"
+        infoDictionary?["NSHumanReadableCopyright"] as? String ?? "Copyright © 2025 \(appName)"
     }
 
     var identifier: String {
-        return infoDictionary?["CFBundleIdentifier"] as? String ?? "com.su.code.PyzhCraft"
+        infoDictionary?["CFBundleIdentifier"] as? String ?? "com.su.code.PyzhCraft"
     }
 
     var appCategory: String {
-        return infoDictionary?["LSApplicationCategoryType"] as? String ?? "public.app-category.games"
+        infoDictionary?["LSApplicationCategoryType"] as? String ?? "public.app-category.games"
     }
 }

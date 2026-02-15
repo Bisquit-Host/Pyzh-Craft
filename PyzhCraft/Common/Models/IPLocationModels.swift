@@ -7,9 +7,8 @@ struct IPLocationResponse: Codable {
     let reason: String?
 
     enum CodingKeys: String, CodingKey {
-        case countryCode = "country_code"
-        case error
-        case reason
+        case countryCode = "country_code",
+             error, reason
     }
 
     init(from decoder: Decoder) throws {
@@ -21,16 +20,16 @@ struct IPLocationResponse: Codable {
 
     /// 是否请求成功
     var isSuccess: Bool {
-        return !error && countryCode != nil
+        !error && countryCode != nil
     }
 
     /// 是否为中国IP
     var isChina: Bool {
-        return countryCode == "CN"
+        countryCode == "CN"
     }
 
     /// 是否为国外IP
     var isForeign: Bool {
-        return isSuccess && !isChina
+        isSuccess && !isChina
     }
 }

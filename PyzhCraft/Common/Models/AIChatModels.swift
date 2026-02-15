@@ -2,22 +2,21 @@ import SwiftUI
 
 /// 消息角色
 enum MessageRole: String, Codable {
-    case user = "user"
-    case assistant = "assistant"
-    case system = "system"
+    case user, assistant, system
 }
 
 /// 附件类型
 enum MessageAttachmentType: Identifiable, Equatable {
-    case image(URL)
-    case file(URL, String) // URL 和文件名
+    case image(URL),
+         file(URL, String) // URL 和文件名
 
     var id: String {
         switch self {
         case .image(let url):
-            return "image_\(url.path)"
+            "image_\(url.path)"
+            
         case .file(let url, _):
-            return "file_\(url.path)"
+            "file_\(url.path)"
         }
     }
 }
@@ -64,21 +63,5 @@ class ChatState: ObservableObject {
     func clear() {
         messages.removeAll()
         isSending = false
-    }
-}
-
-// MARK: - Extension for API Conversion
-
-extension ChatMessage {
-    /// 转换为 API 角色字符串
-    var apiRoleString: String {
-        switch role {
-        case .user:
-            return "user"
-        case .assistant:
-            return "assistant"
-        case .system:
-            return "system"
-        }
     }
 }

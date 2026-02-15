@@ -123,7 +123,7 @@ enum RoomCodeGenerator {
     /// - Parameter roomCode: 房间码字符串（格式：U/XXXX-XXXX-XXXX-XXXX）
     /// - Returns: 是否有效
     static func validate(_ roomCode: String) -> Bool {
-        return parse(roomCode) != nil
+        parse(roomCode) != nil
     }
 
     /// 解析房间码字符串

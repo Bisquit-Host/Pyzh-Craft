@@ -11,7 +11,7 @@ class PlayerStatusManager: ObservableObject {
 
     /// 获取玩家状态
     func getStatus(for player: Player) -> PlayerStatus {
-        return statusCache[player.id] ?? .offline
+        statusCache[player.id] ?? .offline
     }
 
     /// 检查玩家状态
@@ -81,12 +81,12 @@ class PlayerStatusManager: ObservableObject {
 
     /// 获取玩家状态对应的图标名称
     func getStatusIconName(for player: Player) -> String {
-        return getStatus(for: player).iconName
+        getStatus(for: player).iconName
     }
 
     /// 获取玩家状态对应的颜色
     func getStatusColor(for player: Player) -> Color {
-        return getStatus(for: player).color
+        getStatus(for: player).color
     }
 }
 

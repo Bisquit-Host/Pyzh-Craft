@@ -8,15 +8,15 @@ enum LocalResourceInstaller {
 
         var directoryName: String {
             switch self {
-            case .mod: return AppConstants.DirectoryNames.mods
-            case .datapack: return AppConstants.DirectoryNames.datapacks
-            case .resourcepack: return AppConstants.DirectoryNames.resourcepacks
+            case .mod: AppConstants.DirectoryNames.mods
+            case .datapack: AppConstants.DirectoryNames.datapacks
+            case .resourcepack: AppConstants.DirectoryNames.resourcepacks
             }
         }
 
         /// 支持的文件扩展名 - 统一支持 jar 和 zip
         var allowedExtensions: [String] {
-            return ["jar", "zip"]
+            ["jar", "zip"]
         }
     }
 

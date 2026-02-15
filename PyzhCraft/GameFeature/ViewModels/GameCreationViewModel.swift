@@ -106,7 +106,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
     }
 
     override func computeIsDownloading() -> Bool {
-        return gameSetupService.downloadState.isDownloading
+        gameSetupService.downloadState.isDownloading
     }
 
     override func computeIsFormValid() -> Bool {

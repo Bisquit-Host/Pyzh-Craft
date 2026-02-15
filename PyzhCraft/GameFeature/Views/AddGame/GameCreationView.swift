@@ -138,9 +138,9 @@ struct GameCreationView: View {
                 }
                 .onDrop(of: [UTType.image.identifier], isTargeted: nil) { providers in
                     if !viewModel.gameSetupService.downloadState.isDownloading {
-                        return viewModel.handleImageDrop(providers)
+                        viewModel.handleImageDrop(providers)
                     } else {
-                        return false
+                        false
                     }
                 }
         }

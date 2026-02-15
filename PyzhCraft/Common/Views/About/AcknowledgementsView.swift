@@ -272,10 +272,7 @@ public struct AcknowledgementsView: View {
         let description: String?
 
         enum CodingKeys: String, CodingKey {
-            case name
-            case url
-            case avatar
-            case description
+            case name, url, avatar, description
         }
     }
 }

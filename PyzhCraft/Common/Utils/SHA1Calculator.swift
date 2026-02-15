@@ -82,6 +82,6 @@ public enum SHA1Calculator {
 extension Data {
     /// 计算当前 Data 的 SHA1 哈希值
     var sha1: String {
-        return SHA1Calculator.sha1(of: self)
+        SHA1Calculator.sha1(of: self)
     }
 }

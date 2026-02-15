@@ -63,8 +63,7 @@ struct DownloadProgressSection: View {
     // MARK: - Helper Methods
 
     private enum ProgressType {
-        case core
-        case resources
+        case core, resources
     }
 
     private func progressSection(
@@ -186,9 +185,7 @@ private struct ModPackProgressView: View {
     }
 
     private enum ModPackProgressType {
-        case files
-        case dependencies
-        case overrides
+        case files, dependencies, overrides
     }
 
     private func modPackProgressSection(

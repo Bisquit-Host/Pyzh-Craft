@@ -104,14 +104,14 @@ class SparkleUpdateService: NSObject, ObservableObject, SPUUpdaterDelegate {
 
     /// 获取系统架构
     private func getSystemArchitecture() -> String {
-        return Architecture.current.sparkleArch
+        Architecture.current.sparkleArch
     }
 
     // MARK: - Public Methods
 
     /// 获取当前系统架构
     func getCurrentArchitecture() -> String {
-        return getSystemArchitecture()
+        getSystemArchitecture()
     }
 
     /// 检查更新器状态

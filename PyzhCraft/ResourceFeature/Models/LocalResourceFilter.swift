@@ -2,8 +2,7 @@ import Foundation
 
 /// 本地资源筛选类型
 enum LocalResourceFilter: String, CaseIterable, Identifiable {
-    case all
-    case disabled
+    case all, disabled
 
     var id: String { rawValue }
 

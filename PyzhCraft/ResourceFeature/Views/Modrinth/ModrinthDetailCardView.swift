@@ -22,10 +22,8 @@ struct ModrinthDetailCardView: View {
 
     // MARK: - Enums
     enum AddButtonState {
-        case idle
-        case loading
-        case installed
-        case update  // 有新版本可用
+        case idle, loading, installed,
+             update  // 有新版本可用
     }
 
     // MARK: - Body
@@ -190,11 +188,11 @@ struct ModrinthDetailCardView: View {
     // MARK: - Helper Methods
     static func formatNumber(_ num: Int) -> String {
         if num >= 1_000_000 {
-            return String(format: "%.1fM", Double(num) / 1_000_000)
+            String(format: "%.1fM", Double(num) / 1_000_000)
         } else if num >= 1_000 {
-            return String(format: "%.1fk", Double(num) / 1_000)
+            String(format: "%.1fk", Double(num) / 1_000)
         } else {
-            return "\(num)"
+            "\(num)"
         }
     }
 }

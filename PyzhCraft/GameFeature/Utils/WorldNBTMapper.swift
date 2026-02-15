@@ -30,32 +30,32 @@ enum WorldNBTMapper {
 
     static func mapGameMode(_ value: Int) -> String {
         switch value {
-        case 0: return "saveinfo.world.game_mode.survival".localized()
-        case 1: return "saveinfo.world.game_mode.creative".localized()
-        case 2: return "saveinfo.world.game_mode.adventure".localized()
-        case 3: return "saveinfo.world.game_mode.spectator".localized()
-        default: return "saveinfo.world.game_mode.unknown".localized()
+        case 0: "saveinfo.world.game_mode.survival".localized()
+        case 1: "saveinfo.world.game_mode.creative".localized()
+        case 2: "saveinfo.world.game_mode.adventure".localized()
+        case 3: "saveinfo.world.game_mode.spectator".localized()
+        default: "saveinfo.world.game_mode.unknown".localized()
         }
     }
 
     static func mapDifficulty(_ value: Int) -> String {
         switch value {
-        case 0: return "saveinfo.world.difficulty.peaceful".localized()
-        case 1: return "saveinfo.world.difficulty.easy".localized()
-        case 2: return "saveinfo.world.difficulty.normal".localized()
-        case 3: return "saveinfo.world.difficulty.hard".localized()
-        default: return "saveinfo.world.difficulty.unknown".localized()
+        case 0: "saveinfo.world.difficulty.peaceful".localized()
+        case 1: "saveinfo.world.difficulty.easy".localized()
+        case 2: "saveinfo.world.difficulty.normal".localized()
+        case 3: "saveinfo.world.difficulty.hard".localized()
+        default: "saveinfo.world.difficulty.unknown".localized()
         }
     }
 
     /// 将新版 difficulty_settings.difficulty（字符串）映射为本地化文本
     static func mapDifficultyString(_ value: String) -> String {
         switch value.lowercased() {
-        case "peaceful": return "saveinfo.world.difficulty.peaceful".localized()
-        case "easy": return "saveinfo.world.difficulty.easy".localized()
-        case "normal": return "saveinfo.world.difficulty.normal".localized()
-        case "hard": return "saveinfo.world.difficulty.hard".localized()
-        default: return "saveinfo.world.difficulty.unknown".localized()
+        case "peaceful": "saveinfo.world.difficulty.peaceful".localized()
+        case "easy": "saveinfo.world.difficulty.easy".localized()
+        case "normal": "saveinfo.world.difficulty.normal".localized()
+        case "hard": "saveinfo.world.difficulty.hard".localized()
+        default: "saveinfo.world.difficulty.unknown".localized()
         }
     }
 

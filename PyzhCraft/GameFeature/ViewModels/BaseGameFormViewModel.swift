@@ -106,11 +106,11 @@ class BaseGameFormViewModel: ObservableObject, GameFormStateProtocol {
     }
 
     func computeIsDownloading() -> Bool {
-        return gameSetupService.downloadState.isDownloading
+        gameSetupService.downloadState.isDownloading
     }
 
     func computeIsFormValid() -> Bool {
-        return gameNameValidator.isFormValid
+        gameNameValidator.isFormValid
     }
 
     // MARK: - Common Download Management

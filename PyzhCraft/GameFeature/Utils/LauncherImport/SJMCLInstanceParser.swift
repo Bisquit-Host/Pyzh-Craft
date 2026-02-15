@@ -51,9 +51,9 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
     func parseInstance(at instancePath: URL, basePath: URL) throws -> ImportInstanceInfo? {
         // 根据启动器类型使用不同的解析逻辑
         if launcherType == .sjmcLauncher {
-            return try parseSJMCLInstance(at: instancePath, basePath: basePath)
+            try parseSJMCLInstance(at: instancePath, basePath: basePath)
         } else {
-            return try parseHMCLInstance(at: instancePath, basePath: basePath)
+            try parseHMCLInstance(at: instancePath, basePath: basePath)
         }
     }
 

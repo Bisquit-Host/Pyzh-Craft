@@ -127,6 +127,6 @@ enum InstanceFileCopier {
     }
 
     private static func getNormalizedPath(_ path: String) -> String {
-        return path.hasSuffix("/") ? path : path + "/"
+        path.hasSuffix("/") ? path : path + "/"
     }
 }

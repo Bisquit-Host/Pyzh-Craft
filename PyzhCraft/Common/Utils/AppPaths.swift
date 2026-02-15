@@ -135,11 +135,11 @@ enum AppPaths {
 extension AppPaths {
     static func resourceDirectory(for type: String, gameName: String) -> URL? {
         switch type.lowercased() {
-        case "mod": return modsDirectory(gameName: gameName)
-        case "datapack": return datapacksDirectory(gameName: gameName)
-        case "shader": return shaderpacksDirectory(gameName: gameName)
-        case "resourcepack": return resourcepacksDirectory(gameName: gameName)
-        default: return nil
+        case "mod": modsDirectory(gameName: gameName)
+        case "datapack": datapacksDirectory(gameName: gameName)
+        case "shader": shaderpacksDirectory(gameName: gameName)
+        case "resourcepack": resourcepacksDirectory(gameName: gameName)
+        default: nil
         }
     }
     /// 全局缓存文件路径 - 使用系统标准缓存目录，异常时回退到应用支持目录下的 Cache
@@ -147,6 +147,7 @@ extension AppPaths {
         if let cachesDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first {
             return cachesDirectory.appendingPathComponent(Bundle.main.identifier)
         }
+        
         Logger.shared.error("无法获取系统缓存目录，使用应用支持目录下的 Cache")
         return launcherSupportDirectory.appendingPathComponent("Cache", isDirectory: true)
     }

@@ -14,6 +14,7 @@ func filterCompatibleGames(
     // 第一步：根据资源兼容版本和本地游戏列表过滤，过滤出兼容的游戏版本
     let compatibleGames = gameRepository.games.compactMap { game -> GameVersionInfo? in
         let localLoader = game.modLoader.lowercased()
+        
         let match: Bool = {
             switch (resourceTypeLowercased, localLoader) {
             case ("datapack", "vanilla"):
@@ -31,6 +32,7 @@ func filterCompatibleGames(
                     && supportedLoaders.contains(localLoader)
             }
         }()
+        
         return match ? game : nil
     }
 
@@ -75,11 +77,13 @@ func filterCompatibleGames(
         }
 
         var results: [GameVersionInfo] = []
+        
         for await game in group {
             if let game = game {
                 results.append(game)
             }
         }
+        
         return results
     }
 }

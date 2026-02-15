@@ -26,11 +26,7 @@ public enum SidebarItem: Hashable, Identifiable {
 
 /// 资源类型
 public enum ResourceType: String, CaseIterable {
-    case mod = "mod"
-    case datapack = "datapack"
-    case shader = "shader"
-    case resourcepack = "resourcepack"
-    case modpack = "modpack"
+    case mod, datapack, shader, resourcepack, modpack
 
     public var localizedName: String {
         "resource.content.type.\(rawValue)".localized()

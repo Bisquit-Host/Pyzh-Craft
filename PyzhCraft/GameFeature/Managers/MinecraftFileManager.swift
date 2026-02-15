@@ -37,8 +37,7 @@ class MinecraftFileManager {
     var onProgressUpdate: ((String, Int, Int, DownloadType) -> Void)?
 
     enum DownloadType {
-        case core
-        case resources
+        case core, resources
     }
 
     // MARK: - Initialization
@@ -149,7 +148,7 @@ class MinecraftFileManager {
 
     /// 检查分类器是否为当前平台的原生库
     private func isNativeClassifier(_ key: String, minecraftVersion: String? = nil) -> Bool {
-        return MacRuleEvaluator.isPlatformIdentifierSupported(key, minecraftVersion: minecraftVersion)
+        MacRuleEvaluator.isPlatformIdentifierSupported(key, minecraftVersion: minecraftVersion)
     }
 
     private func createDirectories(
@@ -530,7 +529,7 @@ class MinecraftFileManager {
     }
 
     private func calculateFileSHA1(at url: URL) async throws -> String {
-        return try SHA1Calculator.sha1(ofFileAt: url)
+        try SHA1Calculator.sha1(ofFileAt: url)
     }
 
     private func incrementCompletedFilesCount(
@@ -695,7 +694,7 @@ extension MinecraftFileManager {
 
     /// 判断库是否应该下载
     private func shouldDownloadLibrary(_ library: Library, minecraftVersion: String? = nil) -> Bool {
-        return LibraryFilter.shouldDownloadLibrary(library, minecraftVersion: minecraftVersion)
+        LibraryFilter.shouldDownloadLibrary(library, minecraftVersion: minecraftVersion)
     }
 
     /// 判断库是否允许在 macOS (osx) 下加载（保留向后兼容性）

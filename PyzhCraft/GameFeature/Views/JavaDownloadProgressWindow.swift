@@ -115,45 +115,33 @@ struct DownloadItemView: View {
 
     private var iconColor: Color {
         switch status {
-        case .downloading:
-            return .accentColor
-        case .error:
-            return .red
-        default:
-            return .accentColor
+        case .downloading: .accentColor
+        case .error: .red
+        default: .accentColor
         }
     }
 
     private var iconBackgroundColor: Color {
         switch status {
-        case .downloading:
-            return Color.blue.opacity(0.1)
-        case .error:
-            return Color.red.opacity(0.1)
-        default:
-            return .accentColor
+        case .downloading: .blue.opacity(0.1)
+        case .error: .red.opacity(0.1)
+        default: .accentColor
         }
     }
 
     private var buttonIcon: String {
         switch status {
-        case .downloading:
-            return "xmark.circle.fill"  // 取消图标
-        case .error:
-            return "arrow.clockwise.circle.fill"  // 重试图标
-        case .completed, .cancelled:
-            return "xmark.circle.fill"  // 默认关闭图标
+        case .downloading: "xmark.circle.fill"  // 取消图标
+        case .error: "arrow.clockwise.circle.fill"  // 重试图标
+        case .completed, .cancelled: "xmark.circle.fill"  // 默认关闭图标
         }
     }
 
     private var buttonColor: Color {
         switch status {
-        case .downloading:
-            return .secondary  // 取消按钮用次要颜色
-        case .error:
-            return .blue  // 重试按钮用蓝色
-        case .completed, .cancelled:
-            return .secondary  // 默认次要颜色
+        case .downloading: .secondary  // 取消按钮用次要颜色
+        case .error: .blue  // 重试按钮用蓝色
+        case .completed, .cancelled: .secondary  // 默认次要颜色
         }
     }
 }
@@ -161,7 +149,5 @@ struct DownloadItemView: View {
 // 下载状态枚举
 enum DownloadStatus {
     case downloading(progress: Double)
-    case completed
-    case error
-    case cancelled
+    case completed, error, cancelled
 }

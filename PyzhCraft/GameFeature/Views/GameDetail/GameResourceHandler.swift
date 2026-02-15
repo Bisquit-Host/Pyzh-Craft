@@ -76,7 +76,7 @@ enum GameResourceHandler {
     /// - Parameter dir: 目录 URL
     /// - Returns: 是否是 mods 目录
     private static func isModsDirectory(_ dir: URL) -> Bool {
-        return dir.lastPathComponent.lowercased() == "mods"
+        dir.lastPathComponent.lowercased() == "mods"
     }
 
     /// 从 mods 目录路径中提取游戏名称

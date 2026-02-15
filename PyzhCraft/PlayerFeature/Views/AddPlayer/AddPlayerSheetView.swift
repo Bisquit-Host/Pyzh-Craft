@@ -267,9 +267,9 @@ struct AddPlayerSheetView: View {
     // 根据输入状态和焦点状态决定边框颜色
     private var borderColor: Color {
         if isTextFieldFocused {
-            return .blue
+            .blue
         } else {
-            return .clear
+            .clear
         }
     }
 
@@ -297,8 +297,7 @@ struct AddPlayerSheetView: View {
 enum AccountAuthType: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 
-    case offline
-    case premium
+    case offline, premium
 
     var displayName: String {
         switch self {
