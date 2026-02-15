@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  PyzhCraft
-//
-//  Created by su on 2025/6/1.
-//
-
 import SwiftUI
 import WebKit
 

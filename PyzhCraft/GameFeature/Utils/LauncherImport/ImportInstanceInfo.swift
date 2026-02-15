@@ -1,9 +1,3 @@
-//
-//  ImportInstanceInfo.swift
-//  PyzhCraft
-//
-//
-
 import Foundation
 
 /// 导入实例信息

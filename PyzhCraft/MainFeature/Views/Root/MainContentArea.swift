@@ -1,11 +1,3 @@
-//
-//  MainContentArea.swift
-//  PyzhCraft
-//
-//  承载 filterState/detailState，将二者从 MainView 根节点下沉至此，
-//  减少 filterState（搜索、筛选等）变化时对 MainView 的触发重建。
-//
-
 import SwiftUI
 
 /// 主内容区域：持有 filterState、detailState，渲染 NavigationSplitView

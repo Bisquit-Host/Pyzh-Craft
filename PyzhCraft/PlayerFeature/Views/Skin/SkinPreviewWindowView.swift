@@ -1,10 +1,3 @@
-//
-//  SkinPreviewWindowView.swift
-//  PyzhCraft
-//
-//  Created by su on 2025/1/27.
-//
-
 import Foundation
 import SwiftUI
 import AppKit

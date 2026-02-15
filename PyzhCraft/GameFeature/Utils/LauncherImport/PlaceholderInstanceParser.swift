@@ -1,9 +1,3 @@
-//
-//  PlaceholderInstanceParser.swift
-//  PyzhCraft
-//
-//
-
 import Foundation
 
 /// 占位符实例解析器

@@ -1,9 +1,3 @@
-//
-//  BaseGameFormViewModel.swift
-//  PyzhCraft
-//
-//
-
 import SwiftUI
 import Combine
 

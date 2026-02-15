@@ -1,10 +1,3 @@
-//
-//  ResourceSearchCacheManager.swift
-//  PyzhCraft
-//
-//  Created by AI Assistant on 2026/2/15.
-//
-
 import Foundation
 
 // MARK: - Cache Entry

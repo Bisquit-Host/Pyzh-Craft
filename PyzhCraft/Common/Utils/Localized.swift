@@ -1,8 +1,3 @@
-//
-//  Localized.swift
-//  PyzhCraft
-//
-
 enum Localized {
   enum Sidebar {
     enum Search {

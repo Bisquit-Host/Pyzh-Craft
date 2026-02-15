@@ -1,9 +1,3 @@
-//
-//  XMCLInstanceParser.swift
-//  PyzhCraft
-//
-//
-
 import Foundation
 
 /// XMCL 实例解析器

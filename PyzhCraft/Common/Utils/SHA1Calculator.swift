@@ -1,10 +1,3 @@
-//
-//  SHA1Calculator.swift
-//  PyzhCraft
-//
-//  Created by su on 2025/8/3.
-//
-
 import Foundation
 import CommonCrypto
 import CryptoKit

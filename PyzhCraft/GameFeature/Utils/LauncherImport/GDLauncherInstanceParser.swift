@@ -1,9 +1,3 @@
-//
-//  GDLauncherInstanceParser.swift
-//  PyzhCraft
-//
-//
-
 import Foundation
 
 /// GDLauncher 实例解析器

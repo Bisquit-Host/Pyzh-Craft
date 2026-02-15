@@ -1,9 +1,3 @@
-//
-//  AIChatInputAreaView.swift
-//  PyzhCraft
-//
-//
-
 import SwiftUI
 
 /// AI 聊天输入区域视图

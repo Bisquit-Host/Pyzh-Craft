@@ -1,9 +1,3 @@
-//
-//  MultiMCInstanceParser.swift
-//  PyzhCraft
-//
-//
-
 import Foundation
 
 /// MultiMC/PrismLauncher 实例解析器

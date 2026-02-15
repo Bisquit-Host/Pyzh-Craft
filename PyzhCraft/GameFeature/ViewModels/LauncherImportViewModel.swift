@@ -1,9 +1,3 @@
-//
-//  LauncherImportViewModel.swift
-//  PyzhCraft
-//
-//
-
 import SwiftUI
 
 /// 启动器导入 ViewModel

@@ -1,4 +1,3 @@
-// AsyncSemaphore for Swift Concurrency
 import Foundation
 
 public actor AsyncSemaphore {

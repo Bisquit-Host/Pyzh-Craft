@@ -1,9 +1,3 @@
-//
-//  ModPackImportViewModel.swift
-//  PyzhCraft
-//
-//
-
 import SwiftUI
 
 // MARK: - ModPack Import View Model

@@ -1,10 +1,3 @@
-//
-//  ModPackExportSheet.swift
-//  PyzhCraft
-//
-//  Created by Auto on 2025/01/XX.
-//
-
 import SwiftUI
 import UniformTypeIdentifiers
 

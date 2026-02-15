@@ -1,9 +1,3 @@
-//
-//  ContributorAvatarView.swift
-//  PyzhCraft
-//
-//
-
 import SwiftUI
 import Foundation
 

@@ -1,9 +1,3 @@
-//
-//  GameCreationViewModel.swift
-//  PyzhCraft
-//
-//
-
 import SwiftUI
 import UniformTypeIdentifiers
 

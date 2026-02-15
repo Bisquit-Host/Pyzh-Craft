@@ -1,9 +1,3 @@
-//
-//  LauncherImportView.swift
-//  PyzhCraft
-//
-//
-
 import SwiftUI
 import UniformTypeIdentifiers
 

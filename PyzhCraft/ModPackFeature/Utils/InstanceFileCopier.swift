@@ -1,8 +1,3 @@
-//
-//  InstanceFileCopier.swift
-//  PyzhCraft
-//
-
 import Foundation
 
 enum InstanceFileCopier {

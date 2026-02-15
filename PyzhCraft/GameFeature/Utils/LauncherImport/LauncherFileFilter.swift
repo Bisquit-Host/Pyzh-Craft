@@ -1,9 +1,3 @@
-//
-//  LauncherFileFilter.swift
-//  PyzhCraft
-//
-//
-
 import Foundation
 
 /// 启动器文件过滤器

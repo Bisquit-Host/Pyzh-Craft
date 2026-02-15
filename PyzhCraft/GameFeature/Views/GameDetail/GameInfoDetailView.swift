@@ -1,10 +1,3 @@
-//
-//  GameInfoDetailView.swift
-//  PyzhCraft
-//
-//  Created by su on 2025/6/2.
-//
-
 import SwiftUI
 import UniformTypeIdentifiers
 

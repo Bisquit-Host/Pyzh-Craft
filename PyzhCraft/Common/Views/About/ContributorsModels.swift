@@ -1,9 +1,3 @@
-//
-//  ContributorsModels.swift
-//  PyzhCraft
-//
-//
-
 import SwiftUI
 
 /// 贡献类型枚举

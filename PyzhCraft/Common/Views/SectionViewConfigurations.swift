@@ -1,9 +1,3 @@
-//
-//  SectionViewConfigurations.swift
-//  PyzhCraft
-//
-//  Created by AI Assistant
-//
 import SwiftUI
 
 // MARK: - Section View Configuration Protocol

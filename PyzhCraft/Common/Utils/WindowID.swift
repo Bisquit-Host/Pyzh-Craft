@@ -1,10 +1,3 @@
-//
-//  WindowID.swift
-//  PyzhCraft
-//
-//  Created by su on 2025/1/27.
-//
-
 import SwiftUI
 
 /// 窗口标识符枚举

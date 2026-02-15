@@ -1,9 +1,3 @@
-//
-//  GameFormViewExtensions.swift
-//  PyzhCraft
-//
-//
-
 import SwiftUI
 
 // MARK: - Game Form View Extensions

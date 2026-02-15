@@ -1,9 +1,3 @@
-//
-//  AIChatComponents.swift
-//  PyzhCraft
-//
-//
-
 import SwiftUI
 import AppKit
 

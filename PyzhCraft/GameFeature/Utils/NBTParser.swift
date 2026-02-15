@@ -1,10 +1,3 @@
-//
-//  NBTParser.swift
-//  PyzhCraft
-//
-//  Created by su on 2025/1/20.
-//
-
 import Foundation
 
 /// NBT 标签类型

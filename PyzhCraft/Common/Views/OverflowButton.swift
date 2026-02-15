@@ -1,9 +1,3 @@
-//
-//  OverflowButton.swift
-//  PyzhCraft
-//
-//  Created by AI Assistant
-//
 import SwiftUI
 
 // MARK: - Overflow Button

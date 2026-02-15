@@ -1,10 +1,3 @@
-//
-//  AIChatManager.swift
-//  PyzhCraft
-//
-//  Created by AI Assistant
-//
-
 import Foundation
 import SwiftUI
 

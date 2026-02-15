@@ -1,10 +1,3 @@
-//
-//  ResourceImageCacheManager.swift
-//  PyzhCraft
-//
-//  Created by AI Assistant on 2026/2/15.
-//
-
 import SwiftUI
 import Foundation
 

@@ -1,10 +1,3 @@
-//
-//  StartupInfoSheetView.swift
-//  PyzhCraft
-//
-//  Created by su on 2025/1/12.
-//
-
 import SwiftUI
 
 /// 启动信息提示Sheet视图

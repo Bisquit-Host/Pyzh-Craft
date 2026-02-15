@@ -1,9 +1,3 @@
-//
-//  GameFormProtocols.swift
-//  PyzhCraft
-//
-//
-
 import SwiftUI
 
 // MARK: - Game Form State Protocol

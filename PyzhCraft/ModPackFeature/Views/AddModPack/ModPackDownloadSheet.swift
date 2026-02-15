@@ -1,10 +1,3 @@
-//
-//  ModPackDownloadSheet.swift
-//  PyzhCraft
-//
-//  Created by su on 2025/8/2.
-//
-
 import SwiftUI
 
 struct ModPackDownloadSheet: View {

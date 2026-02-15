@@ -1,10 +1,3 @@
-//
-//  ModPackArchiver.swift
-//  PyzhCraft
-//
-//  Created by Auto on 2025/01/XX.
-//
-
 import Foundation
 import ZIPFoundation
 

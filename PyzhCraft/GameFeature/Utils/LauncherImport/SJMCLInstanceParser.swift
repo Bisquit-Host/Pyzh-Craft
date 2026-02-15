@@ -1,9 +1,3 @@
-//
-//  HMCLSJMCLInstanceParser.swift
-//  PyzhCraft
-//
-//
-
 import Foundation
 
 /// HMCL 和 SJMCL 使用不同的 JSON 格式

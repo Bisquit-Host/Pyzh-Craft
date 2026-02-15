@@ -1,10 +1,3 @@
-//
-//  WindowStyleHelper.swift
-//  PyzhCraft
-//
-//  Created by su on 2025/1/27.
-//
-
 import AppKit
 import SwiftUI
 

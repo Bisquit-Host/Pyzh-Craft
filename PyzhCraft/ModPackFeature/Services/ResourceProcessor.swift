@@ -1,10 +1,3 @@
-//
-//  ResourceProcessor.swift
-//  PyzhCraft
-//
-//  Created by Auto on 2025/01/XX.
-//
-
 import Foundation
 
 /// 资源处理器

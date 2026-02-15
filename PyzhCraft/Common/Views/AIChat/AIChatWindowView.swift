@@ -1,9 +1,3 @@
-//
-//  AIChatWindow.swift
-//  PyzhCraft
-//
-//
-
 import SwiftUI
 import UniformTypeIdentifiers
 

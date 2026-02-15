@@ -1,9 +1,3 @@
-//
-//  ContributorRankBadgeView.swift
-//  PyzhCraft
-//
-//
-
 import SwiftUI
 
 /// 贡献者排名徽章视图

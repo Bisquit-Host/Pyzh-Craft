@@ -1,10 +1,3 @@
-//
-//  GameNameGenerator.swift
-//  PyzhCraft
-//
-//  Created by su on 2025/1/27.
-//
-
 import Foundation
 
 // MARK: - DateFormatter Extension

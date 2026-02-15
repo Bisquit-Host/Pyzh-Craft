@@ -1,9 +1,3 @@
-//
-//  ImportLauncherType.swift
-//  PyzhCraft
-//
-//
-
 import Foundation
 
 /// 支持的启动器类型

@@ -1,9 +1,3 @@
-//
-//  AIChatAttachmentManager.swift
-//  PyzhCraft
-//
-//
-
 import SwiftUI
 import UniformTypeIdentifiers
 

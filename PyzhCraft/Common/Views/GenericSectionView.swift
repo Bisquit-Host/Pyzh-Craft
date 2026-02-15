@@ -1,9 +1,3 @@
-//
-//  GenericSectionView.swift
-//  PyzhCraft
-//
-//  Created by AI Assistant
-//
 import SwiftUI
 
 // MARK: - Generic Section View
