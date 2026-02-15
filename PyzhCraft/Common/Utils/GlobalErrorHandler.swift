@@ -1,4 +1,3 @@
-import Foundation
 import SwiftUI
 
 // MARK: - Error Level Enum

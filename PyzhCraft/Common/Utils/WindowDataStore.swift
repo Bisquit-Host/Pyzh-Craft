@@ -1,5 +1,4 @@
 import SwiftUI
-import AppKit
 import SkinRenderKit
 
 /// 皮肤预览数据

@@ -1,4 +1,3 @@
-import Foundation
 import SwiftUI
 
 // MARK: - 下载状态定义

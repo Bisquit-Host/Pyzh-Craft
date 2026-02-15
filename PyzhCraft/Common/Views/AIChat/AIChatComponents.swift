@@ -1,5 +1,4 @@
 import SwiftUI
-import AppKit
 
 /// AI 头像视图
 struct AIAvatarView: View {

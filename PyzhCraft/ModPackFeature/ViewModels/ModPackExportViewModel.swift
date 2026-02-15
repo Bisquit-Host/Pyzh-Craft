@@ -1,4 +1,3 @@
-import Foundation
 import SwiftUI
 
 /// 整合包导出视图模型

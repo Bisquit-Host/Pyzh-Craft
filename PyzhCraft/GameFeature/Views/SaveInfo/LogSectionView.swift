@@ -1,5 +1,4 @@
 import SwiftUI
-import AppKit
 
 // MARK: - 日志信息区域视图
 struct LogSectionView: View {

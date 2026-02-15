@@ -1,4 +1,3 @@
-import Foundation
 import SwiftUI
 
 /// 数据源枚举

@@ -1,5 +1,4 @@
 import SwiftUI
-import Foundation
 
 /// 贡献者头像图片缓存管理器
 /// 使用 NSCache 限制内存占用，避免加载过多图片导致内存溢出

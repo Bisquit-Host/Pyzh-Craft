@@ -1,5 +1,4 @@
 import SwiftUI
-import AppKit
 
 // MARK: - Litematica 投影文件区域视图
 struct LitematicaSectionView: View {

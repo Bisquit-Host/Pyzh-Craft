@@ -1,4 +1,3 @@
-import Foundation
 import SwiftUI
 
 /// 选中游戏管理器

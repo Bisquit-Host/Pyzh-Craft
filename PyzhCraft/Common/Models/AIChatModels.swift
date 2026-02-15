@@ -1,4 +1,3 @@
-import Foundation
 import SwiftUI
 
 /// 消息角色

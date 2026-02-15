@@ -1,5 +1,4 @@
 import SwiftUI
-import AppKit
 
 public struct GeneralSettingsView: View {
     @StateObject private var generalSettings = GeneralSettingsManager.shared

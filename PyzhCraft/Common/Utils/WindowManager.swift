@@ -1,5 +1,4 @@
 import SwiftUI
-import AppKit
 
 /// 窗口管理器，用于打开和关闭窗口（使用 Window，所有窗口都是单例）
 @MainActor

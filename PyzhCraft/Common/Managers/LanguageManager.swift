@@ -1,4 +1,3 @@
-import Foundation
 import SwiftUI
 
 /// 语言管理器

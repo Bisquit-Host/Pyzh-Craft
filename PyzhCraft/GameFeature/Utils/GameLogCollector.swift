@@ -1,4 +1,3 @@
-import Foundation
 import SwiftUI
 
 /// 游戏日志收集器

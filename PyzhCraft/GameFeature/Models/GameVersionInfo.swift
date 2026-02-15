@@ -1,4 +1,3 @@
-import Foundation
 import SwiftUI
 
 /// 游戏版本信息模型

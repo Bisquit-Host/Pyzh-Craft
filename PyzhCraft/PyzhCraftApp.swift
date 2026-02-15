@@ -1,6 +1,5 @@
 import SwiftUI
 import UserNotifications
-import Combine
 
 @main
 struct PyzhCraftApp: App {

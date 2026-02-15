@@ -1,5 +1,4 @@
 import SwiftUI
-import AppKit
 
 /// SwiftUI 组件，用于访问和操作底层的 macOS NSWindow 对象
 struct WindowAccessor: NSViewRepresentable {

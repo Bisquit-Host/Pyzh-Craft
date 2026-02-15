@@ -1,5 +1,5 @@
 import Foundation
-import os.log
+import OSLog
 import AppKit
 
 class Logger: AppLogging {

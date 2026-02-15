@@ -1,6 +1,5 @@
-import Foundation
 import SwiftUI
-import os
+import OSLog
 
 struct AddOrDeleteResourceButton: View {
     var project: ModrinthProject

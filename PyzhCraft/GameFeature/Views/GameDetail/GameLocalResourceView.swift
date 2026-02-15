@@ -1,5 +1,4 @@
 import SwiftUI
-import AppKit
 
 struct GameLocalResourceView: View {
     let game: GameVersionInfo

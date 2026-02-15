@@ -1,7 +1,5 @@
 import SwiftUI
 import CoreImage
-import Foundation
-import AppKit
 
 // MARK: - Types and Constants
 

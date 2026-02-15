@@ -1,5 +1,4 @@
 import SwiftUI
-import Foundation
 
 /// 资源图片缓存管理器
 /// 为资源列表的图标提供高性能缓存，支持内存和磁盘两级缓存

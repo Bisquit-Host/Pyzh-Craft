@@ -1,5 +1,5 @@
 import Foundation
-import os
+import OSLog
 
 enum ModrinthDependencyDownloader {
     /// 递归下载所有依赖（基于官方依赖API）

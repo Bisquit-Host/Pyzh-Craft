@@ -1,5 +1,6 @@
 import Foundation
 import AVFoundation
+
 /// Minecraft 启动命令生成器（仅负责进程与认证，由 GameLaunchUseCase 对外暴露）
 struct MinecraftLaunchCommand {
     let player: Player?

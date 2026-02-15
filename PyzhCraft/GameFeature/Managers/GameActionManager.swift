@@ -1,5 +1,4 @@
 import SwiftUI
-import AppKit
 
 /// 游戏操作管理器
 /// 提供游戏相关的通用操作，如显示在访达、删除游戏等

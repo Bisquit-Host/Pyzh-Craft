@@ -1,6 +1,5 @@
-import Combine
-import Foundation
 import SwiftUI
+import Combine
 
 /// 主界面布局风格：经典（列表在左、内容在右）/ 聚焦（内容在左、列表在右）
 public enum InterfaceLayoutStyle: String, CaseIterable {

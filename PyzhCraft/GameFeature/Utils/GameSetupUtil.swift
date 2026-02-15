@@ -1,4 +1,3 @@
-import Foundation
 import SwiftUI
 
 /// 游戏设置服务

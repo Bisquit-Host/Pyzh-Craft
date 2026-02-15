@@ -1,4 +1,3 @@
-import Foundation
 import SwiftUI
 
 /// 应用日志协议，便于注入与 Mock

@@ -1,5 +1,4 @@
 import SwiftUI
-import AppKit
 
 // MARK: - Constants
 private enum ServerAddressSectionConstants {

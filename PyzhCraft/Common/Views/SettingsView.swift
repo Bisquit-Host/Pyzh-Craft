@@ -1,5 +1,4 @@
 import SwiftUI
-import Foundation
 
 /// 设置标签页枚举
 enum SettingsTab: Int {

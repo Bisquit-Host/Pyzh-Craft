@@ -1,4 +1,3 @@
-import Foundation
 import SwiftUI
 
 /// A view model that manages the list of players and interacts with PlayerDataManager.
