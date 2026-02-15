@@ -15,6 +15,7 @@
 
 /* Begin PBXFileReference section */
 		90CE44FE2E7D65A5007C6F30 /* Swift Craft Launcher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Swift Craft Launcher.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F3277B4B2F4288120061E348 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -43,6 +44,7 @@
 		9023D8282E3139B5005A53F1 = {
 			isa = PBXGroup;
 			children = (
+				F3277B4B2F4288120061E348 /* README.md */,
 				9023D8332E3139B5005A53F1 /* PyzhCraft */,
 				90CE44FE2E7D65A5007C6F30 /* Swift Craft Launcher.app */,
 			);

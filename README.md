@@ -1,11 +1,11 @@
 <div align="center">
   <img src="PyzhCraft/Assets.xcassets/AppIcon.appiconset/mac512pt2x.png" alt="PyzhCraft" width="128" height="128">
   
-  # 🚀 Swift Craft Launcher
+  # 🚀 Pyzh Craft
   
   **✨ A modern Minecraft launcher for macOS ✨**
   
-  [![Swift Craft Launcher](https://img.shields.io/badge/Swift%20Craft%20Launcher-SCL-orange.svg?logo=swift)](https://github.com/suhang12332/Swift-Craft-Launcher)
+  [![Pyzh Craft](https://img.shields.io/badge/Swift%20Craft%20Launcher-SCL-orange.svg?logo=swift)](https://github.com/suhang12332/Swift-Craft-Launcher)
   [![Swift](https://img.shields.io/badge/Swift-5.5+-red.svg?logo=swift)](https://swift.org/)
 
   [![QQ Group](https://img.shields.io/badge/QQ%20Group-1057517524-blue.svg?logo=tencentqq)](https://qm.qq.com/cgi-bin/qm/qr?k=1057517524)
@@ -26,7 +26,7 @@
 
 ## 🎯 Overview
 
-Swift Craft Launcher is a native macOS Minecraft launcher 🍎 built with SwiftUI, offering a streamlined and efficient gaming experience. Designed for modern macOS systems, it provides comprehensive mod loader support, Microsoft account authentication, and intuitive game management.
+Pyzh Craft is a native macOS Minecraft launcher 🍎 built with SwiftUI, offering a streamlined and efficient gaming experience. Designed for modern macOS systems, it provides comprehensive mod loader support, Microsoft account authentication, and intuitive game management.
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/suhang12332/Swift-Craft-Launcher-Assets/refs/heads/main/imagebed/readme/screenshot2026-01-29-01.17.31.gif" alt="PyzhCraft Screenshot" width="800">
@@ -71,7 +71,7 @@ brew tap suhang12332/swiftcraftlauncher
 brew install --cask swift-craft-launcher
 ```
 
-> **💡 Tip**: We created a dedicated [Homebrew Tap](https://github.com/suhang12332/homebrew-swiftcraftlauncher) for Swift Craft Launcher
+> **💡 Tip**: We created a dedicated [Homebrew Tap](https://github.com/suhang12332/homebrew-swiftcraftlauncher) for Pyzh Craft
 
 ### 💾 Pre-built Release
 Download the latest version from [GitHub Releases](https://github.com/suhang12332/Swift-Craft-Launcher/releases/latest).
