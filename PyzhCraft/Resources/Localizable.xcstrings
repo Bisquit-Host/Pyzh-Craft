@@ -17668,7 +17668,6 @@
     },
     "Download Complete" : {
       "comment" : "Notification",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {

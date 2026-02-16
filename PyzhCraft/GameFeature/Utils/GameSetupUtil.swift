@@ -135,7 +135,7 @@ class GameSetupUtil: ObservableObject {
 
             // Send notification
             NotificationManager.sendSilently(
-                title: "Download Complete",
+                title: String(localized: "Download Complete"),
                 body: String(format: String(localized: "\(gameInfo.gameName) (Version: \(gameInfo.gameVersion), Loader: \(gameInfo.modLoader)) has been successfully downloaded."))
             )
             onSuccess()
