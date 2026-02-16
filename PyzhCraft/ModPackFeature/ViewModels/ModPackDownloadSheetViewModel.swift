@@ -163,7 +163,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                 let globalError = GlobalError.from(error)
                 handleDownloadError(
                     globalError.chineseMessage,
-                    globalError.i18nKey
+                    globalError.i18nKeyString
                 )
                 return nil
             }
@@ -306,16 +306,14 @@ class ModPackDownloadSheetViewModel: ObservableObject {
 
         guard let httpResponse = response as? HTTPURLResponse,
               httpResponse.statusCode == 200 else {
-            throw GlobalError.download(
-                i18nKey: "error.download.cannot_get_file_size",
+            throw GlobalError(type: .download, i18nKey: "Cannot get file size",
                 level: .notification
             )
         }
 
         guard let contentLength = httpResponse.value(forHTTPHeaderField: "Content-Length"),
               let fileSize = Int64(contentLength) else {
-            throw GlobalError.download(
-                i18nKey: "error.download.cannot_get_file_size",
+            throw GlobalError(type: .download, i18nKey: "Cannot get file size",
                 level: .notification
             )
         }
@@ -356,14 +354,14 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             } catch {
                 handleDownloadError(
                     "下载游戏图标失败",
-                    "error.network.icon_download_failed"
+                    "Icon download failed"
                 )
                 return nil
             }
         } catch {
             handleDownloadError(
                 "下载游戏图标失败",
-                "error.network.icon_download_failed"
+                "Icon download failed"
             )
             return nil
         }
@@ -377,7 +375,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             guard fileExtension == "zip" || fileExtension == "mrpack" else {
                 handleDownloadError(
                     "不支持的整合包格式: \(fileExtension)",
-                    "error.resource.unsupported_modpack_format"
+                    "Unsupported modpack format"
                 )
                 return nil
             }
@@ -400,7 +398,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             let sourceSize = sourceAttributes[.size] as? Int64 ?? 0
 
             guard sourceSize > 0 else {
-                handleDownloadError("整合包文件为空", "error.resource.modpack_empty")
+                handleDownloadError("整合包文件为空", "Modpack is empty")
                 return nil
             }
 
@@ -415,7 +413,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
         } catch {
             handleDownloadError(
                 "解压整合包失败: \(error.localizedDescription)",
-                "error.filesystem.extraction_failed"
+                "Extraction failed"
             )
             return nil
         }
@@ -437,7 +435,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
         // None of the formats are supported
         handleDownloadError(
             "不支持的整合包格式，请使用 Modrinth (.mrpack) 或 CurseForge (.zip) 格式的整合包",
-            "error.resource.unsupported_modpack_format"
+            "Unsupported modpack format"
         )
         return nil
     }
@@ -470,7 +468,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             lastParsedIndexInfo = indexInfo
             return indexInfo
         } catch ModrinthIndexError.emptyIndex {
-            handleDownloadError("modrinth.index.json 文件为空", "error.resource.modrinth_index_empty")
+            handleDownloadError("modrinth.index.json 文件为空", "Modrinth index is empty")
             return nil
         } catch {
             if error is DecodingError {
@@ -509,7 +507,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             ), let expectedSizeInt = Int64(expectedSize), actualSize != expectedSizeInt {
                 handleDownloadError(
                     "文件大小不匹配，预期: \(expectedSizeInt)，实际: \(actualSize)",
-                    "error.resource.size_mismatch"
+                    "File size mismatch"
                 )
                 return false
             }
@@ -532,7 +530,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             if actualSha1 != expectedSha1 {
                 handleDownloadError(
                     "文件校验失败，SHA1不匹配",
-                    "error.resource.sha1_mismatch"
+                    "SHA1 mismatch"
                 )
                 return false
             }
@@ -546,8 +544,9 @@ class ModPackDownloadSheetViewModel: ObservableObject {
         }
     }
 
-    private func handleDownloadError(_ message: String, _ i18nKey: LocalizedStringKey) {
-        let globalError = GlobalError.resource(
+    private func handleDownloadError(_ message: String, _ i18nKey: String) {
+        let globalError = GlobalError(
+            type: .resource,
             i18nKey: i18nKey,
             level: .notification
         )

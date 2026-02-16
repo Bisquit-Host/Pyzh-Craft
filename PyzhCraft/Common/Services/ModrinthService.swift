@@ -86,8 +86,7 @@ enum ModrinthService {
             if error is GlobalError {
                 throw error
             } else {
-                throw GlobalError.validation(
-                    i18nKey: "error.validation.version_info_parse_failed",
+                throw GlobalError(type: .validation, i18nKey: "Version info parse failed",
                     level: .notification
                 )
             }
@@ -127,8 +126,7 @@ enum ModrinthService {
             url: URLConfig.API.Modrinth.search,
             resolvingAgainstBaseURL: true
         ) else {
-            throw GlobalError.validation(
-                i18nKey: "error.validation.url_components_build_failed",
+            throw GlobalError(type: .validation, i18nKey: "URL components build failed",
                 level: .notification
             )
         }

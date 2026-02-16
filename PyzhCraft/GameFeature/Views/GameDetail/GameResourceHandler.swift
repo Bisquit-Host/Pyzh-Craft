@@ -438,22 +438,19 @@ enum GameResourceHandler {
         }
 
         guard let versionId = depVM.selectedDependencyVersion[dep.id] else {
-            throw GlobalError.resource(
-                i18nKey: "error.resource.version_id_missing",
+            throw GlobalError(type: .resource, i18nKey: "Version ID missing",
                 level: .notification
             )
         }
 
         guard let versions = depVM.dependencyVersions[dep.id] else {
-            throw GlobalError.resource(
-                i18nKey: "error.resource.version_info_missing",
+            throw GlobalError(type: .resource, i18nKey: "Version info missing",
                 level: .notification
             )
         }
 
         guard let version = versions.first(where: { $0.id == versionId }) else {
-            throw GlobalError.resource(
-                i18nKey: "error.resource.version_not_found",
+            throw GlobalError(type: .resource, i18nKey: "Version not found",
                 level: .notification
             )
         }

@@ -159,9 +159,57 @@ enum GlobalError: Error, LocalizedError, Identifiable {
     }
 }
 
+enum GlobalErrorType: String, CaseIterable {
+    case network, fileSystem, authentication, validation, download, installation, gameLaunch, resource, player, configuration, unknown
+
+    var defaultLevel: ErrorLevel {
+        switch self {
+        case .network, .fileSystem, .validation, .download, .installation, .resource, .player, .configuration:
+            .notification
+        case .authentication, .gameLaunch:
+            .popup
+        case .unknown:
+            .silent
+        }
+    }
+}
+
 // MARK: - Error Conversion Extensions
 
 extension GlobalError {
+    init(type: GlobalErrorType, i18nKey: LocalizedStringKey, level: ErrorLevel? = nil) {
+        let resolvedLevel = level ?? type.defaultLevel
+
+        switch type {
+        case .network:
+            self = .network(i18nKey: i18nKey, level: resolvedLevel)
+        case .fileSystem:
+            self = .fileSystem(i18nKey: i18nKey, level: resolvedLevel)
+        case .authentication:
+            self = .authentication(i18nKey: i18nKey, level: resolvedLevel)
+        case .validation:
+            self = .validation(i18nKey: i18nKey, level: resolvedLevel)
+        case .download:
+            self = .download(i18nKey: i18nKey, level: resolvedLevel)
+        case .installation:
+            self = .installation(i18nKey: i18nKey, level: resolvedLevel)
+        case .gameLaunch:
+            self = .gameLaunch(i18nKey: i18nKey, level: resolvedLevel)
+        case .resource:
+            self = .resource(i18nKey: i18nKey, level: resolvedLevel)
+        case .player:
+            self = .player(i18nKey: i18nKey, level: resolvedLevel)
+        case .configuration:
+            self = .configuration(i18nKey: i18nKey, level: resolvedLevel)
+        case .unknown:
+            self = .unknown(i18nKey: i18nKey, level: resolvedLevel)
+        }
+    }
+
+    init(type: GlobalErrorType, i18nKey: String, level: ErrorLevel? = nil) {
+        self.init(type: type, i18nKey: LocalizedStringKey(i18nKey), level: level)
+    }
+
     /// Convert from other error types to global errors
     static func from(_ error: Error) -> GlobalError {
         switch error {
@@ -188,8 +236,9 @@ extension GlobalError {
                 )
             }
 
-            return .unknown(
-                i18nKey: "error.unknown.generic",
+            return GlobalError(
+                type: .unknown,
+                i18nKey: "Unknown error",
                 level: .silent
             )
         }

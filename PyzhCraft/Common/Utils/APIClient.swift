@@ -140,15 +140,13 @@ enum APIClient {
         let (data, response) = try await sharedSession.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw GlobalError.network(
-                i18nKey: "error.network.invalid_response",
+            throw GlobalError(type: .network, i18nKey: "Invalid response",
                 level: .notification
             )
         }
 
         guard httpResponse.statusCode == 200 else {
-            throw GlobalError.network(
-                i18nKey: "error.network.api_request_failed",
+            throw GlobalError(type: .network, i18nKey: "API request failed",
                 level: .notification
             )
         }
@@ -163,8 +161,7 @@ enum APIClient {
         let (data, response) = try await sharedSession.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw GlobalError.network(
-                i18nKey: "error.network.invalid_response",
+            throw GlobalError(type: .network, i18nKey: "Invalid response",
                 level: .notification
             )
         }

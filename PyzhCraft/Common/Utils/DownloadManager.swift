@@ -44,8 +44,7 @@ enum DownloadManager {
         }
 
         guard let type = ResourceType(from: resourceType) else {
-            throw GlobalError.resource(
-                i18nKey: "error.resource.unknown_type",
+            throw GlobalError(type: .resource, i18nKey: "Unknown resource type",
                 level: .notification
             )
         }

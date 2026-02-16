@@ -324,8 +324,7 @@ struct AddOrDeleteResourceButton: View {
 
         // Delete using the fileName passed in
         guard let fileName = fileName else {
-            let globalError = GlobalError.resource(
-                i18nKey: "error.resource.file_name_missing",
+            let globalError = GlobalError(type: .resource, i18nKey: "File name missing",
                 level: .notification,
             )
             Logger.shared.error("删除文件失败: \(globalError.chineseMessage)")

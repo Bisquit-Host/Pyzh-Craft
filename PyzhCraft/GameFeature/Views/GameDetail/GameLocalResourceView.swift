@@ -512,8 +512,7 @@ struct GameLocalResourceView: View {
             try fileManager.moveItem(at: currentURL, to: targetURL)
         } catch {
             Logger.shared.error("切换资源启用状态失败: \(error.localizedDescription)")
-            GlobalErrorHandler.shared.handle(GlobalError.resource(
-                i18nKey: "error.resource.toggle_state_failed",
+            GlobalErrorHandler.shared.handle(GlobalError(type: .resource, i18nKey: "Toggle state failed",
                 level: .notification
             ))
         }

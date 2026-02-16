@@ -447,8 +447,7 @@ struct MinecraftSkinUtils: View {
         case 200:
             return data
         case 404:
-            throw GlobalError.resource(
-                i18nKey: "error.resource.skin_not_found",
+            throw GlobalError(type: .resource, i18nKey: "Skin not found",
                 level: .silent
             )
         case 408, 504:
@@ -547,8 +546,7 @@ struct MinecraftSkinUtils: View {
         // Convert to CGImage and zoom in
         guard let headCGImage = ciContext.createCGImage(headCropped, from: headCropped.extent),
               let layerCGImage = ciContext.createCGImage(layerCropped, from: layerCropped.extent) else {
-            throw GlobalError.validation(
-                i18nKey: "error.validation.image_processing_failed",
+            throw GlobalError(type: .validation, i18nKey: "Image processing failed",
                 level: .silent
             )
         }
@@ -571,8 +569,7 @@ struct MinecraftSkinUtils: View {
             space: colorSpace,
             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
         ) else {
-            throw GlobalError.validation(
-                i18nKey: "error.validation.image_context_failed",
+            throw GlobalError(type: .validation, i18nKey: "Image context failed",
                 level: .silent
             )
         }
@@ -590,8 +587,7 @@ struct MinecraftSkinUtils: View {
 
         // Get the final CGImage
         guard let finalCGImage = context.makeImage() else {
-            throw GlobalError.validation(
-                i18nKey: "error.validation.final_image_failed",
+            throw GlobalError(type: .validation, i18nKey: "Final image failed",
                 level: .silent
             )
         }
