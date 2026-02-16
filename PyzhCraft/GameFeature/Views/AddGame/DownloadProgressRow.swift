@@ -22,7 +22,7 @@ struct DownloadProgressRow: View {
                 
                 Spacer()
                 
-                Text("Progress: \(Int(progress * 100))%%")
+                Text("Progress: \(Int32(progress * 100))%")
                     .font(.headline)
                     .foregroundColor(.secondary)
             }
