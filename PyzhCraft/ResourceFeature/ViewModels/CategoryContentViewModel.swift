@@ -43,7 +43,7 @@ final class CategoryContentViewModel: ObservableObject {
     @Published private(set) var resolutions: [Category] = []
     @Published private(set) var performanceImpacts: [Category] = []
     @Published private(set) var versions: [GameVersion] = []
-    @Published private(set) var isLoading: Bool = true
+    @Published private(set) var isLoading = true
     @Published private(set) var error: GlobalError?
     @Published private(set) var loaders: [Loader] = []
 

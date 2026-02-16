@@ -3,7 +3,7 @@ import Foundation
 @MainActor
 public class ContributorsViewModel: ObservableObject {
     @Published public var contributors: [GitHubContributor] = []
-    @Published public var isLoading: Bool = false
+    @Published public var isLoading = false
 
     private let gitHubService = GitHubService.shared
 

@@ -21,21 +21,21 @@ final class SaveInfoManager: ObservableObject {
     @Published private(set) var servers: [ServerAddress] = []
     @Published private(set) var litematicaFiles: [LitematicaInfo] = []
     @Published private(set) var logs: [LogInfo] = []
-    @Published private(set) var isLoading: Bool = true
+    @Published private(set) var isLoading = true
 
     // Loading status of various types
-    @Published private(set) var isLoadingWorlds: Bool = false
-    @Published private(set) var isLoadingScreenshots: Bool = false
-    @Published private(set) var isLoadingServers: Bool = false
-    @Published private(set) var isLoadingLitematica: Bool = false
-    @Published private(set) var isLoadingLogs: Bool = false
+    @Published private(set) var isLoadingWorlds = false
+    @Published private(set) var isLoadingScreenshots = false
+    @Published private(set) var isLoadingServers = false
+    @Published private(set) var isLoadingLitematica = false
+    @Published private(set) var isLoadingLogs = false
 
     // Whether each type exists (whether the directory or resource exists)
-    @Published private(set) var hasWorldsType: Bool = false
-    @Published private(set) var hasScreenshotsType: Bool = false
-    @Published private(set) var hasServersType: Bool = false
-    @Published private(set) var hasLitematicaType: Bool = false
-    @Published private(set) var hasLogsType: Bool = false
+    @Published private(set) var hasWorldsType = false
+    @Published private(set) var hasScreenshotsType = false
+    @Published private(set) var hasServersType = false
+    @Published private(set) var hasLitematicaType = false
+    @Published private(set) var hasLogsType = false
 
     // MARK: - Private Properties
     private var loadTask: Task<Void, Never>?

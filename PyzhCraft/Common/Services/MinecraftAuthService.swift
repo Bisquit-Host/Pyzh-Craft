@@ -5,7 +5,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
     static let shared = MinecraftAuthService()
 
     @Published var authState: AuthenticationState = .notAuthenticated
-    @Published var isLoading: Bool = false
+    @Published var isLoading = false
     private var webAuthSession: ASWebAuthenticationSession?
 
     private let clientId = AppConstants.minecraftClientId

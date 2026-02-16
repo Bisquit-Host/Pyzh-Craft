@@ -12,9 +12,9 @@ struct GameLocalResourceView: View {
     @State private var isLoadingResources = false
     @State private var error: GlobalError?
     @State private var currentPage: Int = 1
-    @State private var hasMoreResults: Bool = true
-    @State private var isLoadingMore: Bool = false
-    @State private var hasLoaded: Bool = false
+    @State private var hasMoreResults = true
+    @State private var isLoadingMore = false
+    @State private var hasLoaded = false
     @State private var resourceDirectory: URL? // Save resource directory path
     @State private var allFiles: [URL] = [] // List of all files
     @State private var searchTimer: Timer? // Search for anti-shake timer

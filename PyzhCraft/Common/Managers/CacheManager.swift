@@ -1,7 +1,7 @@
 import SwiftUI
 
 class CacheManager: ObservableObject {
-    @Published var cacheInfo: CacheInfo = CacheInfo(fileCount: 0, totalSize: 0)
+    @Published var cacheInfo = CacheInfo(fileCount: 0, totalSize: 0)
     private let calculator = CacheCalculator.shared
 
     /// Compute metadata cache information (silent version)

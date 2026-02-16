@@ -22,7 +22,7 @@ struct AddOrDeleteResourceButton: View {
     @State private var showGameResourceInstallSheet = false  // New: game resource installation sheet
     @State private var preloadedDetail: ModrinthProjectDetail?  // Preloaded project details (general: integration package/general resources)
     @State private var preloadedCompatibleGames: [GameVersionInfo] = []  // Pre-detected list of compatible games
-    @State private var isDisabled: Bool = false  // Whether the resource is disabled
+    @State private var isDisabled = false  // Whether the resource is disabled
     @Binding var isResourceDisabled: Bool  // Disabled state exposed to parent view (used for graying effect)
     @State private var currentFileName: String?  // Current filename (tracks the renamed filename)
     @State private var hasDownloadedInSheet = false  // Mark whether the download is successful in the sheet

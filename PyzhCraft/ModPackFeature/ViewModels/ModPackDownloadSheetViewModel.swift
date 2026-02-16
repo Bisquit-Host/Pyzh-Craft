@@ -804,9 +804,9 @@ class ModPackInstallState: ObservableObject {
     @Published var filesProgress: Double = 0
     @Published var dependenciesProgress: Double = 0
     @Published var overridesProgress: Double = 0
-    @Published var currentFile: String = ""
-    @Published var currentDependency: String = ""
-    @Published var currentOverride: String = ""
+    @Published var currentFile = ""
+    @Published var currentDependency = ""
+    @Published var currentOverride = ""
     @Published var filesTotal: Int = 0
     @Published var dependenciesTotal: Int = 0
     @Published var overridesTotal: Int = 0

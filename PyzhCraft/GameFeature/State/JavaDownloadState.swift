@@ -5,10 +5,10 @@ import Foundation
 class JavaDownloadState: ObservableObject {
     @Published var isDownloading = false
     @Published var progress: Double = 0
-    @Published var currentFile: String = ""
+    @Published var currentFile = ""
     @Published var isCancelled = false
-    @Published var version: String = ""
-    @Published var errorMessage: String = ""
+    @Published var version = ""
+    @Published var errorMessage = ""
     @Published var hasError = false
 
     func reset() {

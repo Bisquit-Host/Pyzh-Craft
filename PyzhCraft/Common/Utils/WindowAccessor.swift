@@ -2,7 +2,7 @@ import SwiftUI
 
 /// SwiftUI component for accessing and manipulating underlying macOS NSWindow objects
 struct WindowAccessor: NSViewRepresentable {
-    var synchronous: Bool = false
+    var synchronous = false
     var callback: (NSWindow) -> Void
 
     func makeNSView(context: Context) -> NSView {

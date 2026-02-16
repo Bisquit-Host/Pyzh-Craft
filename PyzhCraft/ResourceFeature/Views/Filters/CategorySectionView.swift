@@ -7,7 +7,7 @@ struct CategorySectionView: View {
     let items: [FilterItem]
     @Binding var selectedItems: [String]
     let isLoading: Bool
-    var isVersionSection: Bool = false
+    var isVersionSection = false
 
     // MARK: - Body
     var body: some View {

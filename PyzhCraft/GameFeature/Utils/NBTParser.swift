@@ -22,7 +22,7 @@ private enum NBTType: UInt8 {
 class NBTParser {
     private var data: Data
     private var offset: Int = 0
-    private var outputData: Data = Data()
+    private var outputData = Data()
 
     init(data: Data) {
         self.data = data

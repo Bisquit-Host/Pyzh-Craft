@@ -8,7 +8,7 @@ struct GameHeaderListRow: View {
     let onImport: () -> Void
     var onIconTap: (() -> Void)?
 
-    @State private var refreshTrigger: UUID = UUID()
+    @State private var refreshTrigger = UUID()
     @State private var cancellable: AnyCancellable?
 
     var body: some View {

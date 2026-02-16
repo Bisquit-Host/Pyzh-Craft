@@ -8,14 +8,14 @@ struct GameAdvancedSettingsView: View {
     @State private var memoryRange: ClosedRange<Double> = Double(GameSettingsManager.shared.globalXms)...Double(GameSettingsManager.shared.globalXmx)
     @State private var selectedGarbageCollector: GarbageCollector = .g1gc
     @State private var optimizationPreset: OptimizationPreset = .balanced
-    @State private var enableOptimizations: Bool = true
-    @State private var enableAikarFlags: Bool = false
-    @State private var enableMemoryOptimizations: Bool = true
-    @State private var enableThreadOptimizations: Bool = true
-    @State private var enableNetworkOptimizations: Bool = false
-    @State private var customJvmArguments: String = ""
-    @State private var environmentVariables: String = ""
-    @State private var javaPath: String = ""
+    @State private var enableOptimizations = true
+    @State private var enableAikarFlags = false
+    @State private var enableMemoryOptimizations = true
+    @State private var enableThreadOptimizations = true
+    @State private var enableNetworkOptimizations = false
+    @State private var customJvmArguments = ""
+    @State private var environmentVariables = ""
+    @State private var javaPath = ""
     @State private var showResetAlert = false
     @State private var showJavaPathPicker = false
     @State private var error: GlobalError?

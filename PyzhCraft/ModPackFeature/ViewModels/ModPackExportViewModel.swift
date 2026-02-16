@@ -22,13 +22,13 @@ class ModPackExportViewModel: ObservableObject {
     @Published var exportProgress = ModPackExporter.ExportProgress()
 
     /// Integrated package name
-    @Published var modPackName: String = ""
+    @Published var modPackName = ""
 
     /// Integrated package version
-    @Published var modPackVersion: String = "1.0.0"
+    @Published var modPackVersion = "1.0.0"
 
     /// Integration package description
-    @Published var summary: String = ""
+    @Published var summary = ""
 
     /// Export error message
     @Published var exportError: String?

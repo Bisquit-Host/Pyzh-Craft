@@ -15,7 +15,7 @@ class SelectedGameManager: ObservableObject {
     }
 
     /// Whether the advanced settings tab should be opened
-    @Published var shouldOpenAdvancedSettings: Bool = false {
+    @Published var shouldOpenAdvancedSettings = false {
         didSet {
             objectWillChange.send()
         }

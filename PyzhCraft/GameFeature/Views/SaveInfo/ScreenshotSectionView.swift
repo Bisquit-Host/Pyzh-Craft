@@ -151,8 +151,8 @@ struct ScreenshotDetailView: View {
 struct ScreenshotImageView: View {
     let path: URL
     @State private var image: NSImage?
-    @State private var isLoading: Bool = true
-    @State private var loadFailed: Bool = false
+    @State private var isLoading = true
+    @State private var loadFailed = false
 
     var body: some View {
         Group {

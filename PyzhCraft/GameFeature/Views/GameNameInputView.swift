@@ -5,7 +5,7 @@ struct GameNameInputView: View {
     @Binding var gameName: String
     @Binding var isGameNameDuplicate: Bool
     @FocusState private var isGameNameFocused: Bool
-    @State private var showErrorPopover: Bool = false
+    @State private var showErrorPopover = false
     let isDisabled: Bool
     let gameSetupService: GameSetupUtil
 

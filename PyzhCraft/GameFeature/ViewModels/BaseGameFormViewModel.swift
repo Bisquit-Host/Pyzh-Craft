@@ -4,10 +4,10 @@ import Combine
 // MARK: - Base Game Form View Model
 @MainActor
 class BaseGameFormViewModel: ObservableObject, GameFormStateProtocol {
-    @Published var isDownloading: Bool = false
-    @Published var isFormValid: Bool = false
-    @Published var triggerConfirm: Bool = false
-    @Published var triggerCancel: Bool = false
+    @Published var isDownloading = false
+    @Published var isFormValid = false
+    @Published var triggerConfirm = false
+    @Published var triggerCancel = false
 
     let gameSetupService = GameSetupUtil()
     let gameNameValidator: GameNameValidator

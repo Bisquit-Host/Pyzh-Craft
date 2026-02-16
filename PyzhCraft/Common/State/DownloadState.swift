@@ -6,8 +6,8 @@ class DownloadState: ObservableObject {
     @Published var isDownloading = false
     @Published var coreProgress: Double = 0
     @Published var resourcesProgress: Double = 0
-    @Published var currentCoreFile: String = ""
-    @Published var currentResourceFile: String = ""
+    @Published var currentCoreFile = ""
+    @Published var currentResourceFile = ""
     @Published var coreTotalFiles: Int = 0
     @Published var resourcesTotalFiles: Int = 0
     @Published var coreCompletedFiles: Int = 0

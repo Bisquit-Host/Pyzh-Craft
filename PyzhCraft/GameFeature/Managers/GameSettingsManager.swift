@@ -39,7 +39,7 @@ class GameSettingsManager: ObservableObject {
     }
 
     @AppStorage("enableAICrashAnalysis")
-    var enableAICrashAnalysis: Bool = false {
+    var enableAICrashAnalysis = false {
         didSet { objectWillChange.send() }
     }
 
@@ -50,7 +50,7 @@ class GameSettingsManager: ObservableObject {
 
     /// Whether to include snapshot versions in game version selection (global setting)
     @AppStorage("includeSnapshotsForGameVersions")
-    var includeSnapshotsForGameVersions: Bool = false {
+    var includeSnapshotsForGameVersions = false {
         didSet { objectWillChange.send() }
     }
 

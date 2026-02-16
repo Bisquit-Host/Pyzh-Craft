@@ -17,7 +17,7 @@ struct ModrinthDetailCardView: View {
     @Binding var scannedDetailIds: Set<String> // detailId Set of scanned resources for quick lookup
     @State private var addButtonState: AddButtonState = .idle
     @State private var showDeleteAlert = false
-    @State private var isResourceDisabled: Bool = false  // Whether the resource is disabled (for graying effect)
+    @State private var isResourceDisabled = false  // Whether the resource is disabled (for graying effect)
     @EnvironmentObject private var gameRepository: GameRepository
 
     // MARK: - Enums

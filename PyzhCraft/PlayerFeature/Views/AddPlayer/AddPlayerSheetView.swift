@@ -13,7 +13,7 @@ struct AddPlayerSheetView: View {
 
     @ObservedObject var playerListViewModel: PlayerListViewModel
 
-    @State private var isPremium: Bool = false
+    @State private var isPremium = false
     @State private var authenticatedProfile: MinecraftProfileResponse?
     @StateObject private var authService = MinecraftAuthService.shared
 
@@ -21,12 +21,12 @@ struct AddPlayerSheetView: View {
     private var openURL
     @State private var selectedAuthType: AccountAuthType = .premium
     @FocusState private var isTextFieldFocused: Bool
-    @State private var showErrorPopover: Bool = false
+    @State private var showErrorPopover = false
 
     // Mark check status
-    @State private var isCheckingFlag: Bool = true  // Initially true, loading will be displayed directly when entering the page
+    @State private var isCheckingFlag = true  // Initially true, loading will be displayed directly when entering the page
     // IP check results (only used if there is no genuine account in the list and there is no mark)
-    @State private var isForeignIP: Bool = false
+    @State private var isForeignIP = false
 
     var body: some View {
         CommonSheetView(

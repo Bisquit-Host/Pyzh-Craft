@@ -10,7 +10,7 @@ struct ModPackDownloadSheet: View {
     private var dismiss
     
     @StateObject private var viewModel = ModPackDownloadSheetViewModel()
-    @State private var selectedGameVersion: String = ""
+    @State private var selectedGameVersion = ""
     @State private var selectedModPackVersion: ModrinthProjectDetailVersion?
     @State private var downloadTask: Task<Void, Error>?
     @State private var isProcessing = false

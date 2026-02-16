@@ -3,8 +3,8 @@ import SwiftUI
 // MARK: - GameNameValidator
 @MainActor
 class GameNameValidator: ObservableObject {
-    @Published var gameName: String = ""
-    @Published var isGameNameDuplicate: Bool = false
+    @Published var gameName = ""
+    @Published var isGameNameDuplicate = false
 
     private let gameSetupService: GameSetupUtil
 

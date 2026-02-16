@@ -4,7 +4,7 @@ class PlayerSettingsManager: ObservableObject {
     static let shared = PlayerSettingsManager()
 
     @AppStorage("currentPlayerId")
-    var currentPlayerId: String = "" {
+    var currentPlayerId = "" {
         didSet { objectWillChange.send() }
     }
 

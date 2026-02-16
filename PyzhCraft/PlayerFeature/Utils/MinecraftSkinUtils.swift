@@ -56,7 +56,7 @@ struct MinecraftSkinUtils: View {
 
     @State private var renderedCache: RenderedImageCache?
     @State private var error: String?
-    @State private var isLoading: Bool = false
+    @State private var isLoading = false
     @State private var loadTask: Task<Void, Never>?
 
     private static let imageCache: NSCache<NSString, RenderedImageCache> = {

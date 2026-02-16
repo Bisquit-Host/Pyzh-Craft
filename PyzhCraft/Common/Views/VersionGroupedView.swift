@@ -7,7 +7,7 @@ struct VersionGroupedView: View {
     let items: [FilterItem]
     @Binding var selectedItems: [String]
     let onItemTap: (String) -> Void
-    var isMultiSelect: Bool = true  // Whether to support multiple selection, the default is true
+    var isMultiSelect = true  // Whether to support multiple selection, the default is true
 
     // Optional binding for radio mode
     @Binding var selectedItem: String?

@@ -22,8 +22,8 @@ struct SkinToolDetailView: View {
     @State private var selectedCapeImageURL: String?
     @State private var selectedCapeLocalPath: String?
     @State private var selectedCapeImage: NSImage?
-    @State private var isCapeLoading: Bool = false
-    @State private var capeLoadCompleted: Bool = false
+    @State private var isCapeLoading = false
+    @State private var capeLoadCompleted = false
     @State private var publicSkinInfo: PlayerSkinService.PublicSkinInfo?
     @State private var playerProfile: MinecraftProfileResponse?
 

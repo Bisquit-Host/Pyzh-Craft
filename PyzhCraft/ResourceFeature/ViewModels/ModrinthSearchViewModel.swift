@@ -54,8 +54,8 @@ struct FilterOptions {
 final class ModrinthSearchViewModel: ObservableObject {
     // MARK: - Published Properties
     @Published private(set) var results: [ModrinthProject] = []
-    @Published private(set) var isLoading: Bool = false
-    @Published private(set) var isLoadingMore: Bool = false
+    @Published private(set) var isLoading = false
+    @Published private(set) var isLoadingMore = false
     @Published private(set) var error: GlobalError?
     @Published private(set) var totalHits: Int = 0
 

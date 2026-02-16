@@ -7,7 +7,7 @@ public struct GeneralSettingsView: View {
     @EnvironmentObject private var sparkleUpdateService: SparkleUpdateService
     @State private var showDirectoryPicker = false
     @State private var showingRestartAlert = false
-    @State private var previousLanguage: String = ""
+    @State private var previousLanguage = ""
     @State private var isCancellingLanguageChange = false
     @State private var selectedLanguage = LanguageManager.shared.selectedLanguage
     @State private var error: GlobalError?

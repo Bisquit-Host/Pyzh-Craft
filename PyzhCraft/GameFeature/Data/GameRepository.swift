@@ -19,9 +19,9 @@ class GameRepository: ObservableObject {
     private let workingPathProvider: WorkingPathProviding
     private let database: GameVersionDatabase
     private var workingPathCancellable: AnyCancellable?
-    private var lastWorkingPath: String = ""
+    private var lastWorkingPath = ""
 
-    @Published var workingPathChanged: Bool = false
+    @Published var workingPathChanged = false
 
     // MARK: - Initialization
 

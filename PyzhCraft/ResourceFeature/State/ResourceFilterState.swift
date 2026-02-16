@@ -20,7 +20,7 @@ final class ResourceFilterState: ObservableObject {
 
     // MARK: - Data sources and searches
     @Published var dataSource: DataSource
-    @Published var searchText: String = ""
+    @Published var searchText = ""
     @Published var localResourceFilter: LocalResourceFilter = .all
 
     init(dataSource: DataSource? = nil) {

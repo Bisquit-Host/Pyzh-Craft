@@ -62,12 +62,12 @@ class GeneralSettingsManager: ObservableObject, WorkingPathProviding {
 
     /// Whether to enable GitHub proxy (enabled by default)
     @AppStorage("enableGitHubProxy")
-    var enableGitHubProxy: Bool = true {
+    var enableGitHubProxy = true {
         didSet { objectWillChange.send() }
     }
 
     @AppStorage("gitProxyURL")
-    var gitProxyURL: String = "https://gh-proxy.com" {
+    var gitProxyURL = "https://gh-proxy.com" {
         didSet { objectWillChange.send() }
     }
 

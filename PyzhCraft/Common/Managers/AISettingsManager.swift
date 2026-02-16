@@ -71,7 +71,7 @@ class AISettingsManager: ObservableObject {
     static let shared = AISettingsManager()
 
     @AppStorage("aiProvider")
-    private var _selectedProviderRawValue: String = "openai"
+    private var _selectedProviderRawValue = "openai"
 
     var selectedProvider: AIProvider {
         get {
@@ -121,28 +121,28 @@ class AISettingsManager: ObservableObject {
     }
 
     @AppStorage("aiOllamaBaseURL")
-    var ollamaBaseURL: String = "http://localhost:11434" {
+    var ollamaBaseURL = "http://localhost:11434" {
         didSet {
             objectWillChange.send()
         }
     }
 
     @AppStorage("aiOpenAIBaseURL")
-    var openAIBaseURL: String = "" {
+    var openAIBaseURL = "" {
         didSet {
             objectWillChange.send()
         }
     }
 
     @AppStorage("aiModelOverride")
-    var modelOverride: String = "" {
+    var modelOverride = "" {
         didSet {
             objectWillChange.send()
         }
     }
 
     @AppStorage("aiAvatarURL")
-    var aiAvatarURL: String = "https://mcskins.top/assets/snippets/download/skin.php?n=7050" {
+    var aiAvatarURL = "https://mcskins.top/assets/snippets/download/skin.php?n=7050" {
         didSet {
             objectWillChange.send()
         }

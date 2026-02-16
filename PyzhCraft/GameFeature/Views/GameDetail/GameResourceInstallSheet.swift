@@ -7,7 +7,7 @@ struct GameResourceInstallSheet: View {
     let gameInfo: GameVersionInfo  // Preset game information
     @Binding var isPresented: Bool
     let preloadedDetail: ModrinthProjectDetail?  // Preloaded project details
-    var isUpdateMode: Bool = false  // Update mode: The footer displays "Download" and does not display dependencies
+    var isUpdateMode = false  // Update mode: The footer displays "Download" and does not display dependencies
     @EnvironmentObject var gameRepository: GameRepository
     /// Download success callback, the parameters are (fileName, hash), only the downloadResource path will pass the value, downloadAllManual will pass (nil, nil)
     var onDownloadSuccess: ((String?, String?) -> Void)?
@@ -148,7 +148,7 @@ struct GameResourceInstallSheet: View {
 struct GameResourceInstallFooter: View {
     let project: ModrinthProject
     let resourceType: String
-    var isUpdateMode: Bool = false  // Update mode: Display "Download", do not display dependencies (controlled by the parent and do not display dependent blocks)
+    var isUpdateMode = false  // Update mode: Display "Download", do not display dependencies (controlled by the parent and do not display dependent blocks)
     @Binding var isPresented: Bool
     let projectDetail: ModrinthProjectDetail?
     let gameInfo: GameVersionInfo

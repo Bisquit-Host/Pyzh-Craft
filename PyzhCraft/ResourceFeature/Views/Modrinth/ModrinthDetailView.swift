@@ -23,7 +23,7 @@ struct ModrinthDetailView: View {
     @Binding var searchText: String
     @State private var searchTimer: Timer?
     @State private var currentPage: Int = 1
-    @State private var lastSearchParams: String = ""
+    @State private var lastSearchParams = ""
     @State private var error: GlobalError?
 
     init(

@@ -363,11 +363,11 @@ struct ServerAddressEditView: View {
     @State private var serverPort: String
     @State private var isHidden: Bool
     @State private var acceptTextures: Bool
-    @State private var isSaving: Bool = false
-    @State private var isDeleting: Bool = false
-    @State private var showError: Bool = false
-    @State private var showDeleteConfirmation: Bool = false
-    @State private var errorMessage: String = ""
+    @State private var isSaving = false
+    @State private var isDeleting = false
+    @State private var showError = false
+    @State private var showDeleteConfirmation = false
+    @State private var errorMessage = ""
 
     var isNewServer: Bool {
         server == nil

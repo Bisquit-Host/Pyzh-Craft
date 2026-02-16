@@ -7,8 +7,8 @@ public struct SidebarView: View {
     @EnvironmentObject var gameRepository: GameRepository
     @EnvironmentObject var gameLaunchUseCase: GameLaunchUseCase
     @EnvironmentObject var playerListViewModel: PlayerListViewModel
-    @State private var searchText: String = ""
-    @State private var showDeleteAlert: Bool = false
+    @State private var searchText = ""
+    @State private var showDeleteAlert = false
     @State private var gameToDelete: GameVersionInfo?
     @State private var gameToExport: GameVersionInfo?
     @StateObject private var gameActionManager = GameActionManager.shared
