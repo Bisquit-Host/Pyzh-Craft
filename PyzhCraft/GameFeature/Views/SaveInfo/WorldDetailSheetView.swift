@@ -138,8 +138,11 @@ struct WorldDetailSheetView: View {
                 }
 
                 HStack(alignment: .center, spacing: 12) {
-                    Text("World Path" + ":")
-                        .font(.headline)
+                    HStack(spacing: 0) {
+                        Text("World Path")
+                        Text(":")
+                    }
+                    .font(.headline)
                     
                     Button {
                         // Open file location in Finder

@@ -75646,7 +75646,6 @@
       }
     },
     "World Path" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
