@@ -435,7 +435,8 @@ struct GameAdvancedSettingsView: View {
                 try await gameRepository.updateGame(updatedGame)
                 Logger.shared.debug("自动保存游戏设置: \(game.gameName)")
             } catch {
-                let globalError = error as? GlobalError ?? GlobalError.unknown(i18nKey: "Failed to save settings",
+                let globalError = error as? GlobalError ?? GlobalError.unknown(
+                    i18nKey: "Failed to save settings",
                     level: .notification
                 )
                 Logger.shared.error("自动保存游戏设置失败: \(globalError.chineseMessage)")
@@ -480,7 +481,8 @@ struct GameAdvancedSettingsView: View {
                 // Verify that the file exists and is executable
                 let fileManager = FileManager.default
                 guard fileManager.fileExists(atPath: url.path) else {
-                    error = GlobalError.fileSystem(i18nKey: "File Not Found",
+                    error = GlobalError.fileSystem(
+                        i18nKey: "File Not Found",
                         level: .notification
                     )
                     return
@@ -492,13 +494,15 @@ struct GameAdvancedSettingsView: View {
                     autoSave()
                     Logger.shared.info("Java路径已设置为: \(url.path)")
                 } else {
-                    error = GlobalError.validation(i18nKey: "The selected file is not a valid Java executable",
+                    error = GlobalError.validation(
+                        i18nKey: "The selected file is not a valid Java executable",
                         level: .popup
                     )
                 }
             }
         case .failure(let error):
-            let globalError = GlobalError.fileSystem(i18nKey: "Java Path Selection Failed",
+            let globalError = GlobalError.fileSystem(
+                i18nKey: "Java Path Selection Failed",
                 level: .notification
             )
             self.error = globalError

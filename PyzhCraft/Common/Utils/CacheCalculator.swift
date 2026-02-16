@@ -64,7 +64,8 @@ class CacheCalculator {
         var totalSize: Int64 = 0
 
         guard let enumerator = fileManager.enumerator(at: directory, includingPropertiesForKeys: [.fileSizeKey]) else {
-            throw GlobalError.fileSystem(i18nKey: "Directory Enumeration Failed",
+            throw GlobalError.fileSystem(
+                i18nKey: "Directory Enumeration Failed",
                 level: .silent
             )
         }

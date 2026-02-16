@@ -124,13 +124,15 @@ final class CategoryContentViewModel: ObservableObject {
 
             // Verify returned data
             guard !categoriesResult.isEmpty else {
-                throw GlobalError.resource(i18nKey: "Categories Not Found",
+                throw GlobalError.resource(
+                    i18nKey: "Categories Not Found",
                     level: .notification
                 )
             }
 
             guard !versionsResult.isEmpty else {
-                throw GlobalError.resource(i18nKey: "Game versions not found",
+                throw GlobalError.resource(
+                    i18nKey: "Game versions not found",
                     level: .notification
                 )
             }

@@ -348,7 +348,8 @@ class ModPackImportViewModel: BaseGameFormViewModel {
             } catch {
                 Logger.shared.error("创建目录失败: \(dir.path), 错误: \(error.localizedDescription)")
                 GlobalErrorHandler.shared.handle(
-                    GlobalError.fileSystem(i18nKey: "Directory Creation Failed",
+                    GlobalError.fileSystem(
+                        i18nKey: "Directory Creation Failed",
                         level: .notification
                     )
                 )
@@ -416,7 +417,8 @@ class ModPackImportViewModel: BaseGameFormViewModel {
             Task {
                 await cleanupGameDirectories(gameName: gameName)
             }
-            let globalError = GlobalError.resource(i18nKey: "Local modpack import failed",
+            let globalError = GlobalError.resource(
+                i18nKey: "Local modpack import failed",
                 level: .notification
             )
             GlobalErrorHandler.shared.handle(globalError)

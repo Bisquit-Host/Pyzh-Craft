@@ -278,7 +278,8 @@ struct GameLocalResourceView: View {
         )
 
         if resourceDirectory == nil {
-            let globalError = GlobalError.configuration(i18nKey: "Resource Directory Not Found",
+            let globalError = GlobalError.configuration(
+                i18nKey: "Resource Directory Not Found",
                 level: .notification
             )
             Logger.shared.error("初始化资源目录失败: \(globalError.chineseMessage)")
@@ -511,7 +512,9 @@ struct GameLocalResourceView: View {
             try fileManager.moveItem(at: currentURL, to: targetURL)
         } catch {
             Logger.shared.error("切换资源启用状态失败: \(error.localizedDescription)")
-            GlobalErrorHandler.shared.handle(GlobalError(type: .resource, i18nKey: "Toggle state failed",
+            GlobalErrorHandler.shared.handle(GlobalError(
+                type: .resource,
+                i18nKey: "Toggle state failed",
                 level: .notification
             ))
         }

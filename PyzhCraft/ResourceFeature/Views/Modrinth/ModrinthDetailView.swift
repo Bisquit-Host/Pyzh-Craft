@@ -226,7 +226,8 @@ struct ModrinthDetailView: View {
         }
 
         guard !query.isEmpty else {
-            throw GlobalError.validation(i18nKey: "Query Type Empty",
+            throw GlobalError.validation(
+                i18nKey: "Query Type Empty",
                 level: .notification
             )
         }

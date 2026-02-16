@@ -4,7 +4,8 @@ enum ForgeLoaderService {
     /// Get all available Forge version details via Modrinth API
     static func fetchAllForgeVersions(for minecraftVersion: String) async throws -> LoaderVersion {
         guard let result = await CommonService.fetchAllLoaderVersions(type: "forge", minecraftVersion: minecraftVersion) else {
-            throw GlobalError.resource(i18nKey: "Forge Loader Version Not Found",
+            throw GlobalError.resource(
+                i18nKey: "Forge Loader Version Not Found",
                 level: .notification
             )
         }
@@ -114,7 +115,8 @@ enum ForgeLoaderService {
         let classpathString = CommonService.generateClasspath(from: forgeProfile, librariesDir: librariesDirectory)
         let mainClass = forgeProfile.mainClass
         guard let version = forgeProfile.version else {
-            throw GlobalError.resource(i18nKey: "Missing Forge version",
+            throw GlobalError.resource(
+                i18nKey: "Missing Forge version",
                 level: .notification
             )
         }

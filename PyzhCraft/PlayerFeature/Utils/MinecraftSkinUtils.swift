@@ -351,14 +351,16 @@ struct MinecraftSkinUtils: View {
                 try Task.checkCancellation()
 
                 guard let ciImage = CIImage(data: data) else {
-                    throw GlobalError.validation(i18nKey: "Invalid Image Data",
+                    throw GlobalError.validation(
+                        i18nKey: "Invalid Image Data",
                         level: .silent
                     )
                 }
 
                 // Validate skin dimensions
                 guard ciImage.extent.width == 64 && ciImage.extent.height == 64 else {
-                    throw GlobalError.validation(i18nKey: "Unsupported Skin Format",
+                    throw GlobalError.validation(
+                        i18nKey: "Unsupported Skin Format",
                         level: .silent
                     )
                 }
@@ -412,14 +414,16 @@ struct MinecraftSkinUtils: View {
     private func loadAssetData() async throws -> Data {
         guard let image = NSImage(named: src),
               let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
-            throw GlobalError.resource(i18nKey: "Asset Not Found",
+            throw GlobalError.resource(
+                i18nKey: "Asset Not Found",
                 level: .silent
             )
         }
 
         let bitmapRep = NSBitmapImageRep(cgImage: cgImage)
         guard let data = bitmapRep.representation(using: .png, properties: [:]) else {
-            throw GlobalError.validation(i18nKey: "Invalid Image Data",
+            throw GlobalError.validation(
+                i18nKey: "Invalid Image Data",
                 level: .silent
             )
         }
@@ -429,7 +433,8 @@ struct MinecraftSkinUtils: View {
 
     private func loadURLData() async throws -> Data {
         guard let url = URL(string: src) else {
-            throw GlobalError.validation(i18nKey: "Invalid URL",
+            throw GlobalError.validation(
+                i18nKey: "Invalid URL",
                 level: .silent
             )
         }
@@ -442,15 +447,19 @@ struct MinecraftSkinUtils: View {
         case 200:
             return data
         case 404:
-            throw GlobalError(type: .resource, i18nKey: "Skin not found",
+            throw GlobalError(
+                type: .resource,
+                i18nKey: "Skin not found",
                 level: .silent
             )
         case 408, 504:
-            throw GlobalError.download(i18nKey: "Network Timeout",
+            throw GlobalError.download(
+                i18nKey: "Network Timeout",
                 level: .silent
             )
         default:
-            throw GlobalError.download(i18nKey: "Skin Download Failed",
+            throw GlobalError.download(
+                i18nKey: "Skin Download Failed",
                 level: .silent
             )
         }
@@ -471,20 +480,23 @@ struct MinecraftSkinUtils: View {
         case .asset:
             guard let image = NSImage(named: src),
                   let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
-                throw GlobalError.resource(i18nKey: "Asset Not Found",
+                throw GlobalError.resource(
+                    i18nKey: "Asset Not Found",
                     level: .silent
                 )
             }
             let bitmapRep = NSBitmapImageRep(cgImage: cgImage)
             guard let imageData = bitmapRep.representation(using: .png, properties: [:]) else {
-                throw GlobalError.validation(i18nKey: "Invalid Image Data",
+                throw GlobalError.validation(
+                    i18nKey: "Invalid Image Data",
                     level: .silent
                 )
             }
             data = imageData
         case .url:
             guard let url = URL(string: src) else {
-                throw GlobalError.validation(i18nKey: "Invalid URL",
+                throw GlobalError.validation(
+                    i18nKey: "Invalid URL",
                     level: .silent
                 )
             }
@@ -492,7 +504,8 @@ struct MinecraftSkinUtils: View {
             let (responseData, httpResponse) = try await APIClient.performRequestWithResponse(request: request)
 
             guard httpResponse.statusCode == 200 else {
-                throw GlobalError.download(i18nKey: "Skin Download Failed",
+                throw GlobalError.download(
+                    i18nKey: "Skin Download Failed",
                     level: .silent
                 )
             }
@@ -501,14 +514,16 @@ struct MinecraftSkinUtils: View {
 
         // Create CIImage
         guard let ciImage = CIImage(data: data) else {
-            throw GlobalError.validation(i18nKey: "Invalid Image Data",
+            throw GlobalError.validation(
+                i18nKey: "Invalid Image Data",
                 level: .silent
             )
         }
 
         // Verify skin size
         guard ciImage.extent.width == 64 && ciImage.extent.height == 64 else {
-            throw GlobalError.validation(i18nKey: "Unsupported Skin Format",
+            throw GlobalError.validation(
+                i18nKey: "Unsupported Skin Format",
                 level: .silent
             )
         }
@@ -533,7 +548,9 @@ struct MinecraftSkinUtils: View {
         // Convert to CGImage and zoom in
         guard let headCGImage = ciContext.createCGImage(headCropped, from: headCropped.extent),
               let layerCGImage = ciContext.createCGImage(layerCropped, from: layerCropped.extent) else {
-            throw GlobalError(type: .validation, i18nKey: "Image processing failed",
+            throw GlobalError(
+                type: .validation,
+                i18nKey: "Image processing failed",
                 level: .silent
             )
         }
@@ -556,7 +573,9 @@ struct MinecraftSkinUtils: View {
             space: colorSpace,
             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
         ) else {
-            throw GlobalError(type: .validation, i18nKey: "Image context failed",
+            throw GlobalError(
+                type: .validation,
+                i18nKey: "Image context failed",
                 level: .silent
             )
         }
@@ -574,7 +593,9 @@ struct MinecraftSkinUtils: View {
 
         // Get the final CGImage
         guard let finalCGImage = context.makeImage() else {
-            throw GlobalError(type: .validation, i18nKey: "Final image failed",
+            throw GlobalError(
+                type: .validation,
+                i18nKey: "Final image failed",
                 level: .silent
             )
         }

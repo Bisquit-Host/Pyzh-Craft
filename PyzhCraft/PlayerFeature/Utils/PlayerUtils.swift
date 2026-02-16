@@ -12,13 +12,15 @@ enum PlayerUtils {
 
     static func generateOfflineUUID(for username: String) throws -> String {
         guard !username.isEmpty else {
-            throw GlobalError.player(i18nKey: "Invalid Username Empty",
+            throw GlobalError.player(
+                i18nKey: "Invalid Username Empty",
                 level: .notification
             )
         }
 
         guard let data = (offlinePrefix + username).data(using: .utf8) else {
-            throw GlobalError.validation(i18nKey: "Username Encode Failed",
+            throw GlobalError.validation(
+                i18nKey: "Username Encode Failed",
                 level: .notification
             )
         }

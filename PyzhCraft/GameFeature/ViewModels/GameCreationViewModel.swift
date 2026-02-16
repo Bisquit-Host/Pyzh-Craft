@@ -222,7 +222,8 @@ class GameCreationViewModel: BaseGameFormViewModel {
         case .success(let urls):
             guard let url = urls.first else {
                 handleNonCriticalError(
-                    GlobalError.validation(i18nKey: "No File Selected",
+                    GlobalError.validation(
+                        i18nKey: "No File Selected",
                         level: .notification
                     ),
                     message: "Image Selection Failed"

@@ -37,13 +37,16 @@ enum DownloadManager {
     /// - Throws: GlobalError when the operation fails
     static func downloadResource(for game: GameVersionInfo, urlString: String, resourceType: String, expectedSha1: String? = nil) async throws -> URL {
         guard let url = URL(string: urlString) else {
-            throw GlobalError.validation(i18nKey: "Invalid Download URL",
+            throw GlobalError.validation(
+                i18nKey: "Invalid Download URL",
                 level: .notification
             )
         }
 
         guard let type = ResourceType(from: resourceType) else {
-            throw GlobalError(type: .resource, i18nKey: "Unknown resource type",
+            throw GlobalError(
+                type: .resource,
+                i18nKey: "Unknown resource type",
                 level: .notification
             )
         }
@@ -72,7 +75,8 @@ enum DownloadManager {
         }()
 
         guard let resourceDirUnwrapped = resourceDir else {
-            throw GlobalError.resource(i18nKey: "Directory Not Found",
+            throw GlobalError.resource(
+                i18nKey: "Directory Not Found",
                 level: .notification
             )
         }
@@ -103,7 +107,8 @@ enum DownloadManager {
         // Optimization: Create URL first, then call internal method
         let url: URL = try autoreleasepool {
             guard let url = URL(string: urlString) else {
-                throw GlobalError.validation(i18nKey: "Invalid Download URL",
+                throw GlobalError.validation(
+                    i18nKey: "Invalid Download URL",
                     level: .notification
                 )
             }
@@ -149,7 +154,8 @@ enum DownloadManager {
         do {
             try fileManager.createDirectory(at: destinationURL.deletingLastPathComponent(), withIntermediateDirectories: true)
         } catch {
-            throw GlobalError.fileSystem(i18nKey: "Download Directory Creation Failed",
+            throw GlobalError.fileSystem(
+                i18nKey: "Download Directory Creation Failed",
                 level: .notification
             )
         }
@@ -189,7 +195,8 @@ enum DownloadManager {
 
             // Optimization: Check status codes directly and reduce intermediate variables
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                throw GlobalError.download(i18nKey: "HTTP Status Error",
+                throw GlobalError.download(
+                    i18nKey: "HTTP Status Error",
                     level: .notification
                 )
             }
@@ -199,7 +206,8 @@ enum DownloadManager {
                 try autoreleasepool {
                     let actualSha1 = try calculateFileSHA1(at: tempFileURL)
                     if actualSha1 != expectedSha1 {
-                        throw GlobalError.validation(i18nKey: "SHA1 Check Failed",
+                        throw GlobalError.validation(
+                            i18nKey: "SHA1 Check Failed",
                             level: .notification
                         )
                     }
@@ -220,11 +228,13 @@ enum DownloadManager {
             if let globalError = error as? GlobalError {
                 throw globalError
             } else if error is URLError {
-                throw GlobalError.download(i18nKey: "Network Request Failed",
+                throw GlobalError.download(
+                    i18nKey: "Network Request Failed",
                     level: .notification
                 )
             } else {
-                throw GlobalError.download(i18nKey: "General Failure",
+                throw GlobalError.download(
+                    i18nKey: "General Failure",
                     level: .notification
                 )
             }

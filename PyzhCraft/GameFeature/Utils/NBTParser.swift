@@ -46,14 +46,18 @@ class NBTParser {
 
         // Read the root tag type (should be TAG_Compound)
         guard !data.isEmpty else {
-            throw GlobalError(type: .fileSystem, i18nKey: "NBT Empty Data",
+            throw GlobalError(
+                type: .fileSystem,
+                i18nKey: "NBT Empty Data",
                 level: .notification
             )
         }
 
         let tagType = NBTType(rawValue: data[offset]) ?? .end
         guard tagType == .compound else {
-            throw GlobalError(type: .fileSystem, i18nKey: "NBT Invalid Root",
+            throw GlobalError(
+                type: .fileSystem,
+                i18nKey: "NBT Invalid Root",
                 level: .notification
             )
         }
@@ -70,14 +74,18 @@ class NBTParser {
     /// Read string
     private func readString() throws -> String {
         guard offset + 2 <= data.count else {
-            throw GlobalError(type: .fileSystem, i18nKey: "NBT Insufficient Data",
+            throw GlobalError(
+                type: .fileSystem,
+                i18nKey: "NBT Insufficient Data",
                 level: .notification
             )
         }
 
         let length = Int(readShort())
         guard offset + length <= data.count else {
-            throw GlobalError(type: .fileSystem, i18nKey: "NBT String Out Of Range",
+            throw GlobalError(
+                type: .fileSystem,
+                i18nKey: "NBT String Out Of Range",
                 level: .notification
             )
         }
@@ -179,7 +187,9 @@ class NBTParser {
             }
             return array
         case .end:
-            throw GlobalError(type: .fileSystem, i18nKey: "NBT Unexpected End Tag",
+            throw GlobalError(
+                type: .fileSystem,
+                i18nKey: "NBT Unexpected End Tag",
                 level: .notification
             )
         }
@@ -213,7 +223,9 @@ class NBTParser {
     /// Read list
     private func readList() throws -> [Any] {
         guard offset < data.count else {
-            throw GlobalError(type: .fileSystem, i18nKey: "NBT Insufficient Data For List",
+            throw GlobalError(
+                type: .fileSystem,
+                i18nKey: "NBT Insufficient Data For List",
                 level: .notification
             )
         }
@@ -235,7 +247,9 @@ class NBTParser {
     /// Decompress GZIP data (using system commands)
     private func decompressGzip(data: Data) throws -> Data {
         guard !data.isEmpty else {
-            throw GlobalError(type: .fileSystem, i18nKey: "NBT GZIP Empty Data",
+            throw GlobalError(
+                type: .fileSystem,
+                i18nKey: "NBT GZIP Empty Data",
                 level: .notification
             )
         }
@@ -266,7 +280,9 @@ class NBTParser {
         do {
             try process.run()
         } catch {
-            throw GlobalError(type: .fileSystem, i18nKey: "NBT GZIP Process Start Failed",
+            throw GlobalError(
+                type: .fileSystem,
+                i18nKey: "NBT GZIP Process Start Failed",
                 level: .notification
             )
         }
@@ -277,13 +293,17 @@ class NBTParser {
         process.waitUntilExit()
 
         guard process.terminationStatus == 0 else {
-            throw GlobalError(type: .fileSystem, i18nKey: "NBT GZIP Decompress Failed",
+            throw GlobalError(
+                type: .fileSystem,
+                i18nKey: "NBT GZIP Decompress Failed",
                 level: .notification
             )
         }
 
         guard !decompressedData.isEmpty else {
-            throw GlobalError(type: .fileSystem, i18nKey: "NBT GZIP Decompressed Empty",
+            throw GlobalError(
+                type: .fileSystem,
+                i18nKey: "NBT GZIP Decompressed Empty",
                 level: .notification
             )
         }
@@ -398,7 +418,9 @@ class NBTParser {
             } else if let boolValue = value as? Bool {
                 writeByte(boolValue ? 1 : 0)
             } else {
-                throw GlobalError(type: .fileSystem, i18nKey: "NBT Invalid Byte Value",
+                throw GlobalError(
+                    type: .fileSystem,
+                    i18nKey: "NBT Invalid Byte Value",
                     level: .notification
                 )
             }
@@ -409,7 +431,9 @@ class NBTParser {
             } else if let int16Value = value as? Int16 {
                 shortValue = int16Value
             } else {
-                throw GlobalError(type: .fileSystem, i18nKey: "NBT Invalid Short Value",
+                throw GlobalError(
+                    type: .fileSystem,
+                    i18nKey: "NBT Invalid Short Value",
                     level: .notification
                 )
             }
@@ -421,7 +445,9 @@ class NBTParser {
             } else if let int32Value = value as? Int32 {
                 intValue = int32Value
             } else {
-                throw GlobalError(type: .fileSystem, i18nKey: "NBT Invalid Int Value",
+                throw GlobalError(
+                    type: .fileSystem,
+                    i18nKey: "NBT Invalid Int Value",
                     level: .notification
                 )
             }
@@ -433,21 +459,27 @@ class NBTParser {
             } else if let int64Value = value as? Int64 {
                 longValue = int64Value
             } else {
-                throw GlobalError(type: .fileSystem, i18nKey: "NBT Invalid Long Value",
+                throw GlobalError(
+                    type: .fileSystem,
+                    i18nKey: "NBT Invalid Long Value",
                     level: .notification
                 )
             }
             writeLong(longValue)
         case .float:
             guard let floatValue = value as? Float else {
-                throw GlobalError(type: .fileSystem, i18nKey: "NBT Invalid Float Value",
+                throw GlobalError(
+                    type: .fileSystem,
+                    i18nKey: "NBT Invalid Float Value",
                     level: .notification
                 )
             }
             writeFloat(floatValue)
         case .double:
             guard let doubleValue = value as? Double else {
-                throw GlobalError(type: .fileSystem, i18nKey: "NBT Invalid Double Value",
+                throw GlobalError(
+                    type: .fileSystem,
+                    i18nKey: "NBT Invalid Double Value",
                     level: .notification
                 )
             }
@@ -464,14 +496,18 @@ class NBTParser {
             try writeList(value)
         case .compound:
             guard let compoundValue = value as? [String: Any] else {
-                throw GlobalError(type: .fileSystem, i18nKey: "NBT Invalid Compound Value",
+                throw GlobalError(
+                    type: .fileSystem,
+                    i18nKey: "NBT Invalid Compound Value",
                     level: .notification
                 )
             }
             try writeCompound(compoundValue)
         case .byteArray:
             guard let array = value as? [UInt8] else {
-                throw GlobalError(type: .fileSystem, i18nKey: "NBT Invalid Byte Array Value",
+                throw GlobalError(
+                    type: .fileSystem,
+                    i18nKey: "NBT Invalid Byte Array Value",
                     level: .notification
                 )
             }
@@ -479,7 +515,9 @@ class NBTParser {
             outputData.append(contentsOf: array)
         case .intArray:
             guard let array = value as? [Int32] else {
-                throw GlobalError(type: .fileSystem, i18nKey: "NBT Invalid Int Array Value",
+                throw GlobalError(
+                    type: .fileSystem,
+                    i18nKey: "NBT Invalid Int Array Value",
                     level: .notification
                 )
             }
@@ -489,7 +527,9 @@ class NBTParser {
             }
         case .longArray:
             guard let array = value as? [Int64] else {
-                throw GlobalError(type: .fileSystem, i18nKey: "NBT Invalid Long Array Value",
+                throw GlobalError(
+                    type: .fileSystem,
+                    i18nKey: "NBT Invalid Long Array Value",
                     level: .notification
                 )
             }
@@ -557,7 +597,9 @@ class NBTParser {
     /// Compress GZIP data (using system commands)
     private func compressGzip(data: Data) throws -> Data {
         guard !data.isEmpty else {
-            throw GlobalError(type: .fileSystem, i18nKey: "NBT Empty Data For Compress",
+            throw GlobalError(
+                type: .fileSystem,
+                i18nKey: "NBT Empty Data For Compress",
                 level: .notification
             )
         }
@@ -588,7 +630,9 @@ class NBTParser {
         do {
             try process.run()
         } catch {
-            throw GlobalError(type: .fileSystem, i18nKey: "NBT GZIP Compress Process Start Failed",
+            throw GlobalError(
+                type: .fileSystem,
+                i18nKey: "NBT GZIP Compress Process Start Failed",
                 level: .notification
             )
         }
@@ -599,13 +643,17 @@ class NBTParser {
         process.waitUntilExit()
 
         guard process.terminationStatus == 0 else {
-            throw GlobalError(type: .fileSystem, i18nKey: "NBT GZIP Compress Failed",
+            throw GlobalError(
+                type: .fileSystem,
+                i18nKey: "NBT GZIP Compress Failed",
                 level: .notification
             )
         }
 
         guard !compressedData.isEmpty else {
-            throw GlobalError(type: .fileSystem, i18nKey: "NBT GZIP Compressed Empty",
+            throw GlobalError(
+                type: .fileSystem,
+                i18nKey: "NBT GZIP Compressed Empty",
                 level: .notification
             )
         }

@@ -134,7 +134,8 @@ class GameRepository: ObservableObject {
     func deleteGame(id: String) async throws {
         let workingPath = currentWorkingPath
         guard let game = getGame(by: id) else {
-            throw GlobalError.validation(i18nKey: "Game Not Found Delete",
+            throw GlobalError.validation(
+                i18nKey: "Game Not Found Delete",
                 level: .notification
             )
         }
@@ -210,7 +211,8 @@ class GameRepository: ObservableObject {
     func updateGameLastPlayed(id: String, lastPlayed: Date = Date()) async throws {
         let workingPath = currentWorkingPath
         guard var game = getGame(by: id) else {
-            throw GlobalError.validation(i18nKey: "Game Not Found Status",
+            throw GlobalError.validation(
+                i18nKey: "Game Not Found Status",
                 level: .notification
             )
         }
@@ -246,7 +248,8 @@ class GameRepository: ObservableObject {
 
     func updateJavaPath(id: String, javaPath: String) async throws {
         guard var game = getGame(by: id) else {
-            throw GlobalError.validation(i18nKey: "Game Not Found Java",
+            throw GlobalError.validation(
+                i18nKey: "Game Not Found Java",
                 level: .notification
             )
         }
@@ -269,7 +272,8 @@ class GameRepository: ObservableObject {
 
     func updateJvmArguments(id: String, jvmArguments: String) async throws {
         guard var game = getGame(by: id) else {
-            throw GlobalError.validation(i18nKey: "Game Not Found JVM",
+            throw GlobalError.validation(
+                i18nKey: "Game Not Found JVM",
                 level: .notification
             )
         }
@@ -292,14 +296,16 @@ class GameRepository: ObservableObject {
 
     func updateMemorySize(id: String, xms: Int, xmx: Int) async throws {
         guard var game = getGame(by: id) else {
-            throw GlobalError.validation(i18nKey: "Game Not Found Memory",
+            throw GlobalError.validation(
+                i18nKey: "Game Not Found Memory",
                 level: .notification
             )
         }
 
         // Verify memory parameters
         guard xms > 0 && xmx > 0 && xms <= xmx else {
-            throw GlobalError.validation(i18nKey: "Invalid Memory Params",
+            throw GlobalError.validation(
+                i18nKey: "Invalid Memory Params",
                 level: .notification
             )
         }

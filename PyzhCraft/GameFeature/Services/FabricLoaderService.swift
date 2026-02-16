@@ -38,7 +38,9 @@ enum FabricLoaderService {
             }
             return result
         } catch {
-            throw GlobalError(type: .validation, i18nKey: "Fabric Loader Parse Failed",
+            throw GlobalError(
+                type: .validation,
+                i18nKey: "Fabric Loader Parse Failed",
                 level: .notification
             )
         }
@@ -125,7 +127,8 @@ enum FabricLoaderService {
         let classpathString = CommonService.generateFabricClasspath(from: fabricProfile, librariesDir: librariesDirectory)
         let mainClass = fabricProfile.mainClass
         guard let version = fabricProfile.version else {
-            throw GlobalError.validation(i18nKey: "Fabric loader version missing",
+            throw GlobalError.validation(
+                i18nKey: "Fabric loader version missing",
                 level: .notification
             )
         }

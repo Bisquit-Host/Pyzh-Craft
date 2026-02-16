@@ -15,7 +15,8 @@ enum ResourceDetailLoader {
         resourceType: String
     ) async -> (detail: ModrinthProjectDetail, compatibleGames: [GameVersionInfo])? {
         guard let detail = await ModrinthService.fetchProjectDetails(id: projectId) else {
-            GlobalErrorHandler.shared.handle(GlobalError.resource(i18nKey: "Project Details Not Found",
+            GlobalErrorHandler.shared.handle(GlobalError.resource(
+                i18nKey: "Project Details Not Found",
                 level: .notification
             ))
             return nil
@@ -37,7 +38,8 @@ enum ResourceDetailLoader {
     /// - Returns: project details, returns nil if loading fails
     static func loadModPackDetail(projectId: String) async -> ModrinthProjectDetail? {
         guard let detail = await ModrinthService.fetchProjectDetails(id: projectId) else {
-            GlobalErrorHandler.shared.handle(GlobalError.resource(i18nKey: "Project Details Not Found",
+            GlobalErrorHandler.shared.handle(GlobalError.resource(
+                i18nKey: "Project Details Not Found",
                 level: .notification
             ))
             return nil

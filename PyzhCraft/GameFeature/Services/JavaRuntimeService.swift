@@ -51,7 +51,8 @@ class JavaRuntimeService {
     func getGamecoreSupportedVersions() async throws -> [String] {
         let json = try await fetchJavaRuntimeAPI()
         guard let gamecore = json["gamecore"] as? [String: Any] else {
-            throw GlobalError.validation(i18nKey: "Gamecore platform data not found",
+            throw GlobalError.validation(
+                i18nKey: "Gamecore platform data not found",
                 level: .notification
             )
         }
@@ -64,7 +65,8 @@ class JavaRuntimeService {
         let json = try await fetchJavaRuntimeAPI()
         let platform = getCurrentMacPlatform()
         guard let platformData = json[platform] as? [String: Any] else {
-            throw GlobalError.validation(i18nKey: "Platform data not found: %@",
+            throw GlobalError.validation(
+                i18nKey: "Platform data not found: %@",
                 level: .notification
             )
         }
@@ -76,7 +78,8 @@ class JavaRuntimeService {
         let platformData = try await getMacJavaRuntimeData()
         guard let versionData = platformData[version] as? [[String: Any]] else {
             Logger.shared.error("版本 \(version) 的数据类型不正确，期望 [[String: Any]]，实际: \(type(of: platformData[version]))")
-            throw GlobalError.validation(i18nKey: "Version data not found",
+            throw GlobalError.validation(
+                i18nKey: "Version data not found",
                 level: .notification
             )
         }
@@ -91,7 +94,8 @@ class JavaRuntimeService {
               let manifest = firstVersion["manifest"] as? [String: Any],
               let manifestURL = manifest["url"] as? String else {
             Logger.shared.error("无法解析版本 \(version) 的数据结构")
-            throw GlobalError.validation(i18nKey: "Manifest URL not found",
+            throw GlobalError.validation(
+                i18nKey: "Manifest URL not found",
                 level: .notification
             )
         }
@@ -112,7 +116,8 @@ class JavaRuntimeService {
         let manifestData = try await fetchDataFromURL(manifestURL)
         guard let manifest = try JSONSerialization.jsonObject(with: manifestData) as? [String: Any],
               let files = manifest["files"] as? [String: Any] else {
-            throw GlobalError.validation(i18nKey: "Failed to parse manifest.json",
+            throw GlobalError.validation(
+                i18nKey: "Failed to parse manifest.json",
                 level: .notification
             )
         }
@@ -154,7 +159,8 @@ class JavaRuntimeService {
                     // Check if it should be canceled
                     if await cancelActor.shouldCancel() {
                         Logger.shared.info("Java下载已被取消")
-                        throw GlobalError.download(i18nKey: "Download cancelled",
+                        throw GlobalError.download(
+                            i18nKey: "Download cancelled",
                             level: .notification
                         )
                     }
@@ -228,7 +234,8 @@ class JavaRuntimeService {
         let data = try await fetchDataFromURL(url.absoluteString)
 
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            throw GlobalError.validation(i18nKey: "Failed to parse JSON",
+            throw GlobalError.validation(
+                i18nKey: "Failed to parse JSON",
                 level: .notification
             )
         }
@@ -241,7 +248,8 @@ class JavaRuntimeService {
     /// - Returns: downloaded data
     private func fetchDataFromURL(_ urlString: String) async throws -> Data {
         guard let url = URL(string: urlString) else {
-            throw GlobalError.validation(i18nKey: "Invalid URL",
+            throw GlobalError.validation(
+                i18nKey: "Invalid URL",
                 level: .notification
             )
         }
@@ -250,7 +258,8 @@ class JavaRuntimeService {
 
         guard let httpResponse = response as? HTTPURLResponse,
               httpResponse.statusCode == 200 else {
-            throw GlobalError.network(i18nKey: "Download failed",
+            throw GlobalError.network(
+                i18nKey: "Download failed",
                 level: .notification
             )
         }
@@ -331,7 +340,8 @@ class JavaRuntimeService {
         } catch {
             Logger.shared.error("解压Java运行时失败: \(error.localizedDescription)")
 
-            throw GlobalError.validation(i18nKey: "Extraction failed",
+            throw GlobalError.validation(
+                i18nKey: "Extraction failed",
                 level: .notification
             )
         }
@@ -352,7 +362,8 @@ class JavaRuntimeService {
         do {
             archive = try Archive(url: zipPath, accessMode: .read)
         } catch {
-            throw GlobalError.validation(i18nKey: "Cannot open ZIP file",
+            throw GlobalError.validation(
+                i18nKey: "Cannot open ZIP file",
                 level: .notification
             )
         }
@@ -389,7 +400,8 @@ class JavaRuntimeService {
         }
 
         guard !targetFolderEntries.isEmpty, let prefix = targetFolderPrefix else {
-            throw GlobalError.validation(i18nKey: "Zulu folder not found in ZIP file",
+            throw GlobalError.validation(
+                i18nKey: "Zulu folder not found in ZIP file",
                 level: .notification
             )
         }
@@ -502,14 +514,16 @@ class JavaRuntimeService {
         let (_, httpResponse) = try await APIClient.performRequestWithResponse(request: request)
 
         guard httpResponse.statusCode == 200 else {
-            throw GlobalError.network(i18nKey: "Cannot get file size",
+            throw GlobalError.network(
+                i18nKey: "Cannot get file size",
                 level: .notification
             )
         }
 
         guard let contentLength = httpResponse.value(forHTTPHeaderField: "Content-Length"),
               let fileSize = Int64(contentLength) else {
-            throw GlobalError.network(i18nKey: "Cannot get file size",
+            throw GlobalError.network(
+                i18nKey: "Cannot get file size",
                 level: .notification
             )
         }

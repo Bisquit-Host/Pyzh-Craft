@@ -186,7 +186,9 @@ class MinecraftAuthService: NSObject, ObservableObject {
         do {
             return try JSONDecoder().decode(TokenResponse.self, from: data)
         } catch {
-            throw GlobalError(type: .validation, i18nKey: "Token response parse failed",
+            throw GlobalError(
+                type: .validation,
+                i18nKey: "Token response parse failed",
                 level: .notification
             )
         }
@@ -291,7 +293,9 @@ class MinecraftAuthService: NSObject, ObservableObject {
         do {
             xstsTokenResponse = try JSONDecoder().decode(XboxLiveTokenResponse.self, from: xstsData)
         } catch {
-            throw GlobalError(type: .validation, i18nKey: "XSTS Token Parse Failed",
+            throw GlobalError(
+                type: .validation,
+                i18nKey: "XSTS Token Parse Failed",
                 level: .notification
             )
         }
@@ -308,7 +312,9 @@ class MinecraftAuthService: NSObject, ObservableObject {
         do {
             minecraftBodyData = try JSONSerialization.data(withJSONObject: minecraftBody)
         } catch {
-            throw GlobalError(type: .validation, i18nKey: "Minecraft Request Serialize Failed",
+            throw GlobalError(
+                type: .validation,
+                i18nKey: "Minecraft Request Serialize Failed",
                 level: .notification
             )
         }
@@ -329,23 +335,28 @@ class MinecraftAuthService: NSObject, ObservableObject {
             // Provide more specific error information based on different status codes
             switch statusCode {
             case 401:
-                throw GlobalError.authentication(i18nKey: "Minecraft authentication failed: Xbox Live token is invalid or expired",
+                throw GlobalError.authentication(
+                    i18nKey: "Minecraft authentication failed: Xbox Live token is invalid or expired",
                     level: .notification
                 )
             case 403:
-                throw GlobalError.authentication(i18nKey: "Minecraft authentication failed: This Microsoft account does not own Minecraft",
+                throw GlobalError.authentication(
+                    i18nKey: "Minecraft authentication failed: This Microsoft account does not own Minecraft",
                     level: .notification
                 )
             case 503:
-                throw GlobalError.network(i18nKey: "Minecraft authentication service is temporarily unavailable, please try again later",
+                throw GlobalError.network(
+                    i18nKey: "Minecraft authentication service is temporarily unavailable, please try again later",
                     level: .notification
                 )
             case 429:
-                throw GlobalError.network(i18nKey: "Too many requests, please try again later",
+                throw GlobalError.network(
+                    i18nKey: "Too many requests, please try again later",
                     level: .notification
                 )
             default:
-                throw GlobalError.download(i18nKey: "Minecraft Token Failed",
+                throw GlobalError.download(
+                    i18nKey: "Minecraft Token Failed",
                     level: .notification
                 )
             }
@@ -355,7 +366,9 @@ class MinecraftAuthService: NSObject, ObservableObject {
         do {
             minecraftTokenResponse = try JSONDecoder().decode(TokenResponse.self, from: minecraftData)
         } catch {
-            throw GlobalError(type: .validation, i18nKey: "Minecraft Token Parse Failed",
+            throw GlobalError(
+                type: .validation,
+                i18nKey: "Minecraft Token Parse Failed",
                 level: .notification
             )
         }
@@ -380,15 +393,18 @@ class MinecraftAuthService: NSObject, ObservableObject {
             // Provide specific error information based on status code
             switch statusCode {
             case 401:
-                throw GlobalError.authentication(i18nKey: "Minecraft access token is invalid or expired",
+                throw GlobalError.authentication(
+                    i18nKey: "Minecraft access token is invalid or expired",
                     level: .notification
                 )
             case 403:
-                throw GlobalError.authentication(i18nKey: "This account has not purchased Minecraft, please log in with a Microsoft account that owns Minecraft",
+                throw GlobalError.authentication(
+                    i18nKey: "This account has not purchased Minecraft, please log in with a Microsoft account that owns Minecraft",
                     level: .popup
                 )
             default:
-                throw GlobalError.download(i18nKey: "Failed to check game ownership: HTTP %@",
+                throw GlobalError.download(
+                    i18nKey: "Failed to check game ownership: HTTP %@",
                     level: .notification
                 )
             }
@@ -402,21 +418,24 @@ class MinecraftAuthService: NSObject, ObservableObject {
             let hasGameMinecraft = entitlements.items.contains { $0.name == MinecraftEntitlement.gameMinecraft.rawValue }
 
             if !hasProductMinecraft || !hasGameMinecraft {
-                throw GlobalError.authentication(i18nKey: "This Microsoft account has not purchased Minecraft or has insufficient entitlements, please log in with an account that has purchased Minecraft",
+                throw GlobalError.authentication(
+                    i18nKey: "This Microsoft account has not purchased Minecraft or has insufficient entitlements, please log in with an account that has purchased Minecraft",
                     level: .popup
                 )
             }
 
             // Verification passed
         } catch let decodingError as DecodingError {
-            throw GlobalError.validation(i18nKey: "Failed to parse game entitlements response: %@",
+            throw GlobalError.validation(
+                i18nKey: "Failed to parse game entitlements response: %@",
                 level: .notification
             )
         } catch let globalError as GlobalError {
             // Rethrow GlobalError
             throw globalError
         } catch {
-            throw GlobalError.validation(i18nKey: "Unknown error occurred while checking game ownership: %@",
+            throw GlobalError.validation(
+                i18nKey: "Unknown error occurred while checking game ownership: %@",
                 level: .notification
             )
         }
@@ -443,7 +462,9 @@ class MinecraftAuthService: NSObject, ObservableObject {
                 refreshToken: refreshToken
             )
         } catch {
-            throw GlobalError(type: .validation, i18nKey: "Minecraft Profile Parse Failed",
+            throw GlobalError(
+                type: .validation,
+                i18nKey: "Minecraft Profile Parse Failed",
                 level: .notification
             )
         }
@@ -487,7 +508,8 @@ extension MinecraftAuthService {
         } catch let error as GlobalError {
             return .failure(error)
         } catch {
-            let globalError = GlobalError.authentication(i18nKey: "Unknown error occurred while refreshing token: %@",
+            let globalError = GlobalError.authentication(
+                i18nKey: "Unknown error occurred while refreshing token: %@",
                 level: .popup
             )
             return .failure(globalError)
@@ -502,7 +524,8 @@ extension MinecraftAuthService {
 
         // If there is no access token, throw an error and ask to log in again
         guard !player.authAccessToken.isEmpty else {
-            throw GlobalError.authentication(i18nKey: "Access token is missing, please log in again",
+            throw GlobalError.authentication(
+                i18nKey: "Access token is missing, please log in again",
                 level: .notification
             )
         }
@@ -519,7 +542,8 @@ extension MinecraftAuthService {
 
         // Token expires, try to refresh using refresh token
         guard !player.authRefreshToken.isEmpty else {
-            throw GlobalError.authentication(i18nKey: "Login has expired, please re-login to this account",
+            throw GlobalError.authentication(
+                i18nKey: "Login has expired, please re-login to this account",
                 level: .popup
             )
         }
@@ -590,12 +614,14 @@ extension MinecraftAuthService {
             switch error {
             case "invalid_grant":
                 Logger.shared.error("刷新令牌已过期或无效")
-                throw GlobalError.authentication(i18nKey: "Refresh token is expired or invalid",
+                throw GlobalError.authentication(
+                    i18nKey: "Refresh token is expired or invalid",
                     level: .notification
                 )
             default:
                 Logger.shared.error("刷新令牌错误: \(error)")
-                throw GlobalError.authentication(i18nKey: "Refresh token error",
+                throw GlobalError.authentication(
+                    i18nKey: "Refresh token error",
                     level: .notification
                 )
             }
@@ -603,7 +629,8 @@ extension MinecraftAuthService {
 
         guard httpResponse.statusCode == 200 else {
             Logger.shared.error("刷新访问令牌失败: HTTP \(httpResponse.statusCode)")
-            throw GlobalError.download(i18nKey: "Refresh token request failed",
+            throw GlobalError.download(
+                i18nKey: "Refresh token request failed",
                 level: .notification
             )
         }
@@ -622,7 +649,8 @@ extension MinecraftAuthService {
     /// - Parameter player: Player who needs to log in again
     func promptForReauth(player: Player) {
         // Display notification prompting user to log in again
-        let notification = GlobalError.authentication(i18nKey: "Login has expired, please re-login to this account in player management before starting the game",
+        let notification = GlobalError.authentication(
+            i18nKey: "Login has expired, please re-login to this account in player management before starting the game",
             level: .notification
         )
 

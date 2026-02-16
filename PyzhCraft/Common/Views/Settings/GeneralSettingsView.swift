@@ -158,7 +158,8 @@ public struct GeneralSettingsView: View {
     private func resetWorkingDirectorySafely() {
         do {
             guard let supportDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appendingPathComponent(Bundle.main.appName) else {
-                throw GlobalError.configuration(i18nKey: "App Support Directory Not Found",
+                throw GlobalError.configuration(
+                    i18nKey: "App Support Directory Not Found",
                     level: .popup
                 )
             }
@@ -185,7 +186,8 @@ public struct GeneralSettingsView: View {
                     // Verify directory is accessible
                     let resourceValues = try url.resourceValues(forKeys: [.isDirectoryKey, .isReadableKey])
                     guard resourceValues.isDirectory == true, resourceValues.isReadable == true else {
-                        throw GlobalError.fileSystem(i18nKey: "Invalid Directory Selected",
+                        throw GlobalError.fileSystem(
+                            i18nKey: "Invalid Directory Selected",
                             level: .notification
                         )
                     }
@@ -201,7 +203,8 @@ public struct GeneralSettingsView: View {
                 }
             }
         case .failure(let error):
-            let globalError = GlobalError.fileSystem(i18nKey: "Directory Selection Failed",
+            let globalError = GlobalError.fileSystem(
+                i18nKey: "Directory Selection Failed",
                 level: .notification
             )
             GlobalErrorHandler.shared.handle(globalError)
@@ -225,7 +228,8 @@ public struct GeneralSettingsView: View {
 /// - Throws: GlobalError when restart fails
 private func restartApp() throws {
     guard let appURL = Bundle.main.bundleURL as URL? else {
-        throw GlobalError.configuration(i18nKey: "App Executable Not Found",
+        throw GlobalError.configuration(
+            i18nKey: "App Executable Not Found",
             level: .popup
         )
     }

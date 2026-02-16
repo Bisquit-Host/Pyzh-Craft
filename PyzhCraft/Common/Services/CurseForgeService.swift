@@ -362,7 +362,8 @@ enum CurseForgeService {
             let stringIds = limitedCategoryIds.map { String($0) }
             let data = try JSONEncoder().encode(stringIds)
             guard let jsonArrayString = String(data: data, encoding: .utf8) else {
-                throw GlobalError.validation(i18nKey: "Encode Category IDs Failed",
+                throw GlobalError.validation(
+                    i18nKey: "Encode Category IDs Failed",
                     level: .notification
                 )
             }
@@ -378,7 +379,8 @@ enum CurseForgeService {
             // As required by the API documentation, use the JSON array string format: ["1.0","1.1"]
             let data = try JSONEncoder().encode(limitedGameVersions)
             guard let jsonArrayString = String(data: data, encoding: .utf8) else {
-                throw GlobalError.validation(i18nKey: "Encode Game Versions Failed",
+                throw GlobalError.validation(
+                    i18nKey: "Encode Game Versions Failed",
                     level: .notification
                 )
             }
@@ -410,7 +412,8 @@ enum CurseForgeService {
             // Use JSON array string format: ["1","4"]
             let data = try JSONEncoder().encode(stringTypes)
             guard let jsonArrayString = String(data: data, encoding: .utf8) else {
-                throw GlobalError.validation(i18nKey: "Encode Mod Loader Types Failed",
+                throw GlobalError.validation(
+                    i18nKey: "Encode Mod Loader Types Failed",
                     level: .notification
                 )
             }
@@ -421,7 +424,8 @@ enum CurseForgeService {
 
         components?.queryItems = queryItems
         guard let url = components?.url else {
-            throw GlobalError.validation(i18nKey: "Search URL Build Failed",
+            throw GlobalError.validation(
+                i18nKey: "Search URL Build Failed",
                 level: .notification
             )
         }
@@ -515,7 +519,8 @@ enum CurseForgeService {
         let description = try await descriptionTask
 
         guard let modrinthDetail = CurseForgeToModrinthAdapter.convert(cfDetail, description: description) else {
-            throw GlobalError.validation(i18nKey: "Project Detail Convert Failed",
+            throw GlobalError.validation(
+                i18nKey: "Project Detail Convert Failed",
                 level: .notification
             )
         }
@@ -814,7 +819,8 @@ enum CurseForgeService {
     /// - Throws: Network error or parsing error
     private static func tryFetchFileDetail(from urlString: String) async throws -> CurseForgeModFileDetail {
         guard let url = URL(string: urlString) else {
-            throw GlobalError.validation(i18nKey: "Network URL Error",
+            throw GlobalError.validation(
+                i18nKey: "Network URL Error",
                 level: .notification
             )
         }
@@ -834,7 +840,8 @@ enum CurseForgeService {
     /// - Throws: Network error or parsing error
     private static func tryFetchModDetail(from urlString: String) async throws -> CurseForgeModDetail {
         guard let url = URL(string: urlString) else {
-            throw GlobalError.validation(i18nKey: "Network URL Error",
+            throw GlobalError.validation(
+                i18nKey: "Network URL Error",
                 level: .notification
             )
         }
@@ -854,7 +861,8 @@ enum CurseForgeService {
     /// - Throws: Network error or parsing error
     private static func tryFetchModDescription(from urlString: String) async throws -> String {
         guard let url = URL(string: urlString) else {
-            throw GlobalError.validation(i18nKey: "Network URL Error",
+            throw GlobalError.validation(
+                i18nKey: "Network URL Error",
                 level: .notification
             )
         }
@@ -872,7 +880,8 @@ enum CurseForgeService {
     private static func parseCurseForgeId(_ id: String) throws -> (modId: Int, normalized: String) {
         let cleanId = id.replacingOccurrences(of: "cf-", with: "")
         guard let modId = Int(cleanId) else {
-            throw GlobalError.validation(i18nKey: "Invalid Project ID",
+            throw GlobalError.validation(
+                i18nKey: "Invalid Project ID",
                 level: .notification
             )
         }

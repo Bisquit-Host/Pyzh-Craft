@@ -44,7 +44,8 @@ extension View {
 extension BaseGameFormViewModel {
     /// Unified file access error handling
     func handleFileAccessError(_ error: Error, context: String) {
-        let globalError = GlobalError.fileSystem(i18nKey: "File Access Failed",
+        let globalError = GlobalError.fileSystem(
+            i18nKey: "File Access Failed",
             level: .notification
         )
         handleNonCriticalError(globalError, message: "error.file.access.failed")
@@ -52,7 +53,8 @@ extension BaseGameFormViewModel {
 
     /// Unified file read error handling
     func handleFileReadError(_ error: Error, context: String) {
-        let globalError = GlobalError.fileSystem(i18nKey: "File Read Failed",
+        let globalError = GlobalError.fileSystem(
+            i18nKey: "File Read Failed",
             level: .notification
         )
         handleNonCriticalError(globalError, message: "error.file.read.failed")

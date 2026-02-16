@@ -4,7 +4,8 @@ enum NeoForgeLoaderService {
     /// Get a collection of version strings for all available NeoForge versions
     static func fetchAllNeoForgeVersions(for minecraftVersion: String) async throws -> LoaderVersion {
         guard let result = await CommonService.fetchAllLoaderVersions(type: "neo", minecraftVersion: minecraftVersion) else {
-            throw GlobalError.resource(i18nKey: "NeoForge loader version not found",
+            throw GlobalError.resource(
+                i18nKey: "NeoForge loader version not found",
                 level: .notification
             )
         }
@@ -114,7 +115,8 @@ enum NeoForgeLoaderService {
         let mainClass = neoForgeProfile.mainClass
 
         guard let version = neoForgeProfile.version else {
-            throw GlobalError.resource(i18nKey: "NeoForge missing version",
+            throw GlobalError.resource(
+                i18nKey: "NeoForge missing version",
                 level: .notification
             )
         }

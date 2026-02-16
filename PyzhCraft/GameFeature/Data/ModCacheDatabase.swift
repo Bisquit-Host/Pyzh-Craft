@@ -83,7 +83,8 @@ class ModCacheDatabase {
             let result = sqlite3_step(statement)
             guard result == SQLITE_DONE else {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
-                throw GlobalError.validation(i18nKey: "Failed to save mod cache: %@",
+                throw GlobalError.validation(
+                    i18nKey: "Failed to save mod cache: %@",
                     level: .notification
                 )
             }
@@ -118,7 +119,8 @@ class ModCacheDatabase {
                 let result = sqlite3_step(statement)
                 guard result == SQLITE_DONE else {
                     let errorMessage = String(cString: sqlite3_errmsg(db.database))
-                    throw GlobalError.validation(i18nKey: "Failed to batch save mod cache: %@",
+                    throw GlobalError.validation(
+                        i18nKey: "Failed to batch save mod cache: %@",
                         level: .notification
                     )
                 }
@@ -182,7 +184,8 @@ class ModCacheDatabase {
             let result = sqlite3_step(statement)
             guard result == SQLITE_DONE else {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
-                throw GlobalError.validation(i18nKey: "Failed to delete mod cache: %@",
+                throw GlobalError.validation(
+                    i18nKey: "Failed to delete mod cache: %@",
                     level: .notification
                 )
             }
@@ -205,7 +208,8 @@ class ModCacheDatabase {
                 let result = sqlite3_step(statement)
                 guard result == SQLITE_DONE else {
                     let errorMessage = String(cString: sqlite3_errmsg(db.database))
-                    throw GlobalError.validation(i18nKey: "Failed to batch delete mod cache: %@",
+                    throw GlobalError.validation(
+                        i18nKey: "Failed to batch delete mod cache: %@",
                         level: .notification
                     )
                 }

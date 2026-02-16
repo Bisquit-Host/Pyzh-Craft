@@ -240,7 +240,8 @@ struct GameInfoDetailView: View {
         switch result {
         case .success(let urls):
             guard let url = urls.first else {
-                let globalError = GlobalError.validation(i18nKey: "No File Selected",
+                let globalError = GlobalError.validation(
+                    i18nKey: "No File Selected",
                     level: .notification
                 )
                 GlobalErrorHandler.shared.handle(globalError)
@@ -248,7 +249,8 @@ struct GameInfoDetailView: View {
             }
 
             guard url.startAccessingSecurityScopedResource() else {
-                let globalError = GlobalError.fileSystem(i18nKey: "File Access Failed",
+                let globalError = GlobalError.fileSystem(
+                    i18nKey: "File Access Failed",
                     level: .notification
                 )
                 GlobalErrorHandler.shared.handle(globalError)

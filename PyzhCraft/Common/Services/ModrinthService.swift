@@ -86,7 +86,9 @@ enum ModrinthService {
             if error is GlobalError {
                 throw error
             } else {
-                throw GlobalError(type: .validation, i18nKey: "Version info parse failed",
+                throw GlobalError(
+                    type: .validation,
+                    i18nKey: "Version info parse failed",
                     level: .notification
                 )
             }
@@ -126,7 +128,9 @@ enum ModrinthService {
             url: URLConfig.API.Modrinth.search,
             resolvingAgainstBaseURL: true
         ) else {
-            throw GlobalError(type: .validation, i18nKey: "URL components build failed",
+            throw GlobalError(
+                type: .validation,
+                i18nKey: "URL components build failed",
                 level: .notification
             )
         }
@@ -147,14 +151,16 @@ enum ModrinthService {
                     )
                 }
             } catch {
-                throw GlobalError.validation(i18nKey: "Search Condition Encode Failed",
+                throw GlobalError.validation(
+                    i18nKey: "Search Condition Encode Failed",
                     level: .notification
                 )
             }
         }
         components.queryItems = queryItems
         guard let url = components.url else {
-            throw GlobalError.validation(i18nKey: "Search URL Build Failed",
+            throw GlobalError.validation(
+                i18nKey: "Search URL Build Failed",
                 level: .notification
             )
         }

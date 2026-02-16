@@ -30,7 +30,8 @@ enum LocalResourceInstaller {
         // Check extension
         guard let ext = fileURL.pathExtension.lowercased() as String?,
               resourceType.allowedExtensions.contains(ext) else {
-            throw GlobalError.resource(i18nKey: "Invalid file type",
+            throw GlobalError.resource(
+                i18nKey: "Invalid file type",
                 level: .notification
             )
         }
@@ -38,7 +39,8 @@ enum LocalResourceInstaller {
         // target directory
         var isDir: ObjCBool = false
         guard FileManager.default.fileExists(atPath: gameRoot.path, isDirectory: &isDir), isDir.boolValue else {
-            throw GlobalError.fileSystem(i18nKey: "Destination Unavailable",
+            throw GlobalError.fileSystem(
+                i18nKey: "Destination Unavailable",
                 level: .notification
             )
         }
@@ -47,7 +49,8 @@ enum LocalResourceInstaller {
         let needsSecurity = fileURL.startAccessingSecurityScopedResource()
         defer { if needsSecurity { fileURL.stopAccessingSecurityScopedResource() } }
         if !needsSecurity {
-            throw GlobalError.fileSystem(i18nKey: "Security Scope Failed",
+            throw GlobalError.fileSystem(
+                i18nKey: "Security Scope Failed",
                 level: .notification
             )
         }
@@ -63,7 +66,8 @@ enum LocalResourceInstaller {
         do {
             try FileManager.default.copyItem(at: fileURL, to: destURL)
         } catch {
-            throw GlobalError.fileSystem(i18nKey: "Copy Failed",
+            throw GlobalError.fileSystem(
+                i18nKey: "Copy Failed",
                 level: .notification
             )
         }
@@ -114,7 +118,8 @@ extension LocalResourceInstaller {
 
                         // If query is a modpack or an invalid resource type, show an error
                         if queryLowercased == "modpack" || !validResourceTypes.contains(queryLowercased) {
-                            errorHandler.handle(GlobalError.configuration(i18nKey: "Resource Directory Not Found",
+                            errorHandler.handle(GlobalError.configuration(
+                                i18nKey: "Resource Directory Not Found",
                                 level: .notification
                             ))
                             return
@@ -122,7 +127,8 @@ extension LocalResourceInstaller {
 
                         let gameRootOpt = AppPaths.resourceDirectory(for: query, gameName: gameName)
                         guard let gameRoot = gameRootOpt else {
-                            errorHandler.handle(GlobalError.fileSystem(i18nKey: "Game Directory Not Found",
+                            errorHandler.handle(GlobalError.fileSystem(
+                                i18nKey: "Game Directory Not Found",
                                 level: .notification
                             ))
                             return
@@ -133,7 +139,8 @@ extension LocalResourceInstaller {
 
                         do {
                             guard let ext = fileURL.pathExtension.lowercased() as String?, allowedExtensions.contains(ext) else {
-                                throw GlobalError.resource(i18nKey: "Invalid file type",
+                                throw GlobalError.resource(
+                                    i18nKey: "Invalid file type",
                                     level: .notification
                                 )
                             }
@@ -148,7 +155,8 @@ extension LocalResourceInstaller {
                             errorHandler.handle(error)
                         }
                     case .failure(let error):
-                        errorHandler.handle(GlobalError.fileSystem(i18nKey: "File Selection Failed",
+                        errorHandler.handle(GlobalError.fileSystem(
+                            i18nKey: "File Selection Failed",
                             level: .notification
                         ))
                     }

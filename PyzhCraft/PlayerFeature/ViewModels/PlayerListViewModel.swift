@@ -160,7 +160,8 @@ class PlayerListViewModel: ObservableObject {
     func setCurrentPlayerThrowing(byID playerId: String) throws {
         guard let index = players.firstIndex(where: { $0.id == playerId })
         else {
-            throw GlobalError.player(i18nKey: "Not Found",
+            throw GlobalError.player(
+                i18nKey: "Not Found",
                 level: .notification
             )
         }

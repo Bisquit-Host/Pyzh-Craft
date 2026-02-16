@@ -123,7 +123,8 @@ struct GlobalResourceSheet: View {
         game: GameVersionInfo
     ) async throws {
         guard !project.projectId.isEmpty else {
-            throw GlobalError.validation(i18nKey: "Project ID Empty",
+            throw GlobalError.validation(
+                i18nKey: "Project ID Empty",
                 level: .notification
             )
         }

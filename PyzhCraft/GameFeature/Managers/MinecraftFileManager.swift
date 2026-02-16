@@ -67,7 +67,8 @@ class MinecraftFileManager {
         do {
             try fileManager.removeItem(at: profileDirectory)
         } catch {
-            throw GlobalError.fileSystem(i18nKey: "Game Deletion Failed",
+            throw GlobalError.fileSystem(
+                i18nKey: "Game Deletion Failed",
                 level: .notification
             )
         }
@@ -174,7 +175,8 @@ class MinecraftFileManager {
                     withIntermediateDirectories: true
                 )
             } catch {
-                throw GlobalError.fileSystem(i18nKey: "Directory Creation Failed",
+                throw GlobalError.fileSystem(
+                    i18nKey: "Directory Creation Failed",
                     level: .notification
                 )
             }
@@ -224,7 +226,8 @@ class MinecraftFileManager {
             if let globalError = error as? GlobalError {
                 throw globalError
             } else {
-                throw GlobalError.download(i18nKey: "Client Jar Failed",
+                throw GlobalError.download(
+                    i18nKey: "Client Jar Failed",
                     level: .notification
                 )
             }
@@ -293,7 +296,8 @@ class MinecraftFileManager {
         }
 
         guard let artifactURL = library.downloads.artifact.url else {
-            throw GlobalError.download(i18nKey: "Missing library URL",
+            throw GlobalError.download(
+                i18nKey: "Missing library URL",
                 level: .notification
             )
         }
@@ -313,7 +317,8 @@ class MinecraftFileManager {
             if let globalError = error as? GlobalError {
                 throw globalError
             } else {
-                throw GlobalError.download(i18nKey: "Library Download Failed",
+                throw GlobalError.download(
+                    i18nKey: "Library Download Failed",
                     level: .notification
                 )
             }
@@ -353,7 +358,8 @@ class MinecraftFileManager {
         }
 
         guard let nativeURL = nativeArtifact.url else {
-            throw GlobalError.download(i18nKey: "Missing native URL",
+            throw GlobalError.download(
+                i18nKey: "Missing native URL",
                 level: .notification
             )
         }
@@ -376,7 +382,8 @@ class MinecraftFileManager {
             if let globalError = error as? GlobalError {
                 throw globalError
             } else {
-                throw GlobalError.download(i18nKey: "Native Library Failed",
+                throw GlobalError.download(
+                    i18nKey: "Native Library Failed",
                     level: .notification
                 )
             }
@@ -428,7 +435,8 @@ class MinecraftFileManager {
             if let globalError = error as? GlobalError {
                 throw globalError
             } else {
-                throw GlobalError.download(i18nKey: "Asset Index Failed",
+                throw GlobalError.download(
+                    i18nKey: "Asset Index Failed",
                     level: .notification
                 )
             }
@@ -461,7 +469,8 @@ class MinecraftFileManager {
             if let globalError = error as? GlobalError {
                 throw globalError
             } else {
-                throw GlobalError.download(i18nKey: "Logging Config Failed",
+                throw GlobalError.download(
+                    i18nKey: "Logging Config Failed",
                     level: .notification
                 )
             }
@@ -493,7 +502,8 @@ class MinecraftFileManager {
             if let globalError = error as? GlobalError {
                 throw globalError
             } else {
-                throw GlobalError.download(i18nKey: "File Download Failed",
+                throw GlobalError.download(
+                    i18nKey: "File Download Failed",
                     level: .notification
                 )
             }
@@ -602,7 +612,8 @@ class MinecraftFileManager {
             if let globalError = error as? GlobalError {
                 throw globalError
             } else {
-                throw GlobalError.download(i18nKey: "Asset File Failed",
+                throw GlobalError.download(
+                    i18nKey: "Asset File Failed",
                     level: .notification
                 )
             }

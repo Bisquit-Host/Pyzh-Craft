@@ -108,7 +108,8 @@ enum QuiltLoaderService {
         let classpathString = CommonService.generateFabricClasspath(from: quiltProfile, librariesDir: librariesDirectory)
         let mainClass = quiltProfile.mainClass
         guard let version = quiltProfile.version else {
-            throw GlobalError.resource(i18nKey: "Quilt missing version",
+            throw GlobalError.resource(
+                i18nKey: "Quilt missing version",
                 level: .notification
             )
         }
