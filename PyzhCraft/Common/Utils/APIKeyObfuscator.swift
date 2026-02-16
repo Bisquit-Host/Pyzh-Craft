@@ -14,19 +14,36 @@ enum Obfuscator {
         return String(bytes: bytes, encoding: .utf8) ?? ""
     }
 
+    private static func chunked(_ string: String, length: Int) -> [String] {
+        guard length > 0 else { return [] }
+
+        var chunks: [String] = []
+        var startIndex = string.startIndex
+
+        while startIndex < string.endIndex {
+            let endIndex = string.index(
+                startIndex,
+                offsetBy: length,
+                limitedBy: string.endIndex
+            ) ?? string.endIndex
+            chunks.append(String(string[startIndex..<endIndex]))
+            startIndex = endIndex
+        }
+
+        return chunks
+    }
+
     // MARK: - Client ID method
 
     /// Decrypt Client ID
     static func decryptClientID(_ encryptedString: String) -> String {
         // Split the encrypted string into fixed lengths (8 characters per part)
         let partLength = 8
-        var parts: [String] = []
-
-        for i in 0..<6 {
-            let startIndex = encryptedString.index(encryptedString.startIndex, offsetBy: i * partLength)
-            let endIndex = encryptedString.index(startIndex, offsetBy: partLength)
-            let part = String(encryptedString[startIndex..<endIndex])
-            parts.append(part)
+        var parts = chunked(encryptedString, length: partLength)
+        if parts.count < indexOrder.count {
+            parts.append(contentsOf: repeatElement("", count: indexOrder.count - parts.count))
+        } else if parts.count > indexOrder.count {
+            parts = Array(parts.prefix(indexOrder.count))
         }
 
         // Restore original order according to indexOrder
@@ -46,17 +63,9 @@ enum Obfuscator {
     static func decryptAPIKey(_ encryptedString: String) -> String {
         // Calculate the number of parts that need to be split (each part is 8 characters after encryption)
         let partLength = 8
-        let totalLength = encryptedString.count
-        let numParts = (totalLength + partLength - 1) / partLength // round up
 
         // Split encrypted string by fixed length
-        var parts: [String] = []
-        for i in 0..<numParts {
-            let startIndex = encryptedString.index(encryptedString.startIndex, offsetBy: i * partLength)
-            let endIndex = min(encryptedString.index(startIndex, offsetBy: partLength), encryptedString.endIndex)
-            let part = String(encryptedString[startIndex..<endIndex])
-            parts.append(part)
-        }
+        var parts = chunked(encryptedString, length: partLength)
 
         // If the number of parts is less than 6, it needs to be filled to 6
         while parts.count < 6 {

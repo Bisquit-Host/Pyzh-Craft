@@ -34,12 +34,9 @@ struct AddPlayerSheetView: View {
                 HStack {
                     Text("Add Account")
                         .font(.headline)
-                    Image(systemName: selectedAuthType.symbol.name)
-                        .font(.headline)
-                        .foregroundStyle(.secondary)
-                        .symbolRenderingMode(selectedAuthType.symbol.mode)
-                        .symbolVariant(.none)
+                    
                     Spacer()
+                    
                     if isCheckingFlag {
                         ProgressView()
                             .controlSize(.small)
@@ -56,11 +53,11 @@ struct AddPlayerSheetView: View {
                         .fixedSize()
                     }
                 }
-            },
-            body: {
+            }, body: {
                 switch selectedAuthType {
                 case .premium:
                     MinecraftAuthView(onLoginSuccess: onLogin)
+                    
                 case .offline:
                     VStack(alignment: .leading) {
                         playerInfoSection
@@ -68,8 +65,7 @@ struct AddPlayerSheetView: View {
                         playerNameInputSection
                     }
                 }
-            },
-            footer: {
+            }, footer: {
                 HStack {
                     Button(
                         "Cancel"
@@ -77,7 +73,9 @@ struct AddPlayerSheetView: View {
                         authService.isLoading = false
                         onCancel()
                     }
+                    
                     Spacer()
+                    
                     if selectedAuthType == .premium {
                         // Show different buttons based on authentication status
                         switch authService.authState {
