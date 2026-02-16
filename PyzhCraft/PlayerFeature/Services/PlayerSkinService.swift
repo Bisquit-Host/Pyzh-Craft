@@ -45,7 +45,7 @@ enum PlayerSkinService {
             )
         case 403:
             throw GlobalError.authentication(
-                i18nKey: "error.authentication.\(operation)_forbidden",
+                i18nKey: .init("error.authentication.\(operation)_forbidden"),
                 level: .notification
             )
         case 404:
@@ -60,7 +60,7 @@ enum PlayerSkinService {
             )
         default:
             throw GlobalError.network(
-                i18nKey: "error.network.\(operation)_http_error",
+                i18nKey: .init("error.network.\(operation)_http_error"),
                 level: .notification
             )
         }

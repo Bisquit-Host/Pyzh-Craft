@@ -15,52 +15,52 @@ enum ErrorLevel: String, CaseIterable {
 /// Global error type enum
 enum GlobalError: Error, LocalizedError, Identifiable {
     case network(
-        i18nKey: String,
+        i18nKey: LocalizedStringKey,
         level: ErrorLevel = .notification
     )
     case fileSystem(
-        i18nKey: String,
+        i18nKey: LocalizedStringKey,
         level: ErrorLevel = .notification
     )
     case authentication(
-        i18nKey: String,
+        i18nKey: LocalizedStringKey,
         level: ErrorLevel = .popup
     )
     case validation(
-        i18nKey: String,
+        i18nKey: LocalizedStringKey,
         level: ErrorLevel = .notification
     )
     case download(
-        i18nKey: String,
+        i18nKey: LocalizedStringKey,
         level: ErrorLevel = .notification
     )
     case installation(
-        i18nKey: String,
+        i18nKey: LocalizedStringKey,
         level: ErrorLevel = .notification
     )
     case gameLaunch(
-        i18nKey: String,
+        i18nKey: LocalizedStringKey,
         level: ErrorLevel = .popup
     )
     case resource(
-        i18nKey: String,
+        i18nKey: LocalizedStringKey,
         level: ErrorLevel = .notification
     )
     case player(
-        i18nKey: String,
+        i18nKey: LocalizedStringKey,
         level: ErrorLevel = .notification
     )
     case configuration(
-        i18nKey: String,
+        i18nKey: LocalizedStringKey,
         level: ErrorLevel = .notification
     )
     case unknown(
-        i18nKey: String,
+        i18nKey: LocalizedStringKey,
         level: ErrorLevel = .silent
     )
 
     var id: String {
-        "\(typeIdentifier)_\(i18nKey)_\(level.rawValue)"
+        "\(typeIdentifier)_\(i18nKeyString)_\(level.rawValue)"
     }
 
     private var typeIdentifier: String {
@@ -85,7 +85,7 @@ enum GlobalError: Error, LocalizedError, Identifiable {
     }
 
     /// International key
-    var i18nKey: String {
+    var i18nKey: LocalizedStringKey {
         switch self {
         case let .network(key, _): key
         case let .fileSystem(key, _): key
@@ -99,6 +99,11 @@ enum GlobalError: Error, LocalizedError, Identifiable {
         case let .configuration(key, _): key
         case let .unknown(key, _): key
         }
+    }
+
+    /// International key as raw string
+    var i18nKeyString: String {
+        i18nKey.rawKey
     }
 
     /// error level
@@ -121,8 +126,8 @@ enum GlobalError: Error, LocalizedError, Identifiable {
     /// Localized error description (using internationalization key)
     var errorDescription: String? {
         LanguageManager.shared.bundle.localizedString(
-            forKey: i18nKey,
-            value: i18nKey,
+            forKey: i18nKeyString,
+            value: i18nKeyString,
             table: nil
         )
     }
@@ -130,8 +135,8 @@ enum GlobalError: Error, LocalizedError, Identifiable {
     /// Localized description derived from the localization key
     var localizedDescription: String {
         LanguageManager.shared.bundle.localizedString(
-            forKey: i18nKey,
-            value: i18nKey,
+            forKey: i18nKeyString,
+            value: i18nKeyString,
             table: nil
         )
     }
@@ -274,7 +279,7 @@ class GlobalErrorHandler: ObservableObject {
 
     /// Record errors to log
     private func logError(_ error: GlobalError) {
-        Logger.shared.error("[GlobalError] \(error.chineseMessage) | Key: \(error.i18nKey) | Level: \(error.level.rawValue)")
+        Logger.shared.error("[GlobalError] \(error.chineseMessage) | Key: \(error.i18nKeyString) | Level: \(error.level.rawValue)")
     }
 }
 
@@ -305,47 +310,55 @@ extension View {
 // MARK: - Convenience Methods
 
 extension GlobalErrorHandler {
-    static func network(i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
+    static func network(i18nKey: LocalizedStringKey, level: ErrorLevel = .notification) -> GlobalError {
         .network(i18nKey: i18nKey, level: level)
     }
 
-    static func fileSystem(i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
+    static func fileSystem(i18nKey: LocalizedStringKey, level: ErrorLevel = .notification) -> GlobalError {
         .fileSystem(i18nKey: i18nKey, level: level)
     }
 
-    static func authentication(i18nKey: String, level: ErrorLevel = .popup) -> GlobalError {
+    static func authentication(i18nKey: LocalizedStringKey, level: ErrorLevel = .popup) -> GlobalError {
         .authentication(i18nKey: i18nKey, level: level)
     }
 
-    static func validation(i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
+    static func validation(i18nKey: LocalizedStringKey, level: ErrorLevel = .notification) -> GlobalError {
         .validation(i18nKey: i18nKey, level: level)
     }
 
-    static func download(i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
+    static func download(i18nKey: LocalizedStringKey, level: ErrorLevel = .notification) -> GlobalError {
         .download(i18nKey: i18nKey, level: level)
     }
 
-    static func installation(i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
+    static func installation(i18nKey: LocalizedStringKey, level: ErrorLevel = .notification) -> GlobalError {
         .installation(i18nKey: i18nKey, level: level)
     }
 
-    static func gameLaunch(i18nKey: String, level: ErrorLevel = .popup) -> GlobalError {
+    static func gameLaunch(i18nKey: LocalizedStringKey, level: ErrorLevel = .popup) -> GlobalError {
         .gameLaunch(i18nKey: i18nKey, level: level)
     }
 
-    static func resource(i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
+    static func resource(i18nKey: LocalizedStringKey, level: ErrorLevel = .notification) -> GlobalError {
         .resource(i18nKey: i18nKey, level: level)
     }
 
-    static func player(i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
+    static func player(i18nKey: LocalizedStringKey, level: ErrorLevel = .notification) -> GlobalError {
         .player(i18nKey: i18nKey, level: level)
     }
 
-    static func configuration(i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
+    static func configuration(i18nKey: LocalizedStringKey, level: ErrorLevel = .notification) -> GlobalError {
         .configuration(i18nKey: i18nKey, level: level)
     }
 
-    static func unknown(i18nKey: String, level: ErrorLevel = .silent) -> GlobalError {
+    static func unknown(i18nKey: LocalizedStringKey, level: ErrorLevel = .silent) -> GlobalError {
         .unknown(i18nKey: i18nKey, level: level)
+    }
+}
+
+private extension LocalizedStringKey {
+    var rawKey: String {
+        Mirror(reflecting: self).children
+            .first { $0.label == "key" }?
+            .value as? String ?? String(describing: self)
     }
 }

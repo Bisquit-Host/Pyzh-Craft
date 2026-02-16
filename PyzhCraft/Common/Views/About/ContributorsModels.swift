@@ -2,21 +2,19 @@ import SwiftUI
 
 /// Contribution type enum
 enum Contribution: String, CaseIterable {
-    case code = "Code"
-    case design = "Design"
-    case test = "Test"
-    case feedback = "Feedback"
-    case documentation = "Documentation"
-    case infra = "Infra"
-
-    var localizedString: String {
-        LanguageManager.shared.bundle.localizedString(
-            forKey: rawValue,
-            value: rawValue,
-            table: nil
-        )
+    case code, design, test, feedback, documentation, infra
+    
+    var localizedString: LocalizedStringKey {
+        switch self {
+        case .code: "Code"
+        case .design: "Design"
+        case .test: "Test"
+        case .feedback: "Feedback"
+        case .documentation: "Documentation"
+        case .infra: "Infra"
+        }
     }
-
+    
     var color: Color {
         switch self {
         case .code: .blue
