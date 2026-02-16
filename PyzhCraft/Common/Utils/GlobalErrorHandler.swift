@@ -142,7 +142,7 @@ enum GlobalError: Error, LocalizedError, Identifiable {
     }
 
     /// Get notification title (using internationalization key)
-    var notificationTitle: String {
+    var notificationTitle: LocalizedStringKey {
         switch self {
         case .network: "Network Error"
         case .fileSystem: "File System Error"
@@ -230,8 +230,13 @@ class GlobalErrorHandler: ObservableObject {
 
         case .notification:
             // Send notification
+            let notificationTitleKey = error.notificationTitle.rawKey
             NotificationManager.sendSilently(
-                title: error.notificationTitle,
+                title: LanguageManager.shared.bundle.localizedString(
+                    forKey: notificationTitleKey,
+                    value: notificationTitleKey,
+                    table: nil
+                ),
                 body: error.localizedDescription
             )
 
