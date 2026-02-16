@@ -12,9 +12,7 @@ final class CategoryDataCacheManager {
     static let shared = CategoryDataCacheManager()
     private var viewModels: [String: CategoryContentViewModel] = [:]
     
-    private init() {
-        
-    }
+    private init() {}
     
     func getViewModel(for project: String) -> CategoryContentViewModel {
         if let existing = viewModels[project] {

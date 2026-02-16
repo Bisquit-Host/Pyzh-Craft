@@ -9,6 +9,9 @@ disabled_rules:
   # Rationale: There are cases where you may want to declare the string enum value explicitly
   - redundant_string_enum_value
 
+  # Rationale: Allow trailing spaces in edited lines
+  - trailing_whitespace
+
 
 
 opt_in_rules:

@@ -22,6 +22,7 @@ struct SearchCacheKey: Hashable {
     let loaders: [String]
     let page: Int
     let dataSource: DataSource
+    
     func hash(into hasher: inout Hasher) {
         hasher.combine(query)
         hasher.combine(projectType)
@@ -34,6 +35,7 @@ struct SearchCacheKey: Hashable {
         hasher.combine(page)
         hasher.combine(dataSource.rawValue)
     }
+    
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.query == rhs.query &&
         lhs.projectType == rhs.projectType &&

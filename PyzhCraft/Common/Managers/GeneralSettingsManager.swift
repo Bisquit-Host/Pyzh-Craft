@@ -8,10 +8,8 @@ public enum InterfaceLayoutStyle: String, CaseIterable {
 
     public var localizedName: String {
         switch self {
-        case .classic:
-            "Classic".localized()
-        case .focused:
-            "Focused".localized()
+        case .classic: "Classic".localized()
+        case .focused: "Focused".localized()
         }
     }
 }
@@ -21,12 +19,9 @@ public enum ThemeMode: String, CaseIterable {
 
     public var localizedName: String {
         switch self {
-        case .light:
-            "Light".localized()
-        case .dark:
-            "Dark".localized()
-        case .system:
-            "Follow System".localized()
+        case .light: "Light".localized()
+        case .dark: "Dark".localized()
+        case .system: "Follow System".localized()
         }
     }
 
