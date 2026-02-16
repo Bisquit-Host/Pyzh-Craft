@@ -117,8 +117,7 @@ enum ModMetadataParser {
                 data.append(chunk)
             }
         } catch {
-            throw GlobalError(
-                type: .validation,
+            throw GlobalError.validation(
                 i18nKey: "Mods TOML Extract Failed",
                 level: .silent
             )

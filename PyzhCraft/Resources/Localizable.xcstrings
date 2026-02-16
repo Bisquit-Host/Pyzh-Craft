@@ -47600,25 +47600,24 @@
         }
       }
     },
-    "Mods TOML Extract Failed %@" : {
-      "extractionState" : "stale",
+    "Mods TOML Extract Failed" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "فشل في استخراج mods.toml: %@"
+            "value" : "فشل في استخراج mods.toml"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mods TOML udtræk mislykkedes: %@"
+            "value" : "Mods TOML udtræk mislykkedes"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mods TOML Extraktion fehlgeschlagen: %@"
+            "value" : "Mods TOML Extraktion fehlgeschlagen"
           }
         },
         "en" : {
@@ -47630,109 +47629,109 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Extracción de mods.toml falló: %@"
+            "value" : "Extracción de mods.toml falló"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mods TOML poiminta epäonnistui: %@"
+            "value" : "Mods TOML poiminta epäonnistui"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Extraction mods.toml échouée: %@"
+            "value" : "Extraction mods.toml échouée"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mods.toml निकालने में विफल: %@"
+            "value" : "mods.toml निकालने में विफल"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Estrazione mods.toml fallita: %@"
+            "value" : "Estrazione mods.toml fallita"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mods.tomlの抽出に失敗: %@"
+            "value" : "mods.tomlの抽出に失敗"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mods.toml 추출 실패: %@"
+            "value" : "mods.toml 추출 실패"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mods TOML uttrekk mislyktes: %@"
+            "value" : "Mods TOML uttrekk mislyktes"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mods TOML extractie mislukt: %@"
+            "value" : "Mods TOML extractie mislukt"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wyodrębnienie mods.toml nie powiodło się: %@"
+            "value" : "Wyodrębnienie mods.toml nie powiodło się"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Extração de mods.toml falhou: %@"
+            "value" : "Extração de mods.toml falhou"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Извлечение mods.toml не удалось: %@"
+            "value" : "Извлечение mods.toml не удалось"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mods TOML extraktion misslyckades: %@"
+            "value" : "Mods TOML extraktion misslyckades"
           }
         },
         "th" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "การดึงข้อมูล mods.toml ล้มเหลว: %@"
+            "value" : "การดึงข้อมูล mods.toml ล้มเหลว"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mods TOML çıkarma başarısız: %@"
+            "value" : "Mods TOML çıkarma başarısız"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trích xuất mods.toml thất bại: %@"
+            "value" : "Trích xuất mods.toml thất bại"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "提取 mods.toml 失败: %@"
+            "value" : "提取 mods.toml 失败"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "提取 mods.toml 失敗: %@"
+            "value" : "提取 mods.toml 失敗"
           }
         }
       }
