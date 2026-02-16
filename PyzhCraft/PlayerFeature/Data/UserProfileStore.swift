@@ -36,7 +36,7 @@ class UserProfileStore {
             return try decoder.decode([UserProfile].self, from: profilesData)
         } catch {
             throw GlobalError.validation(
-                i18nKey: "Failed to load user basic information: %@",
+                i18nKey: "Failed to load user basic information: \(error.localizedDescription)",
                 level: .notification
             )
         }
@@ -65,7 +65,7 @@ class UserProfileStore {
             Logger.shared.debug("用户基本信息已保存")
         } catch {
             throw GlobalError.validation(
-                i18nKey: "Failed to save user basic information: %@",
+                i18nKey: "Failed to save user basic information: \(error.localizedDescription)",
                 level: .notification
             )
         }
@@ -105,7 +105,7 @@ class UserProfileStore {
 
         guard let index = profiles.firstIndex(where: { $0.id == profile.id }) else {
             throw GlobalError.player(
-                i18nKey: "User to update not found: %@",
+                i18nKey: "User to update not found: \(profile.id)",
                 level: .notification
             )
         }

@@ -77,7 +77,7 @@ class PlayerDataManager {
                     // If saving the credential fails, roll back the profile
                     try? profileStore.deleteProfile(byID: newPlayer.id)
                     throw GlobalError.validation(
-                        i18nKey: "Failed to save authentication credentials: %@",
+                        i18nKey: "Failed to save authentication credentials: \(credential.userId)",
                         level: .notification
                     )
                 }
@@ -263,7 +263,7 @@ class PlayerDataManager {
         // save credentials
         for credential in credentials where !credentialStore.saveCredential(credential) {
             throw GlobalError.validation(
-                i18nKey: "Failed to save authentication credentials: %@",
+                i18nKey: "Failed to save authentication credentials: \(credential.userId)",
                 level: .notification
             )
         }

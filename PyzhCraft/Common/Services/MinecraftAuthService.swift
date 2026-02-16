@@ -399,7 +399,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
                 )
             default:
                 throw GlobalError.download(
-                    i18nKey: "Failed to check game ownership: HTTP %@",
+                    i18nKey: "Failed to check game ownership: HTTP \(String(statusCode))",
                     level: .notification
                 )
             }
@@ -430,7 +430,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
             throw globalError
         } catch {
             throw GlobalError.validation(
-                i18nKey: "Unknown error occurred while checking game ownership: %@",
+                i18nKey: "Unknown error occurred while checking game ownership: \(error.localizedDescription)",
                 level: .notification
             )
         }
@@ -503,7 +503,7 @@ extension MinecraftAuthService {
             return .failure(error)
         } catch {
             let globalError = GlobalError.authentication(
-                i18nKey: "Unknown error occurred while refreshing token: %@",
+                i18nKey: "Unknown error occurred while refreshing token: \(error.localizedDescription)",
                 level: .popup
             )
             return .failure(globalError)

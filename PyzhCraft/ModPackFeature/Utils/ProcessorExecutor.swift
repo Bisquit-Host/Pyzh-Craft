@@ -267,7 +267,7 @@ enum ProcessorExecutor {
 
             if process.terminationStatus != 0 {
                 throw GlobalError.download(
-                    i18nKey: "Processor Execution Failed (Exit Code: %d)",
+                    i18nKey: "Processor Execution Failed (Exit Code: \(process.terminationStatus))",
                     level: .notification
                 )
             }
@@ -324,14 +324,14 @@ enum ProcessorExecutor {
             archive = try Archive(url: jarPath, accessMode: .read)
         } catch {
             throw GlobalError.download(
-                i18nKey: "Failed to Open JAR File: %@",
+                i18nKey: "Failed to Open JAR File: \(jarPath.path)",
                 level: .notification
             )
         }
 
         guard let manifestEntry = archive["META-INF/MANIFEST.MF"] else {
             throw GlobalError.download(
-                i18nKey: "Failed to get main class from processor JAR file: %@",
+                i18nKey: "Failed to get main class from processor JAR file: \(jarPath.path)",
                 level: .notification
             )
         }
@@ -361,7 +361,7 @@ enum ProcessorExecutor {
         }
 
         throw GlobalError.download(
-            i18nKey: "Failed to get main class from processor JAR file: %@",
+            i18nKey: "Failed to get main class from processor JAR file: \(jarPath.path)",
             level: .notification
         )
     }

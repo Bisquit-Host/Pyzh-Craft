@@ -472,7 +472,7 @@ enum PlayerSkinService {
             )
         default:
             throw GlobalError.network(
-                i18nKey: "Show cape failed: HTTP %@",
+                i18nKey: "Show cape failed: HTTP \(String(http.statusCode))",
                 level: .notification
             )
         }
@@ -518,7 +518,7 @@ enum PlayerSkinService {
             )
         default:
             throw GlobalError.network(
-                i18nKey: "Hide cape failed: HTTP %@",
+                i18nKey: "Hide cape failed: HTTP \(String(http.statusCode))",
                 level: .notification
             )
         }
@@ -546,7 +546,7 @@ enum PlayerSkinService {
             )
         default:
             throw GlobalError.network(
-                i18nKey: "Reset skin failed: HTTP %@",
+                i18nKey: "Reset skin failed: HTTP \(String(http.statusCode))",
                 level: .notification
             )
         }

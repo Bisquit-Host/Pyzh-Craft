@@ -66,7 +66,7 @@ class JavaRuntimeService {
         let platform = getCurrentMacPlatform()
         guard let platformData = json[platform] as? [String: Any] else {
             throw GlobalError.validation(
-                i18nKey: "Platform data not found: %@",
+                i18nKey: "Platform data not found: \(platform)",
                 level: .notification
             )
         }

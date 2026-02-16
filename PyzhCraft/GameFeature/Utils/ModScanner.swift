@@ -107,7 +107,7 @@ class ModScanner {
         } catch {
             Logger.shared.error("编码 mod 缓存失败: \(error.localizedDescription)")
             GlobalErrorHandler.shared.handle(GlobalError.validation(
-                i18nKey: "Failed to save mod cache: %@",
+                i18nKey: "Failed to save mod cache: \(error.localizedDescription)",
                 level: .silent
             ))
         }
