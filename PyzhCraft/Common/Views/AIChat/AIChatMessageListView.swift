@@ -93,11 +93,12 @@ struct AIChatMessageListView: View {
     private var welcomeView: some View {
         VStack(spacing: 16) {
             if let player = currentPlayer {
-                Text(String(format: "Hello, %@!".localized(), player.name))
+                Text("Hello, \(player.name)!")
                     .font(.title2)
-                    .fontWeight(.bold)
+                    .bold()
                     .foregroundStyle(.primary)
             }
+            
             Text("How can I help you today?")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)

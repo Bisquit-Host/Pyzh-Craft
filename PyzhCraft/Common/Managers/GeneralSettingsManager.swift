@@ -6,10 +6,10 @@ public enum InterfaceLayoutStyle: String, CaseIterable {
     case classic,   // classic
          focused  // focus
 
-    public var localizedName: String {
+    public var localizedName: LocalizedStringKey {
         switch self {
-        case .classic: "Classic".localized()
-        case .focused: "Focused".localized()
+        case .classic: "Classic"
+        case .focused: "Focused"
         }
     }
 }
@@ -17,11 +17,11 @@ public enum InterfaceLayoutStyle: String, CaseIterable {
 public enum ThemeMode: String, CaseIterable {
     case light, dark, system
 
-    public var localizedName: String {
+    public var localizedName: LocalizedStringKey {
         switch self {
-        case .light: "Light".localized()
-        case .dark: "Dark".localized()
-        case .system: "Follow System".localized()
+        case .light: "Light"
+        case .dark: "Dark"
+        case .system: "Follow System"
         }
     }
 

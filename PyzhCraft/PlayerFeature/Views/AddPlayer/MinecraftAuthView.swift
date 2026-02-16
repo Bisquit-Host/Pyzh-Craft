@@ -117,7 +117,7 @@ struct MinecraftAuthView: View {
             VStack(spacing: 8) {
                 Text("Login Successful!")
                     .font(.title2)
-                    .fontWeight(.bold)
+                    .bold()
                     .foregroundColor(.green)
 
                 Text(profile.name)
