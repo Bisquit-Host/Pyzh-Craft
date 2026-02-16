@@ -189,7 +189,7 @@ public struct AcknowledgementsView: View {
             Image(systemName: "exclamationmark.triangle")
                 .foregroundColor(.orange)
                 .font(.title2)
-            Text("error.download.network_request_failed".localized())
+            Text("Network Request Failed")
                 .foregroundColor(.secondary)
                 .font(.caption)
         }

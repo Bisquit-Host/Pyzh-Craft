@@ -9,9 +9,9 @@ enum LocalResourceFilter: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .all:
-            return "resource.local_filter.all".localized()
+            return "All".localized()
         case .disabled:
-            return "resource.local_filter.disabled".localized()
+            return "Disabled".localized()
         }
     }
 }

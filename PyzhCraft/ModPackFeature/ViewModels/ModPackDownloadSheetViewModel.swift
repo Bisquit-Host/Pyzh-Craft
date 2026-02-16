@@ -183,7 +183,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
         guard let url = URL(string: urlString) else {
             throw GlobalError.validation(
                 chineseMessage: "无效的下载地址",
-                i18nKey: "error.validation.invalid_download_url",
+                i18nKey: "Invalid Download URL",
                 level: .notification
             )
         }
@@ -266,7 +266,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                             if actualSha1 != expectedSha1 {
                                 throw GlobalError.validation(
                                     chineseMessage: "SHA1 校验失败",
-                                    i18nKey: "error.validation.sha1_check_failed",
+                                    i18nKey: "SHA1 Check Failed",
                                     level: .notification
                                 )
                             }
@@ -392,7 +392,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             else {
                 handleDownloadError(
                     "整合包文件不存在: \(modPackPathString)",
-                    "error.filesystem.file_not_found"
+                    "File Not Found"
                 )
                 return nil
             }
@@ -521,7 +521,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
         } catch {
             handleDownloadError(
                 "无法获取文件大小: \(error.localizedDescription)",
-                "error.filesystem.file_read_failed"
+                "File Read Failed"
             )
             return false
         }
@@ -544,7 +544,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
         } catch {
             handleDownloadError(
                 "SHA1校验失败: \(error.localizedDescription)",
-                "error.validation.sha1_check_failed"
+                "SHA1 Check Failed"
             )
             return false
         }

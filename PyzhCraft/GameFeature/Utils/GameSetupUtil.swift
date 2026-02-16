@@ -46,10 +46,10 @@ class GameSetupUtil: ObservableObject {
                 onError(
                     GlobalError.configuration(
                         chineseMessage: "没有选择当前玩家",
-                        i18nKey: "error.configuration.no_current_player",
+                        i18nKey: "No Current Player",
                         level: .popup
                     ),
-                    "error.no.current.player.title".localized()
+                    "No Current Player Selected".localized()
                 )
                 return
             }
@@ -136,8 +136,8 @@ class GameSetupUtil: ObservableObject {
 
             // Send notification
             NotificationManager.sendSilently(
-                title: "notification.download.complete.title".localized(),
-                body: String(format: "notification.download.complete.body".localized(), gameInfo.gameName, gameInfo.gameVersion, gameInfo.modLoader)
+                title: "Download Complete",
+                body: String(format: "%@ (Version: %@, Loader: %@) has been successfully downloaded.".localized(), gameInfo.gameName, gameInfo.gameVersion, gameInfo.modLoader)
             )
             onSuccess()
         } catch is CancellationError {
@@ -188,10 +188,10 @@ class GameSetupUtil: ObservableObject {
             onError(
                 GlobalError.fileSystem(
                     chineseMessage: "图片保存失败",
-                    i18nKey: "error.filesystem.image_save_failed",
+                    i18nKey: "Image Save Failed",
                     level: .notification
                 ),
-                "error.image.save.failed".localized()
+                "Failed to Save Image".localized()
             )
         }
     }
@@ -228,7 +228,7 @@ class GameSetupUtil: ObservableObject {
         if !success {
             throw GlobalError.download(
                 chineseMessage: "下载 Minecraft 版本文件失败",
-                i18nKey: "error.download.minecraft_version_failed",
+                i18nKey: "Minecraft Version Failed",
                 level: .notification
             )
         }
@@ -259,7 +259,7 @@ class GameSetupUtil: ObservableObject {
             let globalError = GlobalError.from(error)
             throw GlobalError.download(
                 chineseMessage: "下载资源索引失败: \(globalError.chineseMessage)",
-                i18nKey: "error.download.asset_index_failed",
+                i18nKey: "Asset Index Failed",
                 level: .notification
             )
         }

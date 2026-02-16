@@ -153,7 +153,7 @@ enum ModrinthService {
             } catch {
                 throw GlobalError.validation(
                     chineseMessage: "编码搜索条件失败: \(error.localizedDescription)",
-                    i18nKey: "error.validation.search_condition_encode_failed",
+                    i18nKey: "Search Condition Encode Failed",
                     level: .notification
                 )
             }
@@ -162,7 +162,7 @@ enum ModrinthService {
         guard let url = components.url else {
             throw GlobalError.validation(
                 chineseMessage: "构建搜索URL失败",
-                i18nKey: "error.validation.search_url_build_failed",
+                i18nKey: "Search URL Build Failed",
                 level: .notification
             )
         }

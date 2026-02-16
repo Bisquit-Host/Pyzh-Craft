@@ -32,7 +32,7 @@ struct AddPlayerSheetView: View {
         CommonSheetView(
             header: {
                 HStack {
-                    Text("addplayer.title".localized())
+                    Text("Add Account")
                         .font(.headline)
                     Image(systemName: selectedAuthType.symbol.name)
                         .font(.headline)
@@ -72,7 +72,7 @@ struct AddPlayerSheetView: View {
             footer: {
                 HStack {
                     Button(
-                        "common.cancel".localized()
+                        "Cancel"
                     ) {
                         authService.isLoading = false
                         onCancel()
@@ -82,7 +82,7 @@ struct AddPlayerSheetView: View {
                         // Show different buttons based on authentication status
                         switch authService.authState {
                         case .notAuthenticated:
-                            Button("addplayer.auth.start_login".localized()) {
+                            Button("Start Login") {
                                 Task {
                                     await authService.startAuthentication()
                                 }
@@ -91,13 +91,13 @@ struct AddPlayerSheetView: View {
 
                         case .authenticated(let profile):
 
-                            Button("addplayer.auth.add".localized()) {
+                            Button("Add") {
                                 onLogin(profile)
                             }
                             .keyboardShortcut(.defaultAction)
 
                         case .error:
-                            Button("addplayer.auth.retry".localized()) {
+                            Button("Retry") {
                                 Task {
                                     await authService.startAuthentication()
                                 }
@@ -109,7 +109,7 @@ struct AddPlayerSheetView: View {
                         }
                     } else {
                         Button(
-                            "addplayer.purchase.minecraft".localized()
+                            "Purchase Minecraft"
                         ) {
                             openURL(URLConfig.Store.minecraftPurchase)
                         }
@@ -117,7 +117,7 @@ struct AddPlayerSheetView: View {
                         .tint(.accentColor)
 
                         Button(
-                            "addplayer.create".localized()
+                            "Create account"
                         ) {
                             authService.isLoading = false
                             onAdd()
@@ -218,18 +218,18 @@ struct AddPlayerSheetView: View {
     // Description area
     private var playerInfoSection: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("addplayer.info.title".localized())
+            Text("Offline Account Information")
                 .font(.headline) .padding(.bottom, 4)
-            Text("addplayer.info.line1".localized())
+            Text("• Offline accounts do not require network verification and can play games without an internet connection")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
-            Text("addplayer.info.line2".localized())
+            Text("• The player name length is 1-16 characters, and can only contain letters, numbers, and underscores.")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
-            Text("addplayer.info.line3".localized())
+            Text("• Offline accounts cannot be used on the official server.")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
-            Text("addplayer.info.line4".localized())
+            Text("• Each player name can only create one offline account")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
@@ -238,10 +238,10 @@ struct AddPlayerSheetView: View {
     // input area
     private var playerNameInputSection: some View {
         VStack(alignment: .leading) {
-            Text("addplayer.name.label".localized())
+            Text("Player Name")
                 .font(.headline.bold())
             TextField(
-                "addplayer.name.placeholder".localized(),
+                "Enter player name to be used as your display name in the game",
                 text: $playerName
             )
             .textFieldStyle(.roundedBorder)
@@ -278,7 +278,7 @@ struct AddPlayerSheetView: View {
         let trimmedName = playerName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else { return nil }
         if playerListViewModel.playerExists(name: trimmedName) {
-            return "addplayer.name.error.duplicate".localized()
+            return "Player name already exists".localized()
         }
         // Other verification rules can be added
         return nil
@@ -302,9 +302,9 @@ enum AccountAuthType: String, CaseIterable, Identifiable {
     var displayName: String {
         switch self {
         case .premium:
-            return "addplayer.auth.microsoft".localized()
+            return "Microsoft".localized()
         default:
-            return "addplayer.auth.offline".localized()
+            return "Offline".localized()
         }
     }
 }

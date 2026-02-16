@@ -68,7 +68,7 @@ enum ModPackExporter {
             // 2. Display the scanning progress bar first (before starting scanning)
             progress.progress = 0.1
             progress.scanProgress = ExportProgress.ProgressItem(
-                title: "modpack.export.scanning.title".localized(),
+                title: "Scanning Resources",
                 progress: 0.0,
                 currentFile: "",
                 completed: 0,
@@ -89,7 +89,7 @@ enum ModPackExporter {
             // 4. Update the scanning progress bar to the actual value
             var initialProgress = progress
             initialProgress.scanProgress = ExportProgress.ProgressItem(
-                title: "modpack.export.scanning.title".localized(),
+                title: "Scanning Resources",
                 progress: totalResources > 0 ? 0.0 : 1.0,
                 currentFile: "",
                 completed: 0,
@@ -234,7 +234,7 @@ enum ModPackExporter {
                         let processed = await processedCounter.increment()
                         let scanTotal = max(totalResources, 1) // At least 1 to avoid divide-by-zero errors
                         let scanItem = ExportProgress.ProgressItem(
-                            title: "modpack.export.scanning.title".localized(),
+                            title: "Scanning Resources",
                             progress: Double(processed) / Double(scanTotal),
                             currentFile: result.sourceFile.lastPathComponent,
                             completed: processed,
@@ -277,7 +277,7 @@ enum ModPackExporter {
             // If there are no resource files, make sure the scan progress bar shows Complete
             if totalResources == 0 {
                 let completedScanItem = ExportProgress.ProgressItem(
-                    title: "modpack.export.scanning.title".localized(),
+                    title: "Scanning Resources",
                     progress: 1.0,
                     currentFile: "",
                     completed: 0,
@@ -327,7 +327,7 @@ enum ModPackExporter {
                             // Update copy progress
                             let (processed, total) = await copyCounter.increment()
                             let copyItem = ExportProgress.ProgressItem(
-                                title: "modpack.export.copying.title".localized(),
+                                title: "Copying Files",
                                 progress: Double(processed) / Double(max(total, 1)),
                                 currentFile: file.lastPathComponent,
                                 completed: processed,
@@ -344,7 +344,7 @@ enum ModPackExporter {
                             // Update progress (counts as processed even if it fails)
                             let (processed, total) = await copyCounter.increment()
                             let copyItem = ExportProgress.ProgressItem(
-                                title: "modpack.export.copying.title".localized(),
+                                title: "Copying Files",
                                 progress: Double(processed) / Double(max(total, 1)),
                                 currentFile: file.lastPathComponent,
                                 completed: processed,
@@ -373,7 +373,7 @@ enum ModPackExporter {
                     // Update total progress using shared counter
                     let (processed, total) = await copyCounter.increment()
                     let copyItem = ExportProgress.ProgressItem(
-                        title: "modpack.export.copying.title".localized(),
+                        title: "Copying Files",
                         progress: Double(processed) / Double(max(total, 1)),
                         currentFile: currentFileName,
                         completed: processed,
@@ -472,7 +472,7 @@ enum ModPackExporter {
                 )
             } else {
                 copyProgress = ExportProgress.ProgressItem(
-                    title: "modpack.export.copying.title".localized(),
+                    title: "Copying Files",
                     progress: 0.0,
                     currentFile: "",
                     completed: 0,

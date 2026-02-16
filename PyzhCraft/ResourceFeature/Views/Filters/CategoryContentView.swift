@@ -98,7 +98,7 @@ struct CategoryContentView: View {
         guard !project.isEmpty else {
             throw GlobalError.validation(
                 chineseMessage: "项目类型不能为空",
-                i18nKey: "error.validation.project_type_empty",
+                i18nKey: "Project Type Empty",
                 level: .notification
             )
         }
@@ -109,7 +109,7 @@ struct CategoryContentView: View {
     // MARK: - Section Views
     private var categorySection: some View {
         CategorySectionView(
-            title: "filter.category",
+            title: "Category",
             items: viewModel.categories.map {
                 FilterItem(id: $0.name, name: $0.name)
             },
@@ -120,7 +120,7 @@ struct CategoryContentView: View {
 
     private var versionSection: some View {
         CategorySectionView(
-            title: "filter.version",
+            title: "Versions",
             items: viewModel.versions.map {
                 FilterItem(id: $0.id, name: $0.id)
             },
@@ -132,7 +132,7 @@ struct CategoryContentView: View {
 
     private var loaderSection: some View {
         CategorySectionView(
-            title: "filter.loader",
+            title: "Loader",
             items: filteredLoaders.map {
                 FilterItem(id: $0.name, name: $0.name)
             },
@@ -164,7 +164,7 @@ struct CategoryContentView: View {
 
     private var environmentSection: some View {
         CategorySectionView(
-            title: "filter.environment",
+            title: "Environment",
             items: environmentItems,
             selectedItems: $selectedFeatures,
             isLoading: viewModel.isLoading
@@ -174,7 +174,7 @@ struct CategoryContentView: View {
     private var resourcePackSections: some View {
         Group {
             CategorySectionView(
-                title: "filter.behavior",
+                title: "Behavior",
                 items: viewModel.features.map {
                     FilterItem(id: $0.name, name: $0.name)
                 },
@@ -182,7 +182,7 @@ struct CategoryContentView: View {
                 isLoading: viewModel.isLoading
             )
             CategorySectionView(
-                title: "filter.resolutions",
+                title: "Resolutions",
                 items: viewModel.resolutions.map {
                     FilterItem(id: $0.name, name: $0.name)
                 },
@@ -198,7 +198,7 @@ struct CategoryContentView: View {
             // The CurseForge data source does not support performance requirements filtering and this section is not displayed under the CF tag
             if dataSource == .modrinth {
                 CategorySectionView(
-                    title: "filter.behavior",
+                    title: "Behavior",
                     items: viewModel.features.map {
                         FilterItem(id: $0.name, name: $0.name)
                     },
@@ -206,7 +206,7 @@ struct CategoryContentView: View {
                     isLoading: viewModel.isLoading
                 )
                 CategorySectionView(
-                    title: "filter.performance",
+                    title: "Performance",
                     items: viewModel.performanceImpacts.map {
                         FilterItem(id: $0.name, name: $0.name)
                     },
@@ -226,8 +226,8 @@ struct CategoryContentView: View {
 
     private var environmentItems: [FilterItem] {
         [
-            FilterItem(id: AppConstants.EnvironmentTypes.client, name: "environment.client".localized()),
-            FilterItem(id: AppConstants.EnvironmentTypes.server, name: "environment.server".localized()),
+            FilterItem(id: AppConstants.EnvironmentTypes.client, name: "Client".localized()),
+            FilterItem(id: AppConstants.EnvironmentTypes.server, name: "Server".localized()),
         ]
     }
 }

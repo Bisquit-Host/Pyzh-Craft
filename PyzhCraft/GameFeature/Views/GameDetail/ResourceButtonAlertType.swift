@@ -11,15 +11,15 @@ enum ResourceButtonAlertType: Identifiable {
         switch self {
         case .noGame:
             return Alert(
-                title: Text("no_local_game.title".localized()),
-                message: Text("no_local_game.message".localized()),
-                dismissButton: .default(Text("common.confirm".localized()))
+                title: Text("No Local Game"),
+                message: Text("Please add a local game first before performing this operation."),
+                dismissButton: .default(Text("Confirm"))
             )
         case .noPlayer:
             return Alert(
-                title: Text("sidebar.alert.no_player.title".localized()),
-                message: Text("sidebar.alert.no_player.message".localized()),
-                dismissButton: .default(Text("common.confirm".localized()))
+                title: Text("No Players"),
+                message: Text("No player information. Please add player information first before adding games"),
+                dismissButton: .default(Text("Confirm"))
             )
         }
     }

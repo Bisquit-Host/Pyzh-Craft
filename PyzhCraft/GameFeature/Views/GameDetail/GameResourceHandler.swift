@@ -40,7 +40,7 @@ enum GameResourceHandler {
         guard FileManager.default.fileExists(atPath: fileURL.path) else {
             throw GlobalError.resource(
                 chineseMessage: "文件不存在: \(fileURL.lastPathComponent)",
-                i18nKey: "error.resource.file_not_found",
+                i18nKey: "File Not Found",
                 level: .notification
             )
         }
@@ -66,7 +66,7 @@ enum GameResourceHandler {
             throw GlobalError.fileSystem(
                 chineseMessage:
                     "删除文件失败: \(fileURL.lastPathComponent), 错误: \(error.localizedDescription)",
-                i18nKey: "error.filesystem.file_deletion_failed",
+                i18nKey: "File Deletion Failed",
                 level: .notification
             )
         }
@@ -123,7 +123,7 @@ enum GameResourceHandler {
         guard let gameInfo = gameInfo else {
             throw GlobalError.validation(
                 chineseMessage: "游戏信息缺失",
-                i18nKey: "error.validation.game_info_missing",
+                i18nKey: "Game Info Missing",
                 level: .notification
             )
         }
@@ -174,7 +174,7 @@ enum GameResourceHandler {
         guard let gameInfo = gameInfo else {
             throw GlobalError.validation(
                 chineseMessage: "游戏信息缺失",
-                i18nKey: "error.validation.game_info_missing",
+                i18nKey: "Game Info Missing",
                 level: .notification
             )
         }
@@ -222,7 +222,7 @@ enum GameResourceHandler {
         guard let gameInfo = gameInfo else {
             throw GlobalError.validation(
                 chineseMessage: "游戏信息缺失",
-                i18nKey: "error.validation.game_info_missing",
+                i18nKey: "Game Info Missing",
                 level: .notification
             )
         }
@@ -314,7 +314,7 @@ enum GameResourceHandler {
         guard let gameInfo = gameInfo else {
             throw GlobalError.validation(
                 chineseMessage: "游戏信息缺失",
-                i18nKey: "error.validation.game_info_missing",
+                i18nKey: "Game Info Missing",
                 level: .notification
             )
         }
@@ -345,7 +345,7 @@ enum GameResourceHandler {
         if !allSucceeded {
             throw GlobalError.download(
                 chineseMessage: "下载依赖项失败",
-                i18nKey: "error.download.dependencies_failed",
+                i18nKey: "Dependencies Failed",
                 level: .notification
             )
         }
@@ -386,7 +386,7 @@ enum GameResourceHandler {
         guard let gameInfo = gameInfo else {
             throw GlobalError.validation(
                 chineseMessage: "游戏信息缺失",
-                i18nKey: "error.validation.game_info_missing",
+                i18nKey: "Game Info Missing",
                 level: .notification
             )
         }
@@ -402,7 +402,7 @@ enum GameResourceHandler {
         if !success {
             throw GlobalError.download(
                 chineseMessage: "下载主资源失败",
-                i18nKey: "error.download.main_resource_failed",
+                i18nKey: "Main Resource Failed",
                 level: .notification
             )
         }
@@ -443,7 +443,7 @@ enum GameResourceHandler {
         guard let gameInfo = gameInfo else {
             throw GlobalError.validation(
                 chineseMessage: "游戏信息缺失",
-                i18nKey: "error.validation.game_info_missing",
+                i18nKey: "Game Info Missing",
                 level: .notification
             )
         }
@@ -479,7 +479,7 @@ enum GameResourceHandler {
         else {
             throw GlobalError.resource(
                 chineseMessage: "找不到主文件: \(dep.id)",
-                i18nKey: "error.resource.primary_file_not_found",
+                i18nKey: "Primary File Not Found",
                 level: .notification
             )
         }
@@ -513,7 +513,7 @@ enum GameResourceHandler {
         } catch {
             throw GlobalError.download(
                 chineseMessage: "下载依赖项失败: \(error.localizedDescription)",
-                i18nKey: "error.download.dependency_download_failed",
+                i18nKey: "Dependency Download Failed",
                 level: .notification
             )
         }

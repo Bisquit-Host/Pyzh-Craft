@@ -23,11 +23,11 @@ struct GlobalResourceFooter: View {
                 if compatibleGames.isEmpty {
                     HStack {
                         Spacer()
-                        Button("common.close".localized()) { isPresented = false }
+                        Button("Close") { isPresented = false }
                     }
                 } else {
                     HStack {
-                        Button("common.close".localized()) { isPresented = false }
+                        Button("Close") { isPresented = false }
                         Spacer()
                         if resourceType == "mod" {
                             if !dependencyState.isLoading {
@@ -37,7 +37,7 @@ struct GlobalResourceFooter: View {
                                             ProgressView().controlSize(.small)
                                         } else {
                                             Text(
-                                                "global_resource.download_all"
+                                                "Download All"
                                                     .localized()
                                             )
                                         }
@@ -52,7 +52,7 @@ struct GlobalResourceFooter: View {
                                     if isDownloadingAll {
                                         ProgressView().controlSize(.small)
                                     } else {
-                                        Text("global_resource.download".localized())
+                                        Text("Download")
                                     }
                                 }
                                 .disabled(isDownloadingAll)
@@ -64,7 +64,7 @@ struct GlobalResourceFooter: View {
             } else {
                 HStack {
                     Spacer()
-                    Button("common.close".localized()) { isPresented = false }
+                    Button("Close") { isPresented = false }
                 }
             }
         }
@@ -93,7 +93,7 @@ struct GlobalResourceFooter: View {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
                 chineseMessage: "项目ID不能为空",
-                i18nKey: "error.validation.project_id_empty",
+                i18nKey: "Project ID Empty",
                 level: .notification
             )
         }
@@ -110,7 +110,7 @@ struct GlobalResourceFooter: View {
         if !success {
             throw GlobalError.download(
                 chineseMessage: "下载主资源失败",
-                i18nKey: "error.download.main_resource_failed",
+                i18nKey: "Main Resource Failed",
                 level: .notification
             )
         }
@@ -140,7 +140,7 @@ struct GlobalResourceFooter: View {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
                 chineseMessage: "项目ID不能为空",
-                i18nKey: "error.validation.project_id_empty",
+                i18nKey: "Project ID Empty",
                 level: .notification
             )
         }
@@ -165,7 +165,7 @@ struct GlobalResourceFooter: View {
         if !success {
             throw GlobalError.download(
                 chineseMessage: "手动下载依赖项失败",
-                i18nKey: "error.download.manual_dependencies_failed",
+                i18nKey: "Manual Dependencies Failed",
                 level: .notification
             )
         }
@@ -193,7 +193,7 @@ struct GlobalResourceFooter: View {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
                 chineseMessage: "项目ID不能为空",
-                i18nKey: "error.validation.project_id_empty",
+                i18nKey: "Project ID Empty",
                 level: .notification
             )
         }
@@ -210,7 +210,7 @@ struct GlobalResourceFooter: View {
         if !success {
             throw GlobalError.download(
                 chineseMessage: "下载资源失败",
-                i18nKey: "error.download.resource_download_failed",
+                i18nKey: "Resource Download Failed",
                 level: .notification
             )
         }

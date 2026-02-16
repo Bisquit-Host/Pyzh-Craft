@@ -7,7 +7,12 @@ public enum InterfaceLayoutStyle: String, CaseIterable {
          focused  // focus
 
     public var localizedName: String {
-        "settings.interface_style.\(rawValue)".localized()
+        switch self {
+        case .classic:
+            "Classic".localized()
+        case .focused:
+            "Focused".localized()
+        }
     }
 }
 
@@ -15,7 +20,14 @@ public enum ThemeMode: String, CaseIterable {
     case light, dark, system
 
     public var localizedName: String {
-        "settings.theme.\(rawValue)".localized()
+        switch self {
+        case .light:
+            "Light".localized()
+        case .dark:
+            "Dark".localized()
+        case .system:
+            "Follow System".localized()
+        }
     }
 
     public var effectiveColorScheme: ColorScheme {

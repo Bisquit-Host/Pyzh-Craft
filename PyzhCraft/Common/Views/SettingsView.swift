@@ -22,23 +22,23 @@ public struct SettingsView: View {
         TabView(selection: $selectedTab) {
             GeneralSettingsView()
                 .tabItem {
-                    Label("settings.general.tab".localized(), systemImage: "gearshape")
+                    Label("General", systemImage: "gearshape")
                 }
                 .tag(SettingsTab.general)
             GameSettingsView()
                 .tabItem {
-                    Label("settings.game.tab".localized(), systemImage: "gamecontroller")
+                    Label("Game", systemImage: "gamecontroller")
                 }
                 .tag(SettingsTab.game)
             AISettingsView()
                 .tabItem {
-                    Label("settings.ai.tab".localized(), systemImage: "brain")
+                    Label("AI", systemImage: "brain")
                 }
                 .tag(SettingsTab.ai)
             GameAdvancedSettingsView()
                 .tabItem {
                     Label(
-                        "settings.game.advanced.tab".localized(),
+                        "Advanced",
                         systemImage: "gearshape.2"
                     )
                 }

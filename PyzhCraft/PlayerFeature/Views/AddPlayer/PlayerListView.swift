@@ -115,21 +115,21 @@ struct PlayerListView: View {
 //            .frame(width: 200)
         }
         .confirmationDialog(
-            "player.remove".localized(),
+            "Remove Player",
             isPresented: $showDeleteAlert,
             titleVisibility: .visible
         ) {
-            Button("player.remove".localized(), role: .destructive) {
+            Button("Remove Player", role: .destructive) {
                 if let player = playerToDelete {
                     _ = playerListViewModel.deletePlayer(byID: player.id)
                 }
                 playerToDelete = nil
             }.keyboardShortcut(.defaultAction)
-            Button("common.cancel".localized(), role: .cancel) {
+            Button("Cancel", role: .cancel) {
                 playerToDelete = nil
             }
         } message: {
-            Text(String(format: "player.remove.confirm".localized(), playerToDelete?.name ?? ""))
+            Text(String(format: "Are you sure you want to remove %@?".localized(), playerToDelete?.name ?? ""))
         }
     }
 }
@@ -194,7 +194,7 @@ private struct PlayerListItemView: View {
                 showDeleteAlert = true
             } label: {
                 Image(systemName: "trash.fill")
-                    .help("player.remove".localized())
+                    .help("Remove Player")
             }
             .buttonStyle(.borderless)
         }

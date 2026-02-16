@@ -74,7 +74,7 @@ class CommonFileManager {
             let globalError = GlobalError.from(error)
             throw GlobalError.download(
                 chineseMessage: "下载 Forge JAR 文件失败: \(globalError.chineseMessage)",
-                i18nKey: "error.download.jar_failed",
+                i18nKey: "JAR Download Failed",
                 level: .notification
             )
         }
@@ -117,7 +117,7 @@ class CommonFileManager {
             let globalError = GlobalError.from(error)
             throw GlobalError.download(
                 chineseMessage: "下载 JAR 文件失败: \(globalError.chineseMessage)",
-                i18nKey: "error.download.jar_failed",
+                i18nKey: "JAR Download Failed",
                 level: .notification
             )
         }
@@ -176,8 +176,8 @@ class CommonFileManager {
 
         for (index, processor) in clientProcessors.enumerated() {
             do {
-                let processorName = processor.jar ?? "processor.unknown".localized()
-                let message = String(format: "processor.executing".localized(), index + 1, clientProcessors.count, processorName)
+                let processorName = processor.jar ?? "Unknown".localized()
+                let message = String(format: "Executing processor %d/%d: %@".localized(), index + 1, clientProcessors.count, processorName)
                 onProgressUpdate?(message, index + 1, clientProcessors.count)
                 try await executeProcessor(
                     processor,
@@ -191,7 +191,7 @@ class CommonFileManager {
                 Logger.shared.error("执行处理器失败: \(error.localizedDescription)")
                 throw GlobalError.download(
                     chineseMessage: "执行处理器失败: \(error.localizedDescription)",
-                    i18nKey: "error.download.processor_start_failed",
+                    i18nKey: "Processor Start Failed",
                     level: .notification
                 )
             }

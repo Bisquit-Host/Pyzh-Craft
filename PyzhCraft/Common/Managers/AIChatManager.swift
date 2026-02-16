@@ -21,7 +21,7 @@ class AIChatManager: ObservableObject {
         guard !settings.apiKey.isEmpty else {
             let error = GlobalError.configuration(
                 chineseMessage: "AI 服务未配置，请检查 API Key",
-                i18nKey: "error.configuration.ai_service_not_configured",
+                i18nKey: "OpenAI service not configured, please check API Key",
                 level: .notification
             )
             Logger.shared.error("AI 服务未配置，请检查 API Key")
@@ -35,7 +35,7 @@ class AIChatManager: ObservableObject {
         guard !settings.getModel().isEmpty else {
             let error = GlobalError.configuration(
                 chineseMessage: "AI 模型未配置，请在设置中填写模型名称",
-                i18nKey: "error.configuration.ai_model_not_configured",
+                i18nKey: "AI model not configured, please fill in the model name in settings",
                 level: .notification
             )
             Logger.shared.error("AI 模型未配置，请在设置中填写模型名称")
@@ -471,18 +471,18 @@ class AIChatManager: ObservableObject {
         // Get file size
         guard let fileSize = await getFileSize(url: url) else {
             return await readFileContent(url: url, fileName: fileName) ??
-                   String(format: "ai.file.cannot_read".localized(), fileName)
+                   String(format: "File: %@ (cannot read)".localized(), fileName)
         }
 
         // Determine processing method based on size
         if fileSize <= maxFileSizeForReading {
             // Small files: read text content
             return await readFileContent(url: url, fileName: fileName) ??
-                   String(format: "ai.file.cannot_read_text".localized(), fileName)
+                   String(format: "File: %@ (cannot read text content)".localized(), fileName)
         } else {
             // Large files: return file information
             let sizeDescription = formatFileSize(fileSize)
-            return String(format: "ai.file.too_large".localized(), fileName, sizeDescription)
+            return String(format: "File: %@ (too large: %@)".localized(), fileName, sizeDescription)
         }
     }
 
@@ -493,10 +493,10 @@ class AIChatManager: ObservableObject {
         let maxLength = 5000
         // Use string interpolation instead of string concatenation
         let truncatedContent = fileContent.count > maxLength
-            ? "\(String(fileContent.prefix(maxLength)))\n... \("ai.file.content_truncated".localized())"
+            ? "\(String(fileContent.prefix(maxLength)))\n... \("(content truncated)".localized())"
             : fileContent
 
-        return String(format: "ai.file.content".localized(), fileName, truncatedContent)
+        return String(format: "File: %@\nContent:\n%@".localized(), fileName, truncatedContent)
     }
 
     /// Get file size (bytes)

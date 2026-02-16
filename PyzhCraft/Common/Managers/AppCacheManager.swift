@@ -11,7 +11,7 @@ class AppCacheManager {
         } catch {
             throw GlobalError.fileSystem(
                 chineseMessage: "创建缓存目录失败: \(error.localizedDescription)",
-                i18nKey: "error.filesystem.cache_directory_creation_failed",
+                i18nKey: "Cache Directory Creation Failed",
                 level: .notification
             )
         }
@@ -37,7 +37,7 @@ class AppCacheManager {
             } catch {
                 throw GlobalError.validation(
                     chineseMessage: "缓存数据编码失败: \(error.localizedDescription)",
-                    i18nKey: "error.validation.cache_data_encode_failed",
+                    i18nKey: "Cache Data Encode Failed",
                     level: .notification
                 )
             }
@@ -73,7 +73,7 @@ class AppCacheManager {
                 } catch {
                     GlobalErrorHandler.shared.handle(GlobalError.validation(
                         chineseMessage: "解码缓存数据失败: \(error.localizedDescription)",
-                        i18nKey: "error.validation.cache_data_decode_failed",
+                        i18nKey: "Cache Data Decode Failed",
                         level: .silent
                     ))
                     return nil
@@ -142,7 +142,7 @@ class AppCacheManager {
             } catch {
                 throw GlobalError.fileSystem(
                     chineseMessage: "清空缓存文件失败: \(error.localizedDescription)",
-                    i18nKey: "error.filesystem.cache_clear_failed",
+                    i18nKey: "Cache Clear Failed",
                     level: .notification
                 )
             }
@@ -177,7 +177,7 @@ class AppCacheManager {
         } catch {
             throw GlobalError.fileSystem(
                 chineseMessage: "读取缓存文件失败: \(error.localizedDescription)",
-                i18nKey: "error.filesystem.cache_read_failed",
+                i18nKey: "Cache Read Failed",
                 level: .notification
             )
         }
@@ -197,7 +197,7 @@ class AppCacheManager {
         } catch {
             throw GlobalError.fileSystem(
                 chineseMessage: "写入缓存文件失败: \(error.localizedDescription)",
-                i18nKey: "error.filesystem.cache_write_failed",
+                i18nKey: "Cache Write Failed",
                 level: .notification
             )
         }

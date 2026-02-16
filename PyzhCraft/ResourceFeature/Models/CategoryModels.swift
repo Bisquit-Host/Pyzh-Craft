@@ -22,10 +22,10 @@ enum CategoryHeader {
 }
 
 enum FilterTitle {
-    static let category = "filter.category"
-    static let environment = "filter.environment"
-    static let behavior = "filter.behavior"
-    static let resolutions = "filter.resolutions"
-    static let performance = "filter.performance"
-    static let version = "filter.version"
+    static let category = "Category"
+    static let environment = "Environment"
+    static let behavior = "Behavior"
+    static let resolutions = "Resolutions"
+    static let performance = "Performance"
+    static let version = "Versions"
 }

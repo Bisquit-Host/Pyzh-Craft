@@ -96,7 +96,7 @@ struct SkinToolDetailView: View {
     }
 
     private var headerView: some View {
-        Text("skin.manager".localized()).font(.headline)
+        Text("Skin Manager").font(.headline)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 
@@ -167,14 +167,14 @@ struct SkinToolDetailView: View {
 
     private var footerView: some View {
         HStack {
-            Button("skin.cancel".localized()) { dismiss() }.keyboardShortcut(.cancelAction)
+            Button("Cancel") { dismiss() }.keyboardShortcut(.cancelAction)
             Spacer()
 
             HStack(spacing: 12) {
                 if resolvedPlayer?.isOnlineAccount == true {
-                    Button("skin.reset".localized()) { resetSkin() }.disabled(operationInProgress)
+                    Button("Reset Skin") { resetSkin() }.disabled(operationInProgress)
                 }
-                Button("skin.apply".localized()) { applyChanges() }
+                Button("Apply Changes") { applyChanges() }
                     .keyboardShortcut(.defaultAction)
                     .disabled(operationInProgress || !hasChanges)
             }

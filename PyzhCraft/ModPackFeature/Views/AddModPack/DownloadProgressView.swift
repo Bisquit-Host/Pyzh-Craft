@@ -16,12 +16,12 @@ struct DownloadProgressView: View {
     private var gameDownloadProgress: some View {
         Group {
             progressRow(
-                title: "download.core.title".localized(),
+                title: "Core Files",
                 state: gameSetupService.downloadState,
                 type: .core
             )
             progressRow(
-                title: "download.resources.title".localized(),
+                title: "Resource Files",
                 state: gameSetupService.downloadState,
                 type: .resources
             )
@@ -66,21 +66,21 @@ struct DownloadProgressView: View {
                 // Show overrides progress bar (only displayed when there are files that need to be merged)
                 if modPackInstallState.overridesTotal > 0 {
                     progressRow(
-                        title: "launcher.import.copying_files".localized(),
+                        title: "Copy Files",
                         installState: modPackInstallState,
                         type: .overrides
                     )
                 }
 
                 progressRow(
-                    title: "modpack.files.title".localized(),
+                    title: "Modpack Files",
                     installState: modPackInstallState,
                     type: .files
                 )
 
                 if modPackInstallState.dependenciesTotal > 0 {
                     progressRow(
-                        title: "modpack.dependencies.title".localized(),
+                        title: "Modpack Dependencies",
                         installState: modPackInstallState,
                         type: .dependencies
                     )
@@ -161,13 +161,13 @@ struct DownloadProgressView: View {
     private func getLoaderTitle(for loaderType: String) -> String {
         switch loaderType.lowercased() {
         case "fabric":
-            return "fabric.loader.title".localized()
+            return "Fabric Loader".localized()
         case "quilt":
-            return "quilt.loader.title".localized()
+            return "QuiltMC Loader".localized()
         case "forge":
-            return "forge.loader.title".localized()
+            return "Forge Loader".localized()
         case "neoforge":
-            return "neoforge.loader.title".localized()
+            return "NeoForge Loader".localized()
         default:
             return ""
         }

@@ -58,11 +58,11 @@ struct GameAdvancedSettingsView: View {
 
     var body: some View {
         Form {
-            LabeledContent("settings.game.java.path".localized()) {
+            LabeledContent("Java Path") {
                 DirectorySettingRow(
-                    title: "settings.game.java.path".localized(),
+                    title: "Java Path",
                     path: javaPath.isEmpty ? (currentGame?.javaPath ?? "") : javaPath,
-                    description: "settings.game.java.path.description".localized(),
+                    description: "The path to the Java executable file. Click to choose or reset to the default path.".localized(),
                     onChoose: { showJavaPathPicker = true },
                     onReset: {
                         resetJavaPathSafely()
@@ -77,7 +77,7 @@ struct GameAdvancedSettingsView: View {
                     }
             }.labeledContentStyle(.custom(alignment: .firstTextBaseline))
 
-            LabeledContent("settings.game.java.garbage_collector".localized()) {
+            LabeledContent("Garbage Collector") {
                 HStack {
                     Picker("", selection: $selectedGarbageCollector) {
                         ForEach(availableGarbageCollectors, id: \.self) { gc in
@@ -102,7 +102,7 @@ struct GameAdvancedSettingsView: View {
             .labeledContentStyle(.custom(alignment: .firstTextBaseline))
             .opacity(isUsingCustomArguments ? 0.5 : 1.0)  // Reduce transparency when disabled
 
-            LabeledContent("settings.game.java.performance_optimization".localized()) {
+            LabeledContent("Performance Optimization") {
                 HStack {
                     Picker("", selection: $optimizationPreset) {
                         // Maximum optimization is only available with G1GC
@@ -133,7 +133,7 @@ struct GameAdvancedSettingsView: View {
             .labeledContentStyle(.custom(alignment: .firstTextBaseline))
             .opacity(isUsingCustomArguments ? 0.5 : 1.0)  // Reduce transparency when disabled
 
-            LabeledContent("settings.game.java.memory".localized()) {
+            LabeledContent("Memory Settings") {
                 HStack {
                     MiniRangeSlider(
                         range: $memoryRange,
@@ -150,7 +150,7 @@ struct GameAdvancedSettingsView: View {
             }
             .labeledContentStyle(.custom)
 
-            LabeledContent("settings.game.java.custom_parameters".localized()) {
+            LabeledContent("Custom Parameters") {
                 HStack {
                     TextField("", text: $customJvmArguments)
                         .focusable(false)
@@ -159,7 +159,7 @@ struct GameAdvancedSettingsView: View {
                         .lineLimit(2...4)
                         .frame(width: 200)
                         .onChange(of: customJvmArguments) { _, _ in autoSave() }
-                    InfoIconWithPopover(text: "settings.game.java.custom_parameters.note".localized())
+                    InfoIconWithPopover(text: "Note: Custom parameters will override the optimization settings above".localized())
                 }
             }
             .labeledContentStyle(.custom(alignment: .firstTextBaseline))
@@ -173,10 +173,10 @@ struct GameAdvancedSettingsView: View {
                         .lineLimit(2...4)
                         .frame(width: 200)
                         .onChange(of: environmentVariables) { _, _ in autoSave() }
-                    InfoIconWithPopover(text: "example: JAVA_OPTS=-Dfile.encoding=UTF-8".localized())
+                    InfoIconWithPopover(text: "For example: `JAVA_OPTS=-Dfile.encoding=UTF-8`".localized())
                 }
             } label: {
-                Text("settings.game.java.environment_variables".localized())
+                Text("Environment Variables")
             }
             .labeledContentStyle(.custom)
         }
@@ -184,19 +184,19 @@ struct GameAdvancedSettingsView: View {
         .onChange(of: selectedGameManager.selectedGameId) { _, _ in loadCurrentSettings() }
         .globalErrorHandler()
         .alert(
-            "settings.game.reset.confirm".localized(),
+            "Are you sure you want to restore default settings?",
             isPresented: $showResetAlert
         ) {
-            Button("common.reset".localized(), role: .destructive) {
+            Button("Reset", role: .destructive) {
                 resetToDefaults()
             }
-            Button("common.cancel".localized(), role: .cancel) {}
+            Button("Cancel", role: .cancel) {}
         }
         .alert(
-            "error.notification.validation.title".localized(),
+            "Validation Error",
             isPresented: .constant(error != nil && error?.level == .popup)
         ) {
-            Button("common.close".localized()) {
+            Button("Close") {
                 error = nil
             }
         } message: {
@@ -437,7 +437,7 @@ struct GameAdvancedSettingsView: View {
             } catch {
                 let globalError = error as? GlobalError ?? GlobalError.unknown(
                     chineseMessage: "保存设置失败: \(error.localizedDescription)",
-                    i18nKey: "error.unknown.settings_save_failed",
+                    i18nKey: "Failed to save settings",
                     level: .notification
                 )
                 Logger.shared.error("自动保存游戏设置失败: \(globalError.chineseMessage)")
@@ -484,7 +484,7 @@ struct GameAdvancedSettingsView: View {
                 guard fileManager.fileExists(atPath: url.path) else {
                     error = GlobalError.fileSystem(
                         chineseMessage: "选择的文件不存在",
-                        i18nKey: "error.filesystem.file_not_found",
+                        i18nKey: "File Not Found",
                         level: .notification
                     )
                     return
@@ -498,7 +498,7 @@ struct GameAdvancedSettingsView: View {
                 } else {
                     error = GlobalError.validation(
                         chineseMessage: "选择的文件不是有效的Java可执行文件",
-                        i18nKey: "error.validation.invalid_java_executable",
+                        i18nKey: "The selected file is not a valid Java executable",
                         level: .popup
                     )
                 }
@@ -506,7 +506,7 @@ struct GameAdvancedSettingsView: View {
         case .failure(let error):
             let globalError = GlobalError.fileSystem(
                 chineseMessage: "选择Java路径失败: \(error.localizedDescription)",
-                i18nKey: "error.filesystem.java_path_selection_failed",
+                i18nKey: "Java Path Selection Failed",
                 level: .notification
             )
             self.error = globalError
@@ -539,22 +539,22 @@ enum GarbageCollector: String, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .g1gc: "settings.game.java.gc.g1gc".localized()
-        case .zgc: "settings.game.java.gc.zgc".localized()
-        case .shenandoah: "settings.game.java.gc.shenandoah".localized()
-        case .parallel: "settings.game.java.gc.parallel".localized()
-        case .serial: "settings.game.java.gc.serial".localized()
+        case .g1gc: "G1GC (recommended)".localized()
+        case .zgc: "ZGC (Low Latency)".localized()
+        case .shenandoah: "Shenandoah (Low Pause)".localized()
+        case .parallel: "ParallelGC (High Throughput)".localized()
+        case .serial: "SerialGC (Single Thread)".localized()
         }
     }
 
     var description: String {
         switch self {
-        case .g1gc: "settings.game.java.gc.g1gc.desc".localized()
-        case .zgc: "settings.game.java.gc.zgc.desc".localized()
+        case .g1gc: "G1 garbage collector, balancing performance and latency, suitable for most scenarios".localized()
+        case .zgc: "ZGC garbage collector, extremely low latency, suitable for scenarios with extremely high response time requirements".localized()
         case .shenandoah:
-            "settings.game.java.gc.shenandoah.desc".localized()
-        case .parallel: "settings.game.java.gc.parallel.desc".localized()
-        case .serial: "settings.game.java.gc.serial.desc".localized()
+            "Shenandoah garbage collector, low pause time, suitable for scenarios requiring stable performance".localized()
+        case .parallel: "Parallel garbage collector, high throughput, suitable for background processing tasks".localized()
+        case .serial: "Serial garbage collector, single-threaded, suitable for small memory applications".localized()
         }
     }
 
@@ -576,25 +576,25 @@ enum OptimizationPreset: String, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .disabled: "settings.game.java.optimization.none".localized()
-        case .basic: "settings.game.java.optimization.basic".localized()
+        case .disabled: "None".localized()
+        case .basic: "Basic".localized()
         case .balanced:
-            "settings.game.java.optimization.balanced".localized()
+            "Balanced".localized()
         case .maximum:
-            "settings.game.java.optimization.maximum".localized()
+            "Maximum".localized()
         }
     }
 
     var description: String {
         switch self {
         case .disabled:
-            "settings.game.java.optimization.none.desc".localized()
+            "No JVM optimizations enabled".localized()
         case .basic:
-            "settings.game.java.optimization.basic.desc".localized()
+            "Basic JVM optimizations for improved performance".localized()
         case .balanced:
-            "settings.game.java.optimization.balanced.desc".localized()
+            "Balanced optimizations for good performance and stability (recommended)".localized()
         case .maximum:
-            "settings.game.java.optimization.maximum.desc".localized()
+            "Maximum optimizations including Aikar flags for best performance".localized()
         }
     }
 }

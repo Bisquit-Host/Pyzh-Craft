@@ -16,7 +16,7 @@ public struct GeneralSettingsView: View {
 
     public var body: some View {
         Form {
-            LabeledContent("settings.language.picker".localized()) {
+            LabeledContent("Select Language") {
                 Picker("", selection: $selectedLanguage) {
                     ForEach(LanguageManager.shared.languages, id: \.1) { name, code in
                         Text(name).tag(code)
@@ -31,31 +31,31 @@ public struct GeneralSettingsView: View {
                     }
                 }
                 .confirmationDialog(
-                    "settings.language.restart.title".localized(),
+                    "Restart Required",
                     isPresented: $showingRestartAlert,
                     titleVisibility: .visible
                 ) {
-                    Button("settings.language.restart.confirm".localized(), role: .destructive) {
+                    Button("Restart Application", role: .destructive) {
                         // Update Sparkle's language settings before restarting
                         sparkleUpdateService.updateSparkleLanguage(selectedLanguage)
                         LanguageManager.shared.selectedLanguage = selectedLanguage
                         restartAppSafely()
                     }
                     .keyboardShortcut(.defaultAction)
-                    Button("common.cancel".localized(), role: .cancel) {
+                    Button("Cancel", role: .cancel) {
                         selectedLanguage = LanguageManager.shared.selectedLanguage
                     }
                 } message: {
-                    Text("settings.language.restart.message".localized())
+                    Text("Changing language requires restarting the application to take effect")
                 }
             }.labeledContentStyle(.custom).padding(.bottom, 10)
 
-            LabeledContent("settings.theme.picker".localized()) {
+            LabeledContent("Appearance") {
                 ThemeSelectorView(selectedTheme: $themeManager.themeMode)
                     .fixedSize()
             }.labeledContentStyle(.custom)
 
-            LabeledContent("settings.interface_style.label".localized()) {
+            LabeledContent("Interface style") {
                 Picker("", selection: $generalSettings.interfaceLayoutStyle) {
                     ForEach(InterfaceLayoutStyle.allCases, id: \.self) { style in
                         Text(style.localizedName).tag(style)
@@ -65,11 +65,11 @@ public struct GeneralSettingsView: View {
                 .fixedSize()
             }.labeledContentStyle(.custom).padding(.bottom, 10)
 
-            LabeledContent("settings.launcher_working_directory".localized()) {
+            LabeledContent("Working Directory") {
                 DirectorySettingRow(
-                    title: "settings.launcher_working_directory".localized(),
+                    title: "Working Directory",
                     path: generalSettings.launcherWorkingDirectory.isEmpty ? AppPaths.launcherSupportDirectory.path : generalSettings.launcherWorkingDirectory,
-                    description: "settings.working_directory.description".localized(),
+                    description: "This path setting only affects the storage location of game saves, mods, shaders, and other resources.".localized(),
                     onChoose: { showDirectoryPicker = true },
                     onReset: {
                         resetWorkingDirectorySafely()
@@ -80,7 +80,7 @@ public struct GeneralSettingsView: View {
                     }
             }.labeledContentStyle(.custom(alignment: .firstTextBaseline))
 
-            LabeledContent("settings.concurrent_downloads.label".localized()) {
+            LabeledContent("Concurrent Downloads") {
                 HStack {
                     Slider(
                         value: Binding(
@@ -106,7 +106,7 @@ public struct GeneralSettingsView: View {
                     .gridColumnAlignment(.leading)
                     .labelsHidden()
             }.labeledContentStyle(.custom)
-            LabeledContent("settings.github_proxy.label".localized()) {
+            LabeledContent("GitHub Proxy") {
                 VStack(alignment: .leading) {
                     HStack {
                         Toggle(
@@ -114,7 +114,7 @@ public struct GeneralSettingsView: View {
                             isOn: $generalSettings.enableGitHubProxy
                         )
                         .labelsHidden()
-                        Text("settings.github_proxy.enable".localized())
+                        Text("Enable")
                             .font(.callout)
                             .foregroundColor(.primary)
                     }
@@ -128,21 +128,21 @@ public struct GeneralSettingsView: View {
                         .frame(width: 200)
                         .focusable(false)
                         .disabled(!generalSettings.enableGitHubProxy)
-                        Button("settings.github_proxy.reset_default".localized()) {
+                        Button("Reset to Default") {
                             generalSettings.gitProxyURL = "https://gh-proxy.com"
                         }
                         .disabled(!generalSettings.enableGitHubProxy)
-                        InfoIconWithPopover(text: "settings.github_proxy.description".localized())
+                        InfoIconWithPopover(text: "When enabled, adds a proxy prefix to requests for github.com and raw.githubusercontent.com.".localized())
                     }
                 }
             }.labeledContentStyle(.custom(alignment: .firstTextBaseline)).padding(.top, 10)
         }
         .globalErrorHandler()
         .alert(
-            "error.notification.validation.title".localized(),
+            "Validation Error",
             isPresented: .constant(error != nil && error?.level == .popup)
         ) {
-            Button("common.close".localized()) {
+            Button("Close") {
                 error = nil
             }
         } message: {
@@ -160,7 +160,7 @@ public struct GeneralSettingsView: View {
             guard let supportDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appendingPathComponent(Bundle.main.appName) else {
                 throw GlobalError.configuration(
                     chineseMessage: "无法获取应用支持目录",
-                    i18nKey: "error.configuration.app_support_directory_not_found",
+                    i18nKey: "App Support Directory Not Found",
                     level: .popup
                 )
             }
@@ -189,7 +189,7 @@ public struct GeneralSettingsView: View {
                     guard resourceValues.isDirectory == true, resourceValues.isReadable == true else {
                         throw GlobalError.fileSystem(
                             chineseMessage: "选择的路径不是可读的目录",
-                            i18nKey: "error.filesystem.invalid_directory_selected",
+                            i18nKey: "Invalid Directory Selected",
                             level: .notification
                         )
                     }
@@ -207,7 +207,7 @@ public struct GeneralSettingsView: View {
         case .failure(let error):
             let globalError = GlobalError.fileSystem(
                 chineseMessage: "选择目录失败: \(error.localizedDescription)",
-                i18nKey: "error.filesystem.directory_selection_failed",
+                i18nKey: "Directory Selection Failed",
                 level: .notification
             )
             GlobalErrorHandler.shared.handle(globalError)
@@ -233,7 +233,7 @@ private func restartApp() throws {
     guard let appURL = Bundle.main.bundleURL as URL? else {
         throw GlobalError.configuration(
             chineseMessage: "无法获取应用路径",
-            i18nKey: "error.configuration.app_path_not_found",
+            i18nKey: "App Executable Not Found",
             level: .popup
         )
     }

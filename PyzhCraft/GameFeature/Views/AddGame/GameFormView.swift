@@ -149,11 +149,11 @@ struct GameFormView: View {
     private var currentModeTitle: String {
         switch mode {
         case .creation:
-            return "game.form.mode.manual".localized()
+            return "New".localized()
         case .modPackImport:
-            return "modpack.import.title".localized()
+            return "Import Modpack".localized()
         case .launcherImport:
-            return "launcher.import.title".localized()
+            return "Import Launcher".localized()
         }
     }
 
@@ -162,7 +162,7 @@ struct GameFormView: View {
             Button {
                 mode = .creation
             } label: {
-                Label("game.form.mode.manual".localized(), systemImage: "square.and.pencil")
+                Label("New", systemImage: "square.and.pencil")
             }
 
             Button {
@@ -176,19 +176,19 @@ struct GameFormView: View {
                     showFilePicker = true
                 }
             } label: {
-                Label("modpack.import.title".localized(), systemImage: "square.and.arrow.up")
+                Label("Import Modpack", systemImage: "square.and.arrow.up")
             }
 
             Button {
                 mode = .launcherImport
             } label: {
-                Label("launcher.import.title".localized(), systemImage: "arrow.down.doc")
+                Label("Import Launcher", systemImage: "arrow.down.doc")
             }
         } label: {
             Text(currentModeTitle)
         }
         .fixedSize()
-        .help("game.form.mode.import".localized())
+        .help("Import Modpack")
     }
 
     private var footerView: some View {
@@ -209,7 +209,7 @@ struct GameFormView: View {
                 dismiss()
             }
         } label: {
-            Text(isDownloading ? "common.stop".localized() : "common.cancel".localized())
+            Text(isDownloading ? "Stop".localized() : "Cancel".localized())
         }
         .keyboardShortcut(.cancelAction)
     }
@@ -226,11 +226,11 @@ struct GameFormView: View {
                     let buttonText: String = {
                         switch mode {
                         case .modPackImport:
-                            return "modpack.import.button".localized()
+                            return "Import".localized()
                         case .launcherImport:
-                            return "launcher.import.button".localized()
+                            return "Import".localized()
                         case .creation:
-                            return "common.confirm".localized()
+                            return "Confirm".localized()
                         }
                     }()
                     Text(buttonText)
@@ -251,7 +251,7 @@ struct GameFormView: View {
             guard url.startAccessingSecurityScopedResource() else {
                 let globalError = GlobalError.fileSystem(
                     chineseMessage: "无法访问所选文件",
-                    i18nKey: "error.filesystem.file_access_failed",
+                    i18nKey: "File Access Failed",
                     level: .notification
                 )
                 GlobalErrorHandler.shared.handle(globalError)

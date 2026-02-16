@@ -20,7 +20,7 @@ struct SkinUploadSectionView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("skin.upload".localized()).font(.headline)
+            Text("Skin Upload").font(.headline)
 
             skinRenderArea
 

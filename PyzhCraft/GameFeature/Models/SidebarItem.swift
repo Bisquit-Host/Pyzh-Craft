@@ -29,7 +29,18 @@ public enum ResourceType: String, CaseIterable {
     case mod, datapack, shader, resourcepack, modpack
 
     public var localizedName: String {
-        "resource.content.type.\(rawValue)".localized()
+        switch self {
+        case .mod:
+            "Mod".localized()
+        case .datapack:
+            "Data Pack".localized()
+        case .shader:
+            "Shader".localized()
+        case .resourcepack:
+            "Resource Pack".localized()
+        case .modpack:
+            "Modpack".localized()
+        }
     }
 
     /// SF Symbol icon name for the resource type

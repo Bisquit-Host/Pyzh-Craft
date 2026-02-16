@@ -23,13 +23,13 @@ struct VersionSelectionView: View {
 
     private var gameVersionPicker: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("modpack.game.version".localized())
+            Text("Game Version")
                 .foregroundColor(.primary)
             Picker(
                 "",
                 selection: $selectedGameVersion
             ) {
-                Text("modpack.game.version.placeholder".localized()).tag("")
+                Text("Select game version").tag("")
                 ForEach(availableGameVersions, id: \.self) { version in
                     Text(version).tag(version)
                 }
@@ -46,14 +46,14 @@ struct VersionSelectionView: View {
     private var modPackVersionPicker: some View {
         VStack(alignment: .leading, spacing: 8) {
             if isLoadingModPackVersions {
-                Text("modpack.version".localized())
+                Text("Modpack Version")
                     .foregroundColor(.primary)
                 HStack {
                     ProgressView()
                         .controlSize(.small).frame(maxWidth: .infinity)
                 }
             } else if !selectedGameVersion.isEmpty {
-                Text("modpack.version".localized())
+                Text("Modpack Version")
                     .foregroundColor(.primary)
                 Picker(
                     "",

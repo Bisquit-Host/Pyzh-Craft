@@ -82,27 +82,27 @@ enum GlobalError: Error, LocalizedError, Identifiable {
     var id: String {
         switch self {
         case let .network(message, key, _):
-            return "network_\(key)_\(message.hashValue)"
+            "network_\(key)_\(message.hashValue)"
         case let .fileSystem(message, key, _):
-            return "filesystem_\(key)_\(message.hashValue)"
+            "filesystem_\(key)_\(message.hashValue)"
         case let .authentication(message, key, _):
-            return "auth_\(key)_\(message.hashValue)"
+            "auth_\(key)_\(message.hashValue)"
         case let .validation(message, key, _):
-            return "validation_\(key)_\(message.hashValue)"
+            "validation_\(key)_\(message.hashValue)"
         case let .download(message, key, _):
-            return "download_\(key)_\(message.hashValue)"
+            "download_\(key)_\(message.hashValue)"
         case let .installation(message, key, _):
-            return "installation_\(key)_\(message.hashValue)"
+            "installation_\(key)_\(message.hashValue)"
         case let .gameLaunch(message, key, _):
-            return "gameLaunch_\(key)_\(message.hashValue)"
+            "gameLaunch_\(key)_\(message.hashValue)"
         case let .resource(message, key, _):
-            return "resource_\(key)_\(message.hashValue)"
+            "resource_\(key)_\(message.hashValue)"
         case let .player(message, key, _):
-            return "player_\(key)_\(message.hashValue)"
+            "player_\(key)_\(message.hashValue)"
         case let .configuration(message, key, _):
-            return "config_\(key)_\(message.hashValue)"
+            "config_\(key)_\(message.hashValue)"
         case let .unknown(message, key, _):
-            return "unknown_\(key)_\(message.hashValue)"
+            "unknown_\(key)_\(message.hashValue)"
         }
     }
 
@@ -110,27 +110,27 @@ enum GlobalError: Error, LocalizedError, Identifiable {
     var chineseMessage: String {
         switch self {
         case let .network(message, _, _):
-            return message
+            message
         case let .fileSystem(message, _, _):
-            return message
+            message
         case let .authentication(message, _, _):
-            return message
+            message
         case let .validation(message, _, _):
-            return message
+            message
         case let .download(message, _, _):
-            return message
+            message
         case let .installation(message, _, _):
-            return message
+            message
         case let .gameLaunch(message, _, _):
-            return message
+            message
         case let .resource(message, _, _):
-            return message
+            message
         case let .player(message, _, _):
-            return message
+            message
         case let .configuration(message, _, _):
-            return message
+            message
         case let .unknown(message, _, _):
-            return message
+            message
         }
     }
 
@@ -138,27 +138,27 @@ enum GlobalError: Error, LocalizedError, Identifiable {
     var i18nKey: String {
         switch self {
         case let .network(_, key, _):
-            return key
+            key
         case let .fileSystem(_, key, _):
-            return key
+            key
         case let .authentication(_, key, _):
-            return key
+            key
         case let .validation(_, key, _):
-            return key
+            key
         case let .download(_, key, _):
-            return key
+            key
         case let .installation(_, key, _):
-            return key
+            key
         case let .gameLaunch(_, key, _):
-            return key
+            key
         case let .resource(_, key, _):
-            return key
+            key
         case let .player(_, key, _):
-            return key
+            key
         case let .configuration(_, key, _):
-            return key
+            key
         case let .unknown(_, key, _):
-            return key
+            key
         }
     }
 
@@ -166,27 +166,27 @@ enum GlobalError: Error, LocalizedError, Identifiable {
     var level: ErrorLevel {
         switch self {
         case let .network(_, _, level):
-            return level
+            level
         case let .fileSystem(_, _, level):
-            return level
+            level
         case let .authentication(_, _, level):
-            return level
+            level
         case let .validation(_, _, level):
-            return level
+            level
         case let .download(_, _, level):
-            return level
+            level
         case let .installation(_, _, level):
-            return level
+            level
         case let .gameLaunch(_, _, level):
-            return level
+            level
         case let .resource(_, _, level):
-            return level
+            level
         case let .player(_, _, level):
-            return level
+            level
         case let .configuration(_, _, level):
-            return level
+            level
         case let .unknown(_, _, level):
-            return level
+            level
         }
     }
 
@@ -212,27 +212,27 @@ enum GlobalError: Error, LocalizedError, Identifiable {
     var notificationTitle: String {
         switch self {
         case .network:
-            return "error.notification.network.title".localized()
+            "Network Error"
         case .fileSystem:
-            return "error.notification.filesystem.title".localized()
+            "File System Error"
         case .authentication:
-            return "error.notification.authentication.title".localized()
+            "Authentication Error"
         case .validation:
-            return "error.notification.validation.title".localized()
+            "Validation Error"
         case .download:
-            return "error.notification.download.title".localized()
+            "Download Error"
         case .installation:
-            return "error.notification.installation.title".localized()
+            "Installation Error"
         case .gameLaunch:
-            return "error.notification.game_launch.title".localized()
+            "Game Launch Error"
         case .resource:
-            return "error.notification.resource.title".localized()
+            "Resource Error"
         case .player:
-            return "error.notification.player.title".localized()
+            "Player Error"
         case .configuration:
-            return "error.notification.configuration.title".localized()
+            "Configuration Error"
         case .unknown:
-            return "error.notification.unknown.title".localized()
+            "Unknown Error"
         }
     }
 }
@@ -252,7 +252,7 @@ extension GlobalError {
                 let level: ErrorLevel = urlError.code == .cancelled ? .silent : .notification
                 return .network(
                     chineseMessage: urlError.localizedDescription,
-                    i18nKey: "error.network.url",
+                    i18nKey: "Network URL Error",
                     level: level
                 )
             }
@@ -262,7 +262,7 @@ extension GlobalError {
             if nsError.domain == NSCocoaErrorDomain {
                 return .fileSystem(
                     chineseMessage: nsError.localizedDescription,
-                    i18nKey: "error.filesystem.cocoa",
+                    i18nKey: "File System Error",
                     level: .notification
                 )
             }
@@ -383,7 +383,7 @@ struct GlobalErrorHandlerModifier: ViewModifier {
 
 extension View {
     func globalErrorHandler() -> some View {
-        self.modifier(GlobalErrorHandlerModifier())
+        modifier(GlobalErrorHandlerModifier())
     }
 }
 

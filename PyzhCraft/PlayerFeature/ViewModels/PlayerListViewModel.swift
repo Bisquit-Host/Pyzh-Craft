@@ -162,7 +162,7 @@ class PlayerListViewModel: ObservableObject {
         else {
             throw GlobalError.player(
                 chineseMessage: "玩家不存在: \(playerId)",
-                i18nKey: "error.player.not_found",
+                i18nKey: "Not Found",
                 level: .notification
             )
         }

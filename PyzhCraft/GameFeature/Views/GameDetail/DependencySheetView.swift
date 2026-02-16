@@ -13,7 +13,7 @@ struct DependencySheetView: View {
     var body: some View {
         CommonSheetView(
             header: {
-                Text("dependency.required_mods.title".localized())
+                Text("Required Mods to Download")
                     .font(.headline)
                     .frame(maxWidth: .infinity, alignment: .leading)
             },
@@ -34,7 +34,7 @@ struct DependencySheetView: View {
                                         Spacer()
                                     }
                                     Picker(
-                                        "dependency.version.picker".localized(),
+                                        "Select Version:",
                                         selection: Binding(
                                             get: {
                                                 viewModel
@@ -68,13 +68,13 @@ struct DependencySheetView: View {
                 if viewModel.isLoadingDependencies {
                     HStack {
                         Spacer()
-                        Button("common.close".localized()) {
+                        Button("Close") {
                             viewModel.showDependenciesSheet = false
                         }
                     }
                 } else if !viewModel.missingDependencies.isEmpty {
                     HStack {
-                        Button("common.close".localized()) {
+                        Button("Close") {
                             viewModel.showDependenciesSheet = false
                         }
                         Spacer()
@@ -93,7 +93,7 @@ struct DependencySheetView: View {
                                 ProgressView().controlSize(.small)
                             } else {
                                 Text(
-                                    "global_resource.download_main_only"
+                                    "Download Main Only"
                                         .localized()
                                 )
                             }
@@ -115,7 +115,7 @@ struct DependencySheetView: View {
                                     ProgressView().controlSize(.small)
                                 } else {
                                     Text(
-                                        "dependency.download_all_and_continue"
+                                        "Download All And Continue"
                                             .localized()
                                     )
                                 }
@@ -136,7 +136,7 @@ struct DependencySheetView: View {
                                 if isDownloadingAllDependencies || hasDownloading {
                                     ProgressView().controlSize(.small)
                                 } else {
-                                    Text("common.continue".localized())
+                                    Text("Continue")
                                 }
                             }
                             .keyboardShortcut(.defaultAction)
@@ -152,7 +152,7 @@ struct DependencySheetView: View {
                 } else {
                     HStack {
                         Spacer()
-                        Button("common.close".localized()) {
+                        Button("Close") {
                             viewModel.showDependenciesSheet = false
                         }
                     }
@@ -160,10 +160,10 @@ struct DependencySheetView: View {
             }
         )
         .alert(
-            "error.notification.download.title".localized(),
+            "Download Error",
             isPresented: .constant(error != nil)
         ) {
-            Button("common.close".localized()) {
+            Button("Close") {
                 error = nil
             }
         } message: {

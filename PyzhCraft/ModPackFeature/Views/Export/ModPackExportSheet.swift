@@ -89,8 +89,8 @@ struct ModPackExportSheet: View {
             }
             exportDocument = nil
         }
-        .alert("common.error".localized(), isPresented: $showSaveErrorAlert) {
-            Button("common.ok".localized(), role: .cancel) {
+        .alert("Error", isPresented: $showSaveErrorAlert) {
+            Button("OK", role: .cancel) {
                 viewModel.saveError = nil
             }
         } message: {
@@ -104,7 +104,7 @@ struct ModPackExportSheet: View {
     }
 
     private var headerView: some View {
-        Text("modpack.export.title".localized())
+        Text("Export Modpack")
             .font(.headline)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -133,19 +133,19 @@ struct ModPackExportSheet: View {
         VStack(alignment: .leading, spacing: 16) {
             // Integrated package name
             VStack(alignment: .leading, spacing: 8) {
-                Text("modpack.export.name".localized())
+                Text("Modpack Name")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-                TextField("modpack.export.name.placeholder".localized(), text: $viewModel.modPackName)
+                TextField("Enter modpack name", text: $viewModel.modPackName)
                     .textFieldStyle(.roundedBorder)
             }
 
             // Integrated package version
             VStack(alignment: .leading, spacing: 8) {
-                Text("modpack.export.version".localized())
+                Text("Modpack Version")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-                TextField("modpack.export.version.placeholder".localized(), text: $viewModel.modPackVersion)
+                TextField("1.0.0", text: $viewModel.modPackVersion)
                     .textFieldStyle(.roundedBorder)
             }
         }
@@ -162,7 +162,7 @@ struct ModPackExportSheet: View {
 
     private var footerView: some View {
         HStack {
-            Button("common.cancel".localized()) {
+            Button("Cancel") {
                 if viewModel.isExporting {
                     viewModel.cancelExport()
                 }
@@ -172,7 +172,7 @@ struct ModPackExportSheet: View {
 
             Spacer()
 
-            Button("modpack.export.button".localized()) {
+            Button("Export") {
                 if viewModel.exportState == .completed, let tempPath = viewModel.tempExportPath {
                     handleExportCompleted(tempFilePath: tempPath)
                 } else {
@@ -222,7 +222,7 @@ struct ModPackExportSheet: View {
                 .foregroundColor(.red)
                 .font(.system(size: 48))
 
-            Text("modpack.export.failed".localized())
+            Text("Export Failed")
                 .font(.headline)
 
             Text(error)

@@ -84,7 +84,7 @@ struct ServerAddressSectionView: View {
     }
 
     private var headerTitle: some View {
-        Text("saveinfo.servers".localized())
+        Text("Servers")
             .font(.headline)
     }
 
@@ -139,7 +139,7 @@ struct ServerAddressSectionView: View {
                     id: \.self
                 ) { _ in
                     ServerAddressChip(
-                        title: "common.loading".localized(),
+                        title: "Loading",
                         address: "",
                         port: nil,
                         isLoading: true,
@@ -159,7 +159,7 @@ struct ServerAddressSectionView: View {
 
         return Group {
             if servers.isEmpty {
-                Text("saveinfo.server.empty".localized())
+                Text("No servers")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -399,24 +399,24 @@ struct ServerAddressEditView: View {
             body: { bodyView },
             footer: { footerView }
         )
-        .alert("common.error".localized(), isPresented: $showError) {
-            Button("common.ok".localized(), role: .cancel) { }
+        .alert("Error", isPresented: $showError) {
+            Button("OK", role: .cancel) { }
         } message: {
             Text(errorMessage)
         }
-        .confirmationDialog("saveinfo.server.delete_title".localized(), isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
-            Button("common.delete".localized(), role: .destructive) {
+        .confirmationDialog("Delete Server", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
+            Button("Delete", role: .destructive) {
                 deleteServer()
             }
-            Button("common.cancel".localized(), role: .cancel) { }
+            Button("Cancel", role: .cancel) { }
         } message: {
-            Text(String(format: "saveinfo.server.delete_confirmation".localized(), serverName))
+            Text(String(format: "Are you sure you want to delete server \"%@\"? This action cannot be undone.".localized(), serverName))
         }
     }
 
     private var headerView: some View {
         HStack {
-            Text(isNewServer ? "saveinfo.server.add".localized() : "saveinfo.server.edit".localized())
+            Text(isNewServer ? "Add Server".localized() : "Edit Server".localized())
                 .font(.headline)
             Spacer()
             if let shareText = shareTextForServer, !shareText.isEmpty {
@@ -452,15 +452,15 @@ struct ServerAddressEditView: View {
 
     private var bodyView: some View {
         VStack(alignment: .leading) {
-            Text("saveinfo.server.name".localized())
-            TextField("saveinfo.server.name".localized(), text: $serverName)
+            Text("Server Name")
+            TextField("Server Name", text: $serverName)
                 .textFieldStyle(.roundedBorder)
                 .padding(.bottom, 20)
 
             HStack {
                 VStack(alignment: .leading) {
-                    Text("saveinfo.server.address".localized())
-                    TextField("saveinfo.server.address".localized(), text: $serverAddress)
+                    Text("Server Address")
+                    TextField("Server Address", text: $serverAddress)
                         .textFieldStyle(.roundedBorder)
                         .onChange(of: serverAddress) { _, newValue in
                             // If the address contains a port, it is automatically separated into the port field
@@ -480,8 +480,8 @@ struct ServerAddressEditView: View {
                         }
                 }
                 VStack(alignment: .leading) {
-                    Text("saveinfo.server.port".localized())
-                    TextField("saveinfo.server.port.placeholder".localized(), text: $serverPort)
+                    Text("Port")
+                    TextField("25565 (Optional)", text: $serverPort)
                         .textFieldStyle(.roundedBorder)
                         .frame(maxWidth: 100)
                 }
@@ -489,9 +489,9 @@ struct ServerAddressEditView: View {
             .padding(.bottom, 20)
 
             HStack {
-                Toggle("saveinfo.server.hidden".localized(), isOn: $isHidden)
+                Toggle("Hidden", isOn: $isHidden)
                 Spacer()
-                Toggle("saveinfo.server.accept_textures".localized(), isOn: $acceptTextures)
+                Toggle("Accept Textures", isOn: $acceptTextures)
             }
             .padding(.bottom, 20)
         }
@@ -499,20 +499,20 @@ struct ServerAddressEditView: View {
 
     private var footerView: some View {
         HStack {
-            Button("common.cancel".localized()) {
+            Button("Cancel") {
                 dismiss()
             }
             .keyboardShortcut(.cancelAction)
             .disabled(isSaving || isDeleting)
             if !isNewServer {
-                Button("common.delete".localized()) {
+                Button("Delete") {
                     saveServer()
                 }
                 .keyboardShortcut(.delete, modifiers: [])
                 .disabled(isSaving || isDeleting)
             }
             Spacer()
-            Button("common.save".localized()) {
+            Button("Save") {
                 saveServer()
             }
             .keyboardShortcut(.defaultAction)
@@ -552,7 +552,7 @@ struct ServerAddressEditView: View {
         let trimmedAddress = serverAddress.trimmingCharacters(in: .whitespaces)
 
         guard !trimmedName.isEmpty && !trimmedAddress.isEmpty else {
-            errorMessage = "saveinfo.server.invalid_fields".localized()
+            errorMessage = "Please fill in all required fields".localized()
             showError = true
             return
         }

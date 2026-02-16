@@ -105,11 +105,11 @@ struct ModPackImportView: View {
         VStack(spacing: 24) {
             ProgressView().controlSize(.small)
 
-            Text("modpack.processing.title".localized())
+            Text("Processing Modpack...")
                 .font(.headline)
                 .foregroundColor(.primary)
 
-            Text("modpack.processing.subtitle".localized())
+            Text("Downloading modpack files and parsing configuration")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -128,7 +128,7 @@ struct ModPackImportView: View {
                 .font(.headline)
                 .bold()
 
-            Text("error.resource.modpack_parse_failed".localized())
+            Text("Modpack parsing failed, please check file format")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }

@@ -25,7 +25,7 @@ enum ModMetadataParser {
         guard FileManager.default.fileExists(atPath: fileURL.path) else {
             throw GlobalError.resource(
                 chineseMessage: "文件不存在: \(fileURL.lastPathComponent)",
-                i18nKey: "error.resource.file_not_found",
+                i18nKey: "File Not Found",
                 level: .silent
             )
         }
@@ -37,7 +37,7 @@ enum ModMetadataParser {
             throw GlobalError.validation(
                 chineseMessage:
                     "无法打开压缩包: \(fileURL.lastPathComponent), 错误: \(error.localizedDescription)",
-                i18nKey: "error.validation.archive_open_failed",
+                i18nKey: "Archive Open Failed",
                 level: .silent
             )
         }
@@ -122,7 +122,7 @@ enum ModMetadataParser {
             throw GlobalError.validation(
                 chineseMessage:
                     "提取 mods.toml 失败: \(error.localizedDescription)",
-                i18nKey: "error.validation.mods_toml_extract_failed",
+                i18nKey: "Mods TOML Extract Failed",
                 level: .silent
             )
         }
@@ -130,7 +130,7 @@ enum ModMetadataParser {
         guard let tomlString = String(data: data, encoding: .utf8) else {
             throw GlobalError.validation(
                 chineseMessage: "无法解码 mods.toml 内容",
-                i18nKey: "error.validation.mods_toml_decode_failed",
+                i18nKey: "Mods TOML Decode Failed",
                 level: .silent
             )
         }
@@ -173,7 +173,7 @@ enum ModMetadataParser {
             throw GlobalError.validation(
                 chineseMessage:
                     "提取 fabric.mod.json 失败: \(error.localizedDescription)",
-                i18nKey: "error.validation.fabric_mod_json_extract_failed",
+                i18nKey: "Fabric Mod JSON Extract Failed",
                 level: .silent
             )
         }
@@ -187,7 +187,7 @@ enum ModMetadataParser {
             throw GlobalError.validation(
                 chineseMessage:
                     "解析 fabric.mod.json 失败: \(error.localizedDescription)",
-                i18nKey: "error.validation.fabric_mod_json_parse_failed",
+                i18nKey: "Fabric Mod JSON Parse Failed",
                 level: .silent
             )
         }
@@ -197,7 +197,7 @@ enum ModMetadataParser {
         else {
             throw GlobalError.validation(
                 chineseMessage: "fabric.mod.json 缺少必要的字段",
-                i18nKey: "error.validation.fabric_mod_json_missing_fields",
+                i18nKey: "Fabric Mod JSON Missing Fields",
                 level: .silent
             )
         }
@@ -228,7 +228,7 @@ enum ModMetadataParser {
             throw GlobalError.validation(
                 chineseMessage:
                     "提取 mcmod.info 失败: \(error.localizedDescription)",
-                i18nKey: "error.validation.mcmod_info_extract_failed",
+                i18nKey: "Mcmod Info Extract Failed",
                 level: .silent
             )
         }
@@ -242,7 +242,7 @@ enum ModMetadataParser {
             throw GlobalError.validation(
                 chineseMessage:
                     "解析 mcmod.info 失败: \(error.localizedDescription)",
-                i18nKey: "error.validation.mcmod_info_parse_failed",
+                i18nKey: "Mcmod Info Parse Failed",
                 level: .silent
             )
         }
@@ -250,7 +250,7 @@ enum ModMetadataParser {
         guard let first = arr.first else {
             throw GlobalError.validation(
                 chineseMessage: "mcmod.info 为空",
-                i18nKey: "error.validation.mcmod_info_empty",
+                i18nKey: "Mcmod Info Empty",
                 level: .silent
             )
         }
@@ -260,7 +260,7 @@ enum ModMetadataParser {
         else {
             throw GlobalError.validation(
                 chineseMessage: "mcmod.info 缺少必要的字段",
-                i18nKey: "error.validation.mcmod_info_missing_fields",
+                i18nKey: "Mcmod Info Missing Fields",
                 level: .silent
             )
         }

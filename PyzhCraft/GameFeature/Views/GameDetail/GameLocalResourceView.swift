@@ -55,7 +55,7 @@ struct GameLocalResourceView: View {
         .searchable(
             text: $searchText,
             placement: .toolbar,
-            prompt: "search.resources".localized()
+            prompt: "Search Resources"
         )
         .onAppear {
             if !hasLoaded {
@@ -103,10 +103,10 @@ struct GameLocalResourceView: View {
             loadPage(page: 1, append: false)
         }
         .alert(
-            "error.notification.validation.title".localized(),
+            "Validation Error",
             isPresented: .constant(error != nil)
         ) {
-            Button("common.close".localized()) {
+            Button("Close") {
                 error = nil
             }
         } message: {
@@ -280,7 +280,7 @@ struct GameLocalResourceView: View {
         if resourceDirectory == nil {
             let globalError = GlobalError.configuration(
                 chineseMessage: "无法获取资源目录路径",
-                i18nKey: "error.configuration.resource_directory_not_found",
+                i18nKey: "Resource Directory Not Found",
                 level: .notification
             )
             Logger.shared.error("初始化资源目录失败: \(globalError.chineseMessage)")

@@ -364,7 +364,7 @@ enum CurseForgeService {
             guard let jsonArrayString = String(data: data, encoding: .utf8) else {
                 throw GlobalError.validation(
                     chineseMessage: "编码 categoryIds 失败",
-                    i18nKey: "error.validation.encode_category_ids_failed",
+                    i18nKey: "Encode Category IDs Failed",
                     level: .notification
                 )
             }
@@ -382,7 +382,7 @@ enum CurseForgeService {
             guard let jsonArrayString = String(data: data, encoding: .utf8) else {
                 throw GlobalError.validation(
                     chineseMessage: "编码 gameVersions 失败",
-                    i18nKey: "error.validation.encode_game_versions_failed",
+                    i18nKey: "Encode Game Versions Failed",
                     level: .notification
                 )
             }
@@ -416,7 +416,7 @@ enum CurseForgeService {
             guard let jsonArrayString = String(data: data, encoding: .utf8) else {
                 throw GlobalError.validation(
                     chineseMessage: "编码 modLoaderTypes 失败",
-                    i18nKey: "error.validation.encode_mod_loader_types_failed",
+                    i18nKey: "Encode Mod Loader Types Failed",
                     level: .notification
                 )
             }
@@ -429,7 +429,7 @@ enum CurseForgeService {
         guard let url = components?.url else {
             throw GlobalError.validation(
                 chineseMessage: "构建搜索URL失败",
-                i18nKey: "error.validation.search_url_build_failed",
+                i18nKey: "Search URL Build Failed",
                 level: .notification
             )
         }
@@ -525,7 +525,7 @@ enum CurseForgeService {
         guard let modrinthDetail = CurseForgeToModrinthAdapter.convert(cfDetail, description: description) else {
             throw GlobalError.validation(
                 chineseMessage: "转换项目详情失败",
-                i18nKey: "error.validation.project_detail_convert_failed",
+                i18nKey: "Project Detail Convert Failed",
                 level: .notification
             )
         }
@@ -826,7 +826,7 @@ enum CurseForgeService {
         guard let url = URL(string: urlString) else {
             throw GlobalError.validation(
                 chineseMessage: "无效的镜像 API URL",
-                i18nKey: "error.network.url",
+                i18nKey: "Network URL Error",
                 level: .notification
             )
         }
@@ -848,7 +848,7 @@ enum CurseForgeService {
         guard let url = URL(string: urlString) else {
             throw GlobalError.validation(
                 chineseMessage: "无效的镜像 API URL",
-                i18nKey: "error.network.url",
+                i18nKey: "Network URL Error",
                 level: .notification
             )
         }
@@ -870,7 +870,7 @@ enum CurseForgeService {
         guard let url = URL(string: urlString) else {
             throw GlobalError.validation(
                 chineseMessage: "无效的镜像 API URL",
-                i18nKey: "error.network.url",
+                i18nKey: "Network URL Error",
                 level: .notification
             )
         }
@@ -890,7 +890,7 @@ enum CurseForgeService {
         guard let modId = Int(cleanId) else {
             throw GlobalError.validation(
                 chineseMessage: "无效的项目 ID",
-                i18nKey: "error.validation.invalid_project_id",
+                i18nKey: "Invalid Project ID",
                 level: .notification
             )
         }

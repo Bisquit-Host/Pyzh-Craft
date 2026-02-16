@@ -224,10 +224,10 @@ class GameCreationViewModel: BaseGameFormViewModel {
                 handleNonCriticalError(
                     GlobalError.validation(
                         chineseMessage: "未选择文件",
-                        i18nKey: "error.validation.no_file_selected",
+                        i18nKey: "No File Selected",
                         level: .notification
                     ),
-                    message: "error.image.pick.failed".localized()
+                    message: "Image Selection Failed"
                 )
                 return
             }
@@ -262,7 +262,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
             let globalError = GlobalError.from(error)
             handleNonCriticalError(
                 globalError,
-                message: "error.image.pick.failed".localized()
+                message: "Image Selection Failed"
             )
         }
     }
@@ -282,7 +282,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
                         let globalError = GlobalError.from(error)
                         self.handleNonCriticalError(
                             globalError,
-                            message: "error.image.load.drag.failed".localized()
+                            message: "Failed to Load Dragged Image"
                         )
                     }
                     return

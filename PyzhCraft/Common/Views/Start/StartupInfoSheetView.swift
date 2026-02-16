@@ -71,7 +71,7 @@ struct StartupInfoSheetView: View {
                 HStack {
                     Spacer()
 
-                    Button("startup.info.understand".localized()) {
+                    Button("I Understand") {
                         dismiss()
                     }
                     .buttonStyle(.borderedProminent)

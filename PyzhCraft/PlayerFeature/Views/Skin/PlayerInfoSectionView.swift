@@ -16,7 +16,7 @@ struct PlayerInfoSectionView: View {
                     Text(player.name).font(.title2.bold())
 
                     HStack(spacing: 4) {
-                        Text("skin.classic".localized())
+                        Text("Classic")
                             .font(.caption)
                             .foregroundColor(currentModel == .classic ? .primary : .secondary)
 
@@ -30,16 +30,16 @@ struct PlayerInfoSectionView: View {
                         .toggleStyle(SwitchToggleStyle())
                         .controlSize(.mini)
 
-                        Text("skin.slim".localized())
+                        Text("Slim")
                             .font(.caption)
                             .foregroundColor(currentModel == .slim ? .primary : .secondary)
                     }
                 }
             } else {
                 ContentUnavailableView(
-                    "skin.no_player".localized(),
+                    "No Player Selected".localized(),
                     systemImage: "person",
-                    description: Text("skin.add_player_first".localized())
+                    description: Text("Please add a player first")
                 )
             }
         }.frame(width: 280)

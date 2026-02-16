@@ -37,9 +37,9 @@ private struct CompatibilitySection: View {
 // private struct MinecraftVersionHeader: View {
 //    var body: some View {
 //        HStack {
-//            Text("project.info.minecraft".localized())
+//            Text("Minecraft:")
 //                .font(.headline)
-//            Text("project.info.minecraft.edition".localized())
+//            Text("Java Edition")
 //                .foregroundStyle(.primary)
 //                .font(.caption.bold())
 //        }
@@ -51,7 +51,7 @@ private struct GameVersionsSection: View {
 
     var body: some View {
         GenericSectionView(
-            title: "project.info.versions",
+            title: "Versions:",
             items: versions.map { IdentifiableString(id: $0) },
             isLoading: false,
             maxItems: Constants.maxVisibleVersions
@@ -95,7 +95,7 @@ private struct LoadersSection: View {
 
     var body: some View {
         GenericSectionView(
-            title: "project.info.platforms",
+            title: "Mod Loaders:",
             items: loaders.map { IdentifiableString(id: $0) },
             isLoading: false
         ) { item in
@@ -110,20 +110,33 @@ private struct PlatformSupportSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("\("platform.support".localized()):")
+            Text("Platform Support:")
                 .font(.headline)
                 .padding(.bottom, SectionViewConstants.defaultHeaderBottomPadding)
 
             ContentWithOverflow(
                 items: [
-                    IdentifiablePlatformItem(id: "client", icon: "laptopcomputer", text: "platform.client.\(clientSide)".localized()),
-                    IdentifiablePlatformItem(id: "server", icon: "server.rack", text: "platform.server.\(serverSide)".localized()),
+                    IdentifiablePlatformItem(id: "client", icon: "laptopcomputer", text: supportLabel(for: clientSide)),
+                    IdentifiablePlatformItem(id: "server", icon: "server.rack", text: supportLabel(for: serverSide)),
                 ],
                 maxHeight: SectionViewConstants.defaultMaxHeight,
                 verticalPadding: SectionViewConstants.defaultVerticalPadding
             ) { item in
                 PlatformSupportItem(icon: item.icon, text: item.text)
             }
+        }
+    }
+
+    private func supportLabel(for value: String) -> String {
+        switch value.lowercased() {
+        case "required":
+            "Required".localized()
+        case "optional":
+            "Optional".localized()
+        case "unsupported":
+            "Unsupported".localized()
+        default:
+            "Unknown".localized()
         }
     }
 }
@@ -154,16 +167,16 @@ private struct LinksSection: View {
 
     var body: some View {
         let links = [
-            (project.issuesUrl, "project.info.links.issues".localized()),
-            (project.sourceUrl, "project.info.links.source".localized()),
-            (project.wikiUrl, "project.info.links.wiki".localized()),
-            (project.discordUrl, "project.info.links.discord".localized()),
+            (project.issuesUrl, "Report Issues".localized()),
+            (project.sourceUrl, "View Source Code".localized()),
+            (project.wikiUrl, "Visit Wiki".localized()),
+            (project.discordUrl, "Join Discord".localized()),
         ].compactMap { url, text in
             url.map { (text, $0) }
         }
 
         GenericSectionView(
-            title: "project.info.links",
+            title: "Links",
             items: links.map { IdentifiableLink(id: $0.0, text: $0.0, url: $0.1) },
             isLoading: false
         ) { item in
@@ -208,24 +221,24 @@ private struct DetailsSection: View, Equatable {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("project.info.details".localized())
+            Text("Details")
                 .font(.headline)
                 .padding(.bottom, 4)
 
             VStack(alignment: .leading, spacing: 8) {
                 if let license = project.license {
                     DetailRow(
-                        label: "project.info.details.licensed".localized(),
+                        label: "License".localized(),
                         value: license.name
                     )
                 }
 
                 DetailRow(
-                    label: "project.info.details.published".localized(),
+                    label: "Published Date".localized(),
                     value: publishedDateString
                 )
                 DetailRow(
-                    label: "project.info.details.updated".localized(),
+                    label: "Updated Date".localized(),
                     value: updatedDateString
                 )
             }
@@ -300,7 +313,7 @@ struct ModrinthProjectContentView: View {
         guard !projectId.isEmpty else {
             throw GlobalError.validation(
                 chineseMessage: "项目ID不能为空",
-                i18nKey: "error.validation.project_id_empty",
+                i18nKey: "Project ID Empty",
                 level: .notification
             )
         }
@@ -312,7 +325,7 @@ struct ModrinthProjectContentView: View {
         else {
             throw GlobalError.resource(
                 chineseMessage: "无法获取项目详情",
-                i18nKey: "error.resource.project_details_not_found",
+                i18nKey: "Project Details Not Found",
                 level: .notification
             )
         }

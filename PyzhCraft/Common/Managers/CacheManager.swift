@@ -23,7 +23,7 @@ class CacheManager: ObservableObject {
         } catch {
             throw GlobalError.fileSystem(
                 chineseMessage: "计算元数据缓存信息失败: \(error.localizedDescription)",
-                i18nKey: "error.filesystem.meta_cache_calculation_failed",
+                i18nKey: "Meta Cache Calculation Failed",
                 level: .notification
             )
         }
@@ -48,7 +48,7 @@ class CacheManager: ObservableObject {
         } catch {
             throw GlobalError.fileSystem(
                 chineseMessage: "计算数据缓存信息失败: \(error.localizedDescription)",
-                i18nKey: "error.filesystem.data_cache_calculation_failed",
+                i18nKey: "Data Cache Calculation Failed",
                 level: .notification
             )
         }
@@ -75,7 +75,7 @@ class CacheManager: ObservableObject {
         } catch {
             throw GlobalError.fileSystem(
                 chineseMessage: "计算游戏缓存信息失败: \(error.localizedDescription)",
-                i18nKey: "error.filesystem.game_cache_calculation_failed",
+                i18nKey: "Game Cache Calculation Failed",
                 level: .notification
             )
         }

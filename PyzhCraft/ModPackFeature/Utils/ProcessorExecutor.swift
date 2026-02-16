@@ -62,7 +62,7 @@ enum ProcessorExecutor {
         guard let jar = jar else {
             throw GlobalError.validation(
                 chineseMessage: "处理器缺少JAR文件配置",
-                i18nKey: "error.validation.processor_missing_jar",
+                i18nKey: "Processor Missing JAR",
                 level: .notification
             )
         }
@@ -73,7 +73,7 @@ enum ProcessorExecutor {
             throw GlobalError.validation(
                 chineseMessage: "无效的Maven坐标: \(jar)",
                 i18nKey: String(
-                    format: "error.validation.invalid_maven_coordinate",
+                    format: "Invalid Maven Coordinate",
                     jar
                 ),
                 level: .notification
@@ -85,7 +85,7 @@ enum ProcessorExecutor {
             throw GlobalError.resource(
                 chineseMessage: "找不到处理器JAR文件: \(jar)",
                 i18nKey: String(
-                    format: "error.resource.processor_jar_not_found",
+                    format: "Processor Jar Not Found: %@",
                     jar
                 ),
                 level: .notification
@@ -144,7 +144,7 @@ enum ProcessorExecutor {
                 throw GlobalError.validation(
                     chineseMessage: "无效的Maven坐标: \(coordinate)",
                     i18nKey: String(
-                        format: "error.validation.invalid_maven_coordinate",
+                        format: "Invalid Maven Coordinate",
                         coordinate
                     ),
                     level: .notification
@@ -282,14 +282,14 @@ enum ProcessorExecutor {
                 throw GlobalError.download(
                     chineseMessage:
                         "处理器执行失败 (退出码: \(process.terminationStatus))",
-                    i18nKey: "error.download.processor_execution_failed",
+                    i18nKey: "Processor Execution Failed (Exit Code: %d)",
                     level: .notification
                 )
             }
         } catch {
             throw GlobalError.download(
                 chineseMessage: "启动处理器失败: \(error.localizedDescription)",
-                i18nKey: "error.download.processor_start_failed",
+                i18nKey: "Processor Start Failed",
                 level: .notification
             )
         }
@@ -341,7 +341,7 @@ enum ProcessorExecutor {
         } catch {
             throw GlobalError.download(
                 chineseMessage: "无法打开JAR文件: \(jarPath.lastPathComponent)",
-                i18nKey: "error.download.jar_open_failed",
+                i18nKey: "Failed to Open JAR File: %@",
                 level: .notification
             )
         }
@@ -350,7 +350,7 @@ enum ProcessorExecutor {
             throw GlobalError.download(
                 chineseMessage:
                     "无法从processor JAR文件中获取主类: \(jarPath.lastPathComponent)",
-                i18nKey: "error.download.processor_main_class_not_found",
+                i18nKey: "Failed to get main class from processor JAR file: %@",
                 level: .notification
             )
         }
@@ -364,7 +364,7 @@ enum ProcessorExecutor {
         else {
             throw GlobalError.download(
                 chineseMessage: "无法解析MANIFEST.MF内容",
-                i18nKey: "error.download.manifest_parse_failed",
+                i18nKey: "Manifest Parse Failed",
                 level: .notification
             )
         }
@@ -383,7 +383,7 @@ enum ProcessorExecutor {
         throw GlobalError.download(
             chineseMessage:
                 "无法从processor JAR文件中获取主类: \(jarPath.lastPathComponent)",
-            i18nKey: "error.download.processor_main_class_not_found",
+            i18nKey: "Failed to get main class from processor JAR file: %@",
             level: .notification
         )
     }

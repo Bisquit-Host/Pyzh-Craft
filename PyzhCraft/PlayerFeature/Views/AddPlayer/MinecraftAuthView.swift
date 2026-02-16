@@ -49,11 +49,11 @@ struct MinecraftAuthView: View {
                 .symbolRenderingMode(.multicolor)
                 .symbolVariant(.none)
                 .foregroundColor(.secondary)
-            Text("minecraft.auth.title".localized())
+            Text("Login to Minecraft with Microsoft Account")
                 .font(.headline)
                 .multilineTextAlignment(.center)
 
-            Text("minecraft.auth.subtitle".localized())
+            Text("Please click the \"Start Login\" button below to begin authentication")
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -68,11 +68,11 @@ struct MinecraftAuthView: View {
                 .font(.system(size: 46))
                 .foregroundColor(.secondary)
 
-            Text("minecraft.auth.waiting_browser".localized())
+            Text("Waiting for authorization")
                 .font(.headline)
                 .multilineTextAlignment(.center)
 
-            Text("minecraft.auth.waiting_browser.subtitle".localized())
+            Text("Please complete the authorization in the browser window that has opened")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -84,11 +84,11 @@ struct MinecraftAuthView: View {
         VStack(spacing: 16) {
             ProgressView().controlSize(.small)
 
-            Text("minecraft.auth.processing.title".localized())
+            Text("Verifying account information")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-            Text("minecraft.auth.processing.subtitle".localized())
+            Text("Completing the authentication process, please wait...")
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -115,7 +115,7 @@ struct MinecraftAuthView: View {
             }
 
             VStack(spacing: 8) {
-                Text("minecraft.auth.success".localized())
+                Text("Login Successful!")
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.green)
@@ -125,7 +125,7 @@ struct MinecraftAuthView: View {
 
                 Text(
                     String(
-                        format: "minecraft.auth.uuid".localized(),
+                        format: "UUID: %@".localized(),
                         profile.id
                     )
                 )
@@ -134,7 +134,7 @@ struct MinecraftAuthView: View {
                 .textSelection(.enabled)
             }
 
-            Text("minecraft.auth.confirm_login".localized())
+            Text("Please click the \"Add\" button below to confirm using this account")
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -148,7 +148,7 @@ struct MinecraftAuthView: View {
                 .font(.system(size: 60))
                 .foregroundColor(.red)
 
-            Text("minecraft.auth.failed".localized())
+            Text("Login Failed")
                 .font(.headline)
                 .foregroundColor(.red)
 
@@ -157,7 +157,7 @@ struct MinecraftAuthView: View {
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
 
-            Text("minecraft.auth.retry_message".localized())
+            Text("Please click the \"Retry\" button below to restart authentication")
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

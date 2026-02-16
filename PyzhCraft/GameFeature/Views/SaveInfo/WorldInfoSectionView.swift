@@ -12,7 +12,7 @@ struct WorldInfoSectionView: View {
     // MARK: - Body
     var body: some View {
         GenericSectionView(
-            title: "saveinfo.worlds",
+            title: "Worlds",
             items: worlds,
             isLoading: isLoading,
             iconName: "folder.fill"

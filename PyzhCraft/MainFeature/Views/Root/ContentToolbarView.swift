@@ -41,9 +41,9 @@ public struct ContentToolbarView: ToolbarContent {
                     showingGameForm.toggle()
                 }
             } label: {
-                Label("game.form.title".localized(), systemImage: "plus")
+                Label("Add Game", systemImage: "plus")
             }
-            .help("game.form.title".localized())
+            .help("Add Game")
             .task {
                 // Delay checking of announcements without blocking initial rendering
                 guard !hasCheckedAnnouncement else { return }
@@ -66,9 +66,9 @@ public struct ContentToolbarView: ToolbarContent {
                 isPlayerNameValid = false
                 showingAddPlayerSheet = true
             } label: {
-                Label("player.add".localized(), systemImage: "person.badge.plus")
+                Label("Add Player", systemImage: "person.badge.plus")
             }
-            .help("player.add".localized())
+            .help("Add Player")
             .sheet(isPresented: $showingAddPlayerSheet) {
                 AddPlayerSheetView(
                     playerName: $playerName,
@@ -113,9 +113,9 @@ public struct ContentToolbarView: ToolbarContent {
             }
             .alert(isPresented: $showPlayerAlert) {
                 Alert(
-                    title: Text("sidebar.alert.no_player.title".localized()),
-                    message: Text("sidebar.alert.no_player.message".localized()),
-                    dismissButton: .default(Text("common.confirm".localized()))
+                    title: Text("No Players"),
+                    message: Text("No player information. Please add player information first before adding games"),
+                    dismissButton: .default(Text("Confirm"))
                 )
             }
 
@@ -130,10 +130,10 @@ public struct ContentToolbarView: ToolbarContent {
                         ProgressView()
                             .controlSize(.small)
                     } else {
-                        Label("skin.title".localized(), systemImage: "tshirt")
+                        Label("Skin", systemImage: "tshirt")
                     }
                 }
-                .help("skin.title".localized())
+                .help("Skin")
                 .disabled(isLoadingSkin)
                 .sheet(isPresented: $showEditSkin) {
                     SkinToolDetailView(

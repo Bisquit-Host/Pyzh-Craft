@@ -76,7 +76,7 @@ struct AIChatInputAreaView: View {
     }
 
     private var textField: some View {
-        TextField("ai.chat.input.placeholder".localized(), text: $inputText, axis: .vertical)
+        TextField("Type your message here...", text: $inputText, axis: .vertical)
             .textFieldStyle(.plain)
             .focused($isInputFocused)
             .lineLimit(1...6)

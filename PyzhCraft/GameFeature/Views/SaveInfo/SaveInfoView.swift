@@ -64,7 +64,7 @@ struct SaveInfoView: View {
 
             // Show empty status when no information type is available
             if !manager.isLoading && !manager.hasWorldsType && !manager.hasScreenshotsType && !manager.hasServersType && !manager.hasLitematicaType && !manager.hasLogsType {
-                Text("saveinfo.no_available_info".localized())
+                Text("No information available to display")
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity)
                     .padding()

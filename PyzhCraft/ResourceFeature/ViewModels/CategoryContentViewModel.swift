@@ -128,7 +128,7 @@ final class CategoryContentViewModel: ObservableObject {
             guard !categoriesResult.isEmpty else {
                 throw GlobalError.resource(
                     chineseMessage: "无法获取分类数据",
-                    i18nKey: "error.resource.categories_not_found",
+                    i18nKey: "Categories Not Found",
                     level: .notification
                 )
             }
@@ -136,7 +136,7 @@ final class CategoryContentViewModel: ObservableObject {
             guard !versionsResult.isEmpty else {
                 throw GlobalError.resource(
                     chineseMessage: "无法获取游戏版本数据",
-                    i18nKey: "error.resource.game_versions_not_found",
+                    i18nKey: "Game versions not found",
                     level: .notification
                 )
             }

@@ -54,13 +54,13 @@ struct PyzhCraftApp: App {
         .commands {
 
             CommandGroup(after: .appInfo) {
-                Button("menu.check.updates".localized()) {
+                Button("Check for Updates") {
                     sparkleUpdateService.checkForUpdatesWithUI()
                 }
                 .keyboardShortcut("u", modifiers: [.command, .shift])
             }
             CommandGroup(after: .help) {
-                Button("menu.open.log".localized()) {
+                Button("Open Log") {
                     Logger.shared.openLogFile()
                 }
                 .keyboardShortcut("l", modifiers: [.command, .shift])
@@ -69,22 +69,22 @@ struct PyzhCraftApp: App {
 
                 Link("GitHub", destination: URLConfig.API.GitHub.repositoryURL())
 
-                Button("about.contributors".localized()) {
+                Button("Contributors") {
                     WindowManager.shared.openWindow(id: .contributors)
                 }
                 .keyboardShortcut("c", modifiers: [.command, .shift])
 
-                Button("about.acknowledgements".localized()) {
+                Button("Acknowledgements") {
                     WindowManager.shared.openWindow(id: .acknowledgements)
                 }
                 .keyboardShortcut("a", modifiers: [.command, .shift])
 
-                Link("license.view".localized(), destination: URLConfig.API.GitHub.licenseWebPage())
+                Link("View License", destination: URLConfig.API.GitHub.licenseWebPage())
                     .keyboardShortcut("l", modifiers: [.command, .option])
 
                 Divider()
 
-                Button("ai.assistant.title".localized()) {
+                Button("AI Assistant") {
                     AIChatManager.shared.openChatWindow()
                 }
                 .keyboardShortcut("i", modifiers: [.command, .shift])
@@ -113,7 +113,7 @@ struct PyzhCraftApp: App {
         // Status bar in the upper right corner (can display icons)
         MenuBarExtra(
             content: {
-                Button("ai.assistant.title".localized()) {
+                Button("AI Assistant") {
                     AIChatManager.shared.openChatWindow()
                 }
             },

@@ -93,12 +93,12 @@ struct AIChatMessageListView: View {
     private var welcomeView: some View {
         VStack(spacing: 16) {
             if let player = currentPlayer {
-                Text(String(format: "ai.chat.welcome.message".localized(), player.name))
+                Text(String(format: "Hello, %@!".localized(), player.name))
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundStyle(.primary)
             }
-            Text("ai.chat.welcome.description".localized())
+            Text("How can I help you today?")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
@@ -135,7 +135,7 @@ struct AIChatMessageListView: View {
                 ProgressView()
                     .scaleEffect(0.6)
                     .controlSize(.small)
-                Text("ai.chat.thinking".localized())
+                Text("Thinking...")
                     .font(.system(size: 12))
                     .foregroundStyle(.secondary)
             }

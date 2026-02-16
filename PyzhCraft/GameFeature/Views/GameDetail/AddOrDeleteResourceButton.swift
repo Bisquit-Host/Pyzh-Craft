@@ -72,7 +72,7 @@ struct AddOrDeleteResourceButton: View {
                         ProgressView()
                             .controlSize(.mini)
                     } else {
-                        Text("resource.update".localized())
+                        Text("Update")
                     }
                 }
                 .buttonStyle(.borderedProminent)
@@ -128,20 +128,20 @@ struct AddOrDeleteResourceButton: View {
                 }
             }
             .confirmationDialog(
-                "common.delete".localized(),
+                "Delete",
                 isPresented: $showDeleteAlert,
                 titleVisibility: .visible
             ) {
-                Button("common.delete".localized(), role: .destructive) {
+                Button("Delete", role: .destructive) {
                     deleteFile()
                 }
                 .keyboardShortcut(.defaultAction)  // Bind the Enter key
 
-                Button("common.cancel".localized(), role: .cancel) {}
+                Button("Cancel", role: .cancel) {}
             } message: {
                 Text(
                     String(
-                        format: "resource.delete.confirm".localized(),
+                        format: "Are you sure you want to delete \"%@\"? Deletion may cause game launch failure".localized(),
                         project.title
                     )
                 )
@@ -267,7 +267,7 @@ struct AddOrDeleteResourceButton: View {
     private var buttonLabel: some View {
         switch addButtonState {
         case .idle:
-            AnyView(Text("resource.add".localized()))
+            AnyView(Text("Install"))
         case .loading:
             AnyView(
                 ProgressView()
@@ -278,13 +278,13 @@ struct AddOrDeleteResourceButton: View {
             AnyView(
                 Text(
                     (!type
-                        ? "common.delete".localized()
-                        : "resource.installed".localized())
+                        ? "Delete".localized()
+                        : "Installed".localized())
                 )
             )
         case .update:
             // When there is an update, the main button shows Delete (the update button is already shown separately on the left)
-            AnyView(Text("common.delete".localized()))
+            AnyView(Text("Delete"))
         }
     }
 
@@ -305,7 +305,7 @@ struct AddOrDeleteResourceButton: View {
         if queryLowercased == "modpack" || !validResourceTypes.contains(queryLowercased) {
             let globalError = GlobalError.configuration(
                 chineseMessage: "无法删除文件：不支持删除此类型的资源",
-                i18nKey: "error.configuration.delete_file_failed",
+                i18nKey: "Delete File Failed",
                 level: .notification
             )
             Logger.shared.error("删除文件失败: \(globalError.chineseMessage)")
@@ -321,7 +321,7 @@ struct AddOrDeleteResourceButton: View {
         else {
             let globalError = GlobalError.configuration(
                 chineseMessage: "无法删除文件：游戏信息或资源目录无效",
-                i18nKey: "error.configuration.delete_file_failed",
+                i18nKey: "Delete File Failed",
                 level: .notification
             )
             Logger.shared.error("删除文件失败: \(globalError.chineseMessage)")

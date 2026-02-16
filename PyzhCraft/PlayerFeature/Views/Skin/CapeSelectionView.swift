@@ -79,19 +79,19 @@ struct CapeSelectionView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("skin.cape".localized()).font(.headline)
+            Text("Cape").font(.headline)
 
             if let playerProfile = playerProfile, let capes = playerProfile.capes, !capes.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
-                        capeOption(id: nil, name: "skin.no_cape".localized(), isSystemOption: true)
+                        capeOption(id: nil, name: "No Cape".localized(), isSystemOption: true)
                         ForEach(capes, id: \.id) { cape in
-                            capeOption(id: cape.id, name: cape.alias ?? "skin.cape".localized(), imageURL: cape.url)
+                            capeOption(id: cape.id, name: cape.alias ?? "Cape".localized(), imageURL: cape.url)
                         }
                     }.padding(4)
                 }
             } else {
-                Text("skin.no_capes_available".localized())
+                Text("No capes available")
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)

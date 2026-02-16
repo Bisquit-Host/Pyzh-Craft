@@ -9,7 +9,7 @@ struct LogSectionView: View {
     // MARK: - Body
     var body: some View {
         GenericSectionView(
-            title: "saveinfo.logs",
+            title: "Logs",
             items: logs,
             isLoading: isLoading,
             iconName: "doc.text.fill"

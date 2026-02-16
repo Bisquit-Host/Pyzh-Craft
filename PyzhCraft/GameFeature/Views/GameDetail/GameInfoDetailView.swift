@@ -242,7 +242,7 @@ struct GameInfoDetailView: View {
             guard let url = urls.first else {
                 let globalError = GlobalError.validation(
                     chineseMessage: "未选择文件",
-                    i18nKey: "error.validation.no_file_selected",
+                    i18nKey: "No File Selected",
                     level: .notification
                 )
                 GlobalErrorHandler.shared.handle(globalError)
@@ -252,7 +252,7 @@ struct GameInfoDetailView: View {
             guard url.startAccessingSecurityScopedResource() else {
                 let globalError = GlobalError.fileSystem(
                     chineseMessage: "无法访问所选文件",
-                    i18nKey: "error.filesystem.file_access_failed",
+                    i18nKey: "File Access Failed",
                     level: .notification
                 )
                 GlobalErrorHandler.shared.handle(globalError)

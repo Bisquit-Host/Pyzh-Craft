@@ -2,7 +2,7 @@ import SwiftUI
 
 func newErrorView(_ error: GlobalError) -> some View {
     ContentUnavailableView {
-        Label("result.error".localized(), systemImage: "xmark.icloud")
+        Label("😩 Query error, please try again later!", systemImage: "xmark.icloud")
     } description: {
         Text(error.notificationTitle)
     }
@@ -11,7 +11,7 @@ func newErrorView(_ error: GlobalError) -> some View {
 func emptyResultView() -> some View {
     ContentUnavailableView {
         Label(
-            "result.empty".localized(),
+            "No Results Found",
             systemImage: "magnifyingglass"
         )
     }
@@ -57,7 +57,7 @@ struct DirectorySettingRow: View {
                     }
                 }
 
-                Button("common.reset".localized(), action: onReset)
+                Button("Reset", action: onReset)
                     .padding(.leading, 8)
             }
             Text(description)

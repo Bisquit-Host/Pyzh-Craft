@@ -28,7 +28,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
 
         guard let authURL = buildAuthorizationURL() else {
             isLoading = false
-            authState = .error("minecraft.auth.error.authentication_failed".localized())
+            authState = .error("Authentication failed".localized())
             return
         }
 
@@ -45,11 +45,11 @@ class MinecraftAuthService: NSObject, ObservableObject {
                                 self?.authState = .notAuthenticated
                             } else {
                                                         Logger.shared.error("Microsoft 认证失败: \(authError.localizedDescription)")
-                        self?.authState = .error("minecraft.auth.error.authentication_failed".localized())
+                        self?.authState = .error("Authentication failed".localized())
                             }
                         } else {
                                                     Logger.shared.error("Microsoft 认证发生未知错误: \(error.localizedDescription)")
-                        self?.authState = .error("minecraft.auth.error.authentication_failed".localized())
+                        self?.authState = .error("Authentication failed".localized())
                         }
                         self?.isLoading = false
                         continuation.resume()
@@ -59,7 +59,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
                     guard let callbackURL = callbackURL,
                           let authResponse = AuthorizationCodeResponse(from: callbackURL) else {
                         Logger.shared.error("Microsoft 无效的回调 URL")
-                        self?.authState = .error("minecraft.auth.error.invalid_callback_url".localized())
+                        self?.authState = .error("Invalid callback URL".localized())
                         self?.isLoading = false
                         continuation.resume()
                         return
@@ -87,7 +87,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
                     // Check whether the authorization code was successfully obtained
                     guard authResponse.isSuccess, let code = authResponse.code else {
                         Logger.shared.error("未获取到授权码")
-                        self?.authState = .error("minecraft.auth.error.no_authorization_code".localized())
+                        self?.authState = .error("No authorization code received".localized())
                         self?.isLoading = false
                         continuation.resume()
                         return
@@ -229,7 +229,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         } catch {
             throw GlobalError.validation(
                 chineseMessage: "序列化 Xbox Live 认证请求失败: \(error.localizedDescription)",
-                i18nKey: "error.validation.xbox_live_request_serialize_failed",
+                i18nKey: "Xbox Live Request Serialize Failed",
                 level: .notification
             )
         }
@@ -243,7 +243,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         } catch {
             throw GlobalError.validation(
                 chineseMessage: "解析 Xbox Live 令牌响应失败: \(error.localizedDescription)",
-                i18nKey: "error.validation.xbox_live_token_parse_failed",
+                i18nKey: "Xbox Live Token Parse Failed",
                 level: .notification
             )
         }
@@ -284,7 +284,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         } catch {
             throw GlobalError.validation(
                 chineseMessage: "序列化 XSTS 认证请求失败: \(error.localizedDescription)",
-                i18nKey: "error.validation.xsts_request_serialize_failed",
+                i18nKey: "XSTS Request Serialize Failed",
                 level: .notification
             )
         }
@@ -299,7 +299,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         } catch {
             throw GlobalError.validation(
                 chineseMessage: "解析 XSTS 令牌响应失败: \(error.localizedDescription)",
-                i18nKey: "error.validation.xsts_token_parse_failed",
+                i18nKey: "XSTS Token Parse Failed",
                 level: .notification
             )
         }
@@ -318,7 +318,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         } catch {
             throw GlobalError.validation(
                 chineseMessage: "序列化 Minecraft 认证请求失败: \(error.localizedDescription)",
-                i18nKey: "error.validation.minecraft_request_serialize_failed",
+                i18nKey: "Minecraft Request Serialize Failed",
                 level: .notification
             )
         }
@@ -341,31 +341,31 @@ class MinecraftAuthService: NSObject, ObservableObject {
             case 401:
                 throw GlobalError.authentication(
                     chineseMessage: "Minecraft 认证失败: Xbox Live 令牌无效或已过期",
-                    i18nKey: "error.authentication.invalid_xbox_token",
+                    i18nKey: "Minecraft authentication failed: Xbox Live token is invalid or expired",
                     level: .notification
                 )
             case 403:
                 throw GlobalError.authentication(
                     chineseMessage: "Minecraft 认证失败: 该Microsoft账户未购买Minecraft",
-                    i18nKey: "error.authentication.minecraft_not_owned",
+                    i18nKey: "Minecraft authentication failed: This Microsoft account does not own Minecraft",
                     level: .notification
                 )
             case 503:
                 throw GlobalError.network(
                     chineseMessage: "Minecraft 认证服务暂时不可用，请稍后重试",
-                    i18nKey: "error.network.minecraft_service_unavailable",
+                    i18nKey: "Minecraft authentication service is temporarily unavailable, please try again later",
                     level: .notification
                 )
             case 429:
                 throw GlobalError.network(
                     chineseMessage: "请求过于频繁，请稍后重试",
-                    i18nKey: "error.network.rate_limited",
+                    i18nKey: "Too many requests, please try again later",
                     level: .notification
                 )
             default:
                 throw GlobalError.download(
                     chineseMessage: "获取 Minecraft 访问令牌失败: HTTP \(statusCode)",
-                    i18nKey: "error.download.minecraft_token_failed",
+                    i18nKey: "Minecraft Token Failed",
                     level: .notification
                 )
             }
@@ -377,7 +377,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         } catch {
             throw GlobalError.validation(
                 chineseMessage: "解析 Minecraft 访问令牌响应失败: \(error.localizedDescription)",
-                i18nKey: "error.validation.minecraft_token_parse_failed",
+                i18nKey: "Minecraft Token Parse Failed",
                 level: .notification
             )
         }
@@ -404,19 +404,19 @@ class MinecraftAuthService: NSObject, ObservableObject {
             case 401:
                 throw GlobalError.authentication(
                     chineseMessage: "Minecraft 访问令牌无效或已过期",
-                    i18nKey: "error.authentication.invalid_minecraft_token",
+                    i18nKey: "Minecraft access token is invalid or expired",
                     level: .notification
                 )
             case 403:
                 throw GlobalError.authentication(
                     chineseMessage: "该账户未购买 Minecraft，请使用已购买 Minecraft 的 Microsoft 账户登录",
-                    i18nKey: "error.authentication.minecraft_not_purchased",
+                    i18nKey: "This account has not purchased Minecraft, please log in with a Microsoft account that owns Minecraft",
                     level: .popup
                 )
             default:
                 throw GlobalError.download(
                     chineseMessage: "检查游戏拥有情况失败: HTTP \(statusCode)",
-                    i18nKey: "error.download.entitlements_check_failed",
+                    i18nKey: "Failed to check game ownership: HTTP %@",
                     level: .notification
                 )
             }
@@ -432,7 +432,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
             if !hasProductMinecraft || !hasGameMinecraft {
                 throw GlobalError.authentication(
                     chineseMessage: "该 Microsoft 账户未购买 Minecraft 或权限不足，请使用已购买 Minecraft 的账户登录",
-                    i18nKey: "error.authentication.insufficient_minecraft_entitlements",
+                    i18nKey: "This Microsoft account has not purchased Minecraft or has insufficient entitlements, please log in with an account that has purchased Minecraft",
                     level: .popup
                 )
             }
@@ -441,7 +441,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         } catch let decodingError as DecodingError {
             throw GlobalError.validation(
                 chineseMessage: "解析游戏权限响应失败: \(decodingError.localizedDescription)",
-                i18nKey: "error.validation.entitlements_parse_failed",
+                i18nKey: "Failed to parse game entitlements response: %@",
                 level: .notification
             )
         } catch let globalError as GlobalError {
@@ -450,7 +450,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         } catch {
             throw GlobalError.validation(
                 chineseMessage: "检查游戏拥有情况时发生未知错误: \(error.localizedDescription)",
-                i18nKey: "error.validation.entitlements_check_unknown_error",
+                i18nKey: "Unknown error occurred while checking game ownership: %@",
                 level: .notification
             )
         }
@@ -479,7 +479,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         } catch {
             throw GlobalError.validation(
                 chineseMessage: "解析 Minecraft 用户资料响应失败: \(error.localizedDescription)",
-                i18nKey: "error.validation.minecraft_profile_parse_failed",
+                i18nKey: "Minecraft Profile Parse Failed",
                 level: .notification
             )
         }
@@ -525,7 +525,7 @@ extension MinecraftAuthService {
         } catch {
             let globalError = GlobalError.authentication(
                 chineseMessage: "刷新 Token 时发生未知错误: \(error.localizedDescription)",
-                i18nKey: "error.authentication.unknown_refresh_error",
+                i18nKey: "Unknown error occurred while refreshing token: %@",
                 level: .popup
             )
             return .failure(globalError)
@@ -542,7 +542,7 @@ extension MinecraftAuthService {
         guard !player.authAccessToken.isEmpty else {
             throw GlobalError.authentication(
                 chineseMessage: "缺少访问令牌，请重新登录",
-                i18nKey: "error.authentication.missing_token",
+                i18nKey: "Access token is missing, please log in again",
                 level: .notification
             )
         }
@@ -561,7 +561,7 @@ extension MinecraftAuthService {
         guard !player.authRefreshToken.isEmpty else {
             throw GlobalError.authentication(
                 chineseMessage: "登录已过期，请重新登录该账户",
-                i18nKey: "error.authentication.token_expired_relogin_required",
+                i18nKey: "Login has expired, please re-login to this account",
                 level: .popup
             )
         }
@@ -634,14 +634,14 @@ extension MinecraftAuthService {
                 Logger.shared.error("刷新令牌已过期或无效")
                 throw GlobalError.authentication(
                     chineseMessage: "刷新令牌已过期或无效",
-                    i18nKey: "error.authentication.invalid_refresh_token",
+                    i18nKey: "Refresh token is expired or invalid",
                     level: .notification
                 )
             default:
                 Logger.shared.error("刷新令牌错误: \(error)")
                 throw GlobalError.authentication(
                     chineseMessage: "刷新令牌错误: \(error)",
-                    i18nKey: "error.authentication.refresh_token_error",
+                    i18nKey: "Refresh token error",
                     level: .notification
                 )
             }
@@ -651,7 +651,7 @@ extension MinecraftAuthService {
             Logger.shared.error("刷新访问令牌失败: HTTP \(httpResponse.statusCode)")
             throw GlobalError.download(
                 chineseMessage: "刷新访问令牌失败: HTTP \(httpResponse.statusCode)",
-                i18nKey: "error.download.refresh_token_request_failed",
+                i18nKey: "Refresh token request failed",
                 level: .notification
             )
         }
@@ -672,7 +672,7 @@ extension MinecraftAuthService {
         // Display notification prompting user to log in again
         let notification = GlobalError.authentication(
             chineseMessage: "玩家 \(player.name) 的登录已过期，请在玩家管理中重新登录该账户后再启动游戏",
-            i18nKey: "error.authentication.reauth_required",
+            i18nKey: "Login has expired, please re-login to this account in player management before starting the game",
             level: .notification
         )
 

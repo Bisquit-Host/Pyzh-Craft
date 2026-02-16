@@ -22,10 +22,10 @@ struct GlobalResourceSheet: View {
                 Text(
                     selectedGame.map {
                         String(
-                            format: "global_resource.add_for_game".localized(),
+                            format: "Add For Game".localized(),
                             $0.gameName
                         )
-                    } ?? "global_resource.add".localized()
+                    } ?? "Add".localized()
                 )
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -33,7 +33,7 @@ struct GlobalResourceSheet: View {
             body: {
                 if let detail = preloadedDetail {
                     if preloadedCompatibleGames.isEmpty {
-                        Text("global_resource.no_game_list".localized())
+                        Text("No Game List")
                             .foregroundColor(.secondary).padding()
                     } else {
                         VStack {
@@ -128,7 +128,7 @@ struct GlobalResourceSheet: View {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
                 chineseMessage: "项目ID不能为空",
-                i18nKey: "error.validation.project_id_empty",
+                i18nKey: "Project ID Empty",
                 level: .notification
             )
         }

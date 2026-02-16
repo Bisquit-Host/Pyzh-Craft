@@ -36,12 +36,12 @@ struct DownloadProgressSection: View {
     private var gameDownloadProgressView: some View {
         VStack(spacing: 24) {
             progressSection(
-                title: "download.core.title".localized(),
+                title: "Core Files",
                 state: gameSetupService.downloadState,
                 type: .core
             )
             progressSection(
-                title: "download.resources.title".localized(),
+                title: "Resource Files",
                 state: gameSetupService.downloadState,
                 type: .resources
             )
@@ -138,13 +138,13 @@ struct DownloadProgressSection: View {
     private func getLoaderTitle(for loaderType: String) -> String {
         switch loaderType.lowercased() {
         case "fabric":
-            return "fabric.loader.title".localized()
+            return "Fabric Loader".localized()
         case "quilt":
-            return "quilt.loader.title".localized()
+            return "QuiltMC Loader".localized()
         case "forge":
-            return "forge.loader.title".localized()
+            return "Forge Loader".localized()
         case "neoforge":
-            return "neoforge.loader.title".localized()
+            return "NeoForge Loader".localized()
         default:
             return ""
         }
@@ -161,21 +161,21 @@ private struct ModPackProgressView: View {
                 // Show overrides progress bar (only displayed when there are files that need to be merged)
                 if modPackViewModel.modPackInstallState.overridesTotal > 0 {
                     modPackProgressSection(
-                        title: "launcher.import.copying_files".localized(),
+                        title: "Copy Files",
                         state: modPackViewModel.modPackInstallState,
                         type: .overrides
                     )
                 }
 
                 modPackProgressSection(
-                    title: "modpack.files.title".localized(),
+                    title: "Modpack Files",
                     state: modPackViewModel.modPackInstallState,
                     type: .files
                 )
 
                 if modPackViewModel.modPackInstallState.dependenciesTotal > 0 {
                     modPackProgressSection(
-                        title: "modpack.dependencies.title".localized(),
+                        title: "Modpack Dependencies",
                         state: modPackViewModel.modPackInstallState,
                         type: .dependencies
                     )

@@ -15,7 +15,7 @@ public struct GameSettingsView: View {
 
     public var body: some View {
         Form {
-            LabeledContent("settings.default_api_source.label".localized()) {
+            LabeledContent("Default API Source") {
                 Picker("", selection: $gameSettings.defaultAPISource) {
                     ForEach(DataSource.allCases, id: \.self) { source in
                         Text(source.localizedName).tag(source)
@@ -26,25 +26,25 @@ public struct GameSettingsView: View {
                 .fixedSize()
             }.labeledContentStyle(.custom(alignment: .firstTextBaseline)).padding(.bottom, 10)
 
-            LabeledContent("settings.game_versions.label".localized()) {
+            LabeledContent("Game Versions") {
                 HStack {
                     Toggle(
                         "",
                         isOn: $gameSettings.includeSnapshotsForGameVersions
                     )
                     .labelsHidden()
-                    Text("settings.game_versions.include_snapshots.label".localized()).font(.callout)
+                    Text("Include Snapshot Versions").font(.callout)
                         .foregroundColor(.primary)
                 }
             }.labeledContentStyle(.custom).padding(.bottom, 10)
 
-            LabeledContent("settings.ai_crash_analysis".localized()) {
+            LabeledContent("AI Crash Analysis") {
                 HStack {
                     Toggle(
                         "",
                         isOn: $gameSettings.enableAICrashAnalysis
                     ).labelsHidden()
-                    Text("settings.ai_crash_analysis.description".localized()).font(
+                    Text("This option controls whether to enable AI analysis when the game crashes").font(
                         .callout
                     )
                     .foregroundColor(.primary)
@@ -78,15 +78,15 @@ public struct GameSettingsView: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
                     InfoIconWithPopover(
-                        text: "settings.default_memory_allocation.description".localized()
+                        text: "Set the minimum and maximum memory allocation for Minecraft. The minimum value (Xms) is the initial memory allocated when the game starts, and the maximum value (Xmx) is the maximum memory the game can use.".localized()
                     )
                 }
             } label: {
-                Text("settings.default_memory_allocation.label".localized())
+                Text("Global Memory Allocation")
             }
             .labeledContentStyle(.custom).padding(.bottom, 10)
 
-            LabeledContent("settings.game_resource_info.label".localized()) {
+            LabeledContent("Game Resources") {
                 HStack {
                     Label(
                         "\(cacheManager.cacheInfo.fileCount)",

@@ -77,7 +77,7 @@ class GameVersionDatabase {
             guard let jsonString = String(data: jsonData, encoding: .utf8) else {
                 throw GlobalError.validation(
                     chineseMessage: "无法编码游戏数据为 JSON",
-                    i18nKey: "error.validation.json_encode_failed",
+                    i18nKey: "Failed to encode game data as JSON",
                     level: .notification
                 )
             }
@@ -108,7 +108,7 @@ class GameVersionDatabase {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
                 throw GlobalError.validation(
                     chineseMessage: "保存游戏失败: \(errorMessage)",
-                    i18nKey: "error.validation.game_save_failed",
+                    i18nKey: "Failed to save game: %@",
                     level: .notification
                 )
             }
@@ -159,7 +159,7 @@ class GameVersionDatabase {
                     let errorMessage = String(cString: sqlite3_errmsg(db.database))
                     throw GlobalError.validation(
                         chineseMessage: "批量保存游戏失败: \(errorMessage)",
-                        i18nKey: "error.validation.games_batch_save_failed",
+                        i18nKey: "Failed to batch save games: %@",
                         level: .notification
                     )
                 }
@@ -285,7 +285,7 @@ class GameVersionDatabase {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
                 throw GlobalError.validation(
                     chineseMessage: "删除游戏失败: \(errorMessage)",
-                    i18nKey: "error.validation.game_delete_failed",
+                    i18nKey: "Failed to delete game: %@",
                     level: .notification
                 )
             }
@@ -308,7 +308,7 @@ class GameVersionDatabase {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
                 throw GlobalError.validation(
                     chineseMessage: "删除工作路径游戏失败: \(errorMessage)",
-                    i18nKey: "error.validation.games_delete_failed",
+                    i18nKey: "Failed to delete games in working path: %@",
                     level: .notification
                 )
             }
@@ -344,7 +344,7 @@ class GameVersionDatabase {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
                 throw GlobalError.validation(
                     chineseMessage: "更新最后游玩时间失败: \(errorMessage)",
-                    i18nKey: "error.validation.last_played_update_failed",
+                    i18nKey: "Failed to update last played time: %@",
                     level: .notification
                 )
             }

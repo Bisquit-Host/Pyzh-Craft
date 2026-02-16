@@ -2,12 +2,12 @@ import SwiftUI
 
 /// Contribution type enum
 enum Contribution: String, CaseIterable {
-    case code = "contributor.contribution.code"
-    case design = "contributor.contribution.design"
-    case test = "contributor.contribution.test"
-    case feedback = "contributor.contribution.feedback"
-    case documentation = "contributor.contribution.documentation"
-    case infra = "contributor.contribution.infra"
+    case code = "Code"
+    case design = "Design"
+    case test = "Test"
+    case feedback = "Feedback"
+    case documentation = "Documentation"
+    case infra = "Infra"
 
     var localizedString: String {
         rawValue.localized()

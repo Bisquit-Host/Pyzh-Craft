@@ -66,7 +66,7 @@ class CacheCalculator {
         guard let enumerator = fileManager.enumerator(at: directory, includingPropertiesForKeys: [.fileSizeKey]) else {
             throw GlobalError.fileSystem(
                 chineseMessage: "无法枚举目录: \(directory.path)",
-                i18nKey: "error.filesystem.directory_enumeration_failed",
+                i18nKey: "Directory Enumeration Failed",
                 level: .silent
             )
         }

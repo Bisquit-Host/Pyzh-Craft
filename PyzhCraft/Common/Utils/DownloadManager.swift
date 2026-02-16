@@ -39,7 +39,7 @@ enum DownloadManager {
         guard let url = URL(string: urlString) else {
             throw GlobalError.validation(
                 chineseMessage: "无效的下载地址",
-                i18nKey: "error.validation.invalid_download_url",
+                i18nKey: "Invalid Download URL",
                 level: .notification
             )
         }
@@ -78,7 +78,7 @@ enum DownloadManager {
         guard let resourceDirUnwrapped = resourceDir else {
             throw GlobalError.resource(
                 chineseMessage: "无法获取资源目录",
-                i18nKey: "error.resource.directory_not_found",
+                i18nKey: "Directory Not Found",
                 level: .notification
             )
         }
@@ -111,7 +111,7 @@ enum DownloadManager {
             guard let url = URL(string: urlString) else {
                 throw GlobalError.validation(
                     chineseMessage: "无效的下载地址",
-                    i18nKey: "error.validation.invalid_download_url",
+                    i18nKey: "Invalid Download URL",
                     level: .notification
                 )
             }
@@ -159,7 +159,7 @@ enum DownloadManager {
         } catch {
             throw GlobalError.fileSystem(
                 chineseMessage: "创建目标目录失败",
-                i18nKey: "error.filesystem.download_directory_creation_failed",
+                i18nKey: "Download Directory Creation Failed",
                 level: .notification
             )
         }
@@ -201,7 +201,7 @@ enum DownloadManager {
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 throw GlobalError.download(
                     chineseMessage: "HTTP 请求失败",
-                    i18nKey: "error.download.http_status_error",
+                    i18nKey: "HTTP Status Error",
                     level: .notification
                 )
             }
@@ -213,7 +213,7 @@ enum DownloadManager {
                     if actualSha1 != expectedSha1 {
                         throw GlobalError.validation(
                             chineseMessage: "SHA1 校验失败",
-                            i18nKey: "error.validation.sha1_check_failed",
+                            i18nKey: "SHA1 Check Failed",
                             level: .notification
                         )
                     }
@@ -236,13 +236,13 @@ enum DownloadManager {
             } else if error is URLError {
                 throw GlobalError.download(
                     chineseMessage: "网络请求失败",
-                    i18nKey: "error.download.network_request_failed",
+                    i18nKey: "Network Request Failed",
                     level: .notification
                 )
             } else {
                 throw GlobalError.download(
                     chineseMessage: "下载失败",
-                    i18nKey: "error.download.general_failure",
+                    i18nKey: "General Failure",
                     level: .notification
                 )
             }

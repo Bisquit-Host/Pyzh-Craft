@@ -128,7 +128,7 @@ struct GenericSectionView<Item: Identifiable, ChipContent: View>: View {
                 .foregroundColor(.secondary)
         }
         .buttonStyle(.plain)
-        .help("filter.clear".localized())
+        .help("Clear")
     }
 }
 

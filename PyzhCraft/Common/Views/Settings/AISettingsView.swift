@@ -5,7 +5,7 @@ public struct AISettingsView: View {
     @State private var showApiKey = false
     public var body: some View {
         Form {
-            LabeledContent("settings.ai.api_type.label".localized()) {
+            LabeledContent("API Type") {
                 Picker("", selection: $aiSettings.selectedProvider) {
                     ForEach(AIProvider.allCases) { provider in
                         Text(provider.displayName).tag(provider)
@@ -21,14 +21,14 @@ public struct AISettingsView: View {
             }
             .labeledContentStyle(.custom)
 
-            LabeledContent("settings.ai.api_key.label".localized()) {
+            LabeledContent("API Key") {
                 HStack {
                     Group {
                         if showApiKey {
-                            TextField("".localized(), text: $aiSettings.apiKey)
+                            TextField("", text: $aiSettings.apiKey)
                                 .textFieldStyle(.roundedBorder).labelsHidden()
                         } else {
-                            SecureField("".localized(), text: $aiSettings.apiKey)
+                            SecureField("", text: $aiSettings.apiKey)
                                 .textFieldStyle(.roundedBorder).labelsHidden()
                         }
                     }
@@ -41,14 +41,14 @@ public struct AISettingsView: View {
                     })
                     .buttonStyle(.plain)
                     .applyReplaceTransition()
-                    InfoIconWithPopover(text: "settings.ai.api_key.description".localized())
+                    InfoIconWithPopover(text: "API key is stored locally only and will not be shared".localized())
                 }
             }
             .labeledContentStyle(.custom)
 
             // Ollama address settings (only shown when Ollama is selected)
             if aiSettings.selectedProvider == .ollama {
-                LabeledContent("settings.ai.ollama.url.label".localized()) {
+                LabeledContent("Ollama URL") {
                     TextField("http://localhost:11434", text: $aiSettings.ollamaBaseURL)
                         .textFieldStyle(.roundedBorder)
                         .labelsHidden()
@@ -61,7 +61,7 @@ public struct AISettingsView: View {
 
             // Custom interface address settings in OpenAI format (can be used with compatible services such as DeepSeek)
             if aiSettings.selectedProvider.apiFormat == .openAI {
-                LabeledContent("settings.ai.api_url.label".localized()) {
+                LabeledContent("API URL") {
                     HStack {
                         TextField(aiSettings.selectedProvider.baseURL, text: $aiSettings.openAIBaseURL)
                             .textFieldStyle(.roundedBorder)
@@ -69,28 +69,28 @@ public struct AISettingsView: View {
                             .frame(width: 180)
                             .fixedSize()
                             .focusable(false)
-                        InfoIconWithPopover(text: "settings.ai.api_url.description".localized())
+                        InfoIconWithPopover(text: "Custom API URL (leave empty to use default address)".localized())
                     }
                 }
                 .labeledContentStyle(.custom)
             }
 
             // Model settings (required)
-            LabeledContent("settings.ai.model.label".localized()) {
+            LabeledContent("Model Name") {
                 HStack {
-                    TextField("settings.ai.model.placeholder".localized(), text: $aiSettings.modelOverride)
+                    TextField("e.g.: gpt-4o, deepseek-chat", text: $aiSettings.modelOverride)
                         .textFieldStyle(.roundedBorder)
                         .labelsHidden()
                         .frame(width: 180)
                         .fixedSize()
                         .focusable(false)
-                    InfoIconWithPopover(text: "settings.ai.model.description".localized())
+                    InfoIconWithPopover(text: "The model name to use (required)".localized())
                 }
             }
             .labeledContentStyle(.custom)
 
             // AI avatar settings
-            LabeledContent("settings.ai.avatar.label".localized()) {
+            LabeledContent("AI Avatar") {
                 VStack(alignment: .leading, spacing: 12) {
                     // Avatar preview
                     MinecraftSkinUtils(
@@ -100,13 +100,13 @@ public struct AISettingsView: View {
                     )
                     // URL input box
                     HStack {
-                        TextField("settings.ai.avatar.placeholder".localized(), text: $aiSettings.aiAvatarURL)
+                        TextField("Enter MC skin URL (64x64)", text: $aiSettings.aiAvatarURL)
                             .textFieldStyle(.roundedBorder)
                             .labelsHidden()
                             .frame(maxWidth: 300)
                             .fixedSize()
                             .focusable(false)
-                        InfoIconWithPopover(text: "settings.ai.avatar.description".localized())
+                        InfoIconWithPopover(text: "MC skin direct link, must be 64x64 pixels".localized())
                     }
                 }
             }

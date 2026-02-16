@@ -76,7 +76,7 @@ struct ModPackDownloadSheet: View {
 
     private var headerView: some View {
         HStack {
-            Text("modpack.download.title".localized())
+            Text("Download Modpack")
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -163,7 +163,7 @@ struct ModPackDownloadSheet: View {
     }
 
     private var cancelButton: some View {
-        Button(isDownloading ? "common.stop".localized() : "common.cancel".localized()) {
+        Button(isDownloading ? "Stop".localized() : "Cancel".localized()) {
             handleCancel()
         }
         .keyboardShortcut(.cancelAction)
@@ -180,7 +180,7 @@ struct ModPackDownloadSheet: View {
                     ProgressView()
                         .controlSize(.small)
                 } else {
-                    Text("modpack.download.button".localized())
+                    Text("Download")
                 }
             }
         }
@@ -455,7 +455,7 @@ struct ModPackDownloadSheet: View {
         guard let fileToDownload = primaryFile else {
             let globalError = GlobalError.resource(
                 chineseMessage: "没有找到可下载的文件",
-                i18nKey: "error.resource.no_downloadable_file",
+                i18nKey: "No downloadable file",
                 level: .notification
             )
             GlobalErrorHandler.shared.handle(globalError)
@@ -519,7 +519,7 @@ struct ModPackDownloadSheet: View {
                 GlobalErrorHandler.shared.handle(
                     GlobalError.fileSystem(
                         chineseMessage: "创建目录失败: \(dir.path)",
-                        i18nKey: "error.filesystem.directory_creation_failed",
+                        i18nKey: "Directory Creation Failed",
                         level: .notification
                     )
                 )
@@ -589,7 +589,7 @@ struct ModPackDownloadSheet: View {
             }
             let globalError = GlobalError.resource(
                 chineseMessage: "整合包依赖安装失败",
-                i18nKey: "error.resource.modpack_dependencies_failed",
+                i18nKey: "Modpack dependencies failed",
                 level: .notification
             )
             GlobalErrorHandler.shared.handle(globalError)

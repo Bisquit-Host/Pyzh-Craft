@@ -21,12 +21,12 @@ struct CustomVersionPicker: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("game.form.version".localized())
+                Text("Version")
                     .font(.subheadline)
                     .foregroundColor(.primary)
                 Spacer()
                 Text(
-                    time.isEmpty ? "" : "release.time.prefix".localized() + time
+                    time.isEmpty ? "" : "Released: ".localized() + time
                 )
                 .font(.subheadline)
                 .foregroundColor(.secondary)
@@ -34,10 +34,10 @@ struct CustomVersionPicker: View {
             versionInput
         }
         .alert(
-            "error.notification.validation.title".localized(),
+            "Validation Error",
             isPresented: .constant(error != nil)
         ) {
-            Button("common.close".localized()) {
+            Button("Close") {
                 error = nil
             }
         } message: {
@@ -54,7 +54,7 @@ struct CustomVersionPicker: View {
                 .background(Color(.textBackgroundColor))
             HStack {
                 if selected.isEmpty {
-                    Text("game.form.version.placeholder".localized())
+                    Text("Select game version")
                         .foregroundColor(.primary)
                         .padding(.horizontal, 8)
                 } else {
@@ -112,7 +112,7 @@ struct CustomVersionPicker: View {
     private func handleEmptyVersionsError() {
         let globalError = GlobalError.resource(
             chineseMessage: "没有可用的版本",
-            i18nKey: "error.resource.no_versions_available",
+            i18nKey: "No Versions Available",
             level: .notification
         )
         Logger.shared.error("版本选择器错误: \(globalError.chineseMessage)")

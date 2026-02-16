@@ -15,7 +15,12 @@ enum DataSource: String, CaseIterable, Codable {
     }
 
     var localizedName: String {
-        "settings.default_api_source.\(rawValue.lowercased())".localized()
+        switch self {
+        case .modrinth:
+            "Modrinth".localized()
+        case .curseforge:
+            "CurseForge".localized()
+        }
     }
 }
 

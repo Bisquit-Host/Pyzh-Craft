@@ -101,7 +101,7 @@ enum MinecraftLaunchCommandBuilder {
         guard fileManager.fileExists(atPath: clientJarPath) else {
             throw GlobalError.resource(
                 chineseMessage: "客户端 JAR 文件不存在: \(clientJarPath)",
-                i18nKey: "error.resource.client_jar_not_found",
+                i18nKey: "Client Jar Not Found",
                 level: .popup
             )
         }

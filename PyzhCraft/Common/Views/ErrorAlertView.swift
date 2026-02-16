@@ -10,7 +10,7 @@ struct ErrorAlertModifier: ViewModifier {
                 errorHandler.currentError?.notificationTitle ?? "",
                 isPresented: .constant(errorHandler.currentError != nil && errorHandler.currentError?.level == .popup)
             ) {
-                Button("common.close".localized()) {
+                Button("Close") {
                     errorHandler.clearCurrentError()
                 }
             } message: {

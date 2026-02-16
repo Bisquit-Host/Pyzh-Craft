@@ -38,7 +38,7 @@ struct JavaDownloadProgressWindow: View {
                     Image(systemName: "tray")
                         .font(.system(size: 24))
                         .foregroundColor(.secondary)
-                    Text("download.no.tasks".localized())
+                    Text("No download tasks")
                         .font(.headline)
                         .foregroundColor(.secondary)
                 }

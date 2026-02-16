@@ -35,7 +35,7 @@ class ModScanner {
         guard let hash = try Self.sha1HashThrowing(of: fileURL) else {
             throw GlobalError.validation(
                 chineseMessage: "无法计算文件哈希值",
-                i18nKey: "error.validation.file_hash_calculation_failed",
+                i18nKey: "File Hash Calculation Failed",
                 level: .silent
             )
         }
@@ -109,7 +109,7 @@ class ModScanner {
             Logger.shared.error("编码 mod 缓存失败: \(error.localizedDescription)")
             GlobalErrorHandler.shared.handle(GlobalError.validation(
                 chineseMessage: "保存 mod 缓存失败: \(error.localizedDescription)",
-                i18nKey: "error.validation.mod_cache_encode_failed",
+                i18nKey: "Failed to save mod cache: %@",
                 level: .silent
             ))
         }
@@ -277,7 +277,7 @@ extension ModScanner {
         guard FileManager.default.fileExists(atPath: dir.path) else {
             throw GlobalError.resource(
                 chineseMessage: "目录不存在: \(dir.lastPathComponent)",
-                i18nKey: "error.resource.directory_not_found",
+                i18nKey: "Directory Not Found",
                 level: .silent
             )
         }
@@ -292,7 +292,7 @@ extension ModScanner {
             throw GlobalError.fileSystem(
                 chineseMessage:
                     "读取目录失败: \(dir.lastPathComponent), 错误: \(error.localizedDescription)",
-                i18nKey: "error.filesystem.directory_read_failed",
+                i18nKey: "Directory Read Failed",
                 level: .silent
             )
         }

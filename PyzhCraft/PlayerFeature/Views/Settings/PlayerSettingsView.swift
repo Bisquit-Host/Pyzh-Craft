@@ -7,8 +7,8 @@ public struct PlayerSettingsView: View {
         HStack {
             Spacer()
             Form {
-                Section(header: Text("settings.player.title".localized())) {
-                    Text("settings.player.placeholder".localized())
+                Section(header: Text("Player Settings")) {
+                    Text("Placeholder")
                 }
             }
             // .frame(maxWidth: 500)

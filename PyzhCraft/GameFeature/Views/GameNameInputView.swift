@@ -11,11 +11,11 @@ struct GameNameInputView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("game.form.name".localized())
+            Text("Name")
                 .font(.subheadline)
                 .foregroundColor(.primary)
             TextField(
-                "game.form.name.placeholder".localized(),
+                "Enter game name",
                 text: $gameName
             )
             .textFieldStyle(.roundedBorder)
@@ -25,7 +25,7 @@ struct GameNameInputView: View {
             .disabled(isDisabled)
             .popover(isPresented: $showErrorPopover, arrowEdge: .trailing) {
                 if isGameNameDuplicate {
-                    Text("game.form.name.duplicate".localized())
+                    Text("Duplicate")
                         .padding()
                         .presentationCompactAdaptation(.popover)
                 }

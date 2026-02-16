@@ -7,10 +7,10 @@ struct CommonSheetGameBody: View {
 
     var body: some View {
         Picker(
-            "global_resource.select_game".localized(),
+            "Select Game",
             selection: $selectedGame
         ) {
-            Text("global_resource.please_select_game".localized()).tag(
+            Text("Please Select Game").tag(
                 GameVersionInfo?(nil)
             )
             ForEach(compatibleGames, id: \.id) { game in

@@ -30,8 +30,8 @@ struct WorldDetailSheetView: View {
         .task {
             await loadMetadata()
         }
-        .alert("common.error".localized(), isPresented: $showError) {
-            Button("common.ok".localized(), role: .cancel) { }
+        .alert("Error", isPresented: $showError) {
+            Button("OK", role: .cancel) { }
         } message: {
             if let errorMessage = errorMessage {
                 Text(errorMessage)
@@ -71,7 +71,7 @@ struct WorldDetailSheetView: View {
             Image(systemName: "exclamationmark.triangle")
                 .font(.largeTitle)
                 .foregroundColor(.orange)
-            Text("saveinfo.world.detail.load.failed".localized())
+            Text("Failed to load world information")
                 .font(.headline)
             if let errorMessage = errorMessage {
                 Text(errorMessage)
@@ -89,56 +89,56 @@ struct WorldDetailSheetView: View {
             VStack(alignment: .leading, spacing: 20) {
                 HStack(alignment: .top, spacing: 24) {
                     // Basic information
-                    infoSection(title: "saveinfo.world.detail.section.basic".localized()) {
-                        infoRow(label: "saveinfo.world.detail.label.level_name".localized(), value: metadata.levelName)
-                        infoRow(label: "saveinfo.world.detail.label.folder_name".localized(), value: metadata.folderName)
+                    infoSection(title: "Basic Information") {
+                        infoRow(label: "World Name".localized(), value: metadata.levelName)
+                        infoRow(label: "Save Folder".localized(), value: metadata.folderName)
                         if let versionName = metadata.versionName {
-                            infoRow(label: "saveinfo.world.detail.label.game_version".localized(), value: versionName)
+                            infoRow(label: "Game Version".localized(), value: versionName)
                         }
                         if let versionId = metadata.versionId {
-                            infoRow(label: "saveinfo.world.detail.label.version_id".localized(), value: "\(versionId)")
+                            infoRow(label: "Version ID".localized(), value: "\(versionId)")
                         }
                         if let dataVersion = metadata.dataVersion {
-                            infoRow(label: "saveinfo.world.detail.label.data_version".localized(), value: "\(dataVersion)")
+                            infoRow(label: "Data Version".localized(), value: "\(dataVersion)")
                         }
                     }
 
                     // game settings
-                    infoSection(title: "saveinfo.world.detail.section.game_settings".localized()) {
-                        infoRow(label: "saveinfo.world.detail.label.game_mode".localized(), value: metadata.gameMode)
-                        infoRow(label: "saveinfo.world.detail.label.difficulty".localized(), value: metadata.difficulty)
-                        infoRow(label: "saveinfo.world.detail.label.hardcore".localized(), value: metadata.hardcore ? "common.yes".localized() : "common.no".localized())
-                        infoRow(label: "saveinfo.world.detail.label.cheats".localized(), value: metadata.cheats ? "common.yes".localized() : "common.no".localized())
+                    infoSection(title: "Game Settings") {
+                        infoRow(label: "Game Mode".localized(), value: metadata.gameMode)
+                        infoRow(label: "Difficulty".localized(), value: metadata.difficulty)
+                        infoRow(label: "Hardcore Mode".localized(), value: metadata.hardcore ? "Yes".localized() : "No".localized())
+                        infoRow(label: "Allow Cheats".localized(), value: metadata.cheats ? "Yes".localized() : "No".localized())
                         if let seed = metadata.seed {
-                            infoRow(label: "saveinfo.world.detail.label.seed".localized(), value: "\(seed)")
+                            infoRow(label: "World Seed".localized(), value: "\(seed)")
                         }
                     }
                 }
 
                 // Other information
-                infoSection(title: "saveinfo.world.detail.section.other".localized()) {
+                infoSection(title: "Other Information") {
                     if let lastPlayed = metadata.lastPlayed {
-                        infoRow(label: "saveinfo.world.detail.label.last_played".localized(), value: formatDate(lastPlayed))
+                        infoRow(label: "Last Played".localized(), value: formatDate(lastPlayed))
                     }
                     if let spawn = metadata.spawn {
-                        infoRow(label: "saveinfo.world.detail.label.spawn".localized(), value: spawn)
+                        infoRow(label: "Spawn Point".localized(), value: spawn)
                     }
                     if let time = metadata.time {
-                        infoRow(label: "saveinfo.world.detail.label.time".localized(), value: "\(time)")
+                        infoRow(label: "Time".localized(), value: "\(time)")
                     }
                     if let dayTime = metadata.dayTime {
-                        infoRow(label: "saveinfo.world.detail.label.day_time".localized(), value: "\(dayTime)")
+                        infoRow(label: "DayTime".localized(), value: "\(dayTime)")
                     }
                     if let weather = metadata.weather {
-                        infoRow(label: "saveinfo.world.detail.label.weather".localized(), value: weather)
+                        infoRow(label: "Weather".localized(), value: weather)
                     }
                     if let border = metadata.worldBorder {
-                        infoRow(label: "saveinfo.world.detail.label.world_border".localized(), value: border, isMultiline: true)
+                        infoRow(label: "World Border".localized(), value: border, isMultiline: true)
                     }
                 }
 
                 HStack(alignment: .center, spacing: 12) {
-                    Text("saveinfo.world.detail.label.world_path".localized() + ":")
+                    Text("World Path" + ":")
                         .font(.headline)
                     Button {
                         // Open file location in Finder
@@ -173,7 +173,7 @@ struct WorldDetailSheetView: View {
                                     Image(systemName: showRawData ? "chevron.down" : "chevron.right")
                                         .font(.headline)
                                         .foregroundColor(.secondary)
-                                    Text("saveinfo.world.detail.toggle.detailed_info".localized())
+                                    Text("Show Detailed Information")
                                         .font(.headline)
                                     Spacer()
                                 }
@@ -182,7 +182,7 @@ struct WorldDetailSheetView: View {
 
                             if showRawData {
                                 NBTStructureView(data: filteredRaw)
-//                                infoSection(title: "saveinfo.world.detail.section.detailed_info".localized()) {
+//                                infoSection(title: "Detailed Information") {
 //
 //                                }
                             }
@@ -239,7 +239,7 @@ struct WorldDetailSheetView: View {
 
             Spacer()
 
-            Button("common.close".localized()) {
+            Button("Close") {
                 dismiss()
             }
             .keyboardShortcut(.defaultAction)
@@ -298,20 +298,20 @@ struct WorldDetailSheetView: View {
         } catch WorldDetailLoadError.levelDatNotFound {
             await MainActor.run {
                 self.isLoading = false
-                self.errorMessage = "saveinfo.world.detail.error.level_dat_not_found".localized()
+                self.errorMessage = "level.dat file not found".localized()
                 self.showError = true
             }
         } catch WorldDetailLoadError.invalidStructure {
             await MainActor.run {
                 self.isLoading = false
-                self.errorMessage = "saveinfo.world.detail.error.invalid_structure".localized()
+                self.errorMessage = "level.dat structure is invalid (missing Data tag)".localized()
                 self.showError = true
             }
         } catch {
             Logger.shared.error("加载世界详细信息失败: \(error.localizedDescription)")
             await MainActor.run {
                 self.isLoading = false
-                self.errorMessage = String(format: "saveinfo.world.detail.error.load_failed".localized(), error.localizedDescription)
+                self.errorMessage = String(format: "Failed to load world information: %@".localized(), error.localizedDescription)
                 self.showError = true
             }
         }
@@ -327,13 +327,13 @@ struct WorldDetailSheetView: View {
         }
 
         // GameType: 0 Survival, 1 Creation, 2 Adventure, 3 Spectator
-        var gameMode = "saveinfo.world.game_mode.unknown".localized()
+        var gameMode = "Unknown".localized()
         if let gt = WorldNBTMapper.readInt64(dataTag["GameType"]) {
             gameMode = WorldNBTMapper.mapGameMode(Int(gt))
         }
 
         // Difficulty: The old version is a numerical value, the new version (26+) is usually the difficulty_settings.difficulty string
-        var difficulty = "saveinfo.world.difficulty.unknown".localized()
+        var difficulty = "Unknown".localized()
         if let diff = WorldNBTMapper.readInt64(dataTag["Difficulty"]) {
             difficulty = WorldNBTMapper.mapDifficulty(Int(diff))
         } else if let ds = dataTag["difficulty_settings"] as? [String: Any],
@@ -399,11 +399,11 @@ struct WorldDetailSheetView: View {
         var weather: String?
         if let rainingFlag = dataTag["raining"] {
             let raining = WorldNBTMapper.readBoolFlag(rainingFlag)
-            weather = raining ? "saveinfo.world.weather.rain".localized() : "saveinfo.world.weather.clear".localized()
+            weather = raining ? "Rain".localized() : "Clear".localized()
         }
         if let thunderingFlag = dataTag["thundering"] {
             let thundering = WorldNBTMapper.readBoolFlag(thunderingFlag)
-            let t = thundering ? "saveinfo.world.weather.thunderstorm".localized() : nil
+            let t = thundering ? "Thunderstorm".localized() : nil
             if let t {
                 weather = weather.map { "\($0), \(t)" } ?? t
             }

@@ -12,7 +12,7 @@ struct LitematicaSectionView: View {
     // MARK: - Body
     var body: some View {
         GenericSectionView(
-            title: "saveinfo.litematica",
+            title: "Litematica",
             items: litematicaFiles,
             isLoading: isLoading,
             iconName: "square.stack.3d.up"
@@ -50,7 +50,7 @@ struct LitematicaFileRow: View {
                     .font(.headline)
 
                 if let author = file.author {
-                    Text(String(format: "saveinfo.litematica.author".localized(), author))
+                    Text(String(format: "Author: %@".localized(), author))
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -64,13 +64,13 @@ struct LitematicaFileRow: View {
 
                 HStack(spacing: 8) {
                     if let regionCount = file.regionCount {
-                        Label(String(format: "saveinfo.litematica.region_count".localized(), regionCount), systemImage: "square.grid.2x2")
+                        Label(String(format: "Regions: %d".localized(), regionCount), systemImage: "square.grid.2x2")
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }
 
                     if let totalBlocks = file.totalBlocks {
-                        Label(String(format: "saveinfo.litematica.block_count".localized(), totalBlocks), systemImage: "cube")
+                        Label(String(format: "Blocks: %d".localized(), totalBlocks), systemImage: "cube")
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }

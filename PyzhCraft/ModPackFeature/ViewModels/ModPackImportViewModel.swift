@@ -350,7 +350,7 @@ class ModPackImportViewModel: BaseGameFormViewModel {
                 GlobalErrorHandler.shared.handle(
                     GlobalError.fileSystem(
                         chineseMessage: "创建目录失败: \(dir.path)",
-                        i18nKey: "error.filesystem.directory_creation_failed",
+                        i18nKey: "Directory Creation Failed",
                         level: .notification
                     )
                 )
@@ -420,7 +420,7 @@ class ModPackImportViewModel: BaseGameFormViewModel {
             }
             let globalError = GlobalError.resource(
                 chineseMessage: "本地整合包导入失败",
-                i18nKey: "error.resource.local_modpack_import_failed",
+                i18nKey: "Local modpack import failed",
                 level: .notification
             )
             GlobalErrorHandler.shared.handle(globalError)

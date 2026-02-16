@@ -145,7 +145,7 @@ struct ModrinthDetailView: View {
         .searchable(
             text: $searchText,
             placement: .toolbar,
-            prompt: "search.resources".localized()
+            prompt: "Search Resources"
         )
 
         .onChange(of: searchText) { oldValue, newValue in
@@ -156,10 +156,10 @@ struct ModrinthDetailView: View {
             }
         }
         .alert(
-            "error.notification.search.title".localized(),
+            "error.notification.search.title",
             isPresented: .constant(error != nil)
         ) {
-            Button("common.close".localized()) {
+            Button("Close") {
                 error = nil
             }
         } message: {
@@ -228,7 +228,7 @@ struct ModrinthDetailView: View {
         guard !query.isEmpty else {
             throw GlobalError.validation(
                 chineseMessage: "查询类型不能为空",
-                i18nKey: "error.validation.query_type_empty",
+                i18nKey: "Query Type Empty",
                 level: .notification
             )
         }

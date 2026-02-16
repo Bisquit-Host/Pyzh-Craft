@@ -23,7 +23,7 @@ struct GameResourceInstallSheet: View {
             header: {
                 Text(
                     String(
-                        format: "global_resource.add_for_game".localized(),
+                        format: "Add For Game".localized(),
                         gameInfo.gameName
                     )
                 )
@@ -115,7 +115,7 @@ struct GameResourceInstallSheet: View {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
                 chineseMessage: "项目ID不能为空",
-                i18nKey: "error.validation.project_id_empty",
+                i18nKey: "Project ID Empty",
                 level: .notification
             )
         }
@@ -171,7 +171,7 @@ struct GameResourceInstallFooter: View {
         Group {
             if projectDetail != nil {
                 HStack {
-                    Button("common.close".localized()) { isPresented = false }
+                    Button("Close") { isPresented = false }
                     Spacer()
                     if resourceType == "mod", !isUpdateMode {
                         // Mod in installation mode: displays "Download All" (including dependencies)
@@ -182,7 +182,7 @@ struct GameResourceInstallFooter: View {
                                         ProgressView().controlSize(.small)
                                     } else {
                                         Text(
-                                            "global_resource.download_all"
+                                            "Download All"
                                                 .localized()
                                         )
                                     }
@@ -198,7 +198,7 @@ struct GameResourceInstallFooter: View {
                                 if isDownloadingAll {
                                     ProgressView().controlSize(.small)
                                 } else {
-                                    Text("global_resource.download".localized())
+                                    Text("Download")
                                 }
                             }
                             .disabled(isDownloadingAll)
@@ -209,7 +209,7 @@ struct GameResourceInstallFooter: View {
             } else {
                 HStack {
                     Spacer()
-                    Button("common.close".localized()) { isPresented = false }
+                    Button("Close") { isPresented = false }
                 }
             }
         }
@@ -239,7 +239,7 @@ struct GameResourceInstallFooter: View {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
                 chineseMessage: "项目ID不能为空",
-                i18nKey: "error.validation.project_id_empty",
+                i18nKey: "Project ID Empty",
                 level: .notification
             )
         }
@@ -264,7 +264,7 @@ struct GameResourceInstallFooter: View {
         if !success {
             throw GlobalError.download(
                 chineseMessage: "手动下载依赖项失败",
-                i18nKey: "error.download.manual_dependencies_failed",
+                i18nKey: "Manual Dependencies Failed",
                 level: .notification
             )
         }
@@ -299,7 +299,7 @@ struct GameResourceInstallFooter: View {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
                 chineseMessage: "项目ID不能为空",
-                i18nKey: "error.validation.project_id_empty",
+                i18nKey: "Project ID Empty",
                 level: .notification
             )
         }
@@ -316,7 +316,7 @@ struct GameResourceInstallFooter: View {
         if !success {
             throw GlobalError.download(
                 chineseMessage: "下载资源失败",
-                i18nKey: "error.download.resource_download_failed",
+                i18nKey: "Resource Download Failed",
                 level: .notification
             )
         }

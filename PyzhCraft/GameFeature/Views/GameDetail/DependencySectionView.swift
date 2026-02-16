@@ -24,7 +24,7 @@ struct DependencySectionView: View {
                         if let versions = state.versions[dep.id],
                             !versions.isEmpty {
                             Picker(
-                                "global_resource.dependency_version".localized(),
+                                "Dependency Version",
                                 selection:
                                     Binding(
                                     get: {
@@ -39,7 +39,7 @@ struct DependencySectionView: View {
                             }
                             .pickerStyle(.menu)
                         } else {
-                            Text("global_resource.no_version".localized())
+                            Text("No Version")
                                 .foregroundColor(.secondary)
                         }
                     }

@@ -17,7 +17,7 @@ struct ScreenshotSectionView: View {
     // MARK: - Body
     var body: some View {
         GenericSectionView(
-            title: "saveinfo.screenshots",
+            title: "Screenshots",
             items: screenshots,
             isLoading: isLoading,
             iconName: "photo.fill"
@@ -139,7 +139,7 @@ struct ScreenshotDetailView: View {
             }
 
             Spacer()
-            Button("common.close".localized()) {
+            Button("Close") {
                 dismiss()
             }
             .keyboardShortcut(.defaultAction)
@@ -163,7 +163,7 @@ struct ScreenshotImageView: View {
                     Image(systemName: "photo.fill")
                         .font(.largeTitle)
                         .foregroundColor(.secondary)
-                    Text("saveinfo.screenshot.load.failed".localized())
+                    Text("Failed to load screenshot")
                         .foregroundColor(.secondary)
                 }
             } else if let image = image {

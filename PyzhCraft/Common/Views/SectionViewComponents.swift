@@ -89,7 +89,7 @@ struct LoadingPlaceholder: View {
             FlowLayout {
                 ForEach(0..<count, id: \.self) { _ in
                     FilterChip(
-                        title: "common.loading".localized(),
+                        title: "Loading",
                         iconName: iconName,
                         isLoading: true,
                         verticalPadding: verticalPaddingForChip,

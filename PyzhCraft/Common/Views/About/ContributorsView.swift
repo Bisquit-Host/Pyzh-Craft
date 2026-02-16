@@ -58,7 +58,7 @@ public struct ContributorsView: View {
     // MARK: - Static Contributors List
     private var staticContributorsList: some View {
         VStack(spacing: 0) {
-            Text("contributors.core_contributors")
+            Text("Core Contributors")
                 .font(.title3)
                 .fontWeight(.semibold)
                 .padding(.horizontal)
@@ -81,7 +81,7 @@ public struct ContributorsView: View {
     private var contributorsList: some View {
         VStack(spacing: 0) {
             // GitHub contributor titles
-            Text("contributors.github_contributors")
+            Text("GitHub Contributors")
                 .font(.title3)
                 .fontWeight(.semibold)
                 .padding(.horizontal)
@@ -99,7 +99,7 @@ public struct ContributorsView: View {
                         isTopContributor: true,
                         rank: index + 1,
                         contributionsText: String(
-                            format: "contributors.contributions.format"
+                            format: "%@ contributions"
                                 .localized(),
                             viewModel.formatContributions(
                                 contributor.contributions
@@ -130,7 +130,7 @@ public struct ContributorsView: View {
                     isTopContributor: false,
                     rank: index + viewModel.topContributors.count + 1,
                     contributionsText: String(
-                        format: "contributors.contributions.format"
+                        format: "%@ contributions"
                             .localized(),
                         viewModel.formatContributions(
                             contributor.contributions

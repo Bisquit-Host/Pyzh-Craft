@@ -53,7 +53,7 @@ class JavaRuntimeService {
         guard let gamecore = json["gamecore"] as? [String: Any] else {
             throw GlobalError.validation(
                 chineseMessage: "未找到gamecore平台数据",
-                i18nKey: "error.validation.gamecore_not_found",
+                i18nKey: "Gamecore platform data not found",
                 level: .notification
             )
         }
@@ -68,7 +68,7 @@ class JavaRuntimeService {
         guard let platformData = json[platform] as? [String: Any] else {
             throw GlobalError.validation(
                 chineseMessage: "未找到\(platform)平台数据",
-                i18nKey: "error.validation.platform_data_not_found",
+                i18nKey: "Platform data not found: %@",
                 level: .notification
             )
         }
@@ -82,7 +82,7 @@ class JavaRuntimeService {
             Logger.shared.error("版本 \(version) 的数据类型不正确，期望 [[String: Any]]，实际: \(type(of: platformData[version]))")
             throw GlobalError.validation(
                 chineseMessage: "未找到版本 \(version) 的数据",
-                i18nKey: "error.validation.version_data_not_found",
+                i18nKey: "Version data not found",
                 level: .notification
             )
         }
@@ -99,7 +99,7 @@ class JavaRuntimeService {
             Logger.shared.error("无法解析版本 \(version) 的数据结构")
             throw GlobalError.validation(
                 chineseMessage: "未找到版本 \(version) 的manifest URL",
-                i18nKey: "error.validation.manifest_url_not_found",
+                i18nKey: "Manifest URL not found",
                 level: .notification
             )
         }
@@ -122,7 +122,7 @@ class JavaRuntimeService {
               let files = manifest["files"] as? [String: Any] else {
             throw GlobalError.validation(
                 chineseMessage: "解析manifest.json失败",
-                i18nKey: "error.validation.manifest_parse_failed",
+                i18nKey: "Failed to parse manifest.json",
                 level: .notification
             )
         }
@@ -166,7 +166,7 @@ class JavaRuntimeService {
                         Logger.shared.info("Java下载已被取消")
                         throw GlobalError.download(
                             chineseMessage: "下载已被取消",
-                            i18nKey: "error.download.cancelled",
+                            i18nKey: "Download cancelled",
                             level: .notification
                         )
                     }
@@ -242,7 +242,7 @@ class JavaRuntimeService {
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw GlobalError.validation(
                 chineseMessage: "解析JSON失败",
-                i18nKey: "error.validation.json_parse_failed",
+                i18nKey: "Failed to parse JSON",
                 level: .notification
             )
         }
@@ -257,7 +257,7 @@ class JavaRuntimeService {
         guard let url = URL(string: urlString) else {
             throw GlobalError.validation(
                 chineseMessage: "无效的URL",
-                i18nKey: "error.validation.invalid_url",
+                i18nKey: "Invalid URL",
                 level: .notification
             )
         }
@@ -268,7 +268,7 @@ class JavaRuntimeService {
               httpResponse.statusCode == 200 else {
             throw GlobalError.network(
                 chineseMessage: "下载失败",
-                i18nKey: "error.network.download_failed",
+                i18nKey: "Download failed",
                 level: .notification
             )
         }
@@ -351,7 +351,7 @@ class JavaRuntimeService {
 
             throw GlobalError.validation(
                 chineseMessage: "解压Java运行时失败: \(error.localizedDescription)",
-                i18nKey: "error.validation.extract_failed",
+                i18nKey: "Extraction failed",
                 level: .notification
             )
         }
@@ -374,7 +374,7 @@ class JavaRuntimeService {
         } catch {
             throw GlobalError.validation(
                 chineseMessage: "无法打开zip文件: \(error.localizedDescription)",
-                i18nKey: "error.validation.cannot_open_zip",
+                i18nKey: "Cannot open ZIP file",
                 level: .notification
             )
         }
@@ -413,7 +413,7 @@ class JavaRuntimeService {
         guard !targetFolderEntries.isEmpty, let prefix = targetFolderPrefix else {
             throw GlobalError.validation(
                 chineseMessage: "在zip文件中未找到zulu文件夹",
-                i18nKey: "error.validation.zulu_folder_not_found_in_zip",
+                i18nKey: "Zulu folder not found in ZIP file",
                 level: .notification
             )
         }
@@ -528,7 +528,7 @@ class JavaRuntimeService {
         guard httpResponse.statusCode == 200 else {
             throw GlobalError.network(
                 chineseMessage: "无法获取文件大小 - HTTP状态码: \(httpResponse.statusCode)",
-                i18nKey: "error.network.cannot_get_file_size",
+                i18nKey: "Cannot get file size",
                 level: .notification
             )
         }
@@ -537,7 +537,7 @@ class JavaRuntimeService {
               let fileSize = Int64(contentLength) else {
             throw GlobalError.network(
                 chineseMessage: "无法获取文件大小 - 缺少或无效的Content-Length头部",
-                i18nKey: "error.network.cannot_get_file_size",
+                i18nKey: "Cannot get file size",
                 level: .notification
             )
         }

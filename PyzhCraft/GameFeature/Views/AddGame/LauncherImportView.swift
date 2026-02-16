@@ -86,7 +86,7 @@ struct LauncherImportView: View {
     private var launcherSelectionSection: some View {
         FormSection {
             VStack(alignment: .leading, spacing: 8) {
-                Text("launcher.import.select_launcher".localized())
+                Text("Select Launcher")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
 
@@ -105,7 +105,7 @@ struct LauncherImportView: View {
     private var pathSelectionSection: some View {
         FormSection {
             VStack(alignment: .leading, spacing: 8) {
-                Text("launcher.import.select_instance_folder".localized())
+                Text("Select Instance Folder")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
 
@@ -113,14 +113,14 @@ struct LauncherImportView: View {
                     if let path = viewModel.selectedInstancePath?.path {
                         PathBreadcrumbView(path: path)
                     } else {
-                        Text("launcher.import.no_path_selected".localized())
+                        Text("No path selected")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
 
                     Spacer()
 
-                    Button("common.browse".localized()) {
+                    Button("Browse") {
                         selectLauncherPath()
                     }
                 }
@@ -135,7 +135,7 @@ struct LauncherImportView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         // Game name
                         HStack {
-                            Text("game.form.name".localized())
+                            Text("Name")
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                             Spacer()
@@ -146,7 +146,7 @@ struct LauncherImportView: View {
 
                         // game version
                         HStack {
-                            Text("game.form.version".localized())
+                            Text("Version")
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                             Spacer()
@@ -158,7 +158,7 @@ struct LauncherImportView: View {
                         // Mod loader
                         if !info.modLoader.isEmpty && info.modLoader != "vanilla" {
                             HStack {
-                                Text("game.form.modloader".localized())
+                                Text("Mod Loader")
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                                 Spacer()
@@ -217,7 +217,7 @@ struct LauncherImportView: View {
     private func importProgressSection(progress: (fileName: String, completed: Int, total: Int)) -> some View {
         FormSection {
             DownloadProgressRow(
-                title: "launcher.import.copying_files".localized(),
+                title: "Copy Files",
                 progress: progress.total > 0 ? Double(progress.completed) / Double(progress.total) : 0.0,
                 currentFile: progress.fileName,
                 completed: progress.completed,
@@ -244,7 +244,7 @@ struct LauncherImportView: View {
                 GlobalErrorHandler.shared.handle(
                     GlobalError.fileSystem(
                         chineseMessage: "无法访问所选文件夹",
-                        i18nKey: "error.filesystem.file_access_failed",
+                        i18nKey: "File Access Failed",
                         level: .notification
                     )
                 )
@@ -259,7 +259,7 @@ struct LauncherImportView: View {
                 GlobalErrorHandler.shared.handle(
                     GlobalError.fileSystem(
                         chineseMessage: "选择的文件夹不是有效的 \(launcherName) 实例",
-                        i18nKey: "error.filesystem.invalid_instance_path",
+                        i18nKey: "Invalid Instance Path",
                         level: .notification
                     )
                 )

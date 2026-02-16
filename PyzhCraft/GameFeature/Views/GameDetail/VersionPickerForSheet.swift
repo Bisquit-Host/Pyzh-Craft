@@ -22,7 +22,7 @@ struct VersionPickerForSheet: View {
                     alignment: .leading
                 )
                 Picker(
-                    "global_resource.select_version".localized(),
+                    "Select Version",
                     selection: $selectedVersion
                 ) {
                     ForEach(availableVersions, id: \.id) { version in
@@ -40,7 +40,7 @@ struct VersionPickerForSheet: View {
                 }
                 .pickerStyle(.menu)
             } else {
-                Text("global_resource.no_version_available".localized())
+                Text("No Version Available")
                     .foregroundColor(.secondary)
             }
         }
@@ -77,7 +77,7 @@ struct VersionPickerForSheet: View {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
                 chineseMessage: "项目ID不能为空",
-                i18nKey: "error.validation.project_id_empty",
+                i18nKey: "Project ID Empty",
                 level: .notification
             )
         }

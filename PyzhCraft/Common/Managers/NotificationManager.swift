@@ -1,4 +1,4 @@
-import Foundation
+import SwiftUI
 import UserNotifications
 import OSLog
 
@@ -46,7 +46,7 @@ enum NotificationManager {
             Logger.shared.error("添加通知请求时出错：\(error.localizedDescription)")
             throw GlobalError.resource(
                 chineseMessage: "发送通知失败: \(error.localizedDescription)",
-                i18nKey: "error.resource.notification_send_failed",
+                i18nKey: "Notification Send Failed",
                 level: .silent
             )
         }
@@ -79,7 +79,7 @@ enum NotificationManager {
                 Logger.shared.warning("用户拒绝了通知权限")
                 throw GlobalError.configuration(
                     chineseMessage: "用户拒绝了通知权限",
-                    i18nKey: "error.configuration.notification_permission_denied",
+                    i18nKey: "Notification Permission Denied",
                     level: .notification
                 )
             }
@@ -90,7 +90,7 @@ enum NotificationManager {
             } else {
                 throw GlobalError.configuration(
                     chineseMessage: "请求通知权限失败: \(error.localizedDescription)",
-                    i18nKey: "error.configuration.notification_permission_request_failed",
+                    i18nKey: "Notification Permission Request Failed",
                     level: .notification
                 )
             }

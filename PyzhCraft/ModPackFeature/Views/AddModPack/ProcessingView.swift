@@ -28,12 +28,12 @@ struct ProcessingView: View {
             }
 
             VStack(spacing: 8) {
-                Text("modpack.processing.title".localized())
+                Text("Processing Modpack...")
                     .font(.headline)
                     .foregroundColor(.primary)
             }
 
-            Text("modpack.processing.subtitle".localized())
+            Text("Downloading modpack files and parsing configuration")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

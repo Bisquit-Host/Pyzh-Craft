@@ -14,7 +14,7 @@ enum PlayerUtils {
         guard !username.isEmpty else {
             throw GlobalError.player(
                 chineseMessage: "无效的用户名: 用户名不能为空",
-                i18nKey: "error.player.invalid_username_empty",
+                i18nKey: "Invalid Username Empty",
                 level: .notification
             )
         }
@@ -22,7 +22,7 @@ enum PlayerUtils {
         guard let data = (offlinePrefix + username).data(using: .utf8) else {
             throw GlobalError.validation(
                 chineseMessage: "用户名编码失败: \(username)",
-                i18nKey: "error.validation.username_encode_failed",
+                i18nKey: "Username Encode Failed",
                 level: .notification
             )
         }

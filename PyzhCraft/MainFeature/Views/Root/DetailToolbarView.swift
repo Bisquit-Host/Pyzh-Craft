@@ -77,8 +77,8 @@ public struct DetailToolbarView: ToolbarContent {
                         } else {
                             Label(
                                 isRunning
-                                ? "stop.fill".localized()
-                                : "play.fill".localized(),
+                                ? "Stop".localized()
+                                : "Start".localized(),
                                 systemImage: isRunning
                                 ? "stop.fill" : "play.fill"
                             )
@@ -86,8 +86,8 @@ public struct DetailToolbarView: ToolbarContent {
                     }
                     .help(
                         isGameRunning(gameId: game.id)
-                        ? "stop.fill"
-                        : (gameStatusManager.isGameLaunching(gameId: game.id) ? "" : "play.fill")
+                        ? "Stop"
+                        : (gameStatusManager.isGameLaunching(gameId: game.id) ? "" : "Start")
                     )
                     .disabled(gameStatusManager.isGameLaunching(gameId: game.id))
                     .applyReplaceTransition()
@@ -95,10 +95,10 @@ public struct DetailToolbarView: ToolbarContent {
                     Button {
                         gameActionManager.showInFinder(game: game)
                     } label: {
-                        Label("game.path".localized(), systemImage: "folder")
+                        Label("Path", systemImage: "folder")
                             .foregroundStyle(.primary)
                     }
-                    .help("game.path".localized())
+                    .help("Path")
                 }
             case .resource:
                 if detailState.selectedProjectId != nil {
@@ -110,16 +110,16 @@ public struct DetailToolbarView: ToolbarContent {
                             filterState.selectedTab = 0
                         }
                     } label: {
-                        Label("return".localized(), systemImage: "arrow.backward")
+                        Label("Return", systemImage: "arrow.backward")
                     }
-                    .help("return".localized())
+                    .help("Return")
                     Spacer()
                     Button {
                         openCurrentResourceInBrowser()
                     } label: {
-                        Label("common.browser".localized(), systemImage: "safari")
+                        Label("Browser", systemImage: "safari")
                     }
-                    .help("resource.open_in_browser".localized())
+                    .help("Open in Browser")
                 } else {
                     if detailState.gameType {
                         dataSourceMenu
@@ -130,24 +130,24 @@ public struct DetailToolbarView: ToolbarContent {
     }
 
     private var currentResourceTitle: String {
-        "resource.content.type.\(detailState.gameResourcesType)".localized()
+        resourceTypeTitle(for: detailState.gameResourcesType)
     }
     private var currentResourceTypeTitle: String {
         detailState.gameType
-            ? "resource.content.type.server".localized()
-            : "resource.content.type.local".localized()
+            ? "Resource Library".localized()
+            : "Installed".localized()
     }
 
     private var resourcesMenu: some View {
         Menu {
             ForEach(resourceTypesForCurrentGame, id: \.self) { sort in
-                Button("resource.content.type.\(sort)".localized()) {
+                Button(resourceTypeTitle(for: sort)) {
                     detailState.gameResourcesType = sort
                 }
             }
         } label: {
             Label(currentResourceTitle, systemImage: "").labelStyle(.titleOnly)
-        }.help("resource.content.type.help".localized())
+        }.help("Resource Type")
     }
 
     private var resourcesTypeMenu: some View {
@@ -160,7 +160,7 @@ public struct DetailToolbarView: ToolbarContent {
                     ? "tray.and.arrow.down" : "icloud.and.arrow.down"
             ).foregroundStyle(.primary)
         }
-        .help("resource.content.location.help".localized())
+        .help("Resource Location")
         .applyReplaceTransition()
     }
 
@@ -171,6 +171,27 @@ public struct DetailToolbarView: ToolbarContent {
             types.insert("shader", at: 2)
         }
         return types
+    }
+
+    private func resourceTypeTitle(for type: String) -> String {
+        switch type.lowercased() {
+        case "mod":
+            "Mod".localized()
+        case "datapack":
+            "Data Pack".localized()
+        case "shader":
+            "Shader".localized()
+        case "resourcepack":
+            "Resource Pack".localized()
+        case "modpack":
+            "Modpack".localized()
+        case "local":
+            "Installed".localized()
+        case "server":
+            "Resource Library".localized()
+        default:
+            type.capitalized
+        }
     }
 
     private var dataSourceMenu: some View {

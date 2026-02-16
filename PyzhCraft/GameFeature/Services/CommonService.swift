@@ -135,7 +135,7 @@ enum CommonService {
             throw GlobalError.resource(
                 chineseMessage:
                     "未找到 Minecraft \(minecraftVersion) 的 \(type) 加载器版本",
-                i18nKey: "error.resource.loader_version_not_found",
+                i18nKey: "Loader version not found",
                 level: .notification
             )
         }
@@ -173,7 +173,7 @@ enum CommonService {
             throw GlobalError.validation(
                 chineseMessage:
                     "解析 \(type) 版本清单失败: \(error.localizedDescription)",
-                i18nKey: "error.validation.version_manifest_parse_failed",
+                i18nKey: "Version Manifest Parse Failed",
                 level: .notification
             )
         }

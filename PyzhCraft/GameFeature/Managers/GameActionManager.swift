@@ -45,7 +45,7 @@ class GameActionManager: ObservableObject {
                 if GameProcessManager.shared.isGameRunning(gameId: game.id) {
                     let error = GlobalError.validation(
                         chineseMessage: "游戏运行中，无法删除",
-                        i18nKey: "error.validation.game_running_cannot_delete",
+                        i18nKey: "Game is running, cannot delete",
                         level: .notification
                     )
                     GlobalErrorHandler.shared.handle(error)
@@ -91,7 +91,7 @@ class GameActionManager: ObservableObject {
             } catch {
                 let globalError = GlobalError.fileSystem(
                     chineseMessage: "删除游戏失败: \(error.localizedDescription)",
-                    i18nKey: "error.filesystem.game_deletion_failed",
+                    i18nKey: "Game Deletion Failed",
                     level: .notification
                 )
                 Logger.shared.error("删除游戏失败: \(globalError.chineseMessage)")

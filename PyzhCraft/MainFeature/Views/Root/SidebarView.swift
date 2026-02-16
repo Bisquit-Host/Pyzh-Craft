@@ -25,7 +25,7 @@ public struct SidebarView: View {
     public var body: some View {
         List(selection: detailState.selectedItemOptionalBinding) {
             // Resources section
-            Section(header: Text("sidebar.resources.title".localized())) {
+            Section(header: Text("Resource List")) {
                 ForEach(ResourceType.allCases, id: \.self) { type in
                     NavigationLink(value: SidebarItem.resource(type)) {
                         HStack(spacing: 6) {
@@ -39,7 +39,7 @@ public struct SidebarView: View {
             }
 
             // game section
-            Section(header: Text("sidebar.games.title".localized())) {
+            Section(header: Text("Game List")) {
                 ForEach(filteredGames) { game in
                     NavigationLink(value: SidebarItem.game(game.id)) {
                         HStack(spacing: 6) {
@@ -104,11 +104,11 @@ public struct SidebarView: View {
             }
         }
         .confirmationDialog(
-            "delete.title".localized(),
+            "Delete Game Version",
             isPresented: $showDeleteAlert,
             titleVisibility: .visible
         ) {
-            Button("common.delete".localized(), role: .destructive) {
+            Button("Delete", role: .destructive) {
                 if let game = gameToDelete {
                     gameActionManager.deleteGame(
                         game: game,
@@ -119,11 +119,11 @@ public struct SidebarView: View {
                 }
             }
             .keyboardShortcut(.defaultAction)
-            Button("common.cancel".localized(), role: .cancel) {}
+            Button("Cancel", role: .cancel) {}
         } message: {
             if let game = gameToDelete {
                 Text(
-                    String(format: "delete.game.confirm".localized(), game.gameName)
+                    String(format: "Are you sure you want to delete the game \"%@\" and all its data? (This will take a very long time)".localized(), game.gameName)
                 )
             }
         }
@@ -229,7 +229,7 @@ private struct GameContextMenu: View {
             toggleGameState()
         }, label: {
             Label(
-                isRunning ? "stop.fill".localized() : "play.fill".localized(),
+                isRunning ? "Stop".localized() : "Start".localized(),
                 systemImage: isRunning ? "stop.fill" : "play.fill"
             )
         })
@@ -237,24 +237,24 @@ private struct GameContextMenu: View {
         Button(action: {
             gameActionManager.showInFinder(game: game)
         }, label: {
-            Label("sidebar.context_menu.show_in_finder".localized(), systemImage: "folder")
+            Label("Show in Finder", systemImage: "folder")
         })
 
         Button(action: {
             selectedGameManager.setSelectedGameAndOpenAdvancedSettings(game.id)
             onOpenSettings()
         }, label: {
-            Label("settings.game.advanced.tab".localized(), systemImage: "gearshape")
+            Label("Advanced", systemImage: "gearshape")
         })
 
         Divider()
 
         Button(action: onExport) {
-            Label("modpack.export.button".localized(), systemImage: "square.and.arrow.up")
+            Label("Export", systemImage: "square.and.arrow.up")
         }
 
         Button(action: onDelete) {
-            Label("sidebar.context_menu.delete_game".localized(), systemImage: "trash")
+            Label("Delete Game", systemImage: "trash")
         }
     }
 
