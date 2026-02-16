@@ -139,12 +139,7 @@ struct AddOrDeleteResourceButton: View {
 
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text(
-                    String(
-                        format: String(localized: "Are you sure you want to delete \"%@\"? Deletion may cause game launch failure"),
-                        project.title
-                    )
-                )
+                Text("Are you sure you want to delete \"\(project.title)\"? Deletion may cause game launch failure")
             }
             .sheet(
                 isPresented: $showGlobalResourceSheet,

@@ -132,18 +132,15 @@ enum ImportError: LocalizedError {
         switch self {
         case .gameDirectoryNotFound(let path):
             return String(
-                format: String(localized: "Game directory not found: %@"),
-                path
+                format: String(localized: "Game directory not found: \(path)")
             )
         case .invalidConfiguration(let message):
             return String(
-                format: String(localized: "Invalid configuration: %@"),
-                message
+                format: String(localized: "Invalid configuration: \(message)")
             )
         case .fileNotFound(let path):
             return String(
-                format: String(localized: "File not found: %@"),
-                path
+                format: String(localized: "File not found: \(path)"),
             )
         }
     }

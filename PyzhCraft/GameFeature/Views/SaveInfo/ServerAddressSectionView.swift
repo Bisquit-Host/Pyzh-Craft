@@ -410,7 +410,7 @@ struct ServerAddressEditView: View {
             }
             Button("Cancel", role: .cancel) { }
         } message: {
-            Text(String(format: String(localized: "Are you sure you want to delete server \"%@\"? This action cannot be undone."), serverName))
+            Text(String(format: String(localized: "Are you sure you want to delete server \"\(serverName)\"? This action cannot be undone.")))
         }
     }
 

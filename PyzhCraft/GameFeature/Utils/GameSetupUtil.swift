@@ -136,7 +136,7 @@ class GameSetupUtil: ObservableObject {
             // Send notification
             NotificationManager.sendSilently(
                 title: "Download Complete",
-                body: String(format: String(localized: "%@ (Version: %@, Loader: %@) has been successfully downloaded."), gameInfo.gameName, gameInfo.gameVersion, gameInfo.modLoader)
+                body: String(format: String(localized: "\(gameInfo.gameName) (Version: \(gameInfo.gameVersion), Loader: \(gameInfo.modLoader)) has been successfully downloaded."))
             )
             onSuccess()
         } catch is CancellationError {

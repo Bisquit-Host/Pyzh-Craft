@@ -109,9 +109,9 @@ public struct SidebarView: View {
             titleVisibility: .visible
         ) {
             Button("Delete", role: .destructive) {
-                if let game = gameToDelete {
+                if let gameToDelete {
                     gameActionManager.deleteGame(
-                        game: game,
+                        game: gameToDelete,
                         gameRepository: gameRepository,
                         selectedItem: detailState.selectedItemBinding,
                         gameType: detailState.gameTypeBinding
@@ -121,10 +121,8 @@ public struct SidebarView: View {
             .keyboardShortcut(.defaultAction)
             Button("Cancel", role: .cancel) {}
         } message: {
-            if let game = gameToDelete {
-                Text(
-                    String(format: String(localized: "Are you sure you want to delete the game \"%@\" and all its data? (This will take a very long time)"), game.gameName)
-                )
+            if let gameToDelete {
+                Text("Are you sure you want to delete the game \"\(gameToDelete.gameName)\" and all its data? (This will take a very long time)")
             }
         }
         .sheet(item: $gameToExport) { game in
@@ -137,6 +135,7 @@ public struct SidebarView: View {
         if searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             return gameRepository.games
         }
+        
         let lower = searchText.lowercased()
         return gameRepository.games.filter { $0.gameName.lowercased().contains(lower) }
     }

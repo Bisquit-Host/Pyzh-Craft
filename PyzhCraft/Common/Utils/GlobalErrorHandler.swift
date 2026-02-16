@@ -4,19 +4,10 @@ import SwiftUI
 
 /// error level enum
 enum ErrorLevel: String, CaseIterable {
-    case popup,           // Pop-up window display
+    case popup,         // Pop-up window display
          notification, // Notification display
-         silent,         // Silent processing, only logging
-         disabled     // Do nothing, record nothing
-
-    var displayName: String {
-        switch self {
-        case .popup: "弹窗"
-        case .notification: "通知"
-        case .silent: "静默"
-        case .disabled: "无操作"
-        }
-    }
+         silent,      // Silent processing, only logging
+         disabled    // Do nothing, record nothing
 }
 
 // MARK: - Global Error Types
@@ -74,28 +65,17 @@ enum GlobalError: Error, LocalizedError, Identifiable {
 
     private var typeIdentifier: String {
         switch self {
-        case .network:
-            "network"
-        case .fileSystem:
-            "filesystem"
-        case .authentication:
-            "auth"
-        case .validation:
-            "validation"
-        case .download:
-            "download"
-        case .installation:
-            "installation"
-        case .gameLaunch:
-            "gameLaunch"
-        case .resource:
-            "resource"
-        case .player:
-            "player"
-        case .configuration:
-            "config"
-        case .unknown:
-            "unknown"
+        case .network: "network"
+        case .fileSystem: "filesystem"
+        case .authentication: "auth"
+        case .validation: "validation"
+        case .download: "download"
+        case .installation: "installation"
+        case .gameLaunch: "gameLaunch"
+        case .resource: "resource"
+        case .player: "player"
+        case .configuration: "config"
+        case .unknown: "unknown"
         }
     }
 
@@ -107,56 +87,34 @@ enum GlobalError: Error, LocalizedError, Identifiable {
     /// International key
     var i18nKey: String {
         switch self {
-        case let .network(key, _):
-            key
-        case let .fileSystem(key, _):
-            key
-        case let .authentication(key, _):
-            key
-        case let .validation(key, _):
-            key
-        case let .download(key, _):
-            key
-        case let .installation(key, _):
-            key
-        case let .gameLaunch(key, _):
-            key
-        case let .resource(key, _):
-            key
-        case let .player(key, _):
-            key
-        case let .configuration(key, _):
-            key
-        case let .unknown(key, _):
-            key
+        case let .network(key, _): key
+        case let .fileSystem(key, _): key
+        case let .authentication(key, _): key
+        case let .validation(key, _): key
+        case let .download(key, _): key
+        case let .installation(key, _): key
+        case let .gameLaunch(key, _): key
+        case let .resource(key, _): key
+        case let .player(key, _): key
+        case let .configuration(key, _): key
+        case let .unknown(key, _): key
         }
     }
 
     /// error level
     var level: ErrorLevel {
         switch self {
-        case let .network(_, level):
-            level
-        case let .fileSystem(_, level):
-            level
-        case let .authentication(_, level):
-            level
-        case let .validation(_, level):
-            level
-        case let .download(_, level):
-            level
-        case let .installation(_, level):
-            level
-        case let .gameLaunch(_, level):
-            level
-        case let .resource(_, level):
-            level
-        case let .player(_, level):
-            level
-        case let .configuration(_, level):
-            level
-        case let .unknown(_, level):
-            level
+        case let .network(_, level): level
+        case let .fileSystem(_, level): level
+        case let .authentication(_, level): level
+        case let .validation(_, level): level
+        case let .download(_, level): level
+        case let .installation(_, level): level
+        case let .gameLaunch(_, level): level
+        case let .resource(_, level): level
+        case let .player(_, level): level
+        case let .configuration(_, level): level
+        case let .unknown(_, level): level
         }
     }
 

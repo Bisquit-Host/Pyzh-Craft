@@ -217,7 +217,7 @@ struct LitematicaDetailSheetView: View {
             Logger.shared.error("加载投影详细信息失败: \(error.localizedDescription)")
             await MainActor.run {
                 self.isLoading = false
-                self.errorMessage = String(format: String(localized: "Failed to load schematic information: %@"), error.localizedDescription)
+                self.errorMessage = String(format: String(localized: "Failed to load schematic information: \(error.localizedDescription)"))
                 self.showError = true
             }
         }

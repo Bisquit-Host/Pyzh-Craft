@@ -99,10 +99,7 @@ public struct ContributorsView: View {
                         isTopContributor: true,
                         rank: index + 1,
                         contributionsText: String(
-                            format: String(localized: "%@ contributions"),
-                            viewModel.formatContributions(
-                                contributor.contributions
-                            )
+                            format: String(localized: "\(viewModel.formatContributions(contributor.contributions)) contributions")
                         )
                     )
                     .id("top-\(contributor.id)")
@@ -129,8 +126,7 @@ public struct ContributorsView: View {
                     isTopContributor: false,
                     rank: index + viewModel.topContributors.count + 1,
                     contributionsText: String(
-                        format: String(localized: "%@ contributions"),
-                        viewModel.formatContributions(contributor.contributions)
+                        format: String(localized: "\(viewModel.formatContributions(contributor.contributions)) contributions")
                     )
                 )
                 .id("other-\(contributor.id)")

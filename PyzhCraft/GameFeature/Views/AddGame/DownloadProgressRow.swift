@@ -7,51 +7,42 @@ struct DownloadProgressRow: View {
     let completed: Int
     let total: Int
     let version: String?
-
+    
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
                 Text(title)
                     .font(.headline)
+                
                 if let version = version, !version.isEmpty {
                     Text(version)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
+                
                 Spacer()
-                Text(
-                    String(
-                        format: String(localized: "Progress: %d%%"),
-                        Int(progress * 100)
-                    )
-                )
-                .font(.headline)
-                .foregroundColor(.secondary)
+                
+                Text("Progress: \(Int(progress * 100))%%")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
             }
+            
             ProgressView(value: progress).animation(
                 .easeOut(duration: 0.5),
                 value: progress
             )
+            
             HStack {
-                Text(
-                    String(
-                        format: String(localized: "Current Step: %@"),
-                        currentFile
-                    )
-                )
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .lineLimit(1)
+                Text("Current Step: \(currentFile)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                
                 Spacer()
-                Text(
-                    String(
-                        format: String(localized: "Files: %d/%d"),
-                        completed,
-                        total
-                    )
-                )
-                .font(.caption)
-                .foregroundColor(.secondary)
+                
+                Text("Files: \(completed)/\(total)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
         }
     }

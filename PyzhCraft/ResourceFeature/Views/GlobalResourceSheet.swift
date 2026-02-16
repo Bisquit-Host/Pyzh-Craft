@@ -21,10 +21,7 @@ struct GlobalResourceSheet: View {
             header: {
                 Text(
                     selectedGame.map {
-                        String(
-                            format: String(localized: "Add For Game"),
-                            $0.gameName
-                        )
+                        String(format: String(localized: "Add For Game \($0.gameName)"))
                     } ?? String(localized: "Add")
                 )
                 .font(.headline)

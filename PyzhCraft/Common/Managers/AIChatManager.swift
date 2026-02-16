@@ -459,14 +459,14 @@ class AIChatManager: ObservableObject {
         // Get file size
         guard let fileSize = await getFileSize(url: url) else {
             return await readFileContent(url: url, fileName: fileName) ??
-                   String(format: String(localized: "File: %@ (cannot read)"), fileName)
+                   String(format: String(localized: "File: \(fileName) (cannot read)"))
         }
 
         // Determine processing method based on size
         if fileSize <= maxFileSizeForReading {
             // Small files: read text content
             return await readFileContent(url: url, fileName: fileName) ??
-                   String(format: String(localized: "File: %@ (cannot read text content)"), fileName)
+                   String(format: String(localized: "File: \(fileName) (cannot read text content)"))
         } else {
             // Large files: return file information
             let sizeDescription = formatFileSize(fileSize)
@@ -484,7 +484,7 @@ class AIChatManager: ObservableObject {
             ? "\(String(fileContent.prefix(maxLength)))\n... \(String(localized: "(content truncated)"))"
             : fileContent
 
-        return String(format: String(localized: "File: %@\nContent:\n%@"), fileName, truncatedContent)
+        return String(format: String(localized: "File: \(fileName)\nContent:\n\(truncatedContent)"))
     }
 
     /// Get file size (bytes)

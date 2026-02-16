@@ -21,21 +21,16 @@ struct GameResourceInstallSheet: View {
     var body: some View {
         CommonSheetView(
             header: {
-                Text(
-                    String(
-                        format: String(localized: "Add For Game"),
-                        gameInfo.gameName
-                    )
-                )
-                .font(.headline)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            },
-            body: {
+                Text("Add For Game \(gameInfo.gameName)")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }, body: {
                 if let detail = preloadedDetail {
                     VStack {
                         ModrinthProjectTitleView(
                             projectDetail: detail
                         ).padding(.bottom, 18)
+                        
                         VersionPickerForSheet(
                             project: project,
                             resourceType: resourceType,
@@ -52,6 +47,7 @@ struct GameResourceInstallSheet: View {
                                 dependencyState = DependencyState()
                             }
                         }
+                        
                         if resourceType == "mod", !isUpdateMode {
                             if dependencyState.isLoading || !dependencyState.dependencies.isEmpty {
                                 spacerView()
