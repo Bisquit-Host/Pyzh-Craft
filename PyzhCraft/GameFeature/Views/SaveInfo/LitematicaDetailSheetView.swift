@@ -142,7 +142,7 @@ struct LitematicaDetailSheetView: View {
         }
     }
 
-    private func infoSection<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
+    private func infoSection<Content: View>(title: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.headline)

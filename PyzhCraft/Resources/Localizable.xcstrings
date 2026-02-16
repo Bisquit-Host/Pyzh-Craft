@@ -67164,7 +67164,6 @@
     },
     "Size" : {
       "comment" : "Section title",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
