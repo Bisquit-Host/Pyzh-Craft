@@ -4,7 +4,8 @@ import SwiftUI
 struct StartupInfoSheetView: View {
 
     // MARK: - Properties
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismiss)
+    private var dismiss
 
     let announcementData: AnnouncementData?
 

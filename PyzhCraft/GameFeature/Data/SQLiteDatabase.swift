@@ -58,7 +58,7 @@ class SQLiteDatabase {
                     sqlite3_close(dbToClose)
                 }
                 throw GlobalError.validation(
-                    i18nKey: "Failed to open database: %@",
+                    i18nKey: "Failed to open database: \(errorMessage)",
                     level: .notification
                 )
             }
@@ -81,7 +81,7 @@ class SQLiteDatabase {
     /// Close database connection
     func close() {
         sync {
-            guard let db = db else { return }
+            guard let db else { return }
             sqlite3_close(db)
             self.db = nil
             Logger.shared.debug("SQLite 数据库已关闭")
@@ -91,13 +91,13 @@ class SQLiteDatabase {
     /// Enable WAL mode (Write-Ahead Logging)
     /// Provide better concurrency performance and crash recovery capabilities
     private func enableWALMode() throws {
-        guard let db = db else { return }
+        guard let db else { return }
 
         let result = sqlite3_exec(db, "PRAGMA journal_mode=WAL;", nil, nil, nil)
         guard result == SQLITE_OK else {
             let errorMessage = String(cString: sqlite3_errmsg(db))
             throw GlobalError.validation(
-                i18nKey: "Failed to enable WAL mode: %@",
+                i18nKey: "Failed to enable WAL mode: \(errorMessage)",
                 level: .notification
             )
         }
@@ -110,7 +110,7 @@ class SQLiteDatabase {
     /// Enable mmap (memory mapping)
     /// Allow SQLite to use the operating system virtual memory system to access database files
     private func enableMmap() throws {
-        guard let db = db else { return }
+        guard let db else { return }
 
         // Set mmap size to 64MB (can be adjusted as needed)
         let mmapSize = 64 * 1024 * 1024
@@ -120,7 +120,7 @@ class SQLiteDatabase {
         guard result == SQLITE_OK else {
             let errorMessage = String(cString: sqlite3_errmsg(db))
             throw GlobalError.validation(
-                i18nKey: "Failed to enable mmap: %@",
+                i18nKey: "Failed to enable mmap: \(errorMessage)",
                 level: .notification
             )
         }
@@ -135,7 +135,7 @@ class SQLiteDatabase {
     /// - Throws: GlobalError when the operation fails
     func transaction<T>(_ block: () throws -> T) throws -> T {
         try sync {
-            guard let db = db else {
+            guard let db else {
                 throw GlobalError.validation(
                     i18nKey: "Database is not open",
                     level: .notification
@@ -147,7 +147,7 @@ class SQLiteDatabase {
             guard result == SQLITE_OK else {
                 let errorMessage = String(cString: sqlite3_errmsg(db))
                 throw GlobalError.validation(
-                    i18nKey: "Failed to begin transaction: %@",
+                    i18nKey: "Failed to begin transaction: \(errorMessage)",
                     level: .notification
                 )
             }
@@ -160,7 +160,7 @@ class SQLiteDatabase {
                 guard result == SQLITE_OK else {
                     let errorMessage = String(cString: sqlite3_errmsg(db))
                     throw GlobalError.validation(
-                        i18nKey: "Failed to commit transaction: %@",
+                        i18nKey: "Failed to commit transaction: \(errorMessage)",
                         level: .notification
                     )
                 }
@@ -181,7 +181,7 @@ class SQLiteDatabase {
     /// - Throws: GlobalError when execution fails
     func execute(_ sql: String) throws {
         try sync {
-            guard let db = db else {
+            guard let db else {
                 throw GlobalError.validation(
                     i18nKey: "Database is not open",
                     level: .notification
@@ -195,7 +195,7 @@ class SQLiteDatabase {
                 let message = errorMessage.map { String(cString: $0) } ?? "未知错误"
                 sqlite3_free(errorMessage)
                 throw GlobalError.validation(
-                    i18nKey: "SQL execution failed: %@",
+                    i18nKey: "SQL execution failed: \(message)",
                     level: .notification
                 )
             }
@@ -209,7 +209,7 @@ class SQLiteDatabase {
     /// - Warning: The returned statement must be used in the queue, and sqlite3_finalize is called after use
     func prepare(_ sql: String) throws -> OpaquePointer {
         return try sync {
-            guard let db = db else {
+            guard let db else {
                 throw GlobalError.validation(
                     i18nKey: "Database is not open",
                     level: .notification
@@ -222,7 +222,7 @@ class SQLiteDatabase {
             guard result == SQLITE_OK, let stmt = statement else {
                 let errorMessage = String(cString: sqlite3_errmsg(db))
                 throw GlobalError.validation(
-                    i18nKey: "Failed to prepare SQL statement: %@",
+                    i18nKey: "Failed to prepare SQL statement: \(errorMessage)",
                     level: .notification
                 )
             }

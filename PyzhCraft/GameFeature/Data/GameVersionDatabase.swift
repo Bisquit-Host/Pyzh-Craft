@@ -106,7 +106,7 @@ class GameVersionDatabase {
             guard result == SQLITE_DONE else {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
                 throw GlobalError.validation(
-                    i18nKey: "Failed to save game: %@",
+                    i18nKey: "Failed to save game: \(errorMessage)",
                     level: .notification
                 )
             }
@@ -156,7 +156,7 @@ class GameVersionDatabase {
                 guard result == SQLITE_DONE else {
                     let errorMessage = String(cString: sqlite3_errmsg(db.database))
                     throw GlobalError.validation(
-                        i18nKey: "Failed to batch save games: %@",
+                        i18nKey: "Failed to batch save games: \(errorMessage)",
                         level: .notification
                     )
                 }
@@ -281,7 +281,7 @@ class GameVersionDatabase {
             guard result == SQLITE_DONE else {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
                 throw GlobalError.validation(
-                    i18nKey: "Failed to delete game: %@",
+                    i18nKey: "Failed to delete game: \(errorMessage)",
                     level: .notification
                 )
             }
@@ -303,7 +303,7 @@ class GameVersionDatabase {
             guard result == SQLITE_DONE else {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
                 throw GlobalError.validation(
-                    i18nKey: "Failed to delete games in working path: %@",
+                    i18nKey: "Failed to delete games in working path: \(errorMessage)",
                     level: .notification
                 )
             }
@@ -338,7 +338,7 @@ class GameVersionDatabase {
             guard result == SQLITE_DONE else {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
                 throw GlobalError.validation(
-                    i18nKey: "Failed to update last played time: %@",
+                    i18nKey: "Failed to update last played time: \(errorMessage)",
                     level: .notification
                 )
             }

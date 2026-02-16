@@ -422,7 +422,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
             // Verification passed
         } catch let decodingError as DecodingError {
             throw GlobalError.validation(
-                i18nKey: "Failed to parse game entitlements response: %@",
+                i18nKey: "Failed to parse game entitlements response: \(decodingError.localizedDescription)",
                 level: .notification
             )
         } catch let globalError as GlobalError {

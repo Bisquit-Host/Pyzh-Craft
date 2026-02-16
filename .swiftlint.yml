@@ -12,6 +12,9 @@ disabled_rules:
   # Rationale: Allow trailing spaces in edited lines
   - trailing_whitespace
 
+  # Rationale: Disable mandatory trailing commas in multiline collection literals
+  - trailing_comma
+
 
 
 opt_in_rules:
@@ -451,9 +454,6 @@ line_length:
 nesting:
   type_level: 2
   function_level: 5
-
-trailing_comma:
-  mandatory_comma: true
 
 type_name:
   max_length:

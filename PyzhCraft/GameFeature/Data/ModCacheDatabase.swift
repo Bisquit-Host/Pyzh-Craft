@@ -84,7 +84,7 @@ class ModCacheDatabase {
             guard result == SQLITE_DONE else {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
                 throw GlobalError.validation(
-                    i18nKey: "Failed to save mod cache: %@",
+                    i18nKey: "Failed to save mod cache: \(errorMessage)",
                     level: .notification
                 )
             }
@@ -120,7 +120,7 @@ class ModCacheDatabase {
                 guard result == SQLITE_DONE else {
                     let errorMessage = String(cString: sqlite3_errmsg(db.database))
                     throw GlobalError.validation(
-                        i18nKey: "Failed to batch save mod cache: %@",
+                        i18nKey: "Failed to batch save mod cache: \(errorMessage)",
                         level: .notification
                     )
                 }
@@ -185,7 +185,7 @@ class ModCacheDatabase {
             guard result == SQLITE_DONE else {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
                 throw GlobalError.validation(
-                    i18nKey: "Failed to delete mod cache: %@",
+                    i18nKey: "Failed to delete mod cache: \(errorMessage)",
                     level: .notification
                 )
             }
@@ -209,7 +209,7 @@ class ModCacheDatabase {
                 guard result == SQLITE_DONE else {
                     let errorMessage = String(cString: sqlite3_errmsg(db.database))
                     throw GlobalError.validation(
-                        i18nKey: "Failed to batch delete mod cache: %@",
+                        i18nKey: "Failed to batch delete mod cache: \(errorMessage)",
                         level: .notification
                     )
                 }
