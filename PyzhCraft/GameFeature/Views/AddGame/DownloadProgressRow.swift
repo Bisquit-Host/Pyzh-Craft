@@ -40,7 +40,7 @@ struct DownloadProgressRow: View {
                 
                 Spacer()
                 
-                Text("Files: \(completed)/\(total)")
+                Text("Files: \(Int32(completed))/\(Int32(total))")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
