@@ -33,8 +33,7 @@ enum ModMetadataParser {
         do {
             archive = try Archive(url: fileURL, accessMode: .read)
         } catch {
-            throw GlobalError(
-                type: .validation,
+            throw GlobalError.validation(
                 i18nKey: "Archive Open Failed",
                 level: .silent
             )

@@ -5281,25 +5281,24 @@
         }
       }
     },
-    "Archive Open Failed %@ %@" : {
-      "extractionState" : "stale",
+    "Archive Open Failed" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "فشل فتح الأرشيف: %@، خطأ: %@"
+            "value" : "فشل فتح الأرشيف"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kunne ikke åbne arkiv: %@, fejl: %@"
+            "value" : "Kunne ikke åbne arkiv"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Archiv öffnen fehlgeschlagen: %@, Fehler: %@"
+            "value" : "Archiv öffnen fehlgeschlagen"
           }
         },
         "en" : {
@@ -5311,109 +5310,109 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No se pudo abrir el archivo: %@, error: %@"
+            "value" : "No se pudo abrir el archivo"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Arkiston avaaminen epäonnistui: %@, virhe: %@"
+            "value" : "Arkiston avaaminen epäonnistui"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Impossible d'ouvrir l'archive: %@, erreur: %@"
+            "value" : "Impossible d'ouvrir l'archive"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "संग्रह खोलना विफल: %@, त्रुटि: %@"
+            "value" : "संग्रह खोलना विफल"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Impossibile aprire l'archivio: %@, errore: %@"
+            "value" : "Impossibile aprire l'archivio"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "アーカイブを開けませんでした: %@、エラー: %@"
+            "value" : "アーカイブを開けませんでした"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "압축 파일을 열 수 없습니다: %@, 오류: %@"
+            "value" : "압축 파일을 열 수 없습니다"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kunne ikke åpne arkiv: %@, feil: %@"
+            "value" : "Kunne ikke åpne arkiv"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kan archief niet openen: %@, fout: %@"
+            "value" : "Kan archief niet openen"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nie można otworzyć archiwum: %@, błąd: %@"
+            "value" : "Nie można otworzyć archiwum"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Não é possível abrir o arquivo: %@, erro: %@"
+            "value" : "Não é possível abrir o arquivo"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Не удалось открыть архив: %@, ошибка: %@"
+            "value" : "Не удалось открыть архив"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kunde inte öppna arkiv: %@, fel: %@"
+            "value" : "Kunde inte öppna arkiv"
           }
         },
         "th" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ไม่สามารถเปิดไฟล์บีบอัดได้: %@, ข้อผิดพลาด: %@"
+            "value" : "ไม่สามารถเปิดไฟล์บีบอัดได้"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Arşiv açılamadı: %@, hata: %@"
+            "value" : "Arşiv açılamadı"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Không thể mở tệp nén: %@, lỗi: %@"
+            "value" : "Không thể mở tệp nén"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "无法打开压缩包: %@, 错误: %@"
+            "value" : "无法打开压缩包"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "無法打開壓縮包: %@, 錯誤: %@"
+            "value" : "無法打開壓縮包"
           }
         }
       }
