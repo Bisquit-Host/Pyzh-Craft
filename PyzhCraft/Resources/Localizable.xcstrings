@@ -156,7 +156,8 @@
             "value" : "%1$@ (%2$@)"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "%@ (Version: %@, Loader: %@) has been successfully downloaded." : {
       "localizations" : {
@@ -562,7 +563,8 @@
             "value" : "%1$@:%2$@"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "%lld" : {
       "shouldTranslate" : false
