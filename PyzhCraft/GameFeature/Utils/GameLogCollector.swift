@@ -23,8 +23,7 @@ class GameLogCollector {
 
         if logFiles.isEmpty {
             // Log file not found
-            let error = GlobalError.fileSystem(
-                i18nKey: "Game Log Files Not Found",
+            let error = GlobalError.fileSystem(i18nKey: "Game Log Files Not Found",
                 level: .notification
             )
             GlobalErrorHandler.shared.handle(error)

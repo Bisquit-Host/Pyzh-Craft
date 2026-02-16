@@ -147,16 +147,14 @@ enum ModrinthService {
                     )
                 }
             } catch {
-                throw GlobalError.validation(
-                    i18nKey: "Search Condition Encode Failed",
+                throw GlobalError.validation(i18nKey: "Search Condition Encode Failed",
                     level: .notification
                 )
             }
         }
         components.queryItems = queryItems
         guard let url = components.url else {
-            throw GlobalError.validation(
-                i18nKey: "Search URL Build Failed",
+            throw GlobalError.validation(i18nKey: "Search URL Build Failed",
                 level: .notification
             )
         }

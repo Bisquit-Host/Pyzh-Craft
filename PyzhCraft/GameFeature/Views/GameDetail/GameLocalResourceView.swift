@@ -278,8 +278,7 @@ struct GameLocalResourceView: View {
         )
 
         if resourceDirectory == nil {
-            let globalError = GlobalError.configuration(
-                i18nKey: "Resource Directory Not Found",
+            let globalError = GlobalError.configuration(i18nKey: "Resource Directory Not Found",
                 level: .notification
             )
             Logger.shared.error("初始化资源目录失败: \(globalError.chineseMessage)")

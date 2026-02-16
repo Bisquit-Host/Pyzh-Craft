@@ -99,8 +99,7 @@ enum MinecraftLaunchCommandBuilder {
         let clientJarPath = AppPaths.versionsDirectory.appendingPathComponent(manifest.id).appendingPathComponent("\(manifest.id).jar").path
         let fileManager = FileManager.default
         guard fileManager.fileExists(atPath: clientJarPath) else {
-            throw GlobalError.resource(
-                i18nKey: "Client Jar Not Found",
+            throw GlobalError.resource(i18nKey: "Client Jar Not Found",
                 level: .popup
             )
         }

@@ -23,8 +23,7 @@ enum ModMetadataParser {
         String?, String?
     ) {
         guard FileManager.default.fileExists(atPath: fileURL.path) else {
-            throw GlobalError.resource(
-                i18nKey: "File Not Found",
+            throw GlobalError.resource(i18nKey: "File Not Found",
                 level: .silent
             )
         }
@@ -33,8 +32,7 @@ enum ModMetadataParser {
         do {
             archive = try Archive(url: fileURL, accessMode: .read)
         } catch {
-            throw GlobalError.validation(
-                i18nKey: "Archive Open Failed",
+            throw GlobalError(type: .validation, i18nKey: "Archive Open Failed",
                 level: .silent
             )
         }
@@ -116,15 +114,13 @@ enum ModMetadataParser {
                 data.append(chunk)
             }
         } catch {
-            throw GlobalError.validation(
-                i18nKey: "Mods TOML Extract Failed",
+            throw GlobalError(type: .validation, i18nKey: "Mods TOML Extract Failed",
                 level: .silent
             )
         }
 
         guard let tomlString = String(data: data, encoding: .utf8) else {
-            throw GlobalError.validation(
-                i18nKey: "Mods TOML Decode Failed",
+            throw GlobalError.validation(i18nKey: "Mods TOML Decode Failed",
                 level: .silent
             )
         }
@@ -164,8 +160,7 @@ enum ModMetadataParser {
                 data.append(chunk)
             }
         } catch {
-            throw GlobalError.validation(
-                i18nKey: "Fabric Mod JSON Extract Failed",
+            throw GlobalError(type: .validation, i18nKey: "Fabric Mod JSON Extract Failed",
                 level: .silent
             )
         }
@@ -176,8 +171,7 @@ enum ModMetadataParser {
                 try JSONSerialization.jsonObject(with: data) as? [String: Any]
                 ?? [:]
         } catch {
-            throw GlobalError.validation(
-                i18nKey: "Fabric Mod JSON Parse Failed",
+            throw GlobalError(type: .validation, i18nKey: "Fabric Mod JSON Parse Failed",
                 level: .silent
             )
         }
@@ -185,8 +179,7 @@ enum ModMetadataParser {
         guard let modid = json["id"] as? String,
             let version = json["version"] as? String
         else {
-            throw GlobalError.validation(
-                i18nKey: "Fabric Mod JSON Missing Fields",
+            throw GlobalError.validation(i18nKey: "Fabric Mod JSON Missing Fields",
                 level: .silent
             )
         }
@@ -214,8 +207,7 @@ enum ModMetadataParser {
                 data.append(chunk)
             }
         } catch {
-            throw GlobalError.validation(
-                i18nKey: "Mcmod Info Extract Failed",
+            throw GlobalError(type: .validation, i18nKey: "Mcmod Info Extract Failed",
                 level: .silent
             )
         }
@@ -226,15 +218,13 @@ enum ModMetadataParser {
                 try JSONSerialization.jsonObject(with: data) as? [[String: Any]]
                 ?? []
         } catch {
-            throw GlobalError.validation(
-                i18nKey: "Mcmod Info Parse Failed",
+            throw GlobalError(type: .validation, i18nKey: "Mcmod Info Parse Failed",
                 level: .silent
             )
         }
 
         guard let first = arr.first else {
-            throw GlobalError.validation(
-                i18nKey: "Mcmod Info Empty",
+            throw GlobalError.validation(i18nKey: "Mcmod Info Empty",
                 level: .silent
             )
         }
@@ -242,8 +232,7 @@ enum ModMetadataParser {
         guard let modid = first["modid"] as? String,
             let version = first["version"] as? String
         else {
-            throw GlobalError.validation(
-                i18nKey: "Mcmod Info Missing Fields",
+            throw GlobalError.validation(i18nKey: "Mcmod Info Missing Fields",
                 level: .silent
             )
         }

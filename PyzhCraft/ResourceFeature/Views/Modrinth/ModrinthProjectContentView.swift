@@ -308,8 +308,7 @@ struct ModrinthProjectContentView: View {
 
     private func loadProjectDetailsThrowing() async throws {
         guard !projectId.isEmpty else {
-            throw GlobalError.validation(
-                i18nKey: "Project ID Empty",
+            throw GlobalError.validation(i18nKey: "Project ID Empty",
                 level: .notification
             )
         }
@@ -317,8 +316,7 @@ struct ModrinthProjectContentView: View {
         guard
             let fetchedProject = await ModrinthService.fetchProjectDetails(id: projectId)
         else {
-            throw GlobalError.resource(
-                i18nKey: "Project Details Not Found",
+            throw GlobalError.resource(i18nKey: "Project Details Not Found",
                 level: .notification
             )
         }

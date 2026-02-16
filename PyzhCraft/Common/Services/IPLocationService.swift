@@ -44,8 +44,7 @@ class IPLocationService: ObservableObject {
             if let responseString = String(data: data, encoding: .utf8) {
                 Logger.shared.error("响应内容: \(responseString)")
             }
-            throw GlobalError.validation(
-                i18nKey: "Failed to parse IP location response",
+            throw GlobalError.validation(i18nKey: "Failed to parse IP location response",
                 level: .notification
             )
         }
@@ -59,8 +58,7 @@ class IPLocationService: ObservableObject {
         guard locationResponse.isSuccess else {
             let errorMessage = locationResponse.reason ?? "IP地理位置检测失败"
             Logger.shared.error("IP地理位置检测失败: \(errorMessage), 国家代码: \(locationResponse.countryCode ?? "未知")")
-            throw GlobalError.network(
-                i18nKey: "IP location detection failed",
+            throw GlobalError.network(i18nKey: "IP location detection failed",
                 level: .notification
             )
         }

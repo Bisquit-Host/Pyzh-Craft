@@ -60,8 +60,7 @@ enum ProcessorExecutor {
         librariesDir: URL
     ) throws -> URL {
         guard let jar = jar else {
-            throw GlobalError.validation(
-                i18nKey: "Processor Missing JAR",
+            throw GlobalError.validation(i18nKey: "Processor Missing JAR",
                 level: .notification
             )
         }
@@ -69,12 +68,11 @@ enum ProcessorExecutor {
         guard
             let relativePath = CommonService.mavenCoordinateToRelativePath(jar)
         else {
-            throw GlobalError.validation(
-                i18nKey: .init(
-                    String(
-                        format: "Invalid Maven Coordinate",
-                        jar
-                    )
+            throw GlobalError(
+                type: .validation,
+                i18nKey: String(
+                    format: "Invalid Maven Coordinate",
+                    jar
                 ),
                 level: .notification
             )
@@ -83,12 +81,9 @@ enum ProcessorExecutor {
         let jarPath = librariesDir.appendingPathComponent(relativePath)
         guard FileManager.default.fileExists(atPath: jarPath.path) else {
             throw GlobalError.resource(
-                i18nKey: .init(
-                    String(
-                        format: "Processor Jar Not Found: %@",
-                        jar
-                    )
-                ),
+                i18nKey: .init(String(format: "Processor Jar Not Found: %@",
+                    jar
+                )),
                 level: .notification
             )
         }
@@ -142,12 +137,11 @@ enum ProcessorExecutor {
                     coordinate
                 )
             else {
-                throw GlobalError.validation(
-                    i18nKey: .init(
-                        String(
-                            format: "Invalid Maven Coordinate",
-                            coordinate
-                        )
+                throw GlobalError(
+                    type: .validation,
+                    i18nKey: String(
+                        format: "Invalid Maven Coordinate",
+                        coordinate
                     ),
                     level: .notification
                 )
@@ -281,14 +275,12 @@ enum ProcessorExecutor {
             errorPipe.fileHandleForReading.readabilityHandler = nil
 
             if process.terminationStatus != 0 {
-                throw GlobalError.download(
-                    i18nKey: "Processor Execution Failed (Exit Code: %d)",
+                throw GlobalError.download(i18nKey: "Processor Execution Failed (Exit Code: %d)",
                     level: .notification
                 )
             }
         } catch {
-            throw GlobalError.download(
-                i18nKey: "Processor Start Failed",
+            throw GlobalError.download(i18nKey: "Processor Start Failed",
                 level: .notification
             )
         }
@@ -338,15 +330,13 @@ enum ProcessorExecutor {
         do {
             archive = try Archive(url: jarPath, accessMode: .read)
         } catch {
-            throw GlobalError.download(
-                i18nKey: "Failed to Open JAR File: %@",
+            throw GlobalError.download(i18nKey: "Failed to Open JAR File: %@",
                 level: .notification
             )
         }
 
         guard let manifestEntry = archive["META-INF/MANIFEST.MF"] else {
-            throw GlobalError.download(
-                i18nKey: "Failed to get main class from processor JAR file: %@",
+            throw GlobalError.download(i18nKey: "Failed to get main class from processor JAR file: %@",
                 level: .notification
             )
         }
@@ -358,8 +348,7 @@ enum ProcessorExecutor {
 
         guard let manifestContent = String(data: manifestData, encoding: .utf8)
         else {
-            throw GlobalError.download(
-                i18nKey: "Manifest Parse Failed",
+            throw GlobalError.download(i18nKey: "Manifest Parse Failed",
                 level: .notification
             )
         }
@@ -375,8 +364,7 @@ enum ProcessorExecutor {
             }
         }
 
-        throw GlobalError.download(
-            i18nKey: "Failed to get main class from processor JAR file: %@",
+        throw GlobalError.download(i18nKey: "Failed to get main class from processor JAR file: %@",
             level: .notification
         )
     }

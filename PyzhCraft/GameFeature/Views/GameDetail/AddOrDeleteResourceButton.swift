@@ -298,8 +298,7 @@ struct AddOrDeleteResourceButton: View {
 
         // If query is a modpack or an invalid resource type, show an error
         if queryLowercased == "modpack" || !validResourceTypes.contains(queryLowercased) {
-            let globalError = GlobalError.configuration(
-                i18nKey: "Delete File Failed",
+            let globalError = GlobalError.configuration(i18nKey: "Delete File Failed",
                 level: .notification
             )
             Logger.shared.error("删除文件失败: \(globalError.chineseMessage)")
@@ -313,8 +312,7 @@ struct AddOrDeleteResourceButton: View {
                 gameName: gameInfo.gameName
             )
         else {
-            let globalError = GlobalError.configuration(
-                i18nKey: "Delete File Failed",
+            let globalError = GlobalError.configuration(i18nKey: "Delete File Failed",
                 level: .notification
             )
             Logger.shared.error("删除文件失败: \(globalError.chineseMessage)")

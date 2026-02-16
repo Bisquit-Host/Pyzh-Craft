@@ -22,8 +22,7 @@ enum ModPackArchiver {
         do {
             archive = try Archive(url: outputPath, accessMode: .create)
         } catch {
-            throw GlobalError.fileSystem(
-                i18nKey: "Failed to create archive file",
+            throw GlobalError.fileSystem(i18nKey: "Failed to create archive file",
                 level: .notification
             )
         }

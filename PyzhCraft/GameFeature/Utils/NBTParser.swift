@@ -159,9 +159,7 @@ class NBTParser {
         case .byteArray:
             let length = Int(readInt())
             guard offset + length <= data.count else {
-                throw GlobalError(type: .fileSystem, i18nKey: "NBT Byte Array Out Of Range",
-                    level: .notification
-                )
+                throw GlobalError(type: .fileSystem, i18nKey: "NBT Byte Array Out Of Range", level: .notification)
             }
             let array = Array(data.subdata(in: offset..<(offset + length)))
             offset += length

@@ -75,8 +75,7 @@ class GameVersionDatabase {
             encoder.dateEncodingStrategy = .secondsSince1970
             let jsonData = try encoder.encode(game)
             guard let jsonString = String(data: jsonData, encoding: .utf8) else {
-                throw GlobalError.validation(
-                    i18nKey: "Failed to encode game data as JSON",
+                throw GlobalError.validation(i18nKey: "Failed to encode game data as JSON",
                     level: .notification
                 )
             }
@@ -105,8 +104,7 @@ class GameVersionDatabase {
             let result = sqlite3_step(statement)
             guard result == SQLITE_DONE else {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
-                throw GlobalError.validation(
-                    i18nKey: "Failed to save game: %@",
+                throw GlobalError.validation(i18nKey: "Failed to save game: %@",
                     level: .notification
                 )
             }
@@ -155,8 +153,7 @@ class GameVersionDatabase {
                 let result = sqlite3_step(statement)
                 guard result == SQLITE_DONE else {
                     let errorMessage = String(cString: sqlite3_errmsg(db.database))
-                    throw GlobalError.validation(
-                        i18nKey: "Failed to batch save games: %@",
+                    throw GlobalError.validation(i18nKey: "Failed to batch save games: %@",
                         level: .notification
                     )
                 }
@@ -280,8 +277,7 @@ class GameVersionDatabase {
             let result = sqlite3_step(statement)
             guard result == SQLITE_DONE else {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
-                throw GlobalError.validation(
-                    i18nKey: "Failed to delete game: %@",
+                throw GlobalError.validation(i18nKey: "Failed to delete game: %@",
                     level: .notification
                 )
             }
@@ -302,8 +298,7 @@ class GameVersionDatabase {
             let result = sqlite3_step(statement)
             guard result == SQLITE_DONE else {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
-                throw GlobalError.validation(
-                    i18nKey: "Failed to delete games in working path: %@",
+                throw GlobalError.validation(i18nKey: "Failed to delete games in working path: %@",
                     level: .notification
                 )
             }
@@ -337,8 +332,7 @@ class GameVersionDatabase {
             let result = sqlite3_step(statement)
             guard result == SQLITE_DONE else {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
-                throw GlobalError.validation(
-                    i18nKey: "Failed to update last played time: %@",
+                throw GlobalError.validation(i18nKey: "Failed to update last played time: %@",
                     level: .notification
                 )
             }

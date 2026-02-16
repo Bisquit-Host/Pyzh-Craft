@@ -72,8 +72,7 @@ class CommonFileManager {
             )
         } catch {
             let globalError = GlobalError.from(error)
-            throw GlobalError.download(
-                i18nKey: "JAR Download Failed",
+            throw GlobalError.download(i18nKey: "JAR Download Failed",
                 level: .notification
             )
         }
@@ -114,8 +113,7 @@ class CommonFileManager {
             )
         } catch {
             let globalError = GlobalError.from(error)
-            throw GlobalError.download(
-                i18nKey: "JAR Download Failed",
+            throw GlobalError.download(i18nKey: "JAR Download Failed",
                 level: .notification
             )
         }
@@ -187,8 +185,7 @@ class CommonFileManager {
                 )
             } catch {
                 Logger.shared.error("执行处理器失败: \(error.localizedDescription)")
-                throw GlobalError.download(
-                    i18nKey: "Processor Start Failed",
+                throw GlobalError.download(i18nKey: "Processor Start Failed",
                     level: .notification
                 )
             }

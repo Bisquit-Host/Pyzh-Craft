@@ -28,8 +28,7 @@ enum ResourceEnableDisableManager {
         let isCurrentlyDisabled = fileName.hasSuffix(".disable")
         if isCurrentlyDisabled {
             guard fileName.hasSuffix(".disable") else {
-                throw GlobalError.resource(
-                    i18nKey: "Failed to enable resource: File suffix does not contain .disable",
+                throw GlobalError.resource(i18nKey: "Failed to enable resource: File suffix does not contain .disable",
                     level: .notification
                 )
             }

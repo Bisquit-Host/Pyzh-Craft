@@ -107,8 +107,7 @@ struct CustomVersionPicker: View {
     }
 
     private func handleEmptyVersionsError() {
-        let globalError = GlobalError.resource(
-            i18nKey: "No Versions Available",
+        let globalError = GlobalError.resource(i18nKey: "No Versions Available",
             level: .notification
         )
         Logger.shared.error("版本选择器错误: \(globalError.chineseMessage)")

@@ -57,8 +57,7 @@ class SQLiteDatabase {
                 if let dbToClose = tempDb {
                     sqlite3_close(dbToClose)
                 }
-                throw GlobalError.validation(
-                    i18nKey: "Failed to open database: %@",
+                throw GlobalError.validation(i18nKey: "Failed to open database: %@",
                     level: .notification
                 )
             }
@@ -96,8 +95,7 @@ class SQLiteDatabase {
         let result = sqlite3_exec(db, "PRAGMA journal_mode=WAL;", nil, nil, nil)
         guard result == SQLITE_OK else {
             let errorMessage = String(cString: sqlite3_errmsg(db))
-            throw GlobalError.validation(
-                i18nKey: "Failed to enable WAL mode: %@",
+            throw GlobalError.validation(i18nKey: "Failed to enable WAL mode: %@",
                 level: .notification
             )
         }
@@ -119,8 +117,7 @@ class SQLiteDatabase {
         let result = sqlite3_exec(db, sql, nil, nil, nil)
         guard result == SQLITE_OK else {
             let errorMessage = String(cString: sqlite3_errmsg(db))
-            throw GlobalError.validation(
-                i18nKey: "Failed to enable mmap: %@",
+            throw GlobalError.validation(i18nKey: "Failed to enable mmap: %@",
                 level: .notification
             )
         }
@@ -136,8 +133,7 @@ class SQLiteDatabase {
     func transaction<T>(_ block: () throws -> T) throws -> T {
         try sync {
             guard let db = db else {
-                throw GlobalError.validation(
-                    i18nKey: "Database is not open",
+                throw GlobalError.validation(i18nKey: "Database is not open",
                     level: .notification
                 )
             }
@@ -146,8 +142,7 @@ class SQLiteDatabase {
             var result = sqlite3_exec(db, "BEGIN TRANSACTION;", nil, nil, nil)
             guard result == SQLITE_OK else {
                 let errorMessage = String(cString: sqlite3_errmsg(db))
-                throw GlobalError.validation(
-                    i18nKey: "Failed to begin transaction: %@",
+                throw GlobalError.validation(i18nKey: "Failed to begin transaction: %@",
                     level: .notification
                 )
             }
@@ -159,8 +154,7 @@ class SQLiteDatabase {
                 result = sqlite3_exec(db, "COMMIT;", nil, nil, nil)
                 guard result == SQLITE_OK else {
                     let errorMessage = String(cString: sqlite3_errmsg(db))
-                    throw GlobalError.validation(
-                        i18nKey: "Failed to commit transaction: %@",
+                    throw GlobalError.validation(i18nKey: "Failed to commit transaction: %@",
                         level: .notification
                     )
                 }
@@ -182,8 +176,7 @@ class SQLiteDatabase {
     func execute(_ sql: String) throws {
         try sync {
             guard let db = db else {
-                throw GlobalError.validation(
-                    i18nKey: "Database is not open",
+                throw GlobalError.validation(i18nKey: "Database is not open",
                     level: .notification
                 )
             }
@@ -194,8 +187,7 @@ class SQLiteDatabase {
             if result != SQLITE_OK {
                 let message = errorMessage.map { String(cString: $0) } ?? "未知错误"
                 sqlite3_free(errorMessage)
-                throw GlobalError.validation(
-                    i18nKey: "SQL execution failed: %@",
+                throw GlobalError.validation(i18nKey: "SQL execution failed: %@",
                     level: .notification
                 )
             }
@@ -210,8 +202,7 @@ class SQLiteDatabase {
     func prepare(_ sql: String) throws -> OpaquePointer {
         return try sync {
             guard let db = db else {
-                throw GlobalError.validation(
-                    i18nKey: "Database is not open",
+                throw GlobalError.validation(i18nKey: "Database is not open",
                     level: .notification
                 )
             }
@@ -221,8 +212,7 @@ class SQLiteDatabase {
 
             guard result == SQLITE_OK, let stmt = statement else {
                 let errorMessage = String(cString: sqlite3_errmsg(db))
-                throw GlobalError.validation(
-                    i18nKey: "Failed to prepare SQL statement: %@",
+                throw GlobalError.validation(i18nKey: "Failed to prepare SQL statement: %@",
                     level: .notification
                 )
             }

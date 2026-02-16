@@ -181,8 +181,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
     ) async throws -> URL {
         // Create URL
         guard let url = URL(string: urlString) else {
-            throw GlobalError.validation(
-                i18nKey: "Invalid Download URL",
+            throw GlobalError.validation(i18nKey: "Invalid Download URL",
                 level: .notification
             )
         }
@@ -263,8 +262,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                         if let expectedSha1 = expectedSha1, !expectedSha1.isEmpty {
                             let actualSha1 = try DownloadManager.calculateFileSHA1(at: tempURL)
                             if actualSha1 != expectedSha1 {
-                                throw GlobalError.validation(
-                                    i18nKey: "SHA1 Check Failed",
+                                throw GlobalError.validation(i18nKey: "SHA1 Check Failed",
                                     level: .notification
                                 )
                             }
@@ -306,14 +304,14 @@ class ModPackDownloadSheetViewModel: ObservableObject {
 
         guard let httpResponse = response as? HTTPURLResponse,
               httpResponse.statusCode == 200 else {
-            throw GlobalError(type: .download, i18nKey: "Cannot get file size",
+            throw GlobalError.download(i18nKey: "Cannot get file size",
                 level: .notification
             )
         }
 
         guard let contentLength = httpResponse.value(forHTTPHeaderField: "Content-Length"),
               let fileSize = Int64(contentLength) else {
-            throw GlobalError(type: .download, i18nKey: "Cannot get file size",
+            throw GlobalError.download(i18nKey: "Cannot get file size",
                 level: .notification
             )
         }

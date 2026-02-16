@@ -44,8 +44,7 @@ class GameSetupUtil: ObservableObject {
             guard playerListViewModel.currentPlayer != nil else {
                 Logger.shared.error("无法保存游戏，因为没有选择当前玩家。")
                 onError(
-                    GlobalError.configuration(
-                        i18nKey: "No Current Player",
+                    GlobalError.configuration(i18nKey: "No Current Player",
                         level: .popup
                     ),
                     String(localized: "No Current Player Selected")
@@ -185,8 +184,7 @@ class GameSetupUtil: ObservableObject {
             try data.write(to: iconURL)
         } catch {
             onError(
-                GlobalError.fileSystem(
-                    i18nKey: "Image Save Failed",
+                GlobalError.fileSystem(i18nKey: "Image Save Failed",
                     level: .notification
                 ),
                 String(localized: "Failed to Save Image")
@@ -224,8 +222,7 @@ class GameSetupUtil: ObservableObject {
         // Use a silent version of the API to avoid throwing exceptions
         let success = await fileManager.downloadVersionFiles(manifest: manifest, gameName: gameName)
         if !success {
-            throw GlobalError.download(
-                i18nKey: "Minecraft Version Failed",
+            throw GlobalError.download(i18nKey: "Minecraft Version Failed",
                 level: .notification
             )
         }
@@ -254,8 +251,7 @@ class GameSetupUtil: ObservableObject {
             )
         } catch {
             let globalError = GlobalError.from(error)
-            throw GlobalError.download(
-                i18nKey: "Asset Index Failed",
+            throw GlobalError.download(i18nKey: "Asset Index Failed",
                 level: .notification
             )
         }

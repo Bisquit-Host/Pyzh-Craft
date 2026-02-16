@@ -165,8 +165,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
         let chineseMessage = "实例 \(instanceName) 使用了不支持的 Mod Loader (\(info.modLoader))，仅支持 \(supportedModLoadersList)"
 
         GlobalErrorHandler.shared.handle(
-            GlobalError.fileSystem(
-                i18nKey: "Unsupported Mod Loader",
+            GlobalError.fileSystem(i18nKey: "Unsupported Mod Loader",
                 level: .notification
             )
         )
@@ -214,8 +213,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             guard let parsedInfo = try parser.parseInstance(at: instancePath, basePath: basePath) else {
                 Logger.shared.error("解析实例失败: \(instanceName) - 返回 nil")
                 GlobalErrorHandler.shared.handle(
-                    GlobalError.fileSystem(
-                        i18nKey: "Parse Instance Failed",
+                    GlobalError.fileSystem(i18nKey: "Parse Instance Failed",
                         level: .notification
                     )
                 )
@@ -225,8 +223,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
         } catch {
             Logger.shared.error("解析实例失败: \(instanceName) - \(error.localizedDescription)")
             GlobalErrorHandler.shared.handle(
-                GlobalError.fileSystem(
-                    i18nKey: "Parse Instance Failed",
+                GlobalError.fileSystem(i18nKey: "Parse Instance Failed",
                     level: .notification
                 )
             )
@@ -237,8 +234,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
         guard !instanceInfo.gameVersion.isEmpty else {
             Logger.shared.error("实例 \(instanceName) 没有游戏版本")
             GlobalErrorHandler.shared.handle(
-                GlobalError.fileSystem(
-                    i18nKey: "Instance Has No Version",
+                GlobalError.fileSystem(i18nKey: "Instance Has No Version",
                     level: .notification
                 )
             )
@@ -287,8 +283,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             Logger.shared.error("复制游戏目录失败: \(error.localizedDescription)")
             copyTask = nil
             GlobalErrorHandler.shared.handle(
-                GlobalError.fileSystem(
-                    i18nKey: "Copy Game Directory Failed",
+                GlobalError.fileSystem(i18nKey: "Copy Game Directory Failed",
                     level: .notification
                 )
             )

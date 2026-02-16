@@ -109,8 +109,7 @@ struct GameResourceInstallSheet: View {
         game: GameVersionInfo
     ) async throws {
         guard !project.projectId.isEmpty else {
-            throw GlobalError.validation(
-                i18nKey: "Project ID Empty",
+            throw GlobalError.validation(i18nKey: "Project ID Empty",
                 level: .notification
             )
         }
@@ -229,8 +228,7 @@ struct GameResourceInstallFooter: View {
 
     private func downloadAllManualThrowing() async throws {
         guard !project.projectId.isEmpty else {
-            throw GlobalError.validation(
-                i18nKey: "Project ID Empty",
+            throw GlobalError.validation(i18nKey: "Project ID Empty",
                 level: .notification
             )
         }
@@ -253,8 +251,7 @@ struct GameResourceInstallFooter: View {
             )
 
         if !success {
-            throw GlobalError.download(
-                i18nKey: "Manual Dependencies Failed",
+            throw GlobalError.download(i18nKey: "Manual Dependencies Failed",
                 level: .notification
             )
         }
@@ -287,8 +284,7 @@ struct GameResourceInstallFooter: View {
 
     private func downloadResourceThrowing() async throws {
         guard !project.projectId.isEmpty else {
-            throw GlobalError.validation(
-                i18nKey: "Project ID Empty",
+            throw GlobalError.validation(i18nKey: "Project ID Empty",
                 level: .notification
             )
         }
@@ -303,8 +299,7 @@ struct GameResourceInstallFooter: View {
             )
 
         if !success {
-            throw GlobalError.download(
-                i18nKey: "Resource Download Failed",
+            throw GlobalError.download(i18nKey: "Resource Download Failed",
                 level: .notification
             )
         }

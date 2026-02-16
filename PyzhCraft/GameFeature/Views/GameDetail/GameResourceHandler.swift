@@ -38,8 +38,7 @@ enum GameResourceHandler {
     /// Delete file (throws exception version)
     static func performDeleteThrowing(fileURL: URL) throws {
         guard FileManager.default.fileExists(atPath: fileURL.path) else {
-            throw GlobalError.resource(
-                i18nKey: "File Not Found",
+            throw GlobalError.resource(i18nKey: "File Not Found",
                 level: .notification
             )
         }
@@ -62,8 +61,7 @@ enum GameResourceHandler {
                 ModScanner.shared.removeModHash(hash, from: gameName)
             }
         } catch {
-            throw GlobalError.fileSystem(
-                i18nKey: "File Deletion Failed",
+            throw GlobalError.fileSystem(i18nKey: "File Deletion Failed",
                 level: .notification
             )
         }
@@ -118,8 +116,7 @@ enum GameResourceHandler {
         gameRepository: GameRepository
     ) async throws {
         guard let gameInfo = gameInfo else {
-            throw GlobalError.validation(
-                i18nKey: "Game Info Missing",
+            throw GlobalError.validation(i18nKey: "Game Info Missing",
                 level: .notification
             )
         }
@@ -168,8 +165,7 @@ enum GameResourceHandler {
         gameRepository: GameRepository
     ) async throws {
         guard let gameInfo = gameInfo else {
-            throw GlobalError.validation(
-                i18nKey: "Game Info Missing",
+            throw GlobalError.validation(i18nKey: "Game Info Missing",
                 level: .notification
             )
         }
@@ -215,8 +211,7 @@ enum GameResourceHandler {
         depVM: DependencySheetViewModel
     ) async throws -> Bool {
         guard let gameInfo = gameInfo else {
-            throw GlobalError.validation(
-                i18nKey: "Game Info Missing",
+            throw GlobalError.validation(i18nKey: "Game Info Missing",
                 level: .notification
             )
         }
@@ -306,8 +301,7 @@ enum GameResourceHandler {
         gameRepository: GameRepository
     ) async throws {
         guard let gameInfo = gameInfo else {
-            throw GlobalError.validation(
-                i18nKey: "Game Info Missing",
+            throw GlobalError.validation(i18nKey: "Game Info Missing",
                 level: .notification
             )
         }
@@ -336,8 +330,7 @@ enum GameResourceHandler {
             )
 
         if !allSucceeded {
-            throw GlobalError.download(
-                i18nKey: "Dependencies Failed",
+            throw GlobalError.download(i18nKey: "Dependencies Failed",
                 level: .notification
             )
         }
@@ -376,8 +369,7 @@ enum GameResourceHandler {
         gameRepository: GameRepository
     ) async throws {
         guard let gameInfo = gameInfo else {
-            throw GlobalError.validation(
-                i18nKey: "Game Info Missing",
+            throw GlobalError.validation(i18nKey: "Game Info Missing",
                 level: .notification
             )
         }
@@ -391,8 +383,7 @@ enum GameResourceHandler {
             )
 
         if !success {
-            throw GlobalError.download(
-                i18nKey: "Main Resource Failed",
+            throw GlobalError.download(i18nKey: "Main Resource Failed",
                 level: .notification
             )
         }
@@ -431,8 +422,7 @@ enum GameResourceHandler {
         gameRepository: GameRepository
     ) async throws {
         guard let gameInfo = gameInfo else {
-            throw GlobalError.validation(
-                i18nKey: "Game Info Missing",
+            throw GlobalError.validation(i18nKey: "Game Info Missing",
                 level: .notification
             )
         }
@@ -460,8 +450,7 @@ enum GameResourceHandler {
                 from: version.files
             )
         else {
-            throw GlobalError.resource(
-                i18nKey: "Primary File Not Found",
+            throw GlobalError.resource(i18nKey: "Primary File Not Found",
                 level: .notification
             )
         }
@@ -493,8 +482,7 @@ enum GameResourceHandler {
 
             depVM.dependencyDownloadStates[dep.id] = .success
         } catch {
-            throw GlobalError.download(
-                i18nKey: "Dependency Download Failed",
+            throw GlobalError.download(i18nKey: "Dependency Download Failed",
                 level: .notification
             )
         }

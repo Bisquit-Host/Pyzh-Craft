@@ -180,8 +180,7 @@ struct MinecraftLaunchCommand {
         // Directly use the Java path specified by the game
         let javaExecutable = game.javaPath
         guard !javaExecutable.isEmpty else {
-            throw GlobalError.configuration(
-                i18nKey: "Java Path Not Set",
+            throw GlobalError.configuration(i18nKey: "Java Path Not Set",
                 level: .popup
             )
         }
@@ -230,8 +229,7 @@ struct MinecraftLaunchCommand {
                 GameStatusManager.shared.setGameRunning(gameId: game.id, isRunning: false)
             }
 
-            throw GlobalError.gameLaunch(
-                i18nKey: "Process Failed",
+            throw GlobalError.gameLaunch(i18nKey: "Process Failed",
                 level: .popup
             )
         }

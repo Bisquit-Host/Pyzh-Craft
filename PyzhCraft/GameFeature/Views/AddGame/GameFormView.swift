@@ -253,8 +253,7 @@ struct GameFormView: View {
             guard let url = urls.first else { return }
 
             guard url.startAccessingSecurityScopedResource() else {
-                let globalError = GlobalError.fileSystem(
-                    i18nKey: "File Access Failed",
+                let globalError = GlobalError.fileSystem(i18nKey: "File Access Failed",
                     level: .notification
                 )
                 GlobalErrorHandler.shared.handle(globalError)

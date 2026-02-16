@@ -88,8 +88,7 @@ struct GlobalResourceFooter: View {
 
     private func downloadMainOnlyThrowing(game: GameVersionInfo) async throws {
         guard !project.projectId.isEmpty else {
-            throw GlobalError.validation(
-                i18nKey: "Project ID Empty",
+            throw GlobalError.validation(i18nKey: "Project ID Empty",
                 level: .notification
             )
         }
@@ -104,8 +103,7 @@ struct GlobalResourceFooter: View {
             )
 
         if !success {
-            throw GlobalError.download(
-                i18nKey: "Main Resource Failed",
+            throw GlobalError.download(i18nKey: "Main Resource Failed",
                 level: .notification
             )
         }
@@ -133,8 +131,7 @@ struct GlobalResourceFooter: View {
 
     private func downloadAllManualThrowing(game: GameVersionInfo) async throws {
         guard !project.projectId.isEmpty else {
-            throw GlobalError.validation(
-                i18nKey: "Project ID Empty",
+            throw GlobalError.validation(i18nKey: "Project ID Empty",
                 level: .notification
             )
         }
@@ -157,8 +154,7 @@ struct GlobalResourceFooter: View {
             )
 
         if !success {
-            throw GlobalError.download(
-                i18nKey: "Manual Dependencies Failed",
+            throw GlobalError.download(i18nKey: "Manual Dependencies Failed",
                 level: .notification
             )
         }
@@ -184,8 +180,7 @@ struct GlobalResourceFooter: View {
 
     private func downloadResourceThrowing(game: GameVersionInfo) async throws {
         guard !project.projectId.isEmpty else {
-            throw GlobalError.validation(
-                i18nKey: "Project ID Empty",
+            throw GlobalError.validation(i18nKey: "Project ID Empty",
                 level: .notification
             )
         }
@@ -200,8 +195,7 @@ struct GlobalResourceFooter: View {
             )
 
         if !success {
-            throw GlobalError.download(
-                i18nKey: "Resource Download Failed",
+            throw GlobalError.download(i18nKey: "Resource Download Failed",
                 level: .notification
             )
         }

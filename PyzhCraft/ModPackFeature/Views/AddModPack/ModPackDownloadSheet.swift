@@ -451,8 +451,7 @@ struct ModPackDownloadSheet: View {
         ?? selectedVersion.files.first
         
         guard let fileToDownload = primaryFile else {
-            let globalError = GlobalError.resource(
-                i18nKey: "No downloadable file",
+            let globalError = GlobalError.resource(i18nKey: "No downloadable file",
                 level: .notification
             )
             GlobalErrorHandler.shared.handle(globalError)
@@ -514,8 +513,7 @@ struct ModPackDownloadSheet: View {
                     "创建目录失败: \(dir.path), 错误: \(error.localizedDescription)"
                 )
                 GlobalErrorHandler.shared.handle(
-                    GlobalError.fileSystem(
-                        i18nKey: "Directory Creation Failed",
+                    GlobalError.fileSystem(i18nKey: "Directory Creation Failed",
                         level: .notification
                     )
                 )
@@ -582,8 +580,7 @@ struct ModPackDownloadSheet: View {
             Task {
                 await cleanupGameDirectories(gameName: gameName)
             }
-            let globalError = GlobalError.resource(
-                i18nKey: "Modpack dependencies failed",
+            let globalError = GlobalError.resource(i18nKey: "Modpack dependencies failed",
                 level: .notification
             )
             GlobalErrorHandler.shared.handle(globalError)

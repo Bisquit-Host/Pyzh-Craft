@@ -132,8 +132,7 @@ enum CommonService {
 
         // Returns the first matching version, or throws an error if there is none
         guard let firstVersion = filteredVersions.first else {
-            throw GlobalError.resource(
-                i18nKey: "Loader version not found",
+            throw GlobalError.resource(i18nKey: "Loader version not found",
                 level: .notification
             )
         }
@@ -168,8 +167,7 @@ enum CommonService {
                 return result.gameVersions.filter { $0.stable }
             }
         } catch {
-            throw GlobalError.validation(
-                i18nKey: "Version Manifest Parse Failed",
+            throw GlobalError(type: .validation, i18nKey: "Version Manifest Parse Failed",
                 level: .notification
             )
         }

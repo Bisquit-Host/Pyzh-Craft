@@ -24,8 +24,7 @@ enum PlayerSkinService {
     // MARK: - Common Error Helpers
     private static func validateAccessToken(_ player: Player) throws {
         guard !player.authAccessToken.isEmpty else {
-            throw GlobalError.authentication(
-                i18nKey: "Access token is missing, please log in again",
+            throw GlobalError.authentication(i18nKey: "Access token is missing, please log in again",
                 level: .popup
             )
         }
@@ -34,13 +33,11 @@ enum PlayerSkinService {
     private static func handleHTTPError(_ http: HTTPURLResponse, operation: String) throws {
         switch http.statusCode {
         case 400:
-            throw GlobalError.validation(
-                i18nKey: "Invalid request parameters",
+            throw GlobalError.validation(i18nKey: "Invalid request parameters",
                 level: .notification
             )
         case 401:
-            throw GlobalError.authentication(
-                i18nKey: "Access token has expired, please log in again",
+            throw GlobalError.authentication(i18nKey: "Access token has expired, please log in again",
                 level: .popup
             )
         case 403:
@@ -48,13 +45,11 @@ enum PlayerSkinService {
                 level: .notification
             )
         case 404:
-            throw GlobalError.resource(
-                i18nKey: "The requested resource was not found",
+            throw GlobalError.resource(i18nKey: "The requested resource was not found",
                 level: .notification
             )
         case 429:
-            throw GlobalError.network(
-                i18nKey: "Too many requests, please try again later",
+            throw GlobalError.network(i18nKey: "Too many requests, please try again later",
                 level: .notification
             )
         default:
@@ -286,8 +281,7 @@ enum PlayerSkinService {
             return
         case 400:
             Logger.shared.error("Skin upload failed with 400: Invalid skin file or variant")
-            throw GlobalError.validation(
-                i18nKey: "Invalid skin file",
+            throw GlobalError.validation(i18nKey: "Invalid skin file",
                 level: .popup
             )
         default:
@@ -447,28 +441,23 @@ enum PlayerSkinService {
         case 200, 204:
             return
         case 400:
-            throw GlobalError.validation(
-                i18nKey: "Invalid cape ID or request",
+            throw GlobalError.validation(i18nKey: "Invalid cape ID or request",
                 level: .notification
             )
         case 401:
-            throw GlobalError.authentication(
-                i18nKey: "Access token is invalid or expired, please log in again",
+            throw GlobalError.authentication(i18nKey: "Access token is invalid or expired, please log in again",
                 level: .popup
             )
         case 403:
-            throw GlobalError.authentication(
-                i18nKey: "No permission to equip cape (403)",
+            throw GlobalError.authentication(i18nKey: "No permission to equip cape (403)",
                 level: .notification
             )
         case 404:
-            throw GlobalError.resource(
-                i18nKey: "Cape not found or not owned",
+            throw GlobalError.resource(i18nKey: "Cape not found or not owned",
                 level: .notification
             )
         default:
-            throw GlobalError.network(
-                i18nKey: "Show cape failed: HTTP %@",
+            throw GlobalError.network(i18nKey: "Show cape failed: HTTP %@",
                 level: .notification
             )
         }
@@ -508,13 +497,11 @@ enum PlayerSkinService {
         case 200, 204:
             return
         case 401:
-            throw GlobalError.authentication(
-                i18nKey: "Access token is invalid or expired, please log in again",
+            throw GlobalError.authentication(i18nKey: "Access token is invalid or expired, please log in again",
                 level: .popup
             )
         default:
-            throw GlobalError.network(
-                i18nKey: "Hide cape failed: HTTP %@",
+            throw GlobalError.network(i18nKey: "Hide cape failed: HTTP %@",
                 level: .notification
             )
         }
@@ -536,13 +523,11 @@ enum PlayerSkinService {
         case 200, 204:
             return
         case 401:
-            throw GlobalError.authentication(
-                i18nKey: "Access token is invalid or expired, please log in again",
+            throw GlobalError.authentication(i18nKey: "Access token is invalid or expired, please log in again",
                 level: .popup
             )
         default:
-            throw GlobalError.network(
-                i18nKey: "Reset skin failed: HTTP %@",
+            throw GlobalError.network(i18nKey: "Reset skin failed: HTTP %@",
                 level: .notification
             )
         }

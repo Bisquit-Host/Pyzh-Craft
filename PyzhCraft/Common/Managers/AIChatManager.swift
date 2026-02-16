@@ -19,8 +19,7 @@ class AIChatManager: ObservableObject {
     /// Send message
     func sendMessage(_ text: String, attachments: [MessageAttachmentType] = [], chatState: ChatState) async {
         guard !settings.apiKey.isEmpty else {
-            let error = GlobalError.configuration(
-                i18nKey: "OpenAI service not configured, please check API Key",
+            let error = GlobalError.configuration(i18nKey: "OpenAI service not configured, please check API Key",
                 level: .notification
             )
             Logger.shared.error("AI 服务未配置，请检查 API Key")
@@ -32,8 +31,7 @@ class AIChatManager: ObservableObject {
         }
 
         guard !settings.getModel().isEmpty else {
-            let error = GlobalError.configuration(
-                i18nKey: "AI model not configured, please fill in the model name in settings",
+            let error = GlobalError.configuration(i18nKey: "AI model not configured, please fill in the model name in settings",
                 level: .notification
             )
             Logger.shared.error("AI 模型未配置，请在设置中填写模型名称")
@@ -106,7 +104,7 @@ class AIChatManager: ObservableObject {
     private func sendOpenAIMessage(messages: [ChatMessage], chatState: ChatState) async throws {
         let apiURL = settings.getAPIURL()
         guard let url = URL(string: apiURL) else {
-            throw GlobalError(type: .network, i18nKey: "Invalid URL",
+            throw GlobalError.network(i18nKey: "Invalid URL",
                 level: .notification
             )
         }
@@ -226,7 +224,7 @@ class AIChatManager: ObservableObject {
         let apiURL = baseURL + settings.selectedProvider.apiPath
 
         guard let url = URL(string: apiURL) else {
-            throw GlobalError(type: .network, i18nKey: "Invalid URL",
+            throw GlobalError.network(i18nKey: "Invalid URL",
                 level: .notification
             )
         }
@@ -340,7 +338,7 @@ class AIChatManager: ObservableObject {
         let apiURL = "\(settings.selectedProvider.baseURL)/v1/models/\(model):streamGenerateContent?key=\(settings.apiKey.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? settings.apiKey)"
 
         guard let url = URL(string: apiURL) else {
-            throw GlobalError(type: .network, i18nKey: "Invalid URL",
+            throw GlobalError.network(i18nKey: "Invalid URL",
                 level: .notification
             )
         }

@@ -242,8 +242,7 @@ struct LauncherImportView: View {
             // Maintain security-scoped resource access
             guard url.startAccessingSecurityScopedResource() else {
                 GlobalErrorHandler.shared.handle(
-                    GlobalError.fileSystem(
-                        i18nKey: "File Access Failed",
+                    GlobalError.fileSystem(i18nKey: "File Access Failed",
                         level: .notification
                     )
                 )
@@ -256,8 +255,7 @@ struct LauncherImportView: View {
             guard viewModel.validateInstance(at: url) else {
                 let launcherName = viewModel.selectedLauncherType.rawValue
                 GlobalErrorHandler.shared.handle(
-                    GlobalError.fileSystem(
-                        i18nKey: "Invalid Instance Path",
+                    GlobalError.fileSystem(i18nKey: "Invalid Instance Path",
                         level: .notification
                     )
                 )

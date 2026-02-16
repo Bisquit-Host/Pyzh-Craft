@@ -32,8 +32,7 @@ class PlayerDataManager {
         let players = try loadPlayersThrowing()
 
         if playerExists(name: name) {
-            throw GlobalError.player(
-                i18nKey: "Already Exists",
+            throw GlobalError.player(i18nKey: "Already Exists",
                 level: .notification
             )
         }
@@ -76,8 +75,7 @@ class PlayerDataManager {
                 if !credentialStore.saveCredential(credential) {
                     // If saving the credential fails, roll back the profile
                     try? profileStore.deleteProfile(byID: newPlayer.id)
-                    throw GlobalError.validation(
-                        i18nKey: "Failed to save authentication credentials: %@",
+                    throw GlobalError.validation(i18nKey: "Failed to save authentication credentials: %@",
                         level: .notification
                     )
                 }
@@ -85,8 +83,7 @@ class PlayerDataManager {
 
             Logger.shared.debug("已添加新玩家: \(name)")
         } catch {
-            throw GlobalError.player(
-                i18nKey: "Creation Failed",
+            throw GlobalError.player(i18nKey: "Creation Failed",
                 level: .notification
             )
         }
@@ -262,8 +259,7 @@ class PlayerDataManager {
 
         // save credentials
         for credential in credentials where !credentialStore.saveCredential(credential) {
-            throw GlobalError.validation(
-                i18nKey: "Failed to save authentication credentials: %@",
+            throw GlobalError.validation(i18nKey: "Failed to save authentication credentials: %@",
                 level: .notification
             )
         }
@@ -288,8 +284,7 @@ class PlayerDataManager {
         // Update or delete credentials
         if let credential = updatedPlayer.credential {
             if !credentialStore.saveCredential(credential) {
-                throw GlobalError.validation(
-                    i18nKey: "Failed to update authentication credentials",
+                throw GlobalError.validation(i18nKey: "Failed to update authentication credentials",
                     level: .notification
                 )
             }

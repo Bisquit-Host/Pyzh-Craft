@@ -9,8 +9,7 @@ class AppCacheManager {
         do {
             try FileManager.default.createDirectory(at: AppPaths.appCache, withIntermediateDirectories: true)
         } catch {
-            throw GlobalError.fileSystem(
-                i18nKey: "Cache Directory Creation Failed",
+            throw GlobalError.fileSystem(i18nKey: "Cache Directory Creation Failed",
                 level: .notification
             )
         }
@@ -34,8 +33,7 @@ class AppCacheManager {
                 nsDict[key] = data
                 try saveNamespace(namespace, dict: nsDict)
             } catch {
-                throw GlobalError.validation(
-                    i18nKey: "Cache Data Encode Failed",
+                throw GlobalError.validation(i18nKey: "Cache Data Encode Failed",
                     level: .notification
                 )
             }
@@ -69,8 +67,7 @@ class AppCacheManager {
                 do {
                     return try JSONDecoder().decode(T.self, from: data)
                 } catch {
-                    GlobalErrorHandler.shared.handle(GlobalError.validation(
-                        i18nKey: "Cache Data Decode Failed",
+                    GlobalErrorHandler.shared.handle(GlobalError.validation(i18nKey: "Cache Data Decode Failed",
                         level: .silent
                     ))
                     return nil
@@ -137,8 +134,7 @@ class AppCacheManager {
                     try FileManager.default.removeItem(at: file)
                 }
             } catch {
-                throw GlobalError.fileSystem(
-                    i18nKey: "Cache Clear Failed",
+                throw GlobalError.fileSystem(i18nKey: "Cache Clear Failed",
                     level: .notification
                 )
             }
@@ -171,8 +167,7 @@ class AppCacheManager {
             let data = try Data(contentsOf: url)
             return try JSONDecoder().decode([String: Data].self, from: data)
         } catch {
-            throw GlobalError.fileSystem(
-                i18nKey: "Cache Read Failed",
+            throw GlobalError.fileSystem(i18nKey: "Cache Read Failed",
                 level: .notification
             )
         }
@@ -190,8 +185,7 @@ class AppCacheManager {
             let data = try JSONEncoder().encode(dict)
             try data.write(to: url)
         } catch {
-            throw GlobalError.fileSystem(
-                i18nKey: "Cache Write Failed",
+            throw GlobalError.fileSystem(i18nKey: "Cache Write Failed",
                 level: .notification
             )
         }

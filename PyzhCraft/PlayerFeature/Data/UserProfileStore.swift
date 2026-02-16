@@ -35,8 +35,7 @@ class UserProfileStore {
             let decoder = JSONDecoder()
             return try decoder.decode([UserProfile].self, from: profilesData)
         } catch {
-            throw GlobalError.validation(
-                i18nKey: "Failed to load user basic information: %@",
+            throw GlobalError.validation(i18nKey: "Failed to load user basic information: %@",
                 level: .notification
             )
         }
@@ -64,8 +63,7 @@ class UserProfileStore {
             UserDefaults.standard.set(encodedData, forKey: profilesKey)
             Logger.shared.debug("用户基本信息已保存")
         } catch {
-            throw GlobalError.validation(
-                i18nKey: "Failed to save user basic information: %@",
+            throw GlobalError.validation(i18nKey: "Failed to save user basic information: %@",
                 level: .notification
             )
         }
@@ -78,8 +76,7 @@ class UserProfileStore {
         var profiles = try loadProfilesThrowing()
 
         if profiles.contains(where: { $0.id == profile.id }) {
-            throw GlobalError.player(
-                i18nKey: "Already Exists",
+            throw GlobalError.player(i18nKey: "Already Exists",
                 level: .notification
             )
         }
@@ -104,8 +101,7 @@ class UserProfileStore {
         var profiles = try loadProfilesThrowing()
 
         guard let index = profiles.firstIndex(where: { $0.id == profile.id }) else {
-            throw GlobalError.player(
-                i18nKey: "User to update not found: %@",
+            throw GlobalError.player(i18nKey: "User to update not found: %@",
                 level: .notification
             )
         }
@@ -137,8 +133,7 @@ class UserProfileStore {
             try saveProfilesThrowing(profiles)
             Logger.shared.debug("已删除用户 (ID: \(id))")
         } else {
-            throw GlobalError.player(
-                i18nKey: "Not Found",
+            throw GlobalError.player(i18nKey: "Not Found",
                 level: .notification
             )
         }
