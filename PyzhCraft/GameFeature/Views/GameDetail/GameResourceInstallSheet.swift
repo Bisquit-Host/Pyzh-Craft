@@ -23,7 +23,7 @@ struct GameResourceInstallSheet: View {
             header: {
                 Text(
                     String(
-                        format: "Add For Game".localized(),
+                        format: String(localized: "Add For Game"),
                         gameInfo.gameName
                     )
                 )
@@ -181,10 +181,7 @@ struct GameResourceInstallFooter: View {
                                     if isDownloadingAll {
                                         ProgressView().controlSize(.small)
                                     } else {
-                                        Text(
-                                            "Download All"
-                                                .localized()
-                                        )
+                                        Text("Download All")
                                     }
                                 }
                                 .disabled(isDownloadingAll)

@@ -318,7 +318,7 @@ enum MinecraftServerPing {
         let handshakeLength = encodeVarInt(Int32(packetData.count))
         let handshakePacket = handshakeLength + packetData
         connection.send(content: handshakePacket, completion: .contentProcessed { error in
-            if let error = error {
+            if let error {
                 Logger.shared.debug("发送握手包失败: \(error.localizedDescription)")
                 return
             }
@@ -330,7 +330,7 @@ enum MinecraftServerPing {
             let statusRequestLength = encodeVarInt(Int32(statusRequestData.count))
             let statusRequestPacket = statusRequestLength + statusRequestData
             connection.send(content: statusRequestPacket, completion: .contentProcessed { error in
-                if let error = error {
+                if let error {
                     Logger.shared.debug("发送状态请求包失败: \(error.localizedDescription)")
                 }
             })

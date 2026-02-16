@@ -10,9 +10,7 @@ struct ErrorAlertModifier: ViewModifier {
                 errorHandler.currentError?.notificationTitle ?? "",
                 isPresented: .constant(errorHandler.currentError != nil && errorHandler.currentError?.level == .popup)
             ) {
-                Button("Close") {
-                    errorHandler.clearCurrentError()
-                }
+                Button("Close", action: errorHandler.clearCurrentError)
             } message: {
                 if let error = errorHandler.currentError {
                     Text(error.localizedDescription)

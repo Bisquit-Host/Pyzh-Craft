@@ -50,7 +50,7 @@ struct LitematicaFileRow: View {
                     .font(.headline)
 
                 if let author = file.author {
-                    Text(String(format: "Author: %@".localized(), author))
+                    Text(String(format: String(localized: "Author: %@"), author))
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -64,13 +64,13 @@ struct LitematicaFileRow: View {
 
                 HStack(spacing: 8) {
                     if let regionCount = file.regionCount {
-                        Label(String(format: "Regions: %d".localized(), regionCount), systemImage: "square.grid.2x2")
+                        Label(String(format: String(localized: "Regions: %d"), regionCount), systemImage: "square.grid.2x2")
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }
 
                     if let totalBlocks = file.totalBlocks {
-                        Label(String(format: "Blocks: %d".localized(), totalBlocks), systemImage: "cube")
+                        Label(String(format: String(localized: "Blocks: %d"), totalBlocks), systemImage: "cube")
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }

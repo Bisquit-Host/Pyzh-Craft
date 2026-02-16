@@ -32,7 +32,7 @@ public struct SidebarView: View {
                             Image(systemName: type.systemImage)
                                 .frame(width: 16, height: 16)
                                 .foregroundColor(.secondary)
-                            Text(type.localizedName)
+                            Text(type.localizedNameKey)
                         }
                     }
                 }
@@ -123,7 +123,7 @@ public struct SidebarView: View {
         } message: {
             if let game = gameToDelete {
                 Text(
-                    String(format: "Are you sure you want to delete the game \"%@\" and all its data? (This will take a very long time)".localized(), game.gameName)
+                    String(format: String(localized: "Are you sure you want to delete the game \"%@\" and all its data? (This will take a very long time)"), game.gameName)
                 )
             }
         }
@@ -229,7 +229,9 @@ private struct GameContextMenu: View {
             toggleGameState()
         }, label: {
             Label(
-                isRunning ? "Stop".localized() : "Start".localized(),
+                isRunning
+                    ? LocalizedStringKey("Stop")
+                    : LocalizedStringKey("Start"),
                 systemImage: isRunning ? "stop.fill" : "play.fill"
             )
         })

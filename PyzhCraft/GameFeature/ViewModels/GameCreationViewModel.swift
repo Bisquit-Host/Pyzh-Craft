@@ -277,7 +277,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
             provider.loadDataRepresentation(
                 forTypeIdentifier: UTType.image.identifier
             ) { data, error in
-                if let error = error {
+                if let error {
                     DispatchQueue.main.async {
                         let globalError = GlobalError.from(error)
                         self.handleNonCriticalError(

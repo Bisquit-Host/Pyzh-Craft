@@ -138,7 +138,7 @@ struct GameFormView: View {
     private var headerView: some View {
         VStack(spacing: 12) {
             HStack {
-                Text("\(currentModeTitle)")
+                Text(currentModeTitle)
                     .font(.headline)
                 Spacer()
                 importModePicker
@@ -146,14 +146,14 @@ struct GameFormView: View {
         }
     }
 
-    private var currentModeTitle: String {
+    private var currentModeTitle: LocalizedStringKey {
         switch mode {
         case .creation:
-            return "New".localized()
+            return LocalizedStringKey("New")
         case .modPackImport:
-            return "Import Modpack".localized()
+            return LocalizedStringKey("Import Modpack")
         case .launcherImport:
-            return "Import Launcher".localized()
+            return LocalizedStringKey("Import Launcher")
         }
     }
 
@@ -209,7 +209,11 @@ struct GameFormView: View {
                 dismiss()
             }
         } label: {
-            Text(isDownloading ? "Stop".localized() : "Cancel".localized())
+            Text(
+                isDownloading
+                    ? LocalizedStringKey("Stop")
+                    : LocalizedStringKey("Cancel")
+            )
         }
         .keyboardShortcut(.cancelAction)
     }
@@ -223,14 +227,14 @@ struct GameFormView: View {
                     ProgressView()
                         .controlSize(.small)
                 } else {
-                    let buttonText: String = {
+                    let buttonText: LocalizedStringKey = {
                         switch mode {
                         case .modPackImport:
-                            return "Import".localized()
+                            return LocalizedStringKey("Import")
                         case .launcherImport:
-                            return "Import".localized()
+                            return LocalizedStringKey("Import")
                         case .creation:
-                            return "Confirm".localized()
+                            return LocalizedStringKey("Confirm")
                         }
                     }()
                     Text(buttonText)

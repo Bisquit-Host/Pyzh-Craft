@@ -77,8 +77,8 @@ public struct DetailToolbarView: ToolbarContent {
                         } else {
                             Label(
                                 isRunning
-                                ? "Stop".localized()
-                                : "Start".localized(),
+                                    ? LocalizedStringKey("Stop")
+                                    : LocalizedStringKey("Start"),
                                 systemImage: isRunning
                                 ? "stop.fill" : "play.fill"
                             )
@@ -134,8 +134,8 @@ public struct DetailToolbarView: ToolbarContent {
     }
     private var currentResourceTypeTitle: String {
         detailState.gameType
-            ? "Resource Library".localized()
-            : "Installed".localized()
+            ? String(localized: "Resource Library")
+            : String(localized: "Installed")
     }
 
     private var resourcesMenu: some View {
@@ -176,19 +176,19 @@ public struct DetailToolbarView: ToolbarContent {
     private func resourceTypeTitle(for type: String) -> String {
         switch type.lowercased() {
         case "mod":
-            "Mod".localized()
+            String(localized: "Mod")
         case "datapack":
-            "Data Pack".localized()
+            String(localized: "Data Pack")
         case "shader":
-            "Shader".localized()
+            String(localized: "Shader")
         case "resourcepack":
-            "Resource Pack".localized()
+            String(localized: "Resource Pack")
         case "modpack":
-            "Modpack".localized()
+            String(localized: "Modpack")
         case "local":
-            "Installed".localized()
+            String(localized: "Installed")
         case "server":
-            "Resource Library".localized()
+            String(localized: "Resource Library")
         default:
             type.capitalized
         }
@@ -197,12 +197,12 @@ public struct DetailToolbarView: ToolbarContent {
     private var dataSourceMenu: some View {
         Menu {
             ForEach(DataSource.allCases, id: \.self) { source in
-                Button(source.localizedName) {
+                Button(source.localizedNameKey) {
                     filterState.dataSource = source
                 }
             }
         } label: {
-            Label(filterState.dataSource.localizedName, systemImage: "network")
+            Label(filterState.dataSource.localizedNameKey, systemImage: "network")
                 .labelStyle(.titleOnly)
         }
     }

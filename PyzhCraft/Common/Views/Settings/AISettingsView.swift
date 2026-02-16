@@ -12,10 +12,8 @@ public struct AISettingsView: View {
                     }
                 }
                 .labelsHidden()
-                .if(
-                    ProcessInfo.processInfo.operatingSystemVersion.majorVersion
-                        < 26
-                ) { view in
+                
+                .if(ProcessInfo.processInfo.operatingSystemVersion.majorVersion < 26) { view in
                     view.fixedSize()
                 }
             }
@@ -34,14 +32,16 @@ public struct AISettingsView: View {
                     }
                     .frame(width: 300)
                     .focusable(false)
-                    Button(action: {
+                    
+                    Button {
                         showApiKey.toggle()
-                    }, label: {
+                    } label: {
                         Image(systemName: showApiKey ? "eye.slash" : "eye")
-                    })
+                    }
                     .buttonStyle(.plain)
                     .applyReplaceTransition()
-                    InfoIconWithPopover(text: "API key is stored locally only and will not be shared".localized())
+                    
+                    InfoIconWithPopover(text: String(localized: "API key is stored locally only and will not be shared"))
                 }
             }
             .labeledContentStyle(.custom)
@@ -69,7 +69,7 @@ public struct AISettingsView: View {
                             .frame(width: 180)
                             .fixedSize()
                             .focusable(false)
-                        InfoIconWithPopover(text: "Custom API URL (leave empty to use default address)".localized())
+                        InfoIconWithPopover(text: String(localized: "Custom API URL (leave empty to use default address)"))
                     }
                 }
                 .labeledContentStyle(.custom)
@@ -84,7 +84,7 @@ public struct AISettingsView: View {
                         .frame(width: 180)
                         .fixedSize()
                         .focusable(false)
-                    InfoIconWithPopover(text: "The model name to use (required)".localized())
+                    InfoIconWithPopover(text: String(localized: "The model name to use (required)"))
                 }
             }
             .labeledContentStyle(.custom)
@@ -106,7 +106,7 @@ public struct AISettingsView: View {
                             .frame(maxWidth: 300)
                             .fixedSize()
                             .focusable(false)
-                        InfoIconWithPopover(text: "MC skin direct link, must be 64x64 pixels".localized())
+                        InfoIconWithPopover(text: String(localized: "MC skin direct link, must be 64x64 pixels"))
                     }
                 }
             }

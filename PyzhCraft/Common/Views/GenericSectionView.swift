@@ -62,7 +62,7 @@ struct GenericSectionView<Item: Identifiable, ChipContent: View>: View {
             let overflowItems = customOverflowItems ?? items.computeVisibleAndOverflowItems(maxItems: maxItems).1
 
             HStack {
-                Text(title.localized())
+                Text(LocalizedStringKey(title))
                     .font(.headline)
                 Spacer()
                 if !overflowItems.isEmpty {

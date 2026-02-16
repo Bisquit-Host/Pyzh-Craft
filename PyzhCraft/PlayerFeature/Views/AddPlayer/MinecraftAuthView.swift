@@ -125,7 +125,7 @@ struct MinecraftAuthView: View {
 
                 Text(
                     String(
-                        format: "UUID: %@".localized(),
+                        format: String(localized: "UUID: %@"),
                         profile.id
                     )
                 )

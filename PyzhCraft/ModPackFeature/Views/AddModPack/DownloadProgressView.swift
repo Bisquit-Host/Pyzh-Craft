@@ -161,13 +161,13 @@ struct DownloadProgressView: View {
     private func getLoaderTitle(for loaderType: String) -> String {
         switch loaderType.lowercased() {
         case "fabric":
-            return "Fabric Loader".localized()
+            return String(localized: "Fabric Loader")
         case "quilt":
-            return "QuiltMC Loader".localized()
+            return String(localized: "QuiltMC Loader")
         case "forge":
-            return "Forge Loader".localized()
+            return String(localized: "Forge Loader")
         case "neoforge":
-            return "NeoForge Loader".localized()
+            return String(localized: "NeoForge Loader")
         default:
             return ""
         }

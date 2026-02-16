@@ -37,7 +37,7 @@ struct PlayerInfoSectionView: View {
                 }
             } else {
                 ContentUnavailableView(
-                    "No Player Selected".localized(),
+                    String(localized: "No Player Selected"),
                     systemImage: "person",
                     description: Text("Please add a player first")
                 )

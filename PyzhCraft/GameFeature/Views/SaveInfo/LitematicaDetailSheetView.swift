@@ -92,18 +92,18 @@ struct LitematicaDetailSheetView: View {
                 HStack {
                     // Basic information
                     infoSection(title: "Basic") {
-                        infoRow(label: "Name".localized(), value: metadata.name)
-                        infoRow(label: "Author".localized(), value: metadata.author.isEmpty ? "Unknown".localized() : metadata.author)
+                        infoRow(label: String(localized: "Name"), value: metadata.name)
+                        infoRow(label: String(localized: "Author"), value: metadata.author.isEmpty ? String(localized: "Unknown") : metadata.author)
                         if !metadata.description.isEmpty {
-                            infoRow(label: "Description".localized(), value: metadata.description, isMultiline: true)
+                            infoRow(label: String(localized: "Description"), value: metadata.description, isMultiline: true)
                         }
                     }
 
                     // time information
                     infoSection(title: "Time") {
                         VStack(alignment: .leading, spacing: 12) {
-                            infoRow(label: "Created".localized(), value: formatTimestamp(metadata.timeCreated))
-                            infoRow(label: "Modified".localized(), value: formatTimestamp(metadata.timeModified))
+                            infoRow(label: String(localized: "Created"), value: formatTimestamp(metadata.timeCreated))
+                            infoRow(label: String(localized: "Modified"), value: formatTimestamp(metadata.timeModified))
                         }
                     }
                 }
@@ -116,26 +116,26 @@ struct LitematicaDetailSheetView: View {
                         let hasSize = metadata.enclosingSize.x > 0 || metadata.enclosingSize.y > 0 || metadata.enclosingSize.z > 0
                         if hasSize {
                             infoRow(
-                                label: "Enclosing Size".localized(),
+                                label: String(localized: "Enclosing Size"),
                                 value: "\(metadata.enclosingSize.x) × \(metadata.enclosingSize.y) × \(metadata.enclosingSize.z)"
                             )
                         } else {
-                            infoRow(label: "Enclosing Size".localized(), value: "Unknown".localized())
+                            infoRow(label: String(localized: "Enclosing Size"), value: String(localized: "Unknown"))
                         }
 
                         if metadata.totalVolume > 0 {
-                            infoRow(label: "Total Volume".localized(), value: formatNumber(Int(metadata.totalVolume)))
+                            infoRow(label: String(localized: "Total Volume"), value: formatNumber(Int(metadata.totalVolume)))
                         } else {
-                            infoRow(label: "Total Volume".localized(), value: "Unknown".localized())
+                            infoRow(label: String(localized: "Total Volume"), value: String(localized: "Unknown"))
                         }
 
                         if metadata.totalBlocks > 0 {
-                            infoRow(label: "Total Blocks".localized(), value: formatNumber(Int(metadata.totalBlocks)))
+                            infoRow(label: String(localized: "Total Blocks"), value: formatNumber(Int(metadata.totalBlocks)))
                         } else {
-                            infoRow(label: "Total Blocks".localized(), value: "Unknown".localized())
+                            infoRow(label: String(localized: "Total Blocks"), value: String(localized: "Unknown"))
                         }
 
-                        infoRow(label: "Regions".localized(), value: "\(metadata.regionCount)")
+                        infoRow(label: String(localized: "Regions"), value: "\(metadata.regionCount)")
                     }
                 }
             }
@@ -209,7 +209,7 @@ struct LitematicaDetailSheetView: View {
                     self.metadata = metadata
                 } else {
                     Logger.shared.warning("投影元数据为nil: \(filePath.lastPathComponent)")
-                    self.errorMessage = "Unable to parse schematic metadata. The file may be corrupted or in an unsupported format.".localized()
+                    self.errorMessage = String(localized: "Unable to parse schematic metadata. The file may be corrupted or in an unsupported format.")
                 }
                 self.isLoading = false
             }
@@ -217,7 +217,7 @@ struct LitematicaDetailSheetView: View {
             Logger.shared.error("加载投影详细信息失败: \(error.localizedDescription)")
             await MainActor.run {
                 self.isLoading = false
-                self.errorMessage = String(format: "Failed to load schematic information: %@".localized(), error.localizedDescription)
+                self.errorMessage = String(format: String(localized: "Failed to load schematic information: %@"), error.localizedDescription)
                 self.showError = true
             }
         }
@@ -231,7 +231,7 @@ struct LitematicaDetailSheetView: View {
 
     private func formatTimestamp(_ timestamp: Int64) -> String {
         guard timestamp > 0 else {
-            return "Unknown".localized()
+            return String(localized: "Unknown")
         }
 
         let date = Date(timeIntervalSince1970: TimeInterval(timestamp) / 1000.0)

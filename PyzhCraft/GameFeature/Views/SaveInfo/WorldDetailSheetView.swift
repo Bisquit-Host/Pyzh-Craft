@@ -90,27 +90,27 @@ struct WorldDetailSheetView: View {
                 HStack(alignment: .top, spacing: 24) {
                     // Basic information
                     infoSection(title: "Basic Information") {
-                        infoRow(label: "World Name".localized(), value: metadata.levelName)
-                        infoRow(label: "Save Folder".localized(), value: metadata.folderName)
+                        infoRow(label: String(localized: "World Name"), value: metadata.levelName)
+                        infoRow(label: String(localized: "Save Folder"), value: metadata.folderName)
                         if let versionName = metadata.versionName {
-                            infoRow(label: "Game Version".localized(), value: versionName)
+                            infoRow(label: String(localized: "Game Version"), value: versionName)
                         }
                         if let versionId = metadata.versionId {
-                            infoRow(label: "Version ID".localized(), value: "\(versionId)")
+                            infoRow(label: String(localized: "Version ID"), value: "\(versionId)")
                         }
                         if let dataVersion = metadata.dataVersion {
-                            infoRow(label: "Data Version".localized(), value: "\(dataVersion)")
+                            infoRow(label: String(localized: "Data Version"), value: "\(dataVersion)")
                         }
                     }
 
                     // game settings
                     infoSection(title: "Game Settings") {
-                        infoRow(label: "Game Mode".localized(), value: metadata.gameMode)
-                        infoRow(label: "Difficulty".localized(), value: metadata.difficulty)
-                        infoRow(label: "Hardcore Mode".localized(), value: metadata.hardcore ? "Yes".localized() : "No".localized())
-                        infoRow(label: "Allow Cheats".localized(), value: metadata.cheats ? "Yes".localized() : "No".localized())
+                        infoRow(label: String(localized: "Game Mode"), value: metadata.gameMode)
+                        infoRow(label: String(localized: "Difficulty"), value: metadata.difficulty)
+                        infoRow(label: String(localized: "Hardcore Mode"), value: metadata.hardcore ? String(localized: "Yes") : String(localized: "No"))
+                        infoRow(label: String(localized: "Allow Cheats"), value: metadata.cheats ? String(localized: "Yes") : String(localized: "No"))
                         if let seed = metadata.seed {
-                            infoRow(label: "World Seed".localized(), value: "\(seed)")
+                            infoRow(label: String(localized: "World Seed"), value: "\(seed)")
                         }
                     }
                 }
@@ -118,22 +118,22 @@ struct WorldDetailSheetView: View {
                 // Other information
                 infoSection(title: "Other Information") {
                     if let lastPlayed = metadata.lastPlayed {
-                        infoRow(label: "Last Played".localized(), value: formatDate(lastPlayed))
+                        infoRow(label: String(localized: "Last Played"), value: formatDate(lastPlayed))
                     }
                     if let spawn = metadata.spawn {
-                        infoRow(label: "Spawn Point".localized(), value: spawn)
+                        infoRow(label: String(localized: "Spawn Point"), value: spawn)
                     }
                     if let time = metadata.time {
-                        infoRow(label: "Time".localized(), value: "\(time)")
+                        infoRow(label: String(localized: "Time"), value: "\(time)")
                     }
                     if let dayTime = metadata.dayTime {
-                        infoRow(label: "DayTime".localized(), value: "\(dayTime)")
+                        infoRow(label: String(localized: "DayTime"), value: "\(dayTime)")
                     }
                     if let weather = metadata.weather {
-                        infoRow(label: "Weather".localized(), value: weather)
+                        infoRow(label: String(localized: "Weather"), value: weather)
                     }
                     if let border = metadata.worldBorder {
-                        infoRow(label: "World Border".localized(), value: border, isMultiline: true)
+                        infoRow(label: String(localized: "World Border"), value: border, isMultiline: true)
                     }
                 }
 
@@ -298,20 +298,20 @@ struct WorldDetailSheetView: View {
         } catch WorldDetailLoadError.levelDatNotFound {
             await MainActor.run {
                 self.isLoading = false
-                self.errorMessage = "level.dat file not found".localized()
+                self.errorMessage = String(localized: "level.dat file not found")
                 self.showError = true
             }
         } catch WorldDetailLoadError.invalidStructure {
             await MainActor.run {
                 self.isLoading = false
-                self.errorMessage = "level.dat structure is invalid (missing Data tag)".localized()
+                self.errorMessage = String(localized: "level.dat structure is invalid (missing Data tag)")
                 self.showError = true
             }
         } catch {
             Logger.shared.error("加载世界详细信息失败: \(error.localizedDescription)")
             await MainActor.run {
                 self.isLoading = false
-                self.errorMessage = String(format: "Failed to load world information: %@".localized(), error.localizedDescription)
+                self.errorMessage = String(format: String(localized: "Failed to load world information: %@"), error.localizedDescription)
                 self.showError = true
             }
         }
@@ -327,13 +327,13 @@ struct WorldDetailSheetView: View {
         }
 
         // GameType: 0 Survival, 1 Creation, 2 Adventure, 3 Spectator
-        var gameMode = "Unknown".localized()
+        var gameMode = String(localized: "Unknown")
         if let gt = WorldNBTMapper.readInt64(dataTag["GameType"]) {
             gameMode = WorldNBTMapper.mapGameMode(Int(gt))
         }
 
         // Difficulty: The old version is a numerical value, the new version (26+) is usually the difficulty_settings.difficulty string
-        var difficulty = "Unknown".localized()
+        var difficulty = String(localized: "Unknown")
         if let diff = WorldNBTMapper.readInt64(dataTag["Difficulty"]) {
             difficulty = WorldNBTMapper.mapDifficulty(Int(diff))
         } else if let ds = dataTag["difficulty_settings"] as? [String: Any],
@@ -399,11 +399,11 @@ struct WorldDetailSheetView: View {
         var weather: String?
         if let rainingFlag = dataTag["raining"] {
             let raining = WorldNBTMapper.readBoolFlag(rainingFlag)
-            weather = raining ? "Rain".localized() : "Clear".localized()
+            weather = raining ? String(localized: "Rain") : String(localized: "Clear")
         }
         if let thunderingFlag = dataTag["thundering"] {
             let thundering = WorldNBTMapper.readBoolFlag(thunderingFlag)
-            let t = thundering ? "Thunderstorm".localized() : nil
+            let t = thundering ? String(localized: "Thunderstorm") : nil
             if let t {
                 weather = weather.map { "\($0), \(t)" } ?? t
             }

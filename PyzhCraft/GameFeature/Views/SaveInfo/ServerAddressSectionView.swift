@@ -410,13 +410,17 @@ struct ServerAddressEditView: View {
             }
             Button("Cancel", role: .cancel) { }
         } message: {
-            Text(String(format: "Are you sure you want to delete server \"%@\"? This action cannot be undone.".localized(), serverName))
+            Text(String(format: String(localized: "Are you sure you want to delete server \"%@\"? This action cannot be undone."), serverName))
         }
     }
 
     private var headerView: some View {
         HStack {
-            Text(isNewServer ? "Add Server".localized() : "Edit Server".localized())
+            Text(
+                isNewServer
+                    ? LocalizedStringKey("Add Server")
+                    : LocalizedStringKey("Edit Server")
+            )
                 .font(.headline)
             Spacer()
             if let shareText = shareTextForServer, !shareText.isEmpty {
@@ -552,7 +556,7 @@ struct ServerAddressEditView: View {
         let trimmedAddress = serverAddress.trimmingCharacters(in: .whitespaces)
 
         guard !trimmedName.isEmpty && !trimmedAddress.isEmpty else {
-            errorMessage = "Please fill in all required fields".localized()
+            errorMessage = String(localized: "Please fill in all required fields")
             showError = true
             return
         }

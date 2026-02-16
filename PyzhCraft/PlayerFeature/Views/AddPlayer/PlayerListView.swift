@@ -129,7 +129,7 @@ struct PlayerListView: View {
                 playerToDelete = nil
             }
         } message: {
-            Text(String(format: "Are you sure you want to remove %@?".localized(), playerToDelete?.name ?? ""))
+            Text(String(format: String(localized: "Are you sure you want to remove %@?"), playerToDelete?.name ?? ""))
         }
     }
 }

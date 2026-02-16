@@ -28,7 +28,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
 
         guard let authURL = buildAuthorizationURL() else {
             isLoading = false
-            authState = .error("Authentication failed".localized())
+            authState = .error(String(localized: "Authentication failed"))
             return
         }
 
@@ -38,18 +38,18 @@ class MinecraftAuthService: NSObject, ObservableObject {
                 callbackURLScheme: AppConstants.callbackURLScheme
             ) { [weak self] callbackURL, error in
                 Task { @MainActor in
-                    if let error = error {
+                    if let error {
                         if let authError = error as? ASWebAuthenticationSessionError {
                             if authError.code == .canceledLogin {
                                 Logger.shared.info("用户取消了 Microsoft 认证")
                                 self?.authState = .notAuthenticated
                             } else {
                                                         Logger.shared.error("Microsoft 认证失败: \(authError.localizedDescription)")
-                        self?.authState = .error("Authentication failed".localized())
+                        self?.authState = .error(String(localized: "Authentication failed"))
                             }
                         } else {
                                                     Logger.shared.error("Microsoft 认证发生未知错误: \(error.localizedDescription)")
-                        self?.authState = .error("Authentication failed".localized())
+                        self?.authState = .error(String(localized: "Authentication failed"))
                         }
                         self?.isLoading = false
                         continuation.resume()
@@ -59,7 +59,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
                     guard let callbackURL = callbackURL,
                           let authResponse = AuthorizationCodeResponse(from: callbackURL) else {
                         Logger.shared.error("Microsoft 无效的回调 URL")
-                        self?.authState = .error("Invalid callback URL".localized())
+                        self?.authState = .error(String(localized: "Invalid callback URL"))
                         self?.isLoading = false
                         continuation.resume()
                         return
@@ -87,7 +87,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
                     // Check whether the authorization code was successfully obtained
                     guard authResponse.isSuccess, let code = authResponse.code else {
                         Logger.shared.error("未获取到授权码")
-                        self?.authState = .error("No authorization code received".localized())
+                        self?.authState = .error(String(localized: "No authorization code received"))
                         self?.isLoading = false
                         continuation.resume()
                         return

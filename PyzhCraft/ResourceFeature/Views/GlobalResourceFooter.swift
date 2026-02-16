@@ -36,10 +36,7 @@ struct GlobalResourceFooter: View {
                                         if isDownloadingAll {
                                             ProgressView().controlSize(.small)
                                         } else {
-                                            Text(
-                                                "Download All"
-                                                    .localized()
-                                            )
+                                            Text("Download All")
                                         }
                                     }
                                     .disabled(isDownloadingAll)

@@ -18,7 +18,7 @@ public struct GameSettingsView: View {
             LabeledContent("Default API Source") {
                 Picker("", selection: $gameSettings.defaultAPISource) {
                     ForEach(DataSource.allCases, id: \.self) { source in
-                        Text(source.localizedName).tag(source)
+                        Text(source.localizedNameKey).tag(source)
                     }
                 }
 
@@ -78,7 +78,7 @@ public struct GameSettingsView: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
                     InfoIconWithPopover(
-                        text: "Set the minimum and maximum memory allocation for Minecraft. The minimum value (Xms) is the initial memory allocated when the game starts, and the maximum value (Xmx) is the maximum memory the game can use.".localized()
+                        text: String(localized: "Set the minimum and maximum memory allocation for Minecraft. The minimum value (Xms) is the initial memory allocated when the game starts, and the maximum value (Xmx) is the maximum memory the game can use.")
                     )
                 }
             } label: {

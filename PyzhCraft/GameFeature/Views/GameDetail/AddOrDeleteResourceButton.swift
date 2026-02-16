@@ -141,7 +141,7 @@ struct AddOrDeleteResourceButton: View {
             } message: {
                 Text(
                     String(
-                        format: "Are you sure you want to delete \"%@\"? Deletion may cause game launch failure".localized(),
+                        format: String(localized: "Are you sure you want to delete \"%@\"? Deletion may cause game launch failure"),
                         project.title
                     )
                 )
@@ -278,8 +278,8 @@ struct AddOrDeleteResourceButton: View {
             AnyView(
                 Text(
                     (!type
-                        ? "Delete".localized()
-                        : "Installed".localized())
+                        ? LocalizedStringKey("Delete")
+                        : LocalizedStringKey("Installed"))
                 )
             )
         case .update:

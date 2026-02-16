@@ -22,10 +22,10 @@ struct GlobalResourceSheet: View {
                 Text(
                     selectedGame.map {
                         String(
-                            format: "Add For Game".localized(),
+                            format: String(localized: "Add For Game"),
                             $0.gameName
                         )
-                    } ?? "Add".localized()
+                    } ?? String(localized: "Add")
                 )
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)

@@ -69,8 +69,6 @@ enum CurseForgeManifestParser {
             Logger.shared.info("解析 CurseForge manifest.json 成功: \(manifest.name) v\(modPackVersion)")
             if manifest.version == nil {
                 Logger.shared.info("⚠️ 整合包缺少version字段，已自动生成版本: \(modPackVersion)")
-                // Localized messages can also be used (if required to be displayed to the user)
-                // Logger.shared.info("modpack.version.auto_generated".localized(modPackVersion))
             }
             Logger.shared.info("游戏版本: \(manifest.minecraft.version), 加载器: \(loaderInfo.type) \(loaderInfo.version)")
             Logger.shared.info("文件数量: \(manifest.files.count)")

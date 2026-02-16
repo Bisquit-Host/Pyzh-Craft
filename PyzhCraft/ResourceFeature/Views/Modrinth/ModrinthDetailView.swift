@@ -163,7 +163,7 @@ struct ModrinthDetailView: View {
                 error = nil
             }
         } message: {
-            if let error = error {
+            if let error {
                 Text(error.chineseMessage)
             }
         }
@@ -255,7 +255,7 @@ struct ModrinthDetailView: View {
     // MARK: - Result List
     @ViewBuilder private var listContent: some View {
         Group {
-            if let error = error {
+            if let error {
                 newErrorView(error)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .listRowSeparator(.hidden)

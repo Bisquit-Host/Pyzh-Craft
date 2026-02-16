@@ -84,9 +84,9 @@ struct CapeSelectionView: View {
             if let playerProfile = playerProfile, let capes = playerProfile.capes, !capes.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
-                        capeOption(id: nil, name: "No Cape".localized(), isSystemOption: true)
+                        capeOption(id: nil, name: String(localized: "No Cape"), isSystemOption: true)
                         ForEach(capes, id: \.id) { cape in
-                            capeOption(id: cape.id, name: cape.alias ?? "Cape".localized(), imageURL: cape.url)
+                            capeOption(id: cape.id, name: cape.alias ?? String(localized: "Cape"), imageURL: cape.url)
                         }
                     }.padding(4)
                 }

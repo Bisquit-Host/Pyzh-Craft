@@ -939,7 +939,7 @@ private class ModPackDownloadProgressTracker: NSObject, URLSessionDownloadDelega
         task: URLSessionTask,
         didCompleteWithError error: Error?
     ) {
-        if let error = error {
+        if let error {
             completionHandler?(.failure(error))
         }
     }

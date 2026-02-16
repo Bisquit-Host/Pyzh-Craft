@@ -575,7 +575,7 @@ private class DownloadProgressTracker: NSObject, URLSessionDownloadDelegate {
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        if let error = error {
+        if let error {
             completionHandler?(.failure(error))
         }
     }

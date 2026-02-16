@@ -10,7 +10,11 @@ enum Contribution: String, CaseIterable {
     case infra = "Infra"
 
     var localizedString: String {
-        rawValue.localized()
+        LanguageManager.shared.bundle.localizedString(
+            forKey: rawValue,
+            value: rawValue,
+            table: nil
+        )
     }
 
     var color: Color {

@@ -62,7 +62,7 @@ struct GameAdvancedSettingsView: View {
                 DirectorySettingRow(
                     title: "Java Path",
                     path: javaPath.isEmpty ? (currentGame?.javaPath ?? "") : javaPath,
-                    description: "The path to the Java executable file. Click to choose or reset to the default path.".localized(),
+                    description: String(localized: "The path to the Java executable file. Click to choose or reset to the default path."),
                     onChoose: { showJavaPathPicker = true },
                     onReset: {
                         resetJavaPathSafely()
@@ -159,7 +159,7 @@ struct GameAdvancedSettingsView: View {
                         .lineLimit(2...4)
                         .frame(width: 200)
                         .onChange(of: customJvmArguments) { _, _ in autoSave() }
-                    InfoIconWithPopover(text: "Note: Custom parameters will override the optimization settings above".localized())
+                    InfoIconWithPopover(text: String(localized: "Note: Custom parameters will override the optimization settings above"))
                 }
             }
             .labeledContentStyle(.custom(alignment: .firstTextBaseline))
@@ -173,7 +173,7 @@ struct GameAdvancedSettingsView: View {
                         .lineLimit(2...4)
                         .frame(width: 200)
                         .onChange(of: environmentVariables) { _, _ in autoSave() }
-                    InfoIconWithPopover(text: "For example: `JAVA_OPTS=-Dfile.encoding=UTF-8`".localized())
+                    InfoIconWithPopover(text: String(localized: "For example: `JAVA_OPTS=-Dfile.encoding=UTF-8`"))
                 }
             } label: {
                 Text("Environment Variables")
@@ -200,7 +200,7 @@ struct GameAdvancedSettingsView: View {
                 error = nil
             }
         } message: {
-            if let error = error {
+            if let error {
                 Text(error.localizedDescription)
             }
         }
@@ -539,22 +539,22 @@ enum GarbageCollector: String, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .g1gc: "G1GC (recommended)".localized()
-        case .zgc: "ZGC (Low Latency)".localized()
-        case .shenandoah: "Shenandoah (Low Pause)".localized()
-        case .parallel: "ParallelGC (High Throughput)".localized()
-        case .serial: "SerialGC (Single Thread)".localized()
+        case .g1gc: String(localized: "G1GC (recommended)")
+        case .zgc: String(localized: "ZGC (Low Latency)")
+        case .shenandoah: String(localized: "Shenandoah (Low Pause)")
+        case .parallel: String(localized: "ParallelGC (High Throughput)")
+        case .serial: String(localized: "SerialGC (Single Thread)")
         }
     }
 
     var description: String {
         switch self {
-        case .g1gc: "G1 garbage collector, balancing performance and latency, suitable for most scenarios".localized()
-        case .zgc: "ZGC garbage collector, extremely low latency, suitable for scenarios with extremely high response time requirements".localized()
+        case .g1gc: String(localized: "G1 garbage collector, balancing performance and latency, suitable for most scenarios")
+        case .zgc: String(localized: "ZGC garbage collector, extremely low latency, suitable for scenarios with extremely high response time requirements")
         case .shenandoah:
-            "Shenandoah garbage collector, low pause time, suitable for scenarios requiring stable performance".localized()
-        case .parallel: "Parallel garbage collector, high throughput, suitable for background processing tasks".localized()
-        case .serial: "Serial garbage collector, single-threaded, suitable for small memory applications".localized()
+            String(localized: "Shenandoah garbage collector, low pause time, suitable for scenarios requiring stable performance")
+        case .parallel: String(localized: "Parallel garbage collector, high throughput, suitable for background processing tasks")
+        case .serial: String(localized: "Serial garbage collector, single-threaded, suitable for small memory applications")
         }
     }
 
@@ -576,25 +576,25 @@ enum OptimizationPreset: String, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .disabled: "None".localized()
-        case .basic: "Basic".localized()
+        case .disabled: String(localized: "None")
+        case .basic: String(localized: "Basic")
         case .balanced:
-            "Balanced".localized()
+            String(localized: "Balanced")
         case .maximum:
-            "Maximum".localized()
+            String(localized: "Maximum")
         }
     }
 
     var description: String {
         switch self {
         case .disabled:
-            "No JVM optimizations enabled".localized()
+            String(localized: "No JVM optimizations enabled")
         case .basic:
-            "Basic JVM optimizations for improved performance".localized()
+            String(localized: "Basic JVM optimizations for improved performance")
         case .balanced:
-            "Balanced optimizations for good performance and stability (recommended)".localized()
+            String(localized: "Balanced optimizations for good performance and stability (recommended)")
         case .maximum:
-            "Maximum optimizations including Aikar flags for best performance".localized()
+            String(localized: "Maximum optimizations including Aikar flags for best performance")
         }
     }
 }

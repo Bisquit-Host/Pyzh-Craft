@@ -26,22 +26,19 @@ struct CustomVersionPicker: View {
                     .foregroundColor(.primary)
                 Spacer()
                 Text(
-                    time.isEmpty ? "" : "Released: ".localized() + time
+                    time.isEmpty ? "" : String(localized: "Released: ") + time
                 )
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             }
             versionInput
         }
-        .alert(
-            "Validation Error",
-            isPresented: .constant(error != nil)
-        ) {
+        .alert("Validation Error", isPresented: .constant(error != nil)) {
             Button("Close") {
                 error = nil
             }
         } message: {
-            if let error = error {
+            if let error {
                 Text(error.chineseMessage)
             }
         }

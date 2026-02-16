@@ -115,16 +115,3 @@ public class LanguageManager {
         return "en"
     }
 }
-
-// MARK: - String Localization Extension
-
-extension String {
-    /// Get localized string
-    /// - Parameter bundle: language pack, using the current language by default
-    /// - Returns: localized string
-    public func localized(
-        _ bundle: Bundle = LanguageManager.shared.bundle
-    ) -> String {
-        bundle.localizedString(forKey: self, value: self, table: nil)
-    }
-}

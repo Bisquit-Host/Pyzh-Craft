@@ -49,7 +49,7 @@ class GameSetupUtil: ObservableObject {
                         i18nKey: "No Current Player",
                         level: .popup
                     ),
-                    "No Current Player Selected".localized()
+                    String(localized: "No Current Player Selected")
                 )
                 return
             }
@@ -137,7 +137,7 @@ class GameSetupUtil: ObservableObject {
             // Send notification
             NotificationManager.sendSilently(
                 title: "Download Complete",
-                body: String(format: "%@ (Version: %@, Loader: %@) has been successfully downloaded.".localized(), gameInfo.gameName, gameInfo.gameVersion, gameInfo.modLoader)
+                body: String(format: String(localized: "%@ (Version: %@, Loader: %@) has been successfully downloaded."), gameInfo.gameName, gameInfo.gameVersion, gameInfo.modLoader)
             )
             onSuccess()
         } catch is CancellationError {
@@ -191,7 +191,7 @@ class GameSetupUtil: ObservableObject {
                     i18nKey: "Image Save Failed",
                     level: .notification
                 ),
-                "Failed to Save Image".localized()
+                String(localized: "Failed to Save Image")
             )
         }
     }

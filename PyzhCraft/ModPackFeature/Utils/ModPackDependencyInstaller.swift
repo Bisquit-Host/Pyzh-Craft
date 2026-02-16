@@ -78,7 +78,7 @@ enum ModPackDependencyInstaller {
         let filesToDownload = filterDownloadableFiles(files)
 
         // Notification to start downloading
-        onProgressUpdate?("Starting to download modpack files".localized(), 0, filesToDownload.count, .files)
+        onProgressUpdate?(String(localized: "Starting to download modpack files"), 0, filesToDownload.count, .files)
 
         // Create a semaphore to control the number of concurrencies
         let semaphore = AsyncSemaphore(value: GeneralSettingsManager.shared.concurrentDownloads)
@@ -124,7 +124,7 @@ enum ModPackDependencyInstaller {
         }
 
         // Notification download completed
-        onProgressUpdate?("Modpack files download completed".localized(), filesToDownload.count, filesToDownload.count, .files)
+        onProgressUpdate?(String(localized: "Modpack files download completed"), filesToDownload.count, filesToDownload.count, .files)
 
         return true
     }
@@ -458,7 +458,7 @@ enum ModPackDependencyInstaller {
         let requiredDependencies = dependencies.filter { $0.dependencyType == "required" }
 
         // Notification to start downloading
-        onProgressUpdate?("Starting to install modpack dependencies".localized(), 0, requiredDependencies.count, .dependencies)
+        onProgressUpdate?(String(localized: "Starting to install modpack dependencies"), 0, requiredDependencies.count, .dependencies)
 
         // Create a semaphore to control the number of concurrencies
         let semaphore = AsyncSemaphore(value: GeneralSettingsManager.shared.concurrentDownloads)
@@ -477,7 +477,7 @@ enum ModPackDependencyInstaller {
                     if await shouldSkipDependency(dep: dep, gameInfo: gameInfo, resourceDir: resourceDir) {
                         // Skip also update progress
                         let currentCount = completedCount.increment()
-                        onProgressUpdate?("Skipping already installed dependency".localized(), currentCount, requiredDependencies.count, .dependencies)
+                        onProgressUpdate?(String(localized: "Skipping already installed dependency"), currentCount, requiredDependencies.count, .dependencies)
                         return (index, true) // Skip as success
                     }
 
@@ -513,7 +513,7 @@ enum ModPackDependencyInstaller {
         }
 
         // Notification that installation is complete
-        onProgressUpdate?("Modpack dependencies installation completed".localized(), requiredDependencies.count, requiredDependencies.count, .dependencies)
+        onProgressUpdate?(String(localized: "Modpack dependencies installation completed"), requiredDependencies.count, requiredDependencies.count, .dependencies)
 
         return true
     }

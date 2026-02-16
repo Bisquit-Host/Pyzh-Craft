@@ -92,10 +92,7 @@ struct DependencySheetView: View {
                             if isDownloadingMainResourceOnly {
                                 ProgressView().controlSize(.small)
                             } else {
-                                Text(
-                                    "Download Main Only"
-                                        .localized()
-                                )
+                                Text("Download Main Only")
                             }
                         }
                         .disabled(
@@ -114,10 +111,7 @@ struct DependencySheetView: View {
                                 if isDownloadingAllDependencies || hasDownloading {
                                     ProgressView().controlSize(.small)
                                 } else {
-                                    Text(
-                                        "Download All And Continue"
-                                            .localized()
-                                    )
+                                    Text("Download All And Continue")
                                 }
                             }
                             .keyboardShortcut(.defaultAction)
@@ -159,15 +153,12 @@ struct DependencySheetView: View {
                 }
             }
         )
-        .alert(
-            "Download Error",
-            isPresented: .constant(error != nil)
-        ) {
+        .alert("Download Error", isPresented: .constant(error != nil)) {
             Button("Close") {
                 error = nil
             }
         } message: {
-            if let error = error {
+            if let error {
                 Text(error.chineseMessage)
             }
         }
@@ -177,6 +168,7 @@ struct DependencySheetView: View {
         let globalError = GlobalError.from(error)
         Logger.shared.error("依赖下载错误: \(globalError.chineseMessage)")
         GlobalErrorHandler.shared.handle(globalError)
+        
         Task { @MainActor in
             self.error = globalError
         }

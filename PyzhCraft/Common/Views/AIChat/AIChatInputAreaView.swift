@@ -45,11 +45,9 @@ struct AIChatInputAreaView: View {
     private var gameSelector: some View {
         Menu {
             ForEach(games) { game in
-                Button(action: {
+                Button(game.gameName) {
                     selectedGameId = game.id
-                }, label: {
-                    Text(game.gameName)
-                })
+                }
             }
         } label: {
             HStack(spacing: 4) {

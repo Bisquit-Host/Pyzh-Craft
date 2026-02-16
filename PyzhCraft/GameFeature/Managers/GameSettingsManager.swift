@@ -14,12 +14,12 @@ enum DataSource: String, CaseIterable, Codable {
         }
     }
 
-    var localizedName: String {
+    var localizedNameKey: LocalizedStringKey {
         switch self {
         case .modrinth:
-            "Modrinth".localized()
+            "Modrinth"
         case .curseforge:
-            "CurseForge".localized()
+            "CurseForge"
         }
     }
 }

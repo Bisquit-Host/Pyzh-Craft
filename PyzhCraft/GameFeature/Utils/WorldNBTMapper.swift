@@ -30,32 +30,32 @@ enum WorldNBTMapper {
 
     static func mapGameMode(_ value: Int) -> String {
         switch value {
-        case 0: "Survival".localized()
-        case 1: "Creative".localized()
-        case 2: "Adventure".localized()
-        case 3: "Spectator".localized()
-        default: "Unknown".localized()
+        case 0: String(localized: "Survival")
+        case 1: String(localized: "Creative")
+        case 2: String(localized: "Adventure")
+        case 3: String(localized: "Spectator")
+        default: String(localized: "Unknown")
         }
     }
 
     static func mapDifficulty(_ value: Int) -> String {
         switch value {
-        case 0: "Peaceful".localized()
-        case 1: "Easy".localized()
-        case 2: "Normal".localized()
-        case 3: "Hard".localized()
-        default: "Unknown".localized()
+        case 0: String(localized: "Peaceful")
+        case 1: String(localized: "Easy")
+        case 2: String(localized: "Normal")
+        case 3: String(localized: "Hard")
+        default: String(localized: "Unknown")
         }
     }
 
     /// Map new difficulty_settings.difficulty (string) to localized text
     static func mapDifficultyString(_ value: String) -> String {
         switch value.lowercased() {
-        case "peaceful": "Peaceful".localized()
-        case "easy": "Easy".localized()
-        case "normal": "Normal".localized()
-        case "hard": "Hard".localized()
-        default: "Unknown".localized()
+        case "peaceful": String(localized: "Peaceful")
+        case "easy": String(localized: "Easy")
+        case "normal": String(localized: "Normal")
+        case "hard": String(localized: "Hard")
+        default: String(localized: "Unknown")
         }
     }
 

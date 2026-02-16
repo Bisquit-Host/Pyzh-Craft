@@ -4,8 +4,7 @@ import SwiftUI
 struct StartupInfoSheetView: View {
 
     // MARK: - Properties
-    @Environment(\.dismiss)
-    private var dismiss
+    @Environment(\.dismiss) private var dismiss
 
     let announcementData: AnnouncementData?
 
@@ -21,8 +20,7 @@ struct StartupInfoSheetView: View {
                             .fontWeight(.semibold)
                     }
                 }
-            },
-            body: {
+            }, body: {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
                         // application icon

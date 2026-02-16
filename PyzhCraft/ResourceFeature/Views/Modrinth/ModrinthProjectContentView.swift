@@ -130,13 +130,13 @@ private struct PlatformSupportSection: View {
     private func supportLabel(for value: String) -> String {
         switch value.lowercased() {
         case "required":
-            "Required".localized()
+            String(localized: "Required")
         case "optional":
-            "Optional".localized()
+            String(localized: "Optional")
         case "unsupported":
-            "Unsupported".localized()
+            String(localized: "Unsupported")
         default:
-            "Unknown".localized()
+            String(localized: "Unknown")
         }
     }
 }
@@ -167,10 +167,10 @@ private struct LinksSection: View {
 
     var body: some View {
         let links = [
-            (project.issuesUrl, "Report Issues".localized()),
-            (project.sourceUrl, "View Source Code".localized()),
-            (project.wikiUrl, "Visit Wiki".localized()),
-            (project.discordUrl, "Join Discord".localized()),
+            (project.issuesUrl, String(localized: "Report Issues")),
+            (project.sourceUrl, String(localized: "View Source Code")),
+            (project.wikiUrl, String(localized: "Visit Wiki")),
+            (project.discordUrl, String(localized: "Join Discord")),
         ].compactMap { url, text in
             url.map { (text, $0) }
         }
@@ -228,17 +228,17 @@ private struct DetailsSection: View, Equatable {
             VStack(alignment: .leading, spacing: 8) {
                 if let license = project.license {
                     DetailRow(
-                        label: "License".localized(),
+                        label: String(localized: "License"),
                         value: license.name
                     )
                 }
 
                 DetailRow(
-                    label: "Published Date".localized(),
+                    label: String(localized: "Published Date"),
                     value: publishedDateString
                 )
                 DetailRow(
-                    label: "Updated Date".localized(),
+                    label: String(localized: "Updated Date"),
                     value: updatedDateString
                 )
             }
@@ -264,7 +264,7 @@ struct ModrinthProjectContentView: View {
         VStack {
             if isLoading && projectDetail == nil && error == nil {
                 loadingView
-            } else if let error = error {
+            } else if let error {
                 newErrorView(error)
             } else if let project = projectDetail {
                 CompatibilitySection(project: project)
@@ -319,9 +319,7 @@ struct ModrinthProjectContentView: View {
         }
 
         guard
-            let fetchedProject = await ModrinthService.fetchProjectDetails(
-                id: projectId
-            )
+            let fetchedProject = await ModrinthService.fetchProjectDetails(id: projectId)
         else {
             throw GlobalError.resource(
                 chineseMessage: "无法获取项目详情",

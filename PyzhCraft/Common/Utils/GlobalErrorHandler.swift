@@ -192,12 +192,20 @@ enum GlobalError: Error, LocalizedError, Identifiable {
 
     /// Localized error description (using internationalization key)
     var errorDescription: String? {
-        i18nKey.localized()
+        LanguageManager.shared.bundle.localizedString(
+            forKey: i18nKey,
+            value: i18nKey,
+            table: nil
+        )
     }
 
     /// Localized description: Use i18nKey first, fall back to chineseMessage if not found
     var localizedDescription: String {
-        let localizedText = i18nKey.localized()
+        let localizedText = LanguageManager.shared.bundle.localizedString(
+            forKey: i18nKey,
+            value: i18nKey,
+            table: nil
+        )
 
         // Always use localized content when there is a valid localized entry
         if localizedText != i18nKey {
@@ -371,7 +379,7 @@ struct GlobalErrorHandlerModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .onReceive(errorHandler.$currentError) { error in
-                if let error = error {
+                if let error {
                     // Only logs are recorded, pop-up windows are handled by ErrorAlertModifier
                     Logger.shared.error("Global error occurred: \(error.chineseMessage)")
                 }

@@ -110,7 +110,7 @@ struct GameLocalResourceView: View {
                 error = nil
             }
         } message: {
-            if let error = error {
+            if let error {
                 Text(error.chineseMessage)
             }
         }

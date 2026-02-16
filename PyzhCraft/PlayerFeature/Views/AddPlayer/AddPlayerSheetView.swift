@@ -278,7 +278,7 @@ struct AddPlayerSheetView: View {
         let trimmedName = playerName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else { return nil }
         if playerListViewModel.playerExists(name: trimmedName) {
-            return "Player name already exists".localized()
+            return String(localized: "Player name already exists")
         }
         // Other verification rules can be added
         return nil
@@ -302,9 +302,9 @@ enum AccountAuthType: String, CaseIterable, Identifiable {
     var displayName: String {
         switch self {
         case .premium:
-            return "Microsoft".localized()
+            return String(localized: "Microsoft")
         default:
-            return "Offline".localized()
+            return String(localized: "Offline")
         }
     }
 }

@@ -21,7 +21,7 @@ struct DownloadProgressRow: View {
                 Spacer()
                 Text(
                     String(
-                        format: "Progress: %d%%".localized(),
+                        format: String(localized: "Progress: %d%%"),
                         Int(progress * 100)
                     )
                 )
@@ -35,7 +35,7 @@ struct DownloadProgressRow: View {
             HStack {
                 Text(
                     String(
-                        format: "Current Step: %@".localized(),
+                        format: String(localized: "Current Step: %@"),
                         currentFile
                     )
                 )
@@ -45,7 +45,7 @@ struct DownloadProgressRow: View {
                 Spacer()
                 Text(
                     String(
-                        format: "Files: %d/%d".localized(),
+                        format: String(localized: "Files: %d/%d"),
                         completed,
                         total
                     )

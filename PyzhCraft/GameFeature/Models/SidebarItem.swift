@@ -1,4 +1,4 @@
-import Foundation
+import SwiftUI
 
 /// Sidebar navigation items
 public enum SidebarItem: Hashable, Identifiable {
@@ -28,18 +28,33 @@ public enum SidebarItem: Hashable, Identifiable {
 public enum ResourceType: String, CaseIterable {
     case mod, datapack, shader, resourcepack, modpack
 
+    public var localizedNameKey: LocalizedStringKey {
+        switch self {
+        case .mod:
+            "Mod"
+        case .datapack:
+            "Data Pack"
+        case .shader:
+            "Shader"
+        case .resourcepack:
+            "Resource Pack"
+        case .modpack:
+            "Modpack"
+        }
+    }
+
     public var localizedName: String {
         switch self {
         case .mod:
-            "Mod".localized()
+            String(localized: "Mod")
         case .datapack:
-            "Data Pack".localized()
+            String(localized: "Data Pack")
         case .shader:
-            "Shader".localized()
+            String(localized: "Shader")
         case .resourcepack:
-            "Resource Pack".localized()
+            String(localized: "Resource Pack")
         case .modpack:
-            "Modpack".localized()
+            String(localized: "Modpack")
         }
     }
 

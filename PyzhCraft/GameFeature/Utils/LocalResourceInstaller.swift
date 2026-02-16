@@ -93,7 +93,8 @@ extension LocalResourceInstaller {
                     showImporter = true
                 } label: {
                     // Image(systemName: "square.and.arrow.down")
-                    Text("Import").font(.subheadline)
+                    Text("Import")
+                        .font(.subheadline)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(Color.accentColor)

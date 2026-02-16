@@ -24,7 +24,7 @@ enum LauncherImportError: LocalizedError {
         switch self {
         case .parserNotImplemented(let launcherType):
             return String(
-                format: "%@ launcher parser is not implemented yet".localized(),
+                format: String(localized: "%@ launcher parser is not implemented yet"),
                 launcherType
             )
         }

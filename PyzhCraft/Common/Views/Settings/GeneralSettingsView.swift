@@ -69,7 +69,7 @@ public struct GeneralSettingsView: View {
                 DirectorySettingRow(
                     title: "Working Directory",
                     path: generalSettings.launcherWorkingDirectory.isEmpty ? AppPaths.launcherSupportDirectory.path : generalSettings.launcherWorkingDirectory,
-                    description: "This path setting only affects the storage location of game saves, mods, shaders, and other resources.".localized(),
+                    description: String(localized: "This path setting only affects the storage location of game saves, mods, shaders, and other resources."),
                     onChoose: { showDirectoryPicker = true },
                     onReset: {
                         resetWorkingDirectorySafely()
@@ -132,7 +132,7 @@ public struct GeneralSettingsView: View {
                             generalSettings.gitProxyURL = "https://gh-proxy.com"
                         }
                         .disabled(!generalSettings.enableGitHubProxy)
-                        InfoIconWithPopover(text: "When enabled, adds a proxy prefix to requests for github.com and raw.githubusercontent.com.".localized())
+                        InfoIconWithPopover(text: String(localized: "When enabled, adds a proxy prefix to requests for github.com and raw.githubusercontent.com."))
                     }
                 }
             }.labeledContentStyle(.custom(alignment: .firstTextBaseline)).padding(.top, 10)
@@ -146,7 +146,7 @@ public struct GeneralSettingsView: View {
                 error = nil
             }
         } message: {
-            if let error = error {
+            if let error {
                 Text(error.localizedDescription)
             }
         }

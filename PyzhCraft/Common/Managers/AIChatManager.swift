@@ -471,18 +471,18 @@ class AIChatManager: ObservableObject {
         // Get file size
         guard let fileSize = await getFileSize(url: url) else {
             return await readFileContent(url: url, fileName: fileName) ??
-                   String(format: "File: %@ (cannot read)".localized(), fileName)
+                   String(format: String(localized: "File: %@ (cannot read)"), fileName)
         }
 
         // Determine processing method based on size
         if fileSize <= maxFileSizeForReading {
             // Small files: read text content
             return await readFileContent(url: url, fileName: fileName) ??
-                   String(format: "File: %@ (cannot read text content)".localized(), fileName)
+                   String(format: String(localized: "File: %@ (cannot read text content)"), fileName)
         } else {
             // Large files: return file information
             let sizeDescription = formatFileSize(fileSize)
-            return String(format: "File: %@ (too large: %@)".localized(), fileName, sizeDescription)
+            return String(format: String(localized: "File: %@ (too large: %@)"), fileName, sizeDescription)
         }
     }
 
@@ -493,10 +493,10 @@ class AIChatManager: ObservableObject {
         let maxLength = 5000
         // Use string interpolation instead of string concatenation
         let truncatedContent = fileContent.count > maxLength
-            ? "\(String(fileContent.prefix(maxLength)))\n... \("(content truncated)".localized())"
+            ? "\(String(fileContent.prefix(maxLength)))\n... \(String(localized: "(content truncated)"))"
             : fileContent
 
-        return String(format: "File: %@\nContent:\n%@".localized(), fileName, truncatedContent)
+        return String(format: String(localized: "File: %@\nContent:\n%@"), fileName, truncatedContent)
     }
 
     /// Get file size (bytes)

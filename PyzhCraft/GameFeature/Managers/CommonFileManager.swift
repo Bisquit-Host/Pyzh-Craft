@@ -176,8 +176,8 @@ class CommonFileManager {
 
         for (index, processor) in clientProcessors.enumerated() {
             do {
-                let processorName = processor.jar ?? "Unknown".localized()
-                let message = String(format: "Executing processor %d/%d: %@".localized(), index + 1, clientProcessors.count, processorName)
+                let processorName = processor.jar ?? String(localized: "Unknown")
+                let message = String(format: String(localized: "Executing processor %d/%d: %@"), index + 1, clientProcessors.count, processorName)
                 onProgressUpdate?(message, index + 1, clientProcessors.count)
                 try await executeProcessor(
                     processor,
