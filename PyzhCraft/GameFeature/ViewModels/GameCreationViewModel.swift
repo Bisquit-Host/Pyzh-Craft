@@ -281,7 +281,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
                         let globalError = GlobalError.from(error)
                         self.handleNonCriticalError(
                             globalError,
-                            message: "Failed to Load Dragged Image"
+                            message: String(localized: "Failed to Load Dragged Image")
                         )
                     }
                     return

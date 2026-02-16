@@ -279,7 +279,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         do {
             xstsBodyData = try JSONSerialization.data(withJSONObject: xstsBody)
         } catch {
-            throw GlobalError(type: .validation, i18nKey: "XSTS Request Serialize Failed", level: .notification)
+            throw GlobalError.validation(i18nKey: "XSTS Request Serialize Failed", level: .notification)
         }
 
         // Use a unified API client

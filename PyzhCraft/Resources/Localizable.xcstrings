@@ -24210,7 +24210,6 @@
       }
     },
     "Failed to Load Dragged Image" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -76312,7 +76311,6 @@
       }
     },
     "XSTS Request Serialize Failed" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
