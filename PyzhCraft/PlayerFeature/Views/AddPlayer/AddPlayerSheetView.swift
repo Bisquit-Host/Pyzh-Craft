@@ -44,8 +44,9 @@ struct AddPlayerSheetView: View {
                             .padding(.trailing, 10)
                     } else {
                         Picker("", selection: $selectedAuthType) {
-                            ForEach(availableAuthTypes) { type in
-                                Text(type.displayName).tag(type)
+                            ForEach(availableAuthTypes) {
+                                Text($0.displayName)
+                                    .tag($0)
                             }
                         }
                         .pickerStyle(.menu)  // Use drop-down menu style
@@ -62,6 +63,7 @@ struct AddPlayerSheetView: View {
                     VStack(alignment: .leading) {
                         playerInfoSection
                             .padding(.bottom, 10)
+                        
                         playerNameInputSection
                     }
                 }
