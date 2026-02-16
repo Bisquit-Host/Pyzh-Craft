@@ -21592,25 +21592,24 @@
         }
       }
     },
-    "Fabric Loader Parse Failed %@" : {
-      "extractionState" : "stale",
+    "Fabric Loader Parse Failed" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "فشل تحليل بيانات إصدار محمل Fabric: %@"
+            "value" : "فشل تحليل بيانات إصدار محمل Fabric"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fabric Loader-versionsdata kunne ikke analyseres: %@"
+            "value" : "Fabric Loader-versionsdata kunne ikke analyseres"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fabric Loader-Versionsdaten konnten nicht analysiert werden: %@"
+            "value" : "Fabric Loader-Versionsdaten konnten nicht analysiert werden"
           }
         },
         "en" : {
@@ -21622,109 +21621,109 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Error al analizar los datos de versión del cargador Fabric: %@"
+            "value" : "Error al analizar los datos de versión del cargador Fabric"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fabric Loader -versiotietojen jäsentäminen epäonnistui: %@"
+            "value" : "Fabric Loader -versiotietojen jäsentäminen epäonnistui"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Échec de l'analyse des données de version du chargeur Fabric: %@"
+            "value" : "Échec de l'analyse des données de version du chargeur Fabric"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fabric लोडर संस्करण डेटा पार्स करना विफल: %@"
+            "value" : "Fabric लोडर संस्करण डेटा पार्स करना विफल"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analisi dei dati della versione del caricatore Fabric fallita: %@"
+            "value" : "Analisi dei dati della versione del caricatore Fabric fallita"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fabric ローダーバージョンデータの解析に失敗: %@"
+            "value" : "Fabric ローダーバージョンデータの解析に失敗"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fabric 로더 버전 데이터 분석 실패: %@"
+            "value" : "Fabric 로더 버전 데이터 분석 실패"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fabric Loader-versjonsdata kunne ikke analyseres: %@"
+            "value" : "Fabric Loader-versjonsdata kunne ikke analyseres"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fabric Loader versiegegevens parseren mislukt: %@"
+            "value" : "Fabric Loader versiegegevens parseren mislukt"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nie udało się przeanalizować danych wersji Fabric Loader: %@"
+            "value" : "Nie udało się przeanalizować danych wersji Fabric Loader"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Falha ao analisar dados da versão do Fabric Loader: %@"
+            "value" : "Falha ao analisar dados da versão do Fabric Loader"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ошибка анализа данных версии Fabric Loader: %@"
+            "value" : "Ошибка анализа данных версии Fabric Loader"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kunde inte analysera Fabric Loader-versionsdata: %@"
+            "value" : "Kunde inte analysera Fabric Loader-versionsdata"
           }
         },
         "th" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "การแยกวิเคราะห์ข้อมูลเวอร์ชัน Fabric Loader ล้มเหลว: %@"
+            "value" : "การแยกวิเคราะห์ข้อมูลเวอร์ชัน Fabric Loader ล้มเหลว"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fabric Loader sürüm verileri ayrıştırılamadı: %@"
+            "value" : "Fabric Loader sürüm verileri ayrıştırılamadı"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Phân tích dữ liệu phiên bản Fabric Loader thất bại: %@"
+            "value" : "Phân tích dữ liệu phiên bản Fabric Loader thất bại"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "解析 Fabric 加载器版本数据失败: %@"
+            "value" : "解析 Fabric 加载器版本数据失败"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "解析 Fabric 加載器版本數據失敗: %@"
+            "value" : "解析 Fabric 加載器版本數據失敗"
           }
         }
       }
@@ -21859,25 +21858,24 @@
         }
       }
     },
-    "Fabric Mod JSON Extract Failed %@" : {
-      "extractionState" : "stale",
+    "Fabric Mod JSON Extract Failed" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "فشل استخراج fabric.mod.json: %@"
+            "value" : "فشل استخراج fabric.mod.json"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Udtrækning af fabric.mod.json mislykkedes: %@"
+            "value" : "Udtrækning af fabric.mod.json mislykkedes"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Extrahierung von fabric.mod.json fehlgeschlagen: %@"
+            "value" : "Extrahierung von fabric.mod.json fehlgeschlagen"
           }
         },
         "en" : {
@@ -21889,109 +21887,109 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Error al extraer fabric.mod.json: %@"
+            "value" : "Error al extraer fabric.mod.json"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "fabric.mod.json -tiedoston poimiminen epäonnistui: %@"
+            "value" : "fabric.mod.json -tiedoston poimiminen epäonnistui"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Échec de l'extraction de fabric.mod.json: %@"
+            "value" : "Échec de l'extraction de fabric.mod.json"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "fabric.mod.json निकालना विफल: %@"
+            "value" : "fabric.mod.json निकालना विफल"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Estrazione di fabric.mod.json fallita: %@"
+            "value" : "Estrazione di fabric.mod.json fallita"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "fabric.mod.json の抽出に失敗: %@"
+            "value" : "fabric.mod.json の抽出に失敗"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "fabric.mod.json 추출 실패: %@"
+            "value" : "fabric.mod.json 추출 실패"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uttrekking av fabric.mod.json mislyktes: %@"
+            "value" : "Uttrekking av fabric.mod.json mislyktes"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uitpakken van fabric.mod.json mislukt: %@"
+            "value" : "Uitpakken van fabric.mod.json mislukt"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nie udało się wyodrębnić fabric.mod.json: %@"
+            "value" : "Nie udało się wyodrębnić fabric.mod.json"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Falha ao extrair fabric.mod.json: %@"
+            "value" : "Falha ao extrair fabric.mod.json"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ошибка извлечения fabric.mod.json: %@"
+            "value" : "Ошибка извлечения fabric.mod.json"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Misslyckades att extrahera fabric.mod.json: %@"
+            "value" : "Misslyckades att extrahera fabric.mod.json"
           }
         },
         "th" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "การแตกไฟล์ fabric.mod.json ล้มเหลว: %@"
+            "value" : "การแตกไฟล์ fabric.mod.json ล้มเหลว"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "fabric.mod.json çıkarma işlemi başarısız: %@"
+            "value" : "fabric.mod.json çıkarma işlemi başarısız"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trích xuất fabric.mod.json thất bại: %@"
+            "value" : "Trích xuất fabric.mod.json thất bại"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "提取 fabric.mod.json 失败: %@"
+            "value" : "提取 fabric.mod.json 失败"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "提取 fabric.mod.json 失敗: %@"
+            "value" : "提取 fabric.mod.json 失敗"
           }
         }
       }
@@ -22126,25 +22124,24 @@
         }
       }
     },
-    "Fabric Mod JSON Parse Failed %@" : {
-      "extractionState" : "stale",
+    "Fabric Mod JSON Parse Failed" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "فشل تحليل fabric.mod.json: %@"
+            "value" : "فشل تحليل fabric.mod.json"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analyse af fabric.mod.json mislykkedes: %@"
+            "value" : "Analyse af fabric.mod.json mislykkedes"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analyse von fabric.mod.json fehlgeschlagen: %@"
+            "value" : "Analyse von fabric.mod.json fehlgeschlagen"
           }
         },
         "en" : {
@@ -22156,109 +22153,109 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Error al analizar fabric.mod.json: %@"
+            "value" : "Error al analizar fabric.mod.json"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "fabric.mod.json -tiedoston jäsentäminen epäonnistui: %@"
+            "value" : "fabric.mod.json -tiedoston jäsentäminen epäonnistui"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Échec de l'analyse de fabric.mod.json: %@"
+            "value" : "Échec de l'analyse de fabric.mod.json"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "fabric.mod.json पार्स करना विफल: %@"
+            "value" : "fabric.mod.json पार्स करना विफल"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analisi di fabric.mod.json fallita: %@"
+            "value" : "Analisi di fabric.mod.json fallita"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "fabric.mod.json の解析に失敗: %@"
+            "value" : "fabric.mod.json の解析に失敗"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "fabric.mod.json 분석 실패: %@"
+            "value" : "fabric.mod.json 분석 실패"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analyse av fabric.mod.json mislyktes: %@"
+            "value" : "Analyse av fabric.mod.json mislyktes"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Parseren van fabric.mod.json mislukt: %@"
+            "value" : "Parseren van fabric.mod.json mislukt"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nie udało się przeanalizować fabric.mod.json: %@"
+            "value" : "Nie udało się przeanalizować fabric.mod.json"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Falha ao analisar fabric.mod.json: %@"
+            "value" : "Falha ao analisar fabric.mod.json"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ошибка анализа fabric.mod.json: %@"
+            "value" : "Ошибка анализа fabric.mod.json"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Misslyckades att analysera fabric.mod.json: %@"
+            "value" : "Misslyckades att analysera fabric.mod.json"
           }
         },
         "th" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "การแยกวิเคราะห์ fabric.mod.json ล้มเหลว: %@"
+            "value" : "การแยกวิเคราะห์ fabric.mod.json ล้มเหลว"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "fabric.mod.json ayrıştırma işlemi başarısız: %@"
+            "value" : "fabric.mod.json ayrıştırma işlemi başarısız"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Phân tích fabric.mod.json thất bại: %@"
+            "value" : "Phân tích fabric.mod.json thất bại"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "解析 fabric.mod.json 失败: %@"
+            "value" : "解析 fabric.mod.json 失败"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "解析 fabric.mod.json 失敗: %@"
+            "value" : "解析 fabric.mod.json 失敗"
           }
         }
       }
@@ -28925,6 +28922,10 @@
         }
       }
     },
+    "Final image failed" : {
+      "comment" : "Description of an error that occurs when creating the final avatar image.",
+      "isCommentAutoGenerated" : true
+    },
     "Focused" : {
       "localizations" : {
         "ar" : {
@@ -34794,6 +34795,14 @@
         }
       }
     },
+    "Image context failed" : {
+      "comment" : "Error message displayed when creating a CGContext for the final avatar image.",
+      "isCommentAutoGenerated" : true
+    },
+    "Image processing failed" : {
+      "comment" : "Error message displayed when processing the player avatar image fails.",
+      "isCommentAutoGenerated" : true
+    },
     "Image Save Failed" : {
       "localizations" : {
         "ar" : {
@@ -37400,25 +37409,24 @@
         }
       }
     },
-    "Invalid Maven Coordinate %@" : {
-      "extractionState" : "stale",
+    "Invalid Maven Coordinate" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "إحداثيات Maven غير صالحة: %@"
+            "value" : "إحداثيات Maven غير صالحة"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ugyldig Maven-koordinat: %@"
+            "value" : "Ugyldig Maven-koordinat"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ungültige Maven-Koordinate: %@"
+            "value" : "Ungültige Maven-Koordinate"
           }
         },
         "en" : {
@@ -37430,109 +37438,109 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Coordenada Maven inválida: %@"
+            "value" : "Coordenada Maven inválida"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Virheellinen Maven-koordinaatti: %@"
+            "value" : "Virheellinen Maven-koordinaatti"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Coordonnée Maven invalide: %@"
+            "value" : "Coordonnée Maven invalide"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "अमान्य Maven कोऑर्डिनेट: %@"
+            "value" : "अमान्य Maven कोऑर्डिनेट"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Coordinata Maven non valida: %@"
+            "value" : "Coordinata Maven non valida"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "無効なMaven座標: %@"
+            "value" : "無効なMaven座標"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "유효하지 않은 Maven 좌표: %@"
+            "value" : "유효하지 않은 Maven 좌표"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ugyldig Maven-koordinat: %@"
+            "value" : "Ugyldig Maven-koordinat"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ongeldige Maven-coördinaat: %@"
+            "value" : "Ongeldige Maven-coördinaat"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nieprawidłowa współrzędna Maven: %@"
+            "value" : "Nieprawidłowa współrzędna Maven"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Coordenada Maven inválida: %@"
+            "value" : "Coordenada Maven inválida"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Недействительная координата Maven: %@"
+            "value" : "Недействительная координата Maven"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ogiltig Maven-koordinat: %@"
+            "value" : "Ogiltig Maven-koordinat"
           }
         },
         "th" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "พิกัด Maven ไม่ถูกต้อง: %@"
+            "value" : "พิกัด Maven ไม่ถูกต้อง"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Geçersiz Maven koordinatı: %@"
+            "value" : "Geçersiz Maven koordinatı"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tọa độ Maven không hợp lệ: %@"
+            "value" : "Tọa độ Maven không hợp lệ"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "无效的Maven坐标: %@"
+            "value" : "无效的Maven坐标"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "無效的Maven坐標: %@"
+            "value" : "無效的Maven坐標"
           }
         }
       }
@@ -42876,25 +42884,24 @@
         }
       }
     },
-    "Mcmod Info Extract Failed %@" : {
-      "extractionState" : "stale",
+    "Mcmod Info Extract Failed" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "فشل في استخراج معلومات mcmod: %@"
+            "value" : "فشل في استخراج معلومات mcmod"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mcmod info udtræk mislykkedes: %@"
+            "value" : "Mcmod info udtræk mislykkedes"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mcmod Info Extraktion fehlgeschlagen: %@"
+            "value" : "Mcmod Info Extraktion fehlgeschlagen"
           }
         },
         "en" : {
@@ -42906,109 +42913,109 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Extracción de información mcmod falló: %@"
+            "value" : "Extracción de información mcmod falló"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mcmod-tietojen poiminta epäonnistui: %@"
+            "value" : "Mcmod-tietojen poiminta epäonnistui"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Extraction des informations mcmod échouée: %@"
+            "value" : "Extraction des informations mcmod échouée"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mcmod जानकारी निकालने में विफल: %@"
+            "value" : "mcmod जानकारी निकालने में विफल"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Estrazione informazioni mcmod fallita: %@"
+            "value" : "Estrazione informazioni mcmod fallita"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mcmod情報の抽出に失敗: %@"
+            "value" : "mcmod情報の抽出に失敗"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mcmod 정보 추출 실패: %@"
+            "value" : "mcmod 정보 추출 실패"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mcmod info uttrekk mislyktes: %@"
+            "value" : "Mcmod info uttrekk mislyktes"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mcmod info extractie mislukt: %@"
+            "value" : "Mcmod info extractie mislukt"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wyodrębnienie informacji mcmod nie powiodło się: %@"
+            "value" : "Wyodrębnienie informacji mcmod nie powiodło się"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Extração de informações mcmod falhou: %@"
+            "value" : "Extração de informações mcmod falhou"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Извлечение информации mcmod не удалось: %@"
+            "value" : "Извлечение информации mcmod не удалось"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mcmod info extraktion misslyckades: %@"
+            "value" : "Mcmod info extraktion misslyckades"
           }
         },
         "th" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "การดึงข้อมูล mcmod ล้มเหลว: %@"
+            "value" : "การดึงข้อมูล mcmod ล้มเหลว"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mcmod bilgisi çıkarma başarısız: %@"
+            "value" : "Mcmod bilgisi çıkarma başarısız"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trích xuất thông tin mcmod thất bại: %@"
+            "value" : "Trích xuất thông tin mcmod thất bại"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "提取 mcmod.info 失败: %@"
+            "value" : "提取 mcmod.info 失败"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "提取 mcmod.info 失敗: %@"
+            "value" : "提取 mcmod.info 失敗"
           }
         }
       }
@@ -43143,25 +43150,24 @@
         }
       }
     },
-    "Mcmod Info Parse Failed %@" : {
-      "extractionState" : "stale",
+    "Mcmod Info Parse Failed" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "فشل في تحليل معلومات mcmod: %@"
+            "value" : "فشل في تحليل معلومات mcmod"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mcmod info parse mislykkedes: %@"
+            "value" : "Mcmod info parse mislykkedes"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mcmod Info Parse fehlgeschlagen: %@"
+            "value" : "Mcmod Info Parse fehlgeschlagen"
           }
         },
         "en" : {
@@ -43173,109 +43179,109 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Análisis de información mcmod falló: %@"
+            "value" : "Análisis de información mcmod falló"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mcmod-tietojen jäsentäminen epäonnistui: %@"
+            "value" : "Mcmod-tietojen jäsentäminen epäonnistui"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analyse des informations mcmod échouée: %@"
+            "value" : "Analyse des informations mcmod échouée"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mcmod जानकारी पार्स करने में विफल: %@"
+            "value" : "mcmod जानकारी पार्स करने में विफल"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analisi informazioni mcmod fallita: %@"
+            "value" : "Analisi informazioni mcmod fallita"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mcmod情報の解析に失敗: %@"
+            "value" : "mcmod情報の解析に失敗"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mcmod 정보 파싱 실패: %@"
+            "value" : "mcmod 정보 파싱 실패"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mcmod info parse mislyktes: %@"
+            "value" : "Mcmod info parse mislyktes"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mcmod info parse mislukt: %@"
+            "value" : "Mcmod info parse mislukt"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Parsowanie informacji mcmod nie powiodło się: %@"
+            "value" : "Parsowanie informacji mcmod nie powiodło się"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Análise de informações mcmod falhou: %@"
+            "value" : "Análise de informações mcmod falhou"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Разбор информации mcmod не удался: %@"
+            "value" : "Разбор информации mcmod не удался"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mcmod info parse misslyckades: %@"
+            "value" : "Mcmod info parse misslyckades"
           }
         },
         "th" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "การแยกวิเคราะห์ข้อมูล mcmod ล้มเหลว: %@"
+            "value" : "การแยกวิเคราะห์ข้อมูล mcmod ล้มเหลว"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mcmod bilgisi ayrıştırma başarısız: %@"
+            "value" : "Mcmod bilgisi ayrıştırma başarısız"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Phân tích thông tin mcmod thất bại: %@"
+            "value" : "Phân tích thông tin mcmod thất bại"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "解析 mcmod.info 失败: %@"
+            "value" : "解析 mcmod.info 失败"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "解析 mcmod.info 失敗: %@"
+            "value" : "解析 mcmod.info 失敗"
           }
         }
       }
@@ -44323,25 +44329,24 @@
         }
       }
     },
-    "Minecraft Profile Parse Failed %@" : {
-      "extractionState" : "stale",
+    "Minecraft Profile Parse Failed" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "فشل في تحليل ملف تعريف Minecraft: %@"
+            "value" : "فشل في تحليل ملف تعريف Minecraft"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft profil parse mislykkedes: %@"
+            "value" : "Minecraft profil parse mislykkedes"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft Profil Parse fehlgeschlagen: %@"
+            "value" : "Minecraft Profil Parse fehlgeschlagen"
           }
         },
         "en" : {
@@ -44353,132 +44358,131 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Análisis de perfil de Minecraft falló: %@"
+            "value" : "Análisis de perfil de Minecraft falló"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft-profiilin jäsentäminen epäonnistui: %@"
+            "value" : "Minecraft-profiilin jäsentäminen epäonnistui"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analyse du profil Minecraft échouée: %@"
+            "value" : "Analyse du profil Minecraft échouée"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft प्रोफ़ाइल पार्स करने में विफल: %@"
+            "value" : "Minecraft प्रोफ़ाइल पार्स करने में विफल"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analisi profilo Minecraft fallita: %@"
+            "value" : "Analisi profilo Minecraft fallita"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraftプロファイルの解析に失敗: %@"
+            "value" : "Minecraftプロファイルの解析に失敗"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft 프로필 파싱 실패: %@"
+            "value" : "Minecraft 프로필 파싱 실패"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft profil parse mislyktes: %@"
+            "value" : "Minecraft profil parse mislyktes"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft profiel parse mislukt: %@"
+            "value" : "Minecraft profiel parse mislukt"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Parsowanie profilu Minecraft nie powiodło się: %@"
+            "value" : "Parsowanie profilu Minecraft nie powiodło się"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Análise de perfil do Minecraft falhou: %@"
+            "value" : "Análise de perfil do Minecraft falhou"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Разбор профиля Minecraft не удался: %@"
+            "value" : "Разбор профиля Minecraft не удался"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft profil parse misslyckades: %@"
+            "value" : "Minecraft profil parse misslyckades"
           }
         },
         "th" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "การแยกวิเคราะห์โปรไฟล์ Minecraft ล้มเหลว: %@"
+            "value" : "การแยกวิเคราะห์โปรไฟล์ Minecraft ล้มเหลว"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft profil ayrıştırma başarısız: %@"
+            "value" : "Minecraft profil ayrıştırma başarısız"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Phân tích hồ sơ Minecraft thất bại: %@"
+            "value" : "Phân tích hồ sơ Minecraft thất bại"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "解析 Minecraft 用户资料响应失败: %@"
+            "value" : "解析 Minecraft 用户资料响应失败"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "解析 Minecraft 帳戶資料響應失敗: %@"
+            "value" : "解析 Minecraft 帳戶資料響應失敗"
           }
         }
       }
     },
-    "Minecraft Request Serialize Failed %@" : {
-      "extractionState" : "stale",
+    "Minecraft Request Serialize Failed" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "فشل في تسلسل طلب Minecraft: %@"
+            "value" : "فشل في تسلسل طلب Minecraft"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft anmodning serialisering mislykkedes: %@"
+            "value" : "Minecraft anmodning serialisering mislykkedes"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft Anfrage Serialisierung fehlgeschlagen: %@"
+            "value" : "Minecraft Anfrage Serialisierung fehlgeschlagen"
           }
         },
         "en" : {
@@ -44490,109 +44494,109 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Serialización de solicitud de Minecraft falló: %@"
+            "value" : "Serialización de solicitud de Minecraft falló"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft-pyynnön sarjallistaminen epäonnistui: %@"
+            "value" : "Minecraft-pyynnön sarjallistaminen epäonnistui"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sérialisation de la requête Minecraft échouée: %@"
+            "value" : "Sérialisation de la requête Minecraft échouée"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft अनुरोध क्रमबद्ध करने में विफल: %@"
+            "value" : "Minecraft अनुरोध क्रमबद्ध करने में विफल"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Serializzazione richiesta Minecraft fallita: %@"
+            "value" : "Serializzazione richiesta Minecraft fallita"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraftリクエストのシリアライズに失敗: %@"
+            "value" : "Minecraftリクエストのシリアライズに失敗"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft 요청 직렬화 실패: %@"
+            "value" : "Minecraft 요청 직렬화 실패"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft forespørsel serialisering mislyktes: %@"
+            "value" : "Minecraft forespørsel serialisering mislyktes"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft verzoek serialisatie mislukt: %@"
+            "value" : "Minecraft verzoek serialisatie mislukt"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Serializacja żądania Minecraft nie powiodła się: %@"
+            "value" : "Serializacja żądania Minecraft nie powiodła się"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Serialização da solicitação do Minecraft falhou: %@"
+            "value" : "Serialização da solicitação do Minecraft falhou"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сериализация запроса Minecraft не удалась: %@"
+            "value" : "Сериализация запроса Minecraft не удалась"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft förfrågan serialisering misslyckades: %@"
+            "value" : "Minecraft förfrågan serialisering misslyckades"
           }
         },
         "th" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "การแปลงข้อมูลคำขอ Minecraft ล้มเหลว: %@"
+            "value" : "การแปลงข้อมูลคำขอ Minecraft ล้มเหลว"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft istek serileştirme başarısız: %@"
+            "value" : "Minecraft istek serileştirme başarısız"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tuần tự hóa yêu cầu Minecraft thất bại: %@"
+            "value" : "Tuần tự hóa yêu cầu Minecraft thất bại"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "序列化 Minecraft 认证请求失败: %@"
+            "value" : "序列化 Minecraft 认证请求失败"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "序列化 Minecraft 認證請求失敗: %@"
+            "value" : "序列化 Minecraft 認證請求失敗"
           }
         }
       }
@@ -44727,25 +44731,24 @@
         }
       }
     },
-    "Minecraft Token Parse Failed %@" : {
-      "extractionState" : "stale",
+    "Minecraft Token Parse Failed" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "فشل في تحليل رمز Minecraft: %@"
+            "value" : "فشل في تحليل رمز Minecraft"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft token parse mislykkedes: %@"
+            "value" : "Minecraft token parse mislykkedes"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft Token Parse fehlgeschlagen: %@"
+            "value" : "Minecraft Token Parse fehlgeschlagen"
           }
         },
         "en" : {
@@ -44757,109 +44760,109 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Análisis de token de Minecraft falló: %@"
+            "value" : "Análisis de token de Minecraft falló"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft-tokenin jäsentäminen epäonnistui: %@"
+            "value" : "Minecraft-tokenin jäsentäminen epäonnistui"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analyse du token Minecraft échouée: %@"
+            "value" : "Analyse du token Minecraft échouée"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft टोकन पार्स करने में विफल: %@"
+            "value" : "Minecraft टोकन पार्स करने में विफल"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analisi token Minecraft fallita: %@"
+            "value" : "Analisi token Minecraft fallita"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraftトークンの解析に失敗: %@"
+            "value" : "Minecraftトークンの解析に失敗"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft 토큰 파싱 실패: %@"
+            "value" : "Minecraft 토큰 파싱 실패"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft token parse mislyktes: %@"
+            "value" : "Minecraft token parse mislyktes"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft token parse mislukt: %@"
+            "value" : "Minecraft token parse mislukt"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Parsowanie tokenu Minecraft nie powiodło się: %@"
+            "value" : "Parsowanie tokenu Minecraft nie powiodło się"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Análise de token do Minecraft falhou: %@"
+            "value" : "Análise de token do Minecraft falhou"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Разбор токена Minecraft не удался: %@"
+            "value" : "Разбор токена Minecraft не удался"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft token parse misslyckades: %@"
+            "value" : "Minecraft token parse misslyckades"
           }
         },
         "th" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "การแยกวิเคราะห์โทเค็น Minecraft ล้มเหลว: %@"
+            "value" : "การแยกวิเคราะห์โทเค็น Minecraft ล้มเหลว"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Minecraft token ayrıştırma başarısız: %@"
+            "value" : "Minecraft token ayrıştırma başarısız"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Phân tích token Minecraft thất bại: %@"
+            "value" : "Phân tích token Minecraft thất bại"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "解析 Minecraft 访问令牌响应失败: %@"
+            "value" : "解析 Minecraft 访问令牌响应失败"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "解析 Minecraft 訪問令牌響應失敗: %@"
+            "value" : "解析 Minecraft 訪問令牌響應失敗"
           }
         }
       }
@@ -57767,133 +57770,132 @@
         }
       }
     },
-    "Processor Jar Not Found: %@" : {
-      "extractionState" : "stale",
+    "Processor Jar Not Found" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ملف JAR للمعالج غير موجود: %@"
+            "value" : "ملف JAR للمعالج غير موجود"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Processor Jar ikke fundet: %@"
+            "value" : "Processor Jar ikke fundet"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prozessor-JAR nicht gefunden: %@"
+            "value" : "Prozessor-JAR nicht gefunden"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "JAR del procesador no encontrado: %@"
+            "value" : "JAR del procesador no encontrado"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prosessori-JAR ei löytynyt: %@"
+            "value" : "Prosessori-JAR ei löytynyt"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "JAR du processeur introuvable: %@"
+            "value" : "JAR du processeur introuvable"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "प्रोसेसर JAR नहीं मिला: %@"
+            "value" : "प्रोसेसर JAR नहीं मिला"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "JAR del processore non trovato: %@"
+            "value" : "JAR del processore non trovato"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "プロセッサーJARが見つかりません: %@"
+            "value" : "プロセッサーJARが見つかりません"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "프로세서 JAR을 찾을 수 없음: %@"
+            "value" : "프로세서 JAR을 찾을 수 없음"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prosessor Jar ikke funnet: %@"
+            "value" : "Prosessor Jar ikke funnet"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Processor JAR niet gevonden: %@"
+            "value" : "Processor JAR niet gevonden"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Plik JAR procesora nie został znaleziony: %@"
+            "value" : "Plik JAR procesora nie został znaleziony"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "JAR do processador não encontrado: %@"
+            "value" : "JAR do processador não encontrado"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "JAR-файл процессора не найден: %@"
+            "value" : "JAR-файл процессора не найден"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Processor JAR inte hittad: %@"
+            "value" : "Processor JAR inte hittad"
           }
         },
         "th" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ไม่พบ JAR ของโปรเซสเซอร์: %@"
+            "value" : "ไม่พบ JAR ของโปรเซสเซอร์"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "İşlemci JAR dosyası bulunamadı: %@"
+            "value" : "İşlemci JAR dosyası bulunamadı"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Không tìm thấy JAR bộ xử lý: %@"
+            "value" : "Không tìm thấy JAR bộ xử lý"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "找不到处理器JAR文件: %@"
+            "value" : "找不到处理器JAR文件"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "找不到處理器JAR檔案: %@"
+            "value" : "找不到處理器JAR檔案"
           }
         }
       }
@@ -70942,6 +70944,10 @@
         }
       }
     },
+    "Token response parse failed" : {
+      "comment" : "Error message displayed when parsing the token response fails.",
+      "isCommentAutoGenerated" : true
+    },
     "Too many requests, please try again later" : {
       "localizations" : {
         "ar" : {
@@ -72898,6 +72904,10 @@
         }
       }
     },
+    "URL components build failed" : {
+      "comment" : "Error message when building URL components for a network request.",
+      "isCommentAutoGenerated" : true
+    },
     "User to update not found: %@" : {
       "localizations" : {
         "ar" : {
@@ -74068,25 +74078,24 @@
         }
       }
     },
-    "Version Manifest Parse Failed %@ %@" : {
-      "extractionState" : "stale",
+    "Version Manifest Parse Failed" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "فشل في تحليل قائمة إصدار %@: %@"
+            "value" : "فشل في تحليل قائمة إصدار"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Parsning af %@ versionsmanifest mislykkedes: %@"
+            "value" : "Parsning af"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Parsing des %@ Versionsmanifests fehlgeschlagen: %@"
+            "value" : "Parsing des"
           }
         },
         "en" : {
@@ -74098,109 +74107,109 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Análisis de manifiesto de versión %@ falló: %@"
+            "value" : "Análisis de manifiesto de versión"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ version manifestin jäsentäminen epäonnistui: %@"
+            "value" : "Version Manifest Parse Failed"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analyse du manifeste de version %@ échouée: %@"
+            "value" : "Analyse du manifeste de version"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ संस्करण मैनिफेस्ट पार्स करने में विफल: %@"
+            "value" : "Version Manifest Parse Failed"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analisi manifest versione %@ fallita: %@"
+            "value" : "Analisi manifest versione"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ バージョンマニフェストの解析に失敗: %@"
+            "value" : "Version Manifest Parse Failed"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ 버전 매니페스트 파싱 실패: %@"
+            "value" : "Version Manifest Parse Failed"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Parsing av %@ versjonsmanifest mislyktes: %@"
+            "value" : "Parsing av"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Parsen van %@ versie manifest mislukt: %@"
+            "value" : "Parsen van"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Parsowanie manifestu wersji %@ nie powiodło się: %@"
+            "value" : "Parsowanie manifestu wersji"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Análise de manifesto de versão %@ falhou: %@"
+            "value" : "Análise de manifesto de versão"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Разбор манифеста версии %@ не удался: %@"
+            "value" : "Разбор манифеста версии"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Parsning av %@ versionsmanifest misslyckades: %@"
+            "value" : "Parsning av"
           }
         },
         "th" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "การแยกวิเคราะห์รายการเวอร์ชัน %@ ล้มเหลว: %@"
+            "value" : "การแยกวิเคราะห์รายการเวอร์ชัน"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ sürüm manifest ayrıştırma başarısız: %@"
+            "value" : "Version Manifest Parse Failed"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Phân tích bảng kê phiên bản %@ thất bại: %@"
+            "value" : "Phân tích bảng kê phiên bản"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "解析 %@ 版本清单失败: %@"
+            "value" : "解析"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "解析 %@ 版本清單失敗: %@"
+            "value" : "解析"
           }
         }
       }
@@ -76032,25 +76041,24 @@
         }
       }
     },
-    "Xbox Live Request Serialize Failed %@" : {
-      "extractionState" : "stale",
+    "Xbox Live Request Serialize Failed" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "فشل في تسلسل طلب Xbox Live: %@"
+            "value" : "فشل في تسلسل طلب Xbox Live"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xbox Live anmodning serialisering mislykkedes: %@"
+            "value" : "Xbox Live anmodning serialisering mislykkedes"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xbox Live Anfrage Serialisierung fehlgeschlagen: %@"
+            "value" : "Xbox Live Anfrage Serialisierung fehlgeschlagen"
           }
         },
         "en" : {
@@ -76062,132 +76070,131 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Serialización de solicitud de Xbox Live falló: %@"
+            "value" : "Serialización de solicitud de Xbox Live falló"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xbox Live-pyynnön sarjallistaminen epäonnistui: %@"
+            "value" : "Xbox Live-pyynnön sarjallistaminen epäonnistui"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sérialisation de la requête Xbox Live échouée: %@"
+            "value" : "Sérialisation de la requête Xbox Live échouée"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xbox Live अनुरोध क्रमबद्ध करने में विफल: %@"
+            "value" : "Xbox Live अनुरोध क्रमबद्ध करने में विफल"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Serializzazione richiesta Xbox Live fallita: %@"
+            "value" : "Serializzazione richiesta Xbox Live fallita"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xbox Liveリクエストのシリアライズに失敗: %@"
+            "value" : "Xbox Liveリクエストのシリアライズに失敗"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xbox Live 요청 직렬화 실패: %@"
+            "value" : "Xbox Live 요청 직렬화 실패"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xbox Live forespørsel serialisering mislyktes: %@"
+            "value" : "Xbox Live forespørsel serialisering mislyktes"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xbox Live verzoek serialisatie mislukt: %@"
+            "value" : "Xbox Live verzoek serialisatie mislukt"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Serializacja żądania Xbox Live nie powiodła się: %@"
+            "value" : "Serializacja żądania Xbox Live nie powiodła się"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Serialização da solicitação do Xbox Live falhou: %@"
+            "value" : "Serialização da solicitação do Xbox Live falhou"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сериализация запроса Xbox Live не удалась: %@"
+            "value" : "Сериализация запроса Xbox Live не удалась"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xbox Live förfrågan serialisering misslyckades: %@"
+            "value" : "Xbox Live förfrågan serialisering misslyckades"
           }
         },
         "th" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "การแปลงข้อมูลคำขอ Xbox Live ล้มเหลว: %@"
+            "value" : "การแปลงข้อมูลคำขอ Xbox Live ล้มเหลว"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xbox Live istek serileştirme başarısız: %@"
+            "value" : "Xbox Live istek serileştirme başarısız"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tuần tự hóa yêu cầu Xbox Live thất bại: %@"
+            "value" : "Tuần tự hóa yêu cầu Xbox Live thất bại"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "序列化 Xbox Live 认证请求失败: %@"
+            "value" : "序列化 Xbox Live 认证请求失败"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "序列化 Xbox Live 認證請求失敗: %@"
+            "value" : "序列化 Xbox Live 認證請求失敗"
           }
         }
       }
     },
-    "Xbox Live Token Parse Failed %@" : {
-      "extractionState" : "stale",
+    "Xbox Live Token Parse Failed" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "فشل في تحليل رمز Xbox Live: %@"
+            "value" : "فشل في تحليل رمز Xbox Live"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xbox Live token parse mislykkedes: %@"
+            "value" : "Xbox Live token parse mislykkedes"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xbox Live Token Parse fehlgeschlagen: %@"
+            "value" : "Xbox Live Token Parse fehlgeschlagen"
           }
         },
         "en" : {
@@ -76199,132 +76206,132 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Análisis de token de Xbox Live falló: %@"
+            "value" : "Análisis de token de Xbox Live falló"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xbox Live-tokenin jäsentäminen epäonnistui: %@"
+            "value" : "Xbox Live-tokenin jäsentäminen epäonnistui"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analyse du token Xbox Live échouée: %@"
+            "value" : "Analyse du token Xbox Live échouée"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xbox Live टोकन पार्स करने में विफल: %@"
+            "value" : "Xbox Live टोकन पार्स करने में विफल"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analisi token Xbox Live fallita: %@"
+            "value" : "Analisi token Xbox Live fallita"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xbox Liveトークンの解析に失敗: %@"
+            "value" : "Xbox Liveトークンの解析に失敗"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xbox Live 토큰 파싱 실패: %@"
+            "value" : "Xbox Live 토큰 파싱 실패"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xbox Live token parse mislyktes: %@"
+            "value" : "Xbox Live token parse mislyktes"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xbox Live token parse mislukt: %@"
+            "value" : "Xbox Live token parse mislukt"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Parsowanie tokenu Xbox Live nie powiodło się: %@"
+            "value" : "Parsowanie tokenu Xbox Live nie powiodło się"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Análise de token do Xbox Live falhou: %@"
+            "value" : "Análise de token do Xbox Live falhou"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Разбор токена Xbox Live не удался: %@"
+            "value" : "Разбор токена Xbox Live не удался"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xbox Live token parse misslyckades: %@"
+            "value" : "Xbox Live token parse misslyckades"
           }
         },
         "th" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "การแยกวิเคราะห์โทเค็น Xbox Live ล้มเหลว: %@"
+            "value" : "การแยกวิเคราะห์โทเค็น Xbox Live ล้มเหลว"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Xbox Live token ayrıştırma başarısız: %@"
+            "value" : "Xbox Live token ayrıştırma başarısız"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Phân tích token Xbox Live thất bại: %@"
+            "value" : "Phân tích token Xbox Live thất bại"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "解析 Xbox Live 令牌响应失败: %@"
+            "value" : "解析 Xbox Live 令牌响应失败"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "解析 Xbox Live 令牌響應失敗: %@"
+            "value" : "解析 Xbox Live 令牌響應失敗"
           }
         }
       }
     },
-    "XSTS Request Serialize Failed %@" : {
+    "XSTS Request Serialize Failed" : {
       "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "فشل في تسلسل طلب XSTS: %@"
+            "value" : "فشل في تسلسل طلب XSTS"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "XSTS anmodning serialisering mislykkedes: %@"
+            "value" : "XSTS anmodning serialisering mislykkedes"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "XSTS Anfrage Serialisierung fehlgeschlagen: %@"
+            "value" : "XSTS Anfrage Serialisierung fehlgeschlagen"
           }
         },
         "en" : {
@@ -76336,132 +76343,131 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Serialización de solicitud XSTS falló: %@"
+            "value" : "Serialización de solicitud XSTS falló"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "XSTS-pyynnön sarjallistaminen epäonnistui: %@"
+            "value" : "XSTS-pyynnön sarjallistaminen epäonnistui"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sérialisation de la requête XSTS échouée: %@"
+            "value" : "Sérialisation de la requête XSTS échouée"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "XSTS अनुरोध क्रमबद्ध करने में विफल: %@"
+            "value" : "XSTS अनुरोध क्रमबद्ध करने में विफल"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Serializzazione richiesta XSTS fallita: %@"
+            "value" : "Serializzazione richiesta XSTS fallita"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "XSTSリクエストのシリアライズに失敗: %@"
+            "value" : "XSTSリクエストのシリアライズに失敗"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "XSTS 요청 직렬화 실패: %@"
+            "value" : "XSTS 요청 직렬화 실패"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "XSTS forespørsel serialisering mislyktes: %@"
+            "value" : "XSTS forespørsel serialisering mislyktes"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "XSTS verzoek serialisatie mislukt: %@"
+            "value" : "XSTS verzoek serialisatie mislukt"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Serializacja żądania XSTS nie powiodła się: %@"
+            "value" : "Serializacja żądania XSTS nie powiodła się"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Serialização da solicitação XSTS falhou: %@"
+            "value" : "Serialização da solicitação XSTS falhou"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сериализация запроса XSTS не удалась: %@"
+            "value" : "Сериализация запроса XSTS не удалась"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "XSTS förfrågan serialisering misslyckades: %@"
+            "value" : "XSTS förfrågan serialisering misslyckades"
           }
         },
         "th" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "การแปลงข้อมูลคำขอ XSTS ล้มเหลว: %@"
+            "value" : "การแปลงข้อมูลคำขอ XSTS ล้มเหลว"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "XSTS istek serileştirme başarısız: %@"
+            "value" : "XSTS istek serileştirme başarısız"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tuần tự hóa yêu cầu XSTS thất bại: %@"
+            "value" : "Tuần tự hóa yêu cầu XSTS thất bại"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "序列化 XSTS 认证请求失败: %@"
+            "value" : "序列化 XSTS 认证请求失败"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "序列化 XSTS 認證請求失敗: %@"
+            "value" : "序列化 XSTS 認證請求失敗"
           }
         }
       }
     },
-    "XSTS Token Parse Failed %@" : {
-      "extractionState" : "stale",
+    "XSTS Token Parse Failed" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "فشل في تحليل رمز XSTS: %@"
+            "value" : "فشل في تحليل رمز XSTS"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "XSTS token parse mislykkedes: %@"
+            "value" : "XSTS token parse mislykkedes"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "XSTS Token Parse fehlgeschlagen: %@"
+            "value" : "XSTS Token Parse fehlgeschlagen"
           }
         },
         "en" : {
@@ -76473,109 +76479,109 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Análisis de token XSTS falló: %@"
+            "value" : "Análisis de token XSTS falló"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "XSTS-tokenin jäsentäminen epäonnistui: %@"
+            "value" : "XSTS-tokenin jäsentäminen epäonnistui"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analyse du token XSTS échouée: %@"
+            "value" : "Analyse du token XSTS échouée"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "XSTS टोकन पार्स करने में विफल: %@"
+            "value" : "XSTS टोकन पार्स करने में विफल"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Analisi token XSTS fallita: %@"
+            "value" : "Analisi token XSTS fallita"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "XSTSトークンの解析に失敗: %@"
+            "value" : "XSTSトークンの解析に失敗"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "XSTS 토큰 파싱 실패: %@"
+            "value" : "XSTS 토큰 파싱 실패"
           }
         },
         "nb" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "XSTS token parse mislyktes: %@"
+            "value" : "XSTS token parse mislyktes"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "XSTS token parse mislukt: %@"
+            "value" : "XSTS token parse mislukt"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Parsowanie tokenu XSTS nie powiodło się: %@"
+            "value" : "Parsowanie tokenu XSTS nie powiodło się"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Análise de token XSTS falhou: %@"
+            "value" : "Análise de token XSTS falhou"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Разбор токена XSTS не удался: %@"
+            "value" : "Разбор токена XSTS не удался"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "XSTS token parse misslyckades: %@"
+            "value" : "XSTS token parse misslyckades"
           }
         },
         "th" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "การแยกวิเคราะห์โทเค็น XSTS ล้มเหลว: %@"
+            "value" : "การแยกวิเคราะห์โทเค็น XSTS ล้มเหลว"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "XSTS token ayrıştırma başarısız: %@"
+            "value" : "XSTS token ayrıştırma başarısız"
           }
         },
         "vi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Phân tích token XSTS thất bại: %@"
+            "value" : "Phân tích token XSTS thất bại"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "解析 XSTS 令牌响应失败: %@"
+            "value" : "解析 XSTS 令牌响应失败"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "解析 XSTS 令牌響應失敗: %@"
+            "value" : "解析 XSTS 令牌響應失敗"
           }
         }
       }

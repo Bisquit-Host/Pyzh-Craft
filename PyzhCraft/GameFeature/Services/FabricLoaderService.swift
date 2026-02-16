@@ -38,8 +38,7 @@ enum FabricLoaderService {
             }
             return result
         } catch {
-            throw GlobalError(
-                type: .validation,
+            throw GlobalError.validation(
                 i18nKey: "Fabric Loader Parse Failed",
                 level: .notification
             )

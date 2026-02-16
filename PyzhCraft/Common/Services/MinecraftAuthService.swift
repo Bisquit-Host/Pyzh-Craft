@@ -186,8 +186,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         do {
             return try JSONDecoder().decode(TokenResponse.self, from: data)
         } catch {
-            throw GlobalError(
-                type: .validation,
+            throw GlobalError.validation(
                 i18nKey: "Token response parse failed",
                 level: .notification
             )
@@ -227,8 +226,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         do {
             bodyData = try JSONSerialization.data(withJSONObject: body)
         } catch {
-            throw GlobalError(
-                type: .validation,
+            throw GlobalError.validation(
                 i18nKey: "Xbox Live Request Serialize Failed",
                 level: .notification
             )
@@ -241,8 +239,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         do {
             return try JSONDecoder().decode(XboxLiveTokenResponse.self, from: data)
         } catch {
-            throw GlobalError(
-                type: .validation,
+            throw GlobalError.validation(
                 i18nKey: "Xbox Live Token Parse Failed",
                 level: .notification
             )
@@ -293,8 +290,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         do {
             xstsTokenResponse = try JSONDecoder().decode(XboxLiveTokenResponse.self, from: xstsData)
         } catch {
-            throw GlobalError(
-                type: .validation,
+            throw GlobalError.validation(
                 i18nKey: "XSTS Token Parse Failed",
                 level: .notification
             )
@@ -312,8 +308,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         do {
             minecraftBodyData = try JSONSerialization.data(withJSONObject: minecraftBody)
         } catch {
-            throw GlobalError(
-                type: .validation,
+            throw GlobalError.validation(
                 i18nKey: "Minecraft Request Serialize Failed",
                 level: .notification
             )
@@ -366,8 +361,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
         do {
             minecraftTokenResponse = try JSONDecoder().decode(TokenResponse.self, from: minecraftData)
         } catch {
-            throw GlobalError(
-                type: .validation,
+            throw GlobalError.validation(
                 i18nKey: "Minecraft Token Parse Failed",
                 level: .notification
             )
@@ -462,8 +456,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
                 refreshToken: refreshToken
             )
         } catch {
-            throw GlobalError(
-                type: .validation,
+            throw GlobalError.validation(
                 i18nKey: "Minecraft Profile Parse Failed",
                 level: .notification
             )

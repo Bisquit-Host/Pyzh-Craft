@@ -128,8 +128,7 @@ enum ModrinthService {
             url: URLConfig.API.Modrinth.search,
             resolvingAgainstBaseURL: true
         ) else {
-            throw GlobalError(
-                type: .validation,
+            throw GlobalError.validation(
                 i18nKey: "URL components build failed",
                 level: .notification
             )

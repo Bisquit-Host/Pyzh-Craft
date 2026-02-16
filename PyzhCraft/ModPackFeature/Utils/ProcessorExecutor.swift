@@ -69,12 +69,8 @@ enum ProcessorExecutor {
         guard
             let relativePath = CommonService.mavenCoordinateToRelativePath(jar)
         else {
-            throw GlobalError(
-                type: .validation,
-                i18nKey: String(
-                                    format: "Invalid Maven Coordinate",
-                                    jar
-                                ),
+            throw GlobalError.validation(
+                i18nKey: "Invalid Maven Coordinate",
                 level: .notification
             )
         }
@@ -82,12 +78,7 @@ enum ProcessorExecutor {
         let jarPath = librariesDir.appendingPathComponent(relativePath)
         guard FileManager.default.fileExists(atPath: jarPath.path) else {
             throw GlobalError.resource(
-                i18nKey: .init(
-                                    String(
-                                        format: "Processor Jar Not Found: %@",
-                                        jar
-                                    )
-                                ),
+                i18nKey: "Processor Jar Not Found",
                 level: .notification
             )
         }
@@ -141,12 +132,8 @@ enum ProcessorExecutor {
                     coordinate
                 )
             else {
-                throw GlobalError(
-                    type: .validation,
-                    i18nKey: String(
-                                            format: "Invalid Maven Coordinate",
-                                            coordinate
-                                        ),
+                throw GlobalError.validation(
+                    i18nKey: "Invalid Maven Coordinate",
                     level: .notification
                 )
             }

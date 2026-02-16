@@ -168,8 +168,7 @@ enum CommonService {
                 return result.gameVersions.filter { $0.stable }
             }
         } catch {
-            throw GlobalError(
-                type: .validation,
+            throw GlobalError.validation(
                 i18nKey: "Version Manifest Parse Failed",
                 level: .notification
             )

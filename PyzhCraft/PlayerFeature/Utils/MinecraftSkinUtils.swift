@@ -548,8 +548,7 @@ struct MinecraftSkinUtils: View {
         // Convert to CGImage and zoom in
         guard let headCGImage = ciContext.createCGImage(headCropped, from: headCropped.extent),
               let layerCGImage = ciContext.createCGImage(layerCropped, from: layerCropped.extent) else {
-            throw GlobalError(
-                type: .validation,
+            throw GlobalError.validation(
                 i18nKey: "Image processing failed",
                 level: .silent
             )
@@ -573,8 +572,7 @@ struct MinecraftSkinUtils: View {
             space: colorSpace,
             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
         ) else {
-            throw GlobalError(
-                type: .validation,
+            throw GlobalError.validation(
                 i18nKey: "Image context failed",
                 level: .silent
             )
@@ -593,8 +591,7 @@ struct MinecraftSkinUtils: View {
 
         // Get the final CGImage
         guard let finalCGImage = context.makeImage() else {
-            throw GlobalError(
-                type: .validation,
+            throw GlobalError.validation(
                 i18nKey: "Final image failed",
                 level: .silent
             )

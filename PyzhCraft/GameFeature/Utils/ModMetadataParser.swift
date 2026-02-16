@@ -164,8 +164,7 @@ enum ModMetadataParser {
                 data.append(chunk)
             }
         } catch {
-            throw GlobalError(
-                type: .validation,
+            throw GlobalError.validation(
                 i18nKey: "Fabric Mod JSON Extract Failed",
                 level: .silent
             )
@@ -177,8 +176,7 @@ enum ModMetadataParser {
                 try JSONSerialization.jsonObject(with: data) as? [String: Any]
                 ?? [:]
         } catch {
-            throw GlobalError(
-                type: .validation,
+            throw GlobalError.validation(
                 i18nKey: "Fabric Mod JSON Parse Failed",
                 level: .silent
             )
@@ -216,8 +214,7 @@ enum ModMetadataParser {
                 data.append(chunk)
             }
         } catch {
-            throw GlobalError(
-                type: .validation,
+            throw GlobalError.validation(
                 i18nKey: "Mcmod Info Extract Failed",
                 level: .silent
             )
@@ -229,8 +226,7 @@ enum ModMetadataParser {
                 try JSONSerialization.jsonObject(with: data) as? [[String: Any]]
                 ?? []
         } catch {
-            throw GlobalError(
-                type: .validation,
+            throw GlobalError.validation(
                 i18nKey: "Mcmod Info Parse Failed",
                 level: .silent
             )
