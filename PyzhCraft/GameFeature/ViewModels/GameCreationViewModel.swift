@@ -261,7 +261,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
             let globalError = GlobalError.from(error)
             handleNonCriticalError(
                 globalError,
-                message: "Image Selection Failed"
+                message: String(localized: "Image Selection Failed")
             )
         }
     }

@@ -34933,7 +34933,6 @@
       }
     },
     "Image Selection Failed" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
