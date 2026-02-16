@@ -36,7 +36,6 @@ class UserProfileStore {
             return try decoder.decode([UserProfile].self, from: profilesData)
         } catch {
             throw GlobalError.validation(
-                chineseMessage: "加载用户基本信息失败: \(error.localizedDescription)",
                 i18nKey: "Failed to load user basic information: %@",
                 level: .notification
             )
@@ -66,7 +65,6 @@ class UserProfileStore {
             Logger.shared.debug("用户基本信息已保存")
         } catch {
             throw GlobalError.validation(
-                chineseMessage: "保存用户基本信息失败: \(error.localizedDescription)",
                 i18nKey: "Failed to save user basic information: %@",
                 level: .notification
             )
@@ -81,7 +79,6 @@ class UserProfileStore {
 
         if profiles.contains(where: { $0.id == profile.id }) {
             throw GlobalError.player(
-                chineseMessage: "用户已存在: \(profile.name)",
                 i18nKey: "Already Exists",
                 level: .notification
             )
@@ -108,7 +105,6 @@ class UserProfileStore {
 
         guard let index = profiles.firstIndex(where: { $0.id == profile.id }) else {
             throw GlobalError.player(
-                chineseMessage: "要更新的用户不存在: \(profile.name)",
                 i18nKey: "User to update not found: %@",
                 level: .notification
             )
@@ -142,7 +138,6 @@ class UserProfileStore {
             Logger.shared.debug("已删除用户 (ID: \(id))")
         } else {
             throw GlobalError.player(
-                chineseMessage: "用户不存在: \(id)",
                 i18nKey: "Not Found",
                 level: .notification
             )

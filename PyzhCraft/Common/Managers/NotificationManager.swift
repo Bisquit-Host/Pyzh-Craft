@@ -45,7 +45,6 @@ enum NotificationManager {
         if let error = notificationError {
             Logger.shared.error("添加通知请求时出错：\(error.localizedDescription)")
             throw GlobalError.resource(
-                chineseMessage: "发送通知失败: \(error.localizedDescription)",
                 i18nKey: "Notification Send Failed",
                 level: .silent
             )
@@ -78,7 +77,6 @@ enum NotificationManager {
             } else {
                 Logger.shared.warning("用户拒绝了通知权限")
                 throw GlobalError.configuration(
-                    chineseMessage: "用户拒绝了通知权限",
                     i18nKey: "Notification Permission Denied",
                     level: .notification
                 )
@@ -89,7 +87,6 @@ enum NotificationManager {
                 throw error
             } else {
                 throw GlobalError.configuration(
-                    chineseMessage: "请求通知权限失败: \(error.localizedDescription)",
                     i18nKey: "Notification Permission Request Failed",
                     level: .notification
                 )

@@ -170,7 +170,7 @@ private struct LinksSection: View {
             (project.issuesUrl, String(localized: "Report Issues")),
             (project.sourceUrl, String(localized: "View Source Code")),
             (project.wikiUrl, String(localized: "Visit Wiki")),
-            (project.discordUrl, String(localized: "Join Discord")),
+            (project.discordUrl, String(localized: "Join Discord"))
         ].compactMap { url, text in
             url.map { (text, $0) }
         }
@@ -197,10 +197,7 @@ private struct ProjectLink: View {
 
     var body: some View {
         if let url = URL(string: url) {
-            FilterChip(
-                title: text,
-                isSelected: false
-            ) {
+            FilterChip(title: text, isSelected: false) {
                 NSWorkspace.shared.open(url)
             }
         }
@@ -312,7 +309,6 @@ struct ModrinthProjectContentView: View {
     private func loadProjectDetailsThrowing() async throws {
         guard !projectId.isEmpty else {
             throw GlobalError.validation(
-                chineseMessage: "项目ID不能为空",
                 i18nKey: "Project ID Empty",
                 level: .notification
             )
@@ -322,7 +318,6 @@ struct ModrinthProjectContentView: View {
             let fetchedProject = await ModrinthService.fetchProjectDetails(id: projectId)
         else {
             throw GlobalError.resource(
-                chineseMessage: "无法获取项目详情",
                 i18nKey: "Project Details Not Found",
                 level: .notification
             )

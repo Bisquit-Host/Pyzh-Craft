@@ -20,7 +20,6 @@ class LitematicaService {
         } catch {
             Logger.shared.error("读取 Litematica 文件列表失败: \(error.localizedDescription)")
             throw GlobalError.fileSystem(
-                chineseMessage: "读取 Litematica 文件列表失败",
                 i18nKey: "Failed to read Litematica file list",
                 level: .notification
             )

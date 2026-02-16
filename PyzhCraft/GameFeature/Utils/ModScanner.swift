@@ -34,7 +34,6 @@ class ModScanner {
     ) async throws -> ModrinthProjectDetail? {
         guard let hash = try Self.sha1HashThrowing(of: fileURL) else {
             throw GlobalError.validation(
-                chineseMessage: "无法计算文件哈希值",
                 i18nKey: "File Hash Calculation Failed",
                 level: .silent
             )
@@ -108,7 +107,6 @@ class ModScanner {
         } catch {
             Logger.shared.error("编码 mod 缓存失败: \(error.localizedDescription)")
             GlobalErrorHandler.shared.handle(GlobalError.validation(
-                chineseMessage: "保存 mod 缓存失败: \(error.localizedDescription)",
                 i18nKey: "Failed to save mod cache: %@",
                 level: .silent
             ))
@@ -276,7 +274,6 @@ extension ModScanner {
     private func readJarZipFiles(from dir: URL) throws -> [URL] {
         guard FileManager.default.fileExists(atPath: dir.path) else {
             throw GlobalError.resource(
-                chineseMessage: "目录不存在: \(dir.lastPathComponent)",
                 i18nKey: "Directory Not Found",
                 level: .silent
             )
@@ -290,8 +287,6 @@ extension ModScanner {
             )
         } catch {
             throw GlobalError.fileSystem(
-                chineseMessage:
-                    "读取目录失败: \(dir.lastPathComponent), 错误: \(error.localizedDescription)",
                 i18nKey: "Directory Read Failed",
                 level: .silent
             )

@@ -24,7 +24,6 @@ class GameLogCollector {
         if logFiles.isEmpty {
             // Log file not found
             let error = GlobalError.fileSystem(
-                chineseMessage: "未找到游戏日志文件",
                 i18nKey: "Game Log Files Not Found",
                 level: .notification
             )

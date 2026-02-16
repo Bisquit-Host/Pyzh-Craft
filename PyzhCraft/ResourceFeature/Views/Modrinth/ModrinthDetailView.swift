@@ -227,7 +227,6 @@ struct ModrinthDetailView: View {
 
         guard !query.isEmpty else {
             throw GlobalError.validation(
-                chineseMessage: "查询类型不能为空",
                 i18nKey: "Query Type Empty",
                 level: .notification
             )

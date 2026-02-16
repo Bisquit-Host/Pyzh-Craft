@@ -304,7 +304,6 @@ struct AddOrDeleteResourceButton: View {
         // If query is a modpack or an invalid resource type, show an error
         if queryLowercased == "modpack" || !validResourceTypes.contains(queryLowercased) {
             let globalError = GlobalError.configuration(
-                chineseMessage: "无法删除文件：不支持删除此类型的资源",
                 i18nKey: "Delete File Failed",
                 level: .notification
             )
@@ -320,7 +319,6 @@ struct AddOrDeleteResourceButton: View {
             )
         else {
             let globalError = GlobalError.configuration(
-                chineseMessage: "无法删除文件：游戏信息或资源目录无效",
                 i18nKey: "Delete File Failed",
                 level: .notification
             )
@@ -332,7 +330,6 @@ struct AddOrDeleteResourceButton: View {
         // Delete using the fileName passed in
         guard let fileName = fileName else {
             let globalError = GlobalError.resource(
-                chineseMessage: "无法删除文件：缺少文件名信息",
                 i18nKey: "error.resource.file_name_missing",
                 level: .notification,
             )

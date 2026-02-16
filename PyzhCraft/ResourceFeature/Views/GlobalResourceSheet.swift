@@ -127,7 +127,6 @@ struct GlobalResourceSheet: View {
     ) async throws {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
-                chineseMessage: "项目ID不能为空",
                 i18nKey: "Project ID Empty",
                 level: .notification
             )

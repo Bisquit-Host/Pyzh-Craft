@@ -87,7 +87,6 @@ enum ModrinthService {
                 throw error
             } else {
                 throw GlobalError.validation(
-                    chineseMessage: "解析版本信息失败",
                     i18nKey: "error.validation.version_info_parse_failed",
                     level: .notification
                 )
@@ -129,7 +128,6 @@ enum ModrinthService {
             resolvingAgainstBaseURL: true
         ) else {
             throw GlobalError.validation(
-                chineseMessage: "构建URLComponents失败",
                 i18nKey: "error.validation.url_components_build_failed",
                 level: .notification
             )
@@ -152,7 +150,6 @@ enum ModrinthService {
                 }
             } catch {
                 throw GlobalError.validation(
-                    chineseMessage: "编码搜索条件失败: \(error.localizedDescription)",
                     i18nKey: "Search Condition Encode Failed",
                     level: .notification
                 )
@@ -161,7 +158,6 @@ enum ModrinthService {
         components.queryItems = queryItems
         guard let url = components.url else {
             throw GlobalError.validation(
-                chineseMessage: "构建搜索URL失败",
                 i18nKey: "Search URL Build Failed",
                 level: .notification
             )

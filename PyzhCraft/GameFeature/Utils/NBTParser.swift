@@ -47,7 +47,6 @@ class NBTParser {
         // Read the root tag type (should be TAG_Compound)
         guard !data.isEmpty else {
             throw GlobalError.fileSystem(
-                chineseMessage: "NBT 数据为空",
                 i18nKey: "error.filesystem.nbt_empty_data",
                 level: .notification
             )
@@ -56,7 +55,6 @@ class NBTParser {
         let tagType = NBTType(rawValue: data[offset]) ?? .end
         guard tagType == .compound else {
             throw GlobalError.fileSystem(
-                chineseMessage: "NBT 根标签不是 Compound 类型",
                 i18nKey: "error.filesystem.nbt_invalid_root",
                 level: .notification
             )
@@ -75,7 +73,6 @@ class NBTParser {
     private func readString() throws -> String {
         guard offset + 2 <= data.count else {
             throw GlobalError.fileSystem(
-                chineseMessage: "NBT 数据不足，无法读取字符串长度",
                 i18nKey: "error.filesystem.nbt_insufficient_data",
                 level: .notification
             )
@@ -84,7 +81,6 @@ class NBTParser {
         let length = Int(readShort())
         guard offset + length <= data.count else {
             throw GlobalError.fileSystem(
-                chineseMessage: "NBT 字符串长度超出数据范围",
                 i18nKey: "error.filesystem.nbt_string_out_of_range",
                 level: .notification
             )
@@ -168,7 +164,6 @@ class NBTParser {
             let length = Int(readInt())
             guard offset + length <= data.count else {
                 throw GlobalError.fileSystem(
-                    chineseMessage: "NBT 字节数组长度超出数据范围",
                     i18nKey: "error.filesystem.nbt_byte_array_out_of_range",
                     level: .notification
                 )
@@ -192,7 +187,6 @@ class NBTParser {
             return array
         case .end:
             throw GlobalError.fileSystem(
-                chineseMessage: "NBT 解析遇到 End 标签",
                 i18nKey: "error.filesystem.nbt_unexpected_end_tag",
                 level: .notification
             )
@@ -228,7 +222,6 @@ class NBTParser {
     private func readList() throws -> [Any] {
         guard offset < data.count else {
             throw GlobalError.fileSystem(
-                chineseMessage: "NBT 数据不足，无法读取列表类型",
                 i18nKey: "error.filesystem.nbt_insufficient_data_for_list",
                 level: .notification
             )
@@ -252,7 +245,6 @@ class NBTParser {
     private func decompressGzip(data: Data) throws -> Data {
         guard !data.isEmpty else {
             throw GlobalError.fileSystem(
-                chineseMessage: "NBT GZIP 数据为空",
                 i18nKey: "error.filesystem.nbt_gzip_empty_data",
                 level: .notification
             )
@@ -285,7 +277,6 @@ class NBTParser {
             try process.run()
         } catch {
             throw GlobalError.fileSystem(
-                chineseMessage: "无法启动 gzip 解压进程: \(error.localizedDescription)",
                 i18nKey: "error.filesystem.nbt_gzip_process_start_failed",
                 level: .notification
             )
@@ -298,7 +289,6 @@ class NBTParser {
 
         guard process.terminationStatus == 0 else {
             throw GlobalError.fileSystem(
-                chineseMessage: "GZIP 解压失败，退出状态: \(process.terminationStatus)",
                 i18nKey: "error.filesystem.nbt_gzip_decompress_failed",
                 level: .notification
             )
@@ -306,7 +296,6 @@ class NBTParser {
 
         guard !decompressedData.isEmpty else {
             throw GlobalError.fileSystem(
-                chineseMessage: "GZIP 解压后数据为空",
                 i18nKey: "error.filesystem.nbt_gzip_decompressed_empty",
                 level: .notification
             )
@@ -423,7 +412,6 @@ class NBTParser {
                 writeByte(boolValue ? 1 : 0)
             } else {
                 throw GlobalError.fileSystem(
-                    chineseMessage: "无法将值转换为 Byte 类型",
                     i18nKey: "error.filesystem.nbt_invalid_byte_value",
                     level: .notification
                 )
@@ -436,7 +424,6 @@ class NBTParser {
                 shortValue = int16Value
             } else {
                 throw GlobalError.fileSystem(
-                    chineseMessage: "无法将值转换为 Short 类型",
                     i18nKey: "error.filesystem.nbt_invalid_short_value",
                     level: .notification
                 )
@@ -450,7 +437,6 @@ class NBTParser {
                 intValue = int32Value
             } else {
                 throw GlobalError.fileSystem(
-                    chineseMessage: "无法将值转换为 Int 类型",
                     i18nKey: "error.filesystem.nbt_invalid_int_value",
                     level: .notification
                 )
@@ -464,7 +450,6 @@ class NBTParser {
                 longValue = int64Value
             } else {
                 throw GlobalError.fileSystem(
-                    chineseMessage: "无法将值转换为 Long 类型",
                     i18nKey: "error.filesystem.nbt_invalid_long_value",
                     level: .notification
                 )
@@ -473,7 +458,6 @@ class NBTParser {
         case .float:
             guard let floatValue = value as? Float else {
                 throw GlobalError.fileSystem(
-                    chineseMessage: "无法将值转换为 Float 类型",
                     i18nKey: "error.filesystem.nbt_invalid_float_value",
                     level: .notification
                 )
@@ -482,7 +466,6 @@ class NBTParser {
         case .double:
             guard let doubleValue = value as? Double else {
                 throw GlobalError.fileSystem(
-                    chineseMessage: "无法将值转换为 Double 类型",
                     i18nKey: "error.filesystem.nbt_invalid_double_value",
                     level: .notification
                 )
@@ -501,7 +484,6 @@ class NBTParser {
         case .compound:
             guard let compoundValue = value as? [String: Any] else {
                 throw GlobalError.fileSystem(
-                    chineseMessage: "无法将值转换为 Compound 类型",
                     i18nKey: "error.filesystem.nbt_invalid_compound_value",
                     level: .notification
                 )
@@ -510,7 +492,6 @@ class NBTParser {
         case .byteArray:
             guard let array = value as? [UInt8] else {
                 throw GlobalError.fileSystem(
-                    chineseMessage: "无法将值转换为 ByteArray 类型",
                     i18nKey: "error.filesystem.nbt_invalid_byte_array_value",
                     level: .notification
                 )
@@ -520,7 +501,6 @@ class NBTParser {
         case .intArray:
             guard let array = value as? [Int32] else {
                 throw GlobalError.fileSystem(
-                    chineseMessage: "无法将值转换为 IntArray 类型",
                     i18nKey: "error.filesystem.nbt_invalid_int_array_value",
                     level: .notification
                 )
@@ -532,7 +512,6 @@ class NBTParser {
         case .longArray:
             guard let array = value as? [Int64] else {
                 throw GlobalError.fileSystem(
-                    chineseMessage: "无法将值转换为 LongArray 类型",
                     i18nKey: "error.filesystem.nbt_invalid_long_array_value",
                     level: .notification
                 )
@@ -602,7 +581,6 @@ class NBTParser {
     private func compressGzip(data: Data) throws -> Data {
         guard !data.isEmpty else {
             throw GlobalError.fileSystem(
-                chineseMessage: "NBT 数据为空，无法压缩",
                 i18nKey: "error.filesystem.nbt_empty_data_for_compress",
                 level: .notification
             )
@@ -635,7 +613,6 @@ class NBTParser {
             try process.run()
         } catch {
             throw GlobalError.fileSystem(
-                chineseMessage: "无法启动 gzip 压缩进程: \(error.localizedDescription)",
                 i18nKey: "error.filesystem.nbt_gzip_compress_process_start_failed",
                 level: .notification
             )
@@ -648,7 +625,6 @@ class NBTParser {
 
         guard process.terminationStatus == 0 else {
             throw GlobalError.fileSystem(
-                chineseMessage: "GZIP 压缩失败，退出状态: \(process.terminationStatus)",
                 i18nKey: "error.filesystem.nbt_gzip_compress_failed",
                 level: .notification
             )
@@ -656,7 +632,6 @@ class NBTParser {
 
         guard !compressedData.isEmpty else {
             throw GlobalError.fileSystem(
-                chineseMessage: "GZIP 压缩后数据为空",
                 i18nKey: "error.filesystem.nbt_gzip_compressed_empty",
                 level: .notification
             )

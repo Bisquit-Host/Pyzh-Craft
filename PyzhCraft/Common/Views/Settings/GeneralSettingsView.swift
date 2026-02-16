@@ -159,7 +159,6 @@ public struct GeneralSettingsView: View {
         do {
             guard let supportDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appendingPathComponent(Bundle.main.appName) else {
                 throw GlobalError.configuration(
-                    chineseMessage: "无法获取应用支持目录",
                     i18nKey: "App Support Directory Not Found",
                     level: .popup
                 )
@@ -188,7 +187,6 @@ public struct GeneralSettingsView: View {
                     let resourceValues = try url.resourceValues(forKeys: [.isDirectoryKey, .isReadableKey])
                     guard resourceValues.isDirectory == true, resourceValues.isReadable == true else {
                         throw GlobalError.fileSystem(
-                            chineseMessage: "选择的路径不是可读的目录",
                             i18nKey: "Invalid Directory Selected",
                             level: .notification
                         )
@@ -206,7 +204,6 @@ public struct GeneralSettingsView: View {
             }
         case .failure(let error):
             let globalError = GlobalError.fileSystem(
-                chineseMessage: "选择目录失败: \(error.localizedDescription)",
                 i18nKey: "Directory Selection Failed",
                 level: .notification
             )
@@ -232,7 +229,6 @@ public struct GeneralSettingsView: View {
 private func restartApp() throws {
     guard let appURL = Bundle.main.bundleURL as URL? else {
         throw GlobalError.configuration(
-            chineseMessage: "无法获取应用路径",
             i18nKey: "App Executable Not Found",
             level: .popup
         )

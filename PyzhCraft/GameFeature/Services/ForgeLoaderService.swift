@@ -5,7 +5,6 @@ enum ForgeLoaderService {
     static func fetchAllForgeVersions(for minecraftVersion: String) async throws -> LoaderVersion {
         guard let result = await CommonService.fetchAllLoaderVersions(type: "forge", minecraftVersion: minecraftVersion) else {
             throw GlobalError.resource(
-                chineseMessage: "未找到 Minecraft \(minecraftVersion) 的 Forge 加载器版本",
                 i18nKey: "Forge Loader Version Not Found",
                 level: .notification
             )
@@ -117,7 +116,6 @@ enum ForgeLoaderService {
         let mainClass = forgeProfile.mainClass
         guard let version = forgeProfile.version else {
             throw GlobalError.resource(
-                chineseMessage: "Forge profile 缺少版本信息",
                 i18nKey: "Missing Forge version",
                 level: .notification
             )

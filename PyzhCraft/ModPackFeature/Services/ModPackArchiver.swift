@@ -23,7 +23,6 @@ enum ModPackArchiver {
             archive = try Archive(url: outputPath, accessMode: .create)
         } catch {
             throw GlobalError.fileSystem(
-                chineseMessage: "无法创建压缩文件: \(outputPath.path)",
                 i18nKey: "Failed to create archive file",
                 level: .notification
             )

@@ -45,7 +45,6 @@ extension BaseGameFormViewModel {
     /// Unified file access error handling
     func handleFileAccessError(_ error: Error, context: String) {
         let globalError = GlobalError.fileSystem(
-            chineseMessage: "无法访问文件: \(context)",
             i18nKey: "File Access Failed",
             level: .notification
         )
@@ -55,7 +54,6 @@ extension BaseGameFormViewModel {
     /// Unified file read error handling
     func handleFileReadError(_ error: Error, context: String) {
         let globalError = GlobalError.fileSystem(
-            chineseMessage: "无法读取文件: \(context)",
             i18nKey: "File Read Failed",
             level: .notification
         )

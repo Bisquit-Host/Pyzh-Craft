@@ -114,7 +114,6 @@ struct GameResourceInstallSheet: View {
     ) async throws {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
-                chineseMessage: "项目ID不能为空",
                 i18nKey: "Project ID Empty",
                 level: .notification
             )
@@ -235,7 +234,6 @@ struct GameResourceInstallFooter: View {
     private func downloadAllManualThrowing() async throws {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
-                chineseMessage: "项目ID不能为空",
                 i18nKey: "Project ID Empty",
                 level: .notification
             )
@@ -260,7 +258,6 @@ struct GameResourceInstallFooter: View {
 
         if !success {
             throw GlobalError.download(
-                chineseMessage: "手动下载依赖项失败",
                 i18nKey: "Manual Dependencies Failed",
                 level: .notification
             )
@@ -295,7 +292,6 @@ struct GameResourceInstallFooter: View {
     private func downloadResourceThrowing() async throws {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
-                chineseMessage: "项目ID不能为空",
                 i18nKey: "Project ID Empty",
                 level: .notification
             )
@@ -312,7 +308,6 @@ struct GameResourceInstallFooter: View {
 
         if !success {
             throw GlobalError.download(
-                chineseMessage: "下载资源失败",
                 i18nKey: "Resource Download Failed",
                 level: .notification
             )

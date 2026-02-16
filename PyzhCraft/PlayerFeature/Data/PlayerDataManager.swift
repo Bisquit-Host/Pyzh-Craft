@@ -33,7 +33,6 @@ class PlayerDataManager {
 
         if playerExists(name: name) {
             throw GlobalError.player(
-                chineseMessage: "玩家已存在: \(name)",
                 i18nKey: "Already Exists",
                 level: .notification
             )
@@ -78,7 +77,6 @@ class PlayerDataManager {
                     // If saving the credential fails, roll back the profile
                     try? profileStore.deleteProfile(byID: newPlayer.id)
                     throw GlobalError.validation(
-                        chineseMessage: "保存认证凭据失败",
                         i18nKey: "Failed to save authentication credentials: %@",
                         level: .notification
                     )
@@ -88,7 +86,6 @@ class PlayerDataManager {
             Logger.shared.debug("已添加新玩家: \(name)")
         } catch {
             throw GlobalError.player(
-                chineseMessage: "玩家创建失败: \(error.localizedDescription)",
                 i18nKey: "Creation Failed",
                 level: .notification
             )
@@ -266,7 +263,6 @@ class PlayerDataManager {
         // save credentials
         for credential in credentials where !credentialStore.saveCredential(credential) {
             throw GlobalError.validation(
-                chineseMessage: "保存认证凭据失败: \(credential.userId)",
                 i18nKey: "Failed to save authentication credentials: %@",
                 level: .notification
             )
@@ -293,7 +289,6 @@ class PlayerDataManager {
         if let credential = updatedPlayer.credential {
             if !credentialStore.saveCredential(credential) {
                 throw GlobalError.validation(
-                    chineseMessage: "更新认证凭据失败",
                     i18nKey: "Failed to update authentication credentials",
                     level: .notification
                 )

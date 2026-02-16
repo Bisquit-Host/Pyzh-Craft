@@ -181,7 +181,6 @@ struct MinecraftLaunchCommand {
         let javaExecutable = game.javaPath
         guard !javaExecutable.isEmpty else {
             throw GlobalError.configuration(
-                chineseMessage: "Java 路径未设置",
                 i18nKey: "Java Path Not Set",
                 level: .popup
             )
@@ -232,7 +231,6 @@ struct MinecraftLaunchCommand {
             }
 
             throw GlobalError.gameLaunch(
-                chineseMessage: "启动游戏进程失败: \(error.localizedDescription)",
                 i18nKey: "Process Failed",
                 level: .popup
             )

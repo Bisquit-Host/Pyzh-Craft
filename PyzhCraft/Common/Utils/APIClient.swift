@@ -141,7 +141,6 @@ enum APIClient {
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw GlobalError.network(
-                chineseMessage: "无效的 HTTP 响应",
                 i18nKey: "error.network.invalid_response",
                 level: .notification
             )
@@ -149,7 +148,6 @@ enum APIClient {
 
         guard httpResponse.statusCode == 200 else {
             throw GlobalError.network(
-                chineseMessage: "API 请求失败",
                 i18nKey: "error.network.api_request_failed",
                 level: .notification
             )
@@ -166,7 +164,6 @@ enum APIClient {
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw GlobalError.network(
-                chineseMessage: "无效的 HTTP 响应",
                 i18nKey: "error.network.invalid_response",
                 level: .notification
             )

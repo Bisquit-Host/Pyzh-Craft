@@ -108,7 +108,6 @@ struct CustomVersionPicker: View {
 
     private func handleEmptyVersionsError() {
         let globalError = GlobalError.resource(
-            chineseMessage: "没有可用的版本",
             i18nKey: "No Versions Available",
             level: .notification
         )

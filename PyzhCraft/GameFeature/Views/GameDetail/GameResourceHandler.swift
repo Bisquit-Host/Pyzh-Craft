@@ -39,7 +39,6 @@ enum GameResourceHandler {
     static func performDeleteThrowing(fileURL: URL) throws {
         guard FileManager.default.fileExists(atPath: fileURL.path) else {
             throw GlobalError.resource(
-                chineseMessage: "文件不存在: \(fileURL.lastPathComponent)",
                 i18nKey: "File Not Found",
                 level: .notification
             )
@@ -64,8 +63,6 @@ enum GameResourceHandler {
             }
         } catch {
             throw GlobalError.fileSystem(
-                chineseMessage:
-                    "删除文件失败: \(fileURL.lastPathComponent), 错误: \(error.localizedDescription)",
                 i18nKey: "File Deletion Failed",
                 level: .notification
             )
@@ -122,7 +119,6 @@ enum GameResourceHandler {
     ) async throws {
         guard let gameInfo = gameInfo else {
             throw GlobalError.validation(
-                chineseMessage: "游戏信息缺失",
                 i18nKey: "Game Info Missing",
                 level: .notification
             )
@@ -173,7 +169,6 @@ enum GameResourceHandler {
     ) async throws {
         guard let gameInfo = gameInfo else {
             throw GlobalError.validation(
-                chineseMessage: "游戏信息缺失",
                 i18nKey: "Game Info Missing",
                 level: .notification
             )
@@ -221,7 +216,6 @@ enum GameResourceHandler {
     ) async throws -> Bool {
         guard let gameInfo = gameInfo else {
             throw GlobalError.validation(
-                chineseMessage: "游戏信息缺失",
                 i18nKey: "Game Info Missing",
                 level: .notification
             )
@@ -313,7 +307,6 @@ enum GameResourceHandler {
     ) async throws {
         guard let gameInfo = gameInfo else {
             throw GlobalError.validation(
-                chineseMessage: "游戏信息缺失",
                 i18nKey: "Game Info Missing",
                 level: .notification
             )
@@ -344,7 +337,6 @@ enum GameResourceHandler {
 
         if !allSucceeded {
             throw GlobalError.download(
-                chineseMessage: "下载依赖项失败",
                 i18nKey: "Dependencies Failed",
                 level: .notification
             )
@@ -385,7 +377,6 @@ enum GameResourceHandler {
     ) async throws {
         guard let gameInfo = gameInfo else {
             throw GlobalError.validation(
-                chineseMessage: "游戏信息缺失",
                 i18nKey: "Game Info Missing",
                 level: .notification
             )
@@ -401,7 +392,6 @@ enum GameResourceHandler {
 
         if !success {
             throw GlobalError.download(
-                chineseMessage: "下载主资源失败",
                 i18nKey: "Main Resource Failed",
                 level: .notification
             )
@@ -442,7 +432,6 @@ enum GameResourceHandler {
     ) async throws {
         guard let gameInfo = gameInfo else {
             throw GlobalError.validation(
-                chineseMessage: "游戏信息缺失",
                 i18nKey: "Game Info Missing",
                 level: .notification
             )
@@ -450,7 +439,6 @@ enum GameResourceHandler {
 
         guard let versionId = depVM.selectedDependencyVersion[dep.id] else {
             throw GlobalError.resource(
-                chineseMessage: "缺少版本ID: \(dep.id)",
                 i18nKey: "error.resource.version_id_missing",
                 level: .notification
             )
@@ -458,7 +446,6 @@ enum GameResourceHandler {
 
         guard let versions = depVM.dependencyVersions[dep.id] else {
             throw GlobalError.resource(
-                chineseMessage: "缺少版本信息: \(dep.id)",
                 i18nKey: "error.resource.version_info_missing",
                 level: .notification
             )
@@ -466,7 +453,6 @@ enum GameResourceHandler {
 
         guard let version = versions.first(where: { $0.id == versionId }) else {
             throw GlobalError.resource(
-                chineseMessage: "找不到指定版本: \(versionId)",
                 i18nKey: "error.resource.version_not_found",
                 level: .notification
             )
@@ -478,7 +464,6 @@ enum GameResourceHandler {
             )
         else {
             throw GlobalError.resource(
-                chineseMessage: "找不到主文件: \(dep.id)",
                 i18nKey: "Primary File Not Found",
                 level: .notification
             )
@@ -512,7 +497,6 @@ enum GameResourceHandler {
             depVM.dependencyDownloadStates[dep.id] = .success
         } catch {
             throw GlobalError.download(
-                chineseMessage: "下载依赖项失败: \(error.localizedDescription)",
                 i18nKey: "Dependency Download Failed",
                 level: .notification
             )

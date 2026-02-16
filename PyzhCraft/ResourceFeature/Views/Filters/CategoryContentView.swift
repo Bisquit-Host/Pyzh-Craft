@@ -97,7 +97,6 @@ struct CategoryContentView: View {
     private func loadDataThrowing() async throws {
         guard !project.isEmpty else {
             throw GlobalError.validation(
-                chineseMessage: "项目类型不能为空",
                 i18nKey: "Project Type Empty",
                 level: .notification
             )

@@ -89,7 +89,6 @@ struct GlobalResourceFooter: View {
     private func downloadMainOnlyThrowing(game: GameVersionInfo) async throws {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
-                chineseMessage: "项目ID不能为空",
                 i18nKey: "Project ID Empty",
                 level: .notification
             )
@@ -106,7 +105,6 @@ struct GlobalResourceFooter: View {
 
         if !success {
             throw GlobalError.download(
-                chineseMessage: "下载主资源失败",
                 i18nKey: "Main Resource Failed",
                 level: .notification
             )
@@ -136,7 +134,6 @@ struct GlobalResourceFooter: View {
     private func downloadAllManualThrowing(game: GameVersionInfo) async throws {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
-                chineseMessage: "项目ID不能为空",
                 i18nKey: "Project ID Empty",
                 level: .notification
             )
@@ -161,7 +158,6 @@ struct GlobalResourceFooter: View {
 
         if !success {
             throw GlobalError.download(
-                chineseMessage: "手动下载依赖项失败",
                 i18nKey: "Manual Dependencies Failed",
                 level: .notification
             )
@@ -189,7 +185,6 @@ struct GlobalResourceFooter: View {
     private func downloadResourceThrowing(game: GameVersionInfo) async throws {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
-                chineseMessage: "项目ID不能为空",
                 i18nKey: "Project ID Empty",
                 level: .notification
             )
@@ -206,7 +201,6 @@ struct GlobalResourceFooter: View {
 
         if !success {
             throw GlobalError.download(
-                chineseMessage: "下载资源失败",
                 i18nKey: "Resource Download Failed",
                 level: .notification
             )

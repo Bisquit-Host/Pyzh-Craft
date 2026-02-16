@@ -48,7 +48,6 @@ public enum SHA1Calculator {
             return digest.map { String(format: "%02hhx", $0) }.joined()
         } catch {
             throw GlobalError.fileSystem(
-                chineseMessage: "计算文件 SHA1 失败: \(error.localizedDescription)",
                 i18nKey: "SHA1 Calculation Failed",
                 level: .notification
             )

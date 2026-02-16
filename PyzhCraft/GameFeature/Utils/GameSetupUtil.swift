@@ -45,7 +45,6 @@ class GameSetupUtil: ObservableObject {
                 Logger.shared.error("无法保存游戏，因为没有选择当前玩家。")
                 onError(
                     GlobalError.configuration(
-                        chineseMessage: "没有选择当前玩家",
                         i18nKey: "No Current Player",
                         level: .popup
                     ),
@@ -187,7 +186,6 @@ class GameSetupUtil: ObservableObject {
         } catch {
             onError(
                 GlobalError.fileSystem(
-                    chineseMessage: "图片保存失败",
                     i18nKey: "Image Save Failed",
                     level: .notification
                 ),
@@ -227,7 +225,6 @@ class GameSetupUtil: ObservableObject {
         let success = await fileManager.downloadVersionFiles(manifest: manifest, gameName: gameName)
         if !success {
             throw GlobalError.download(
-                chineseMessage: "下载 Minecraft 版本文件失败",
                 i18nKey: "Minecraft Version Failed",
                 level: .notification
             )
@@ -258,7 +255,6 @@ class GameSetupUtil: ObservableObject {
         } catch {
             let globalError = GlobalError.from(error)
             throw GlobalError.download(
-                chineseMessage: "下载资源索引失败: \(globalError.chineseMessage)",
                 i18nKey: "Asset Index Failed",
                 level: .notification
             )

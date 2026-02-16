@@ -38,7 +38,6 @@ enum DownloadManager {
     static func downloadResource(for game: GameVersionInfo, urlString: String, resourceType: String, expectedSha1: String? = nil) async throws -> URL {
         guard let url = URL(string: urlString) else {
             throw GlobalError.validation(
-                chineseMessage: "无效的下载地址",
                 i18nKey: "Invalid Download URL",
                 level: .notification
             )
@@ -46,7 +45,6 @@ enum DownloadManager {
 
         guard let type = ResourceType(from: resourceType) else {
             throw GlobalError.resource(
-                chineseMessage: "未知的资源类型",
                 i18nKey: "error.resource.unknown_type",
                 level: .notification
             )
@@ -77,7 +75,6 @@ enum DownloadManager {
 
         guard let resourceDirUnwrapped = resourceDir else {
             throw GlobalError.resource(
-                chineseMessage: "无法获取资源目录",
                 i18nKey: "Directory Not Found",
                 level: .notification
             )
@@ -110,7 +107,6 @@ enum DownloadManager {
         let url: URL = try autoreleasepool {
             guard let url = URL(string: urlString) else {
                 throw GlobalError.validation(
-                    chineseMessage: "无效的下载地址",
                     i18nKey: "Invalid Download URL",
                     level: .notification
                 )
@@ -158,7 +154,6 @@ enum DownloadManager {
             try fileManager.createDirectory(at: destinationURL.deletingLastPathComponent(), withIntermediateDirectories: true)
         } catch {
             throw GlobalError.fileSystem(
-                chineseMessage: "创建目标目录失败",
                 i18nKey: "Download Directory Creation Failed",
                 level: .notification
             )
@@ -200,7 +195,6 @@ enum DownloadManager {
             // Optimization: Check status codes directly and reduce intermediate variables
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 throw GlobalError.download(
-                    chineseMessage: "HTTP 请求失败",
                     i18nKey: "HTTP Status Error",
                     level: .notification
                 )
@@ -212,7 +206,6 @@ enum DownloadManager {
                     let actualSha1 = try calculateFileSHA1(at: tempFileURL)
                     if actualSha1 != expectedSha1 {
                         throw GlobalError.validation(
-                            chineseMessage: "SHA1 校验失败",
                             i18nKey: "SHA1 Check Failed",
                             level: .notification
                         )
@@ -235,13 +228,11 @@ enum DownloadManager {
                 throw globalError
             } else if error is URLError {
                 throw GlobalError.download(
-                    chineseMessage: "网络请求失败",
                     i18nKey: "Network Request Failed",
                     level: .notification
                 )
             } else {
                 throw GlobalError.download(
-                    chineseMessage: "下载失败",
                     i18nKey: "General Failure",
                     level: .notification
                 )

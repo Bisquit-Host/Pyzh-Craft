@@ -16,7 +16,6 @@ enum ResourceDetailLoader {
     ) async -> (detail: ModrinthProjectDetail, compatibleGames: [GameVersionInfo])? {
         guard let detail = await ModrinthService.fetchProjectDetails(id: projectId) else {
             GlobalErrorHandler.shared.handle(GlobalError.resource(
-                chineseMessage: "无法获取项目详情",
                 i18nKey: "Project Details Not Found",
                 level: .notification
             ))
@@ -40,7 +39,6 @@ enum ResourceDetailLoader {
     static func loadModPackDetail(projectId: String) async -> ModrinthProjectDetail? {
         guard let detail = await ModrinthService.fetchProjectDetails(id: projectId) else {
             GlobalErrorHandler.shared.handle(GlobalError.resource(
-                chineseMessage: "无法获取整合包项目详情",
                 i18nKey: "Project Details Not Found",
                 level: .notification
             ))

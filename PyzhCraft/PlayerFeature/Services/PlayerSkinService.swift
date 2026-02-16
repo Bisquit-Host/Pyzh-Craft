@@ -25,7 +25,6 @@ enum PlayerSkinService {
     private static func validateAccessToken(_ player: Player) throws {
         guard !player.authAccessToken.isEmpty else {
             throw GlobalError.authentication(
-                chineseMessage: "缺少访问令牌，请重新登录",
                 i18nKey: "Access token is missing, please log in again",
                 level: .popup
             )
@@ -36,37 +35,31 @@ enum PlayerSkinService {
         switch http.statusCode {
         case 400:
             throw GlobalError.validation(
-                chineseMessage: "无效的请求参数",
                 i18nKey: "Invalid request parameters",
                 level: .notification
             )
         case 401:
             throw GlobalError.authentication(
-                chineseMessage: "访问令牌无效或已过期，请重新登录",
                 i18nKey: "Access token has expired, please log in again",
                 level: .popup
             )
         case 403:
             throw GlobalError.authentication(
-                chineseMessage: "没有\(operation)的权限 (403)",
                 i18nKey: "error.authentication.\(operation)_forbidden",
                 level: .notification
             )
         case 404:
             throw GlobalError.resource(
-                chineseMessage: "未找到相关资源",
                 i18nKey: "The requested resource was not found",
                 level: .notification
             )
         case 429:
             throw GlobalError.network(
-                chineseMessage: "请求过于频繁，请稍后再试",
                 i18nKey: "Too many requests, please try again later",
                 level: .notification
             )
         default:
             throw GlobalError.network(
-                chineseMessage: "\(operation)失败: HTTP \(http.statusCode)",
                 i18nKey: "error.network.\(operation)_http_error",
                 level: .notification
             )
@@ -296,7 +289,6 @@ enum PlayerSkinService {
         case 400:
             Logger.shared.error("Skin upload failed with 400: Invalid skin file or variant")
             throw GlobalError.validation(
-                chineseMessage: "无效的皮肤文件",
                 i18nKey: "Invalid skin file",
                 level: .popup
             )
@@ -458,32 +450,26 @@ enum PlayerSkinService {
             return
         case 400:
             throw GlobalError.validation(
-                chineseMessage: "无效的斗篷ID或请求",
                 i18nKey: "Invalid cape ID or request",
                 level: .notification
             )
         case 401:
             throw GlobalError.authentication(
-                chineseMessage:
-                    "访问令牌无效或已过期，请重新登录",
                 i18nKey: "Access token is invalid or expired, please log in again",
                 level: .popup
             )
         case 403:
             throw GlobalError.authentication(
-                chineseMessage: "没有装备斗篷的权限 (403)",
                 i18nKey: "No permission to equip cape (403)",
                 level: .notification
             )
         case 404:
             throw GlobalError.resource(
-                chineseMessage: "未找到斗篷或未拥有",
                 i18nKey: "Cape not found or not owned",
                 level: .notification
             )
         default:
             throw GlobalError.network(
-                chineseMessage: "显示斗篷失败: HTTP \(http.statusCode)",
                 i18nKey: "Show cape failed: HTTP %@",
                 level: .notification
             )
@@ -525,14 +511,11 @@ enum PlayerSkinService {
             return
         case 401:
             throw GlobalError.authentication(
-                chineseMessage:
-                    "访问令牌无效或已过期，请重新登录",
                 i18nKey: "Access token is invalid or expired, please log in again",
                 level: .popup
             )
         default:
             throw GlobalError.network(
-                chineseMessage: "隐藏斗篷失败: HTTP \(http.statusCode)",
                 i18nKey: "Hide cape failed: HTTP %@",
                 level: .notification
             )
@@ -556,14 +539,11 @@ enum PlayerSkinService {
             return
         case 401:
             throw GlobalError.authentication(
-                chineseMessage:
-                    "访问令牌无效或已过期，请重新登录",
                 i18nKey: "Access token is invalid or expired, please log in again",
                 level: .popup
             )
         default:
             throw GlobalError.network(
-                chineseMessage: "重置皮肤失败: HTTP \(http.statusCode)",
                 i18nKey: "Reset skin failed: HTTP %@",
                 level: .notification
             )

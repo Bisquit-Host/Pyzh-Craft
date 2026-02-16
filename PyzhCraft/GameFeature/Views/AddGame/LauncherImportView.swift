@@ -243,7 +243,6 @@ struct LauncherImportView: View {
             guard url.startAccessingSecurityScopedResource() else {
                 GlobalErrorHandler.shared.handle(
                     GlobalError.fileSystem(
-                        chineseMessage: "无法访问所选文件夹",
                         i18nKey: "File Access Failed",
                         level: .notification
                     )
@@ -258,7 +257,6 @@ struct LauncherImportView: View {
                 let launcherName = viewModel.selectedLauncherType.rawValue
                 GlobalErrorHandler.shared.handle(
                     GlobalError.fileSystem(
-                        chineseMessage: "选择的文件夹不是有效的 \(launcherName) 实例",
                         i18nKey: "Invalid Instance Path",
                         level: .notification
                     )

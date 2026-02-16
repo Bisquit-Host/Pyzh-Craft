@@ -254,7 +254,6 @@ struct GameFormView: View {
 
             guard url.startAccessingSecurityScopedResource() else {
                 let globalError = GlobalError.fileSystem(
-                    chineseMessage: "无法访问所选文件",
                     i18nKey: "File Access Failed",
                     level: .notification
                 )

@@ -182,7 +182,6 @@ class ModPackDownloadSheetViewModel: ObservableObject {
         // Create URL
         guard let url = URL(string: urlString) else {
             throw GlobalError.validation(
-                chineseMessage: "无效的下载地址",
                 i18nKey: "Invalid Download URL",
                 level: .notification
             )
@@ -265,7 +264,6 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                             let actualSha1 = try DownloadManager.calculateFileSHA1(at: tempURL)
                             if actualSha1 != expectedSha1 {
                                 throw GlobalError.validation(
-                                    chineseMessage: "SHA1 校验失败",
                                     i18nKey: "SHA1 Check Failed",
                                     level: .notification
                                 )
@@ -309,7 +307,6 @@ class ModPackDownloadSheetViewModel: ObservableObject {
         guard let httpResponse = response as? HTTPURLResponse,
               httpResponse.statusCode == 200 else {
             throw GlobalError.download(
-                chineseMessage: "无法获取文件大小",
                 i18nKey: "error.download.cannot_get_file_size",
                 level: .notification
             )
@@ -318,7 +315,6 @@ class ModPackDownloadSheetViewModel: ObservableObject {
         guard let contentLength = httpResponse.value(forHTTPHeaderField: "Content-Length"),
               let fileSize = Int64(contentLength) else {
             throw GlobalError.download(
-                chineseMessage: "无法获取文件大小",
                 i18nKey: "error.download.cannot_get_file_size",
                 level: .notification
             )
@@ -552,7 +548,6 @@ class ModPackDownloadSheetViewModel: ObservableObject {
 
     private func handleDownloadError(_ message: String, _ i18nKey: String) {
         let globalError = GlobalError.resource(
-            chineseMessage: message,
             i18nKey: i18nKey,
             level: .notification
         )

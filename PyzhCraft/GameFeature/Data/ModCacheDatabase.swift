@@ -84,7 +84,6 @@ class ModCacheDatabase {
             guard result == SQLITE_DONE else {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
                 throw GlobalError.validation(
-                    chineseMessage: "保存 mod 缓存失败: \(errorMessage)",
                     i18nKey: "Failed to save mod cache: %@",
                     level: .notification
                 )
@@ -121,7 +120,6 @@ class ModCacheDatabase {
                 guard result == SQLITE_DONE else {
                     let errorMessage = String(cString: sqlite3_errmsg(db.database))
                     throw GlobalError.validation(
-                        chineseMessage: "批量保存 mod 缓存失败: \(errorMessage)",
                         i18nKey: "Failed to batch save mod cache: %@",
                         level: .notification
                     )
@@ -187,7 +185,6 @@ class ModCacheDatabase {
             guard result == SQLITE_DONE else {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
                 throw GlobalError.validation(
-                    chineseMessage: "删除 mod 缓存失败: \(errorMessage)",
                     i18nKey: "Failed to delete mod cache: %@",
                     level: .notification
                 )
@@ -212,7 +209,6 @@ class ModCacheDatabase {
                 guard result == SQLITE_DONE else {
                     let errorMessage = String(cString: sqlite3_errmsg(db.database))
                     throw GlobalError.validation(
-                        chineseMessage: "批量删除 mod 缓存失败: \(errorMessage)",
                         i18nKey: "Failed to batch delete mod cache: %@",
                         level: .notification
                     )

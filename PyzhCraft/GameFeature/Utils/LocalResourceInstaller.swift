@@ -31,7 +31,6 @@ enum LocalResourceInstaller {
         guard let ext = fileURL.pathExtension.lowercased() as String?,
               resourceType.allowedExtensions.contains(ext) else {
             throw GlobalError.resource(
-                chineseMessage: "不支持的文件类型。请导入 .jar 或 .zip 文件。",
                 i18nKey: "Invalid file type",
                 level: .notification
             )
@@ -41,7 +40,6 @@ enum LocalResourceInstaller {
         var isDir: ObjCBool = false
         guard FileManager.default.fileExists(atPath: gameRoot.path, isDirectory: &isDir), isDir.boolValue else {
             throw GlobalError.fileSystem(
-                chineseMessage: "目标文件夹不存在。",
                 i18nKey: "Destination Unavailable",
                 level: .notification
             )
@@ -52,7 +50,6 @@ enum LocalResourceInstaller {
         defer { if needsSecurity { fileURL.stopAccessingSecurityScopedResource() } }
         if !needsSecurity {
             throw GlobalError.fileSystem(
-                chineseMessage: "无法访问所选文件。",
                 i18nKey: "Security Scope Failed",
                 level: .notification
             )
@@ -70,7 +67,6 @@ enum LocalResourceInstaller {
             try FileManager.default.copyItem(at: fileURL, to: destURL)
         } catch {
             throw GlobalError.fileSystem(
-                chineseMessage: "文件复制失败：\(error.localizedDescription)",
                 i18nKey: "Copy Failed",
                 level: .notification
             )
@@ -123,7 +119,6 @@ extension LocalResourceInstaller {
                         // If query is a modpack or an invalid resource type, show an error
                         if queryLowercased == "modpack" || !validResourceTypes.contains(queryLowercased) {
                             errorHandler.handle(GlobalError.configuration(
-                                chineseMessage: "不支持导入此类型的资源",
                                 i18nKey: "Resource Directory Not Found",
                                 level: .notification
                             ))
@@ -133,7 +128,6 @@ extension LocalResourceInstaller {
                         let gameRootOpt = AppPaths.resourceDirectory(for: query, gameName: gameName)
                         guard let gameRoot = gameRootOpt else {
                             errorHandler.handle(GlobalError.fileSystem(
-                                chineseMessage: "找不到游戏目录",
                                 i18nKey: "Game Directory Not Found",
                                 level: .notification
                             ))
@@ -146,7 +140,6 @@ extension LocalResourceInstaller {
                         do {
                             guard let ext = fileURL.pathExtension.lowercased() as String?, allowedExtensions.contains(ext) else {
                                 throw GlobalError.resource(
-                                    chineseMessage: "不支持的文件类型。请导入 .jar 或 .zip 文件。",
                                     i18nKey: "Invalid file type",
                                     level: .notification
                                 )
@@ -163,7 +156,6 @@ extension LocalResourceInstaller {
                         }
                     case .failure(let error):
                         errorHandler.handle(GlobalError.fileSystem(
-                            chineseMessage: "文件选择失败：\(error.localizedDescription)",
                             i18nKey: "File Selection Failed",
                             level: .notification
                         ))

@@ -22,7 +22,6 @@ class CacheManager: ObservableObject {
             self.cacheInfo = try calculator.calculateMetaCacheInfo()
         } catch {
             throw GlobalError.fileSystem(
-                chineseMessage: "计算元数据缓存信息失败: \(error.localizedDescription)",
                 i18nKey: "Meta Cache Calculation Failed",
                 level: .notification
             )
@@ -47,7 +46,6 @@ class CacheManager: ObservableObject {
             self.cacheInfo = try calculator.calculateCacheInfo()
         } catch {
             throw GlobalError.fileSystem(
-                chineseMessage: "计算数据缓存信息失败: \(error.localizedDescription)",
                 i18nKey: "Data Cache Calculation Failed",
                 level: .notification
             )
@@ -74,7 +72,6 @@ class CacheManager: ObservableObject {
             self.cacheInfo = try calculator.calculateProfileCacheInfo(gameName: game)
         } catch {
             throw GlobalError.fileSystem(
-                chineseMessage: "计算游戏缓存信息失败: \(error.localizedDescription)",
                 i18nKey: "Game Cache Calculation Failed",
                 level: .notification
             )

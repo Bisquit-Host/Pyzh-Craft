@@ -73,7 +73,6 @@ class CommonFileManager {
         } catch {
             let globalError = GlobalError.from(error)
             throw GlobalError.download(
-                chineseMessage: "下载 Forge JAR 文件失败: \(globalError.chineseMessage)",
                 i18nKey: "JAR Download Failed",
                 level: .notification
             )
@@ -116,7 +115,6 @@ class CommonFileManager {
         } catch {
             let globalError = GlobalError.from(error)
             throw GlobalError.download(
-                chineseMessage: "下载 JAR 文件失败: \(globalError.chineseMessage)",
                 i18nKey: "JAR Download Failed",
                 level: .notification
             )
@@ -190,7 +188,6 @@ class CommonFileManager {
             } catch {
                 Logger.shared.error("执行处理器失败: \(error.localizedDescription)")
                 throw GlobalError.download(
-                    chineseMessage: "执行处理器失败: \(error.localizedDescription)",
                     i18nKey: "Processor Start Failed",
                     level: .notification
                 )

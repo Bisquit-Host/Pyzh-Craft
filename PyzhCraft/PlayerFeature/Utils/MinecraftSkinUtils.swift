@@ -352,7 +352,6 @@ struct MinecraftSkinUtils: View {
 
                 guard let ciImage = CIImage(data: data) else {
                     throw GlobalError.validation(
-                        chineseMessage: "无效的图像数据",
                         i18nKey: "Invalid Image Data",
                         level: .silent
                     )
@@ -361,7 +360,6 @@ struct MinecraftSkinUtils: View {
                 // Validate skin dimensions
                 guard ciImage.extent.width == 64 && ciImage.extent.height == 64 else {
                     throw GlobalError.validation(
-                        chineseMessage: "不支持的皮肤格式，仅支持64x64像素",
                         i18nKey: "Unsupported Skin Format",
                         level: .silent
                     )
@@ -417,7 +415,6 @@ struct MinecraftSkinUtils: View {
         guard let image = NSImage(named: src),
               let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
             throw GlobalError.resource(
-                chineseMessage: "Asset 资源未找到: \(src)",
                 i18nKey: "Asset Not Found",
                 level: .silent
             )
@@ -426,7 +423,6 @@ struct MinecraftSkinUtils: View {
         let bitmapRep = NSBitmapImageRep(cgImage: cgImage)
         guard let data = bitmapRep.representation(using: .png, properties: [:]) else {
             throw GlobalError.validation(
-                chineseMessage: "无效的图像数据",
                 i18nKey: "Invalid Image Data",
                 level: .silent
             )
@@ -438,7 +434,6 @@ struct MinecraftSkinUtils: View {
     private func loadURLData() async throws -> Data {
         guard let url = URL(string: src) else {
             throw GlobalError.validation(
-                chineseMessage: "无效的URL: \(src)",
                 i18nKey: "Invalid URL",
                 level: .silent
             )
@@ -453,19 +448,16 @@ struct MinecraftSkinUtils: View {
             return data
         case 404:
             throw GlobalError.resource(
-                chineseMessage: "皮肤资源未找到: \(src)",
                 i18nKey: "error.resource.skin_not_found",
                 level: .silent
             )
         case 408, 504:
             throw GlobalError.download(
-                chineseMessage: "网络请求超时: \(src)",
                 i18nKey: "Network Timeout",
                 level: .silent
             )
         default:
             throw GlobalError.download(
-                chineseMessage: "皮肤下载失败: HTTP \(httpResponse.statusCode)",
                 i18nKey: "Skin Download Failed",
                 level: .silent
             )
@@ -488,7 +480,6 @@ struct MinecraftSkinUtils: View {
             guard let image = NSImage(named: src),
                   let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
                 throw GlobalError.resource(
-                    chineseMessage: "Asset 资源未找到: \(src)",
                     i18nKey: "Asset Not Found",
                     level: .silent
                 )
@@ -496,7 +487,6 @@ struct MinecraftSkinUtils: View {
             let bitmapRep = NSBitmapImageRep(cgImage: cgImage)
             guard let imageData = bitmapRep.representation(using: .png, properties: [:]) else {
                 throw GlobalError.validation(
-                    chineseMessage: "无效的图像数据",
                     i18nKey: "Invalid Image Data",
                     level: .silent
                 )
@@ -505,7 +495,6 @@ struct MinecraftSkinUtils: View {
         case .url:
             guard let url = URL(string: src) else {
                 throw GlobalError.validation(
-                    chineseMessage: "无效的URL: \(src)",
                     i18nKey: "Invalid URL",
                     level: .silent
                 )
@@ -515,7 +504,6 @@ struct MinecraftSkinUtils: View {
 
             guard httpResponse.statusCode == 200 else {
                 throw GlobalError.download(
-                    chineseMessage: "皮肤下载失败: HTTP \(httpResponse.statusCode)",
                     i18nKey: "Skin Download Failed",
                     level: .silent
                 )
@@ -526,7 +514,6 @@ struct MinecraftSkinUtils: View {
         // Create CIImage
         guard let ciImage = CIImage(data: data) else {
             throw GlobalError.validation(
-                chineseMessage: "无效的图像数据",
                 i18nKey: "Invalid Image Data",
                 level: .silent
             )
@@ -535,7 +522,6 @@ struct MinecraftSkinUtils: View {
         // Verify skin size
         guard ciImage.extent.width == 64 && ciImage.extent.height == 64 else {
             throw GlobalError.validation(
-                chineseMessage: "不支持的皮肤格式，仅支持64x64像素",
                 i18nKey: "Unsupported Skin Format",
                 level: .silent
             )
@@ -562,7 +548,6 @@ struct MinecraftSkinUtils: View {
         guard let headCGImage = ciContext.createCGImage(headCropped, from: headCropped.extent),
               let layerCGImage = ciContext.createCGImage(layerCropped, from: layerCropped.extent) else {
             throw GlobalError.validation(
-                chineseMessage: "图像处理失败",
                 i18nKey: "error.validation.image_processing_failed",
                 level: .silent
             )
@@ -587,7 +572,6 @@ struct MinecraftSkinUtils: View {
             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
         ) else {
             throw GlobalError.validation(
-                chineseMessage: "无法创建图像上下文",
                 i18nKey: "error.validation.image_context_failed",
                 level: .silent
             )
@@ -607,7 +591,6 @@ struct MinecraftSkinUtils: View {
         // Get the final CGImage
         guard let finalCGImage = context.makeImage() else {
             throw GlobalError.validation(
-                chineseMessage: "无法生成最终图像",
                 i18nKey: "error.validation.final_image_failed",
                 level: .silent
             )

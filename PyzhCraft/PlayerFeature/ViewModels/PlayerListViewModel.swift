@@ -161,7 +161,6 @@ class PlayerListViewModel: ObservableObject {
         guard let index = players.firstIndex(where: { $0.id == playerId })
         else {
             throw GlobalError.player(
-                chineseMessage: "玩家不存在: \(playerId)",
                 i18nKey: "Not Found",
                 level: .notification
             )

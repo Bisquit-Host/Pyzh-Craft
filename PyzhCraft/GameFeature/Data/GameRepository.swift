@@ -135,7 +135,6 @@ class GameRepository: ObservableObject {
         let workingPath = currentWorkingPath
         guard let game = getGame(by: id) else {
             throw GlobalError.validation(
-                chineseMessage: "找不到要删除的游戏：\(id)",
                 i18nKey: "Game Not Found Delete",
                 level: .notification
             )
@@ -213,7 +212,6 @@ class GameRepository: ObservableObject {
         let workingPath = currentWorkingPath
         guard var game = getGame(by: id) else {
             throw GlobalError.validation(
-                chineseMessage: "找不到要更新状态的游戏：\(id)",
                 i18nKey: "Game Not Found Status",
                 level: .notification
             )
@@ -251,7 +249,6 @@ class GameRepository: ObservableObject {
     func updateJavaPath(id: String, javaPath: String) async throws {
         guard var game = getGame(by: id) else {
             throw GlobalError.validation(
-                chineseMessage: "找不到要更新 Java 路径的游戏：\(id)",
                 i18nKey: "Game Not Found Java",
                 level: .notification
             )
@@ -276,7 +273,6 @@ class GameRepository: ObservableObject {
     func updateJvmArguments(id: String, jvmArguments: String) async throws {
         guard var game = getGame(by: id) else {
             throw GlobalError.validation(
-                chineseMessage: "找不到要更新 JVM 参数的游戏：\(id)",
                 i18nKey: "Game Not Found JVM",
                 level: .notification
             )
@@ -301,7 +297,6 @@ class GameRepository: ObservableObject {
     func updateMemorySize(id: String, xms: Int, xmx: Int) async throws {
         guard var game = getGame(by: id) else {
             throw GlobalError.validation(
-                chineseMessage: "找不到要更新内存大小的游戏：\(id)",
                 i18nKey: "Game Not Found Memory",
                 level: .notification
             )
@@ -310,7 +305,6 @@ class GameRepository: ObservableObject {
         // Verify memory parameters
         guard xms > 0 && xmx > 0 && xms <= xmx else {
             throw GlobalError.validation(
-                chineseMessage: "无效的内存参数：xms=\(xms), xmx=\(xmx)",
                 i18nKey: "Invalid Memory Params",
                 level: .notification
             )

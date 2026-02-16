@@ -68,7 +68,6 @@ class MinecraftFileManager {
             try fileManager.removeItem(at: profileDirectory)
         } catch {
             throw GlobalError.fileSystem(
-                chineseMessage: "清理游戏文件夹失败",
                 i18nKey: "Game Deletion Failed",
                 level: .notification
             )
@@ -177,7 +176,6 @@ class MinecraftFileManager {
                 )
             } catch {
                 throw GlobalError.fileSystem(
-                    chineseMessage: "创建目录失败",
                     i18nKey: "Directory Creation Failed",
                     level: .notification
                 )
@@ -229,7 +227,6 @@ class MinecraftFileManager {
                 throw globalError
             } else {
                 throw GlobalError.download(
-                    chineseMessage: "下载客户端 JAR 文件失败",
                     i18nKey: "Client Jar Failed",
                     level: .notification
                 )
@@ -300,7 +297,6 @@ class MinecraftFileManager {
 
         guard let artifactURL = library.downloads.artifact.url else {
             throw GlobalError.download(
-                chineseMessage: "库文件缺少下载 URL",
                 i18nKey: "Missing library URL",
                 level: .notification
             )
@@ -322,7 +318,6 @@ class MinecraftFileManager {
                 throw globalError
             } else {
                 throw GlobalError.download(
-                    chineseMessage: "下载库文件失败",
                     i18nKey: "Library Download Failed",
                     level: .notification
                 )
@@ -364,7 +359,6 @@ class MinecraftFileManager {
 
         guard let nativeURL = nativeArtifact.url else {
             throw GlobalError.download(
-                chineseMessage: "原生库文件 \(library.name) 缺少下载 URL",
                 i18nKey: "Missing native URL",
                 level: .notification
             )
@@ -389,7 +383,6 @@ class MinecraftFileManager {
                 throw globalError
             } else {
                 throw GlobalError.download(
-                    chineseMessage: "下载原生库文件失败",
                     i18nKey: "Native Library Failed",
                     level: .notification
                 )
@@ -443,7 +436,6 @@ class MinecraftFileManager {
                 throw globalError
             } else {
                 throw GlobalError.download(
-                    chineseMessage: "下载资源索引失败",
                     i18nKey: "Asset Index Failed",
                     level: .notification
                 )
@@ -478,7 +470,6 @@ class MinecraftFileManager {
                 throw globalError
             } else {
                 throw GlobalError.download(
-                    chineseMessage: "下载日志配置文件失败",
                     i18nKey: "Logging Config Failed",
                     level: .notification
                 )
@@ -512,7 +503,6 @@ class MinecraftFileManager {
                 throw globalError
             } else {
                 throw GlobalError.download(
-                    chineseMessage: "下载文件失败",
                     i18nKey: "File Download Failed",
                     level: .notification
                 )
@@ -623,7 +613,6 @@ class MinecraftFileManager {
                 throw globalError
             } else {
                 throw GlobalError.download(
-                    chineseMessage: "下载资源文件失败",
                     i18nKey: "Asset File Failed",
                     level: .notification
                 )

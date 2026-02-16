@@ -109,7 +109,6 @@ enum QuiltLoaderService {
         let mainClass = quiltProfile.mainClass
         guard let version = quiltProfile.version else {
             throw GlobalError.resource(
-                chineseMessage: "Quilt profile 缺少版本信息",
                 i18nKey: "Quilt missing version",
                 level: .notification
             )

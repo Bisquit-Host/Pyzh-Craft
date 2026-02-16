@@ -133,8 +133,6 @@ enum CommonService {
         // Returns the first matching version, or throws an error if there is none
         guard let firstVersion = filteredVersions.first else {
             throw GlobalError.resource(
-                chineseMessage:
-                    "未找到 Minecraft \(minecraftVersion) 的 \(type) 加载器版本",
                 i18nKey: "Loader version not found",
                 level: .notification
             )
@@ -171,8 +169,6 @@ enum CommonService {
             }
         } catch {
             throw GlobalError.validation(
-                chineseMessage:
-                    "解析 \(type) 版本清单失败: \(error.localizedDescription)",
                 i18nKey: "Version Manifest Parse Failed",
                 level: .notification
             )

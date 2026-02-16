@@ -58,7 +58,6 @@ class SQLiteDatabase {
                     sqlite3_close(dbToClose)
                 }
                 throw GlobalError.validation(
-                    chineseMessage: "无法打开数据库: \(errorMessage)",
                     i18nKey: "Failed to open database: %@",
                     level: .notification
                 )
@@ -98,7 +97,6 @@ class SQLiteDatabase {
         guard result == SQLITE_OK else {
             let errorMessage = String(cString: sqlite3_errmsg(db))
             throw GlobalError.validation(
-                chineseMessage: "无法启用 WAL 模式: \(errorMessage)",
                 i18nKey: "Failed to enable WAL mode: %@",
                 level: .notification
             )
@@ -122,7 +120,6 @@ class SQLiteDatabase {
         guard result == SQLITE_OK else {
             let errorMessage = String(cString: sqlite3_errmsg(db))
             throw GlobalError.validation(
-                chineseMessage: "无法启用 mmap: \(errorMessage)",
                 i18nKey: "Failed to enable mmap: %@",
                 level: .notification
             )
@@ -140,7 +137,6 @@ class SQLiteDatabase {
         try sync {
             guard let db = db else {
                 throw GlobalError.validation(
-                    chineseMessage: "数据库未打开",
                     i18nKey: "Database is not open",
                     level: .notification
                 )
@@ -151,7 +147,6 @@ class SQLiteDatabase {
             guard result == SQLITE_OK else {
                 let errorMessage = String(cString: sqlite3_errmsg(db))
                 throw GlobalError.validation(
-                    chineseMessage: "无法开始事务: \(errorMessage)",
                     i18nKey: "Failed to begin transaction: %@",
                     level: .notification
                 )
@@ -165,7 +160,6 @@ class SQLiteDatabase {
                 guard result == SQLITE_OK else {
                     let errorMessage = String(cString: sqlite3_errmsg(db))
                     throw GlobalError.validation(
-                        chineseMessage: "无法提交事务: \(errorMessage)",
                         i18nKey: "Failed to commit transaction: %@",
                         level: .notification
                     )
@@ -189,7 +183,6 @@ class SQLiteDatabase {
         try sync {
             guard let db = db else {
                 throw GlobalError.validation(
-                    chineseMessage: "数据库未打开",
                     i18nKey: "Database is not open",
                     level: .notification
                 )
@@ -202,7 +195,6 @@ class SQLiteDatabase {
                 let message = errorMessage.map { String(cString: $0) } ?? "未知错误"
                 sqlite3_free(errorMessage)
                 throw GlobalError.validation(
-                    chineseMessage: "SQL 执行失败: \(message)",
                     i18nKey: "SQL execution failed: %@",
                     level: .notification
                 )
@@ -219,7 +211,6 @@ class SQLiteDatabase {
         return try sync {
             guard let db = db else {
                 throw GlobalError.validation(
-                    chineseMessage: "数据库未打开",
                     i18nKey: "Database is not open",
                     level: .notification
                 )
@@ -231,7 +222,6 @@ class SQLiteDatabase {
             guard result == SQLITE_OK, let stmt = statement else {
                 let errorMessage = String(cString: sqlite3_errmsg(db))
                 throw GlobalError.validation(
-                    chineseMessage: "无法准备 SQL 语句: \(errorMessage)",
                     i18nKey: "Failed to prepare SQL statement: %@",
                     level: .notification
                 )

@@ -39,7 +39,6 @@ enum FabricLoaderService {
             return result
         } catch {
             throw GlobalError.validation(
-                chineseMessage: "解析 Fabric 加载器版本数据失败: \(error.localizedDescription)",
                 i18nKey: "Fabric Loader Parse Failed",
                 level: .notification
             )
@@ -128,7 +127,6 @@ enum FabricLoaderService {
         let mainClass = fabricProfile.mainClass
         guard let version = fabricProfile.version else {
             throw GlobalError.validation(
-                chineseMessage: "Fabric 加载器版本信息缺失",
                 i18nKey: "Fabric loader version missing",
                 level: .notification
             )

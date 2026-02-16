@@ -223,7 +223,6 @@ class GameCreationViewModel: BaseGameFormViewModel {
             guard let url = urls.first else {
                 handleNonCriticalError(
                     GlobalError.validation(
-                        chineseMessage: "未选择文件",
                         i18nKey: "No File Selected",
                         level: .notification
                     ),

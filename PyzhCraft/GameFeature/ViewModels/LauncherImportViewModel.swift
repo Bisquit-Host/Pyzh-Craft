@@ -166,7 +166,6 @@ class LauncherImportViewModel: BaseGameFormViewModel {
 
         GlobalErrorHandler.shared.handle(
             GlobalError.fileSystem(
-                chineseMessage: chineseMessage,
                 i18nKey: "Unsupported Mod Loader",
                 level: .notification
             )
@@ -216,7 +215,6 @@ class LauncherImportViewModel: BaseGameFormViewModel {
                 Logger.shared.error("解析实例失败: \(instanceName) - 返回 nil")
                 GlobalErrorHandler.shared.handle(
                     GlobalError.fileSystem(
-                        chineseMessage: "解析实例 \(instanceName) 失败：无法获取实例信息",
                         i18nKey: "Parse Instance Failed",
                         level: .notification
                     )
@@ -228,7 +226,6 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             Logger.shared.error("解析实例失败: \(instanceName) - \(error.localizedDescription)")
             GlobalErrorHandler.shared.handle(
                 GlobalError.fileSystem(
-                    chineseMessage: "解析实例 \(instanceName) 失败: \(error.localizedDescription)",
                     i18nKey: "Parse Instance Failed",
                     level: .notification
                 )
@@ -241,7 +238,6 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             Logger.shared.error("实例 \(instanceName) 没有游戏版本")
             GlobalErrorHandler.shared.handle(
                 GlobalError.fileSystem(
-                    chineseMessage: "实例 \(instanceName) 没有游戏版本，无法导入",
                     i18nKey: "Instance Has No Version",
                     level: .notification
                 )
@@ -292,7 +288,6 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             copyTask = nil
             GlobalErrorHandler.shared.handle(
                 GlobalError.fileSystem(
-                    chineseMessage: "复制游戏目录失败: \(error.localizedDescription)",
                     i18nKey: "Copy Game Directory Failed",
                     level: .notification
                 )

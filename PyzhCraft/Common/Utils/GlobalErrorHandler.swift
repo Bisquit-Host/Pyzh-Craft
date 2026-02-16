@@ -24,140 +24,110 @@ enum ErrorLevel: String, CaseIterable {
 /// Global error type enum
 enum GlobalError: Error, LocalizedError, Identifiable {
     case network(
-        chineseMessage: String,
         i18nKey: String,
         level: ErrorLevel = .notification
     )
     case fileSystem(
-        chineseMessage: String,
         i18nKey: String,
         level: ErrorLevel = .notification
     )
     case authentication(
-        chineseMessage: String,
         i18nKey: String,
         level: ErrorLevel = .popup
     )
     case validation(
-        chineseMessage: String,
         i18nKey: String,
         level: ErrorLevel = .notification
     )
     case download(
-        chineseMessage: String,
         i18nKey: String,
         level: ErrorLevel = .notification
     )
     case installation(
-        chineseMessage: String,
         i18nKey: String,
         level: ErrorLevel = .notification
     )
     case gameLaunch(
-        chineseMessage: String,
         i18nKey: String,
         level: ErrorLevel = .popup
     )
     case resource(
-        chineseMessage: String,
         i18nKey: String,
         level: ErrorLevel = .notification
     )
     case player(
-        chineseMessage: String,
         i18nKey: String,
         level: ErrorLevel = .notification
     )
     case configuration(
-        chineseMessage: String,
         i18nKey: String,
         level: ErrorLevel = .notification
     )
     case unknown(
-        chineseMessage: String,
         i18nKey: String,
         level: ErrorLevel = .silent
     )
 
     var id: String {
+        "\(typeIdentifier)_\(i18nKey)_\(level.rawValue)"
+    }
+
+    private var typeIdentifier: String {
         switch self {
-        case let .network(message, key, _):
-            "network_\(key)_\(message.hashValue)"
-        case let .fileSystem(message, key, _):
-            "filesystem_\(key)_\(message.hashValue)"
-        case let .authentication(message, key, _):
-            "auth_\(key)_\(message.hashValue)"
-        case let .validation(message, key, _):
-            "validation_\(key)_\(message.hashValue)"
-        case let .download(message, key, _):
-            "download_\(key)_\(message.hashValue)"
-        case let .installation(message, key, _):
-            "installation_\(key)_\(message.hashValue)"
-        case let .gameLaunch(message, key, _):
-            "gameLaunch_\(key)_\(message.hashValue)"
-        case let .resource(message, key, _):
-            "resource_\(key)_\(message.hashValue)"
-        case let .player(message, key, _):
-            "player_\(key)_\(message.hashValue)"
-        case let .configuration(message, key, _):
-            "config_\(key)_\(message.hashValue)"
-        case let .unknown(message, key, _):
-            "unknown_\(key)_\(message.hashValue)"
+        case .network:
+            "network"
+        case .fileSystem:
+            "filesystem"
+        case .authentication:
+            "auth"
+        case .validation:
+            "validation"
+        case .download:
+            "download"
+        case .installation:
+            "installation"
+        case .gameLaunch:
+            "gameLaunch"
+        case .resource:
+            "resource"
+        case .player:
+            "player"
+        case .configuration:
+            "config"
+        case .unknown:
+            "unknown"
         }
     }
 
     /// Chinese error description
     var chineseMessage: String {
-        switch self {
-        case let .network(message, _, _):
-            message
-        case let .fileSystem(message, _, _):
-            message
-        case let .authentication(message, _, _):
-            message
-        case let .validation(message, _, _):
-            message
-        case let .download(message, _, _):
-            message
-        case let .installation(message, _, _):
-            message
-        case let .gameLaunch(message, _, _):
-            message
-        case let .resource(message, _, _):
-            message
-        case let .player(message, _, _):
-            message
-        case let .configuration(message, _, _):
-            message
-        case let .unknown(message, _, _):
-            message
-        }
+        localizedDescription
     }
 
     /// International key
     var i18nKey: String {
         switch self {
-        case let .network(_, key, _):
+        case let .network(key, _):
             key
-        case let .fileSystem(_, key, _):
+        case let .fileSystem(key, _):
             key
-        case let .authentication(_, key, _):
+        case let .authentication(key, _):
             key
-        case let .validation(_, key, _):
+        case let .validation(key, _):
             key
-        case let .download(_, key, _):
+        case let .download(key, _):
             key
-        case let .installation(_, key, _):
+        case let .installation(key, _):
             key
-        case let .gameLaunch(_, key, _):
+        case let .gameLaunch(key, _):
             key
-        case let .resource(_, key, _):
+        case let .resource(key, _):
             key
-        case let .player(_, key, _):
+        case let .player(key, _):
             key
-        case let .configuration(_, key, _):
+        case let .configuration(key, _):
             key
-        case let .unknown(_, key, _):
+        case let .unknown(key, _):
             key
         }
     }
@@ -165,27 +135,27 @@ enum GlobalError: Error, LocalizedError, Identifiable {
     /// error level
     var level: ErrorLevel {
         switch self {
-        case let .network(_, _, level):
+        case let .network(_, level):
             level
-        case let .fileSystem(_, _, level):
+        case let .fileSystem(_, level):
             level
-        case let .authentication(_, _, level):
+        case let .authentication(_, level):
             level
-        case let .validation(_, _, level):
+        case let .validation(_, level):
             level
-        case let .download(_, _, level):
+        case let .download(_, level):
             level
-        case let .installation(_, _, level):
+        case let .installation(_, level):
             level
-        case let .gameLaunch(_, _, level):
+        case let .gameLaunch(_, level):
             level
-        case let .resource(_, _, level):
+        case let .resource(_, level):
             level
-        case let .player(_, _, level):
+        case let .player(_, level):
             level
-        case let .configuration(_, _, level):
+        case let .configuration(_, level):
             level
-        case let .unknown(_, _, level):
+        case let .unknown(_, level):
             level
         }
     }
@@ -199,48 +169,29 @@ enum GlobalError: Error, LocalizedError, Identifiable {
         )
     }
 
-    /// Localized description: Use i18nKey first, fall back to chineseMessage if not found
+    /// Localized description derived from the localization key
     var localizedDescription: String {
-        let localizedText = LanguageManager.shared.bundle.localizedString(
+        LanguageManager.shared.bundle.localizedString(
             forKey: i18nKey,
             value: i18nKey,
             table: nil
         )
-
-        // Always use localized content when there is a valid localized entry
-        if localizedText != i18nKey {
-            return localizedText
-        }
-
-        // When there is no corresponding localized entry, fallback to Chinese message
-        return chineseMessage
     }
 
     /// Get notification title (using internationalization key)
     var notificationTitle: String {
         switch self {
-        case .network:
-            "Network Error"
-        case .fileSystem:
-            "File System Error"
-        case .authentication:
-            "Authentication Error"
-        case .validation:
-            "Validation Error"
-        case .download:
-            "Download Error"
-        case .installation:
-            "Installation Error"
-        case .gameLaunch:
-            "Game Launch Error"
-        case .resource:
-            "Resource Error"
-        case .player:
-            "Player Error"
-        case .configuration:
-            "Configuration Error"
-        case .unknown:
-            "Unknown Error"
+        case .network: "Network Error"
+        case .fileSystem: "File System Error"
+        case .authentication: "Authentication Error"
+        case .validation: "Validation Error"
+        case .download: "Download Error"
+        case .installation: "Installation Error"
+        case .gameLaunch: "Game Launch Error"
+        case .resource: "Resource Error"
+        case .player: "Player Error"
+        case .configuration: "Configuration Error"
+        case .unknown: "Unknown Error"
         }
     }
 }
@@ -259,7 +210,6 @@ extension GlobalError {
                 // If it is a cancellation error, use the silent level and do not display notifications
                 let level: ErrorLevel = urlError.code == .cancelled ? .silent : .notification
                 return .network(
-                    chineseMessage: urlError.localizedDescription,
                     i18nKey: "Network URL Error",
                     level: level
                 )
@@ -267,16 +217,15 @@ extension GlobalError {
 
             // Check if it is a file system error
             let nsError = error as NSError
+            
             if nsError.domain == NSCocoaErrorDomain {
                 return .fileSystem(
-                    chineseMessage: nsError.localizedDescription,
                     i18nKey: "File System Error",
                     level: .notification
                 )
             }
 
             return .unknown(
-                chineseMessage: error.localizedDescription,
                 i18nKey: "error.unknown.generic",
                 level: .silent
             )
@@ -398,47 +347,47 @@ extension View {
 // MARK: - Convenience Methods
 
 extension GlobalErrorHandler {
-    static func network(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
-        .network(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+    static func network(i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
+        .network(i18nKey: i18nKey, level: level)
     }
 
-    static func fileSystem(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
-        .fileSystem(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+    static func fileSystem(i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
+        .fileSystem(i18nKey: i18nKey, level: level)
     }
 
-    static func authentication(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .popup) -> GlobalError {
-        .authentication(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+    static func authentication(i18nKey: String, level: ErrorLevel = .popup) -> GlobalError {
+        .authentication(i18nKey: i18nKey, level: level)
     }
 
-    static func validation(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
-        .validation(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+    static func validation(i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
+        .validation(i18nKey: i18nKey, level: level)
     }
 
-    static func download(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
-        .download(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+    static func download(i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
+        .download(i18nKey: i18nKey, level: level)
     }
 
-    static func installation(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
-        .installation(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+    static func installation(i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
+        .installation(i18nKey: i18nKey, level: level)
     }
 
-    static func gameLaunch(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .popup) -> GlobalError {
-        .gameLaunch(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+    static func gameLaunch(i18nKey: String, level: ErrorLevel = .popup) -> GlobalError {
+        .gameLaunch(i18nKey: i18nKey, level: level)
     }
 
-    static func resource(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
-        .resource(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+    static func resource(i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
+        .resource(i18nKey: i18nKey, level: level)
     }
 
-    static func player(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
-        .player(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+    static func player(i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
+        .player(i18nKey: i18nKey, level: level)
     }
 
-    static func configuration(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
-        .configuration(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+    static func configuration(i18nKey: String, level: ErrorLevel = .notification) -> GlobalError {
+        .configuration(i18nKey: i18nKey, level: level)
     }
 
-    static func unknown(_ chineseMessage: String, i18nKey: String, level: ErrorLevel = .silent) -> GlobalError {
-        .unknown(chineseMessage: chineseMessage, i18nKey: i18nKey, level: level)
+    static func unknown(i18nKey: String, level: ErrorLevel = .silent) -> GlobalError {
+        .unknown(i18nKey: i18nKey, level: level)
     }
 }
