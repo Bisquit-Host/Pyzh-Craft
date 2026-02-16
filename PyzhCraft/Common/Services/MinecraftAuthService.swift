@@ -186,7 +186,8 @@ class MinecraftAuthService: NSObject, ObservableObject {
         do {
             return try JSONDecoder().decode(TokenResponse.self, from: data)
         } catch {
-            throw GlobalError.validation(
+            throw GlobalError(
+                type: .validation,
                 i18nKey: "Token response parse failed",
                 level: .notification
             )

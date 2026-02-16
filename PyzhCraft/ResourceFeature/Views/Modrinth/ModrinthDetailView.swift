@@ -147,7 +147,6 @@ struct ModrinthDetailView: View {
             placement: .toolbar,
             prompt: "Search Resources"
         )
-
         .onChange(of: searchText) { oldValue, newValue in
             // Optimization: only trigger anti-shake search when the search text actually changes
             if oldValue != newValue {
@@ -155,10 +154,7 @@ struct ModrinthDetailView: View {
                 debounceSearch()
             }
         }
-        .alert(
-            "error.notification.search.title",
-            isPresented: .constant(error != nil)
-        ) {
+        .alert("Search Failed", isPresented: .constant(error != nil)) {
             Button("Close") {
                 error = nil
             }
