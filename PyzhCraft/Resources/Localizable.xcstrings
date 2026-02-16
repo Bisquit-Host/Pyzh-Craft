@@ -70624,7 +70624,6 @@
     },
     "Size" : {
       "comment" : "Section title",
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -70642,12 +70641,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Größe"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Size"
           }
         },
         "es" : {
@@ -70899,7 +70892,6 @@
       }
     },
     "Skin Download Failed" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -70917,12 +70909,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Skin Download Fehlgeschlagen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Skin Download Failed"
           }
         },
         "es" : {
@@ -71037,7 +71023,6 @@
     },
     "Skin Manager" : {
       "comment" : "Skin Manager",
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -71055,12 +71040,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Skin-Manager"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Skin Manager"
           }
         },
         "es" : {
@@ -71175,7 +71154,6 @@
     },
     "Skin Preview" : {
       "comment" : "Skin Preview window title",
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -71193,12 +71171,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Skin-Vorschau"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Skin Preview"
           }
         },
         "es" : {
@@ -71313,7 +71285,6 @@
     },
     "Skin Upload" : {
       "comment" : "Skin Upload section title",
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -71331,12 +71302,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Skin hochladen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Skin Upload"
           }
         },
         "es" : {
@@ -71450,7 +71415,6 @@
       }
     },
     "Skipping already installed dependency" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -71468,12 +71432,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bereits installierte Abhängigkeit übersprungen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Skipping already installed dependency"
           }
         },
         "es" : {
@@ -71588,7 +71546,6 @@
     },
     "Slim" : {
       "comment" : "Slim skin model",
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -71606,12 +71563,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Schlank"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Slim"
           }
         },
         "es" : {
@@ -71725,7 +71676,6 @@
       }
     },
     "Spawn Point" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -71743,12 +71693,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Spawn-Punkt"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spawn Point"
           }
         },
         "es" : {
@@ -71862,7 +71806,6 @@
       }
     },
     "Spectator" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -71880,12 +71823,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zuschauer"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spectator"
           }
         },
         "es" : {
@@ -71999,7 +71936,6 @@
       }
     },
     "SQL execution failed: %@" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -72017,12 +71953,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "SQL-Ausführung fehlgeschlagen: %@"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SQL execution failed: %@"
           }
         },
         "es" : {
@@ -72137,7 +72067,6 @@
     },
     "Start" : {
       "comment" : "Play and Stop Actions",
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -72155,12 +72084,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Starten"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start"
           }
         },
         "es" : {
@@ -72274,7 +72197,6 @@
       }
     },
     "Start Login" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -72292,12 +72214,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Anmeldung starten"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start Login"
           }
         },
         "es" : {
@@ -72411,7 +72327,6 @@
       }
     },
     "Starting to download modpack files" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -72429,12 +72344,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Modpack-Dateien herunterladen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Starting to download modpack files"
           }
         },
         "es" : {
@@ -72548,7 +72457,6 @@
       }
     },
     "Starting to install modpack dependencies" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -72566,12 +72474,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Installation der Modpack-Abhängigkeiten gestartet"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Starting to install modpack dependencies"
           }
         },
         "es" : {
@@ -72685,7 +72587,6 @@
       }
     },
     "Stop" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -72703,12 +72604,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Stoppen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stop"
           }
         },
         "es" : {
@@ -72822,7 +72717,6 @@
       }
     },
     "Survival" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -72840,12 +72734,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Überleben"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Survival"
           }
         },
         "es" : {
@@ -72959,7 +72847,6 @@
       }
     },
     "Test" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -72974,12 +72861,6 @@
           }
         },
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Test"
-          }
-        },
-        "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Test"
@@ -73097,7 +72978,6 @@
     },
     "The model name to use (required)" : {
       "comment" : "AI Settings",
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -73115,12 +72995,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Der zu verwendende Modellname (erforderlich)"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The model name to use (required)"
           }
         },
         "es" : {
@@ -75984,7 +75858,6 @@
       }
     },
     "Unsupported" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -76002,12 +75875,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nicht Unterstützt"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unsupported"
           }
         },
         "es" : {
@@ -76121,7 +75988,6 @@
       }
     },
     "Unsupported Mod Loader" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -76139,12 +76005,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nicht unterstützter Mod-Loader"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unsupported Mod Loader"
           }
         },
         "es" : {
@@ -76258,7 +76118,6 @@
       }
     },
     "Unsupported Skin Format" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -76276,12 +76135,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nicht unterstütztes Skin-Format"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unsupported Skin Format"
           }
         },
         "es" : {
@@ -76395,7 +76248,6 @@
       }
     },
     "Update" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -76413,12 +76265,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aktualisieren"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Update"
           }
         },
         "es" : {
@@ -76532,7 +76378,6 @@
       }
     },
     "Updated Date" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -76550,12 +76395,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aktualisierungsdatum"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Updated Date"
           }
         },
         "es" : {
@@ -76669,7 +76508,6 @@
       }
     },
     "User to update not found: %@" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -76687,12 +76525,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zu aktualisierender Benutzer nicht gefunden: %@"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "User to update not found: %@"
           }
         },
         "es" : {
@@ -76806,7 +76638,6 @@
       }
     },
     "Username Encode Failed" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -76824,12 +76655,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Benutzername-Kodierung fehlgeschlagen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Username Encode Failed"
           }
         },
         "es" : {
@@ -76943,7 +76768,6 @@
       }
     },
     "UUID: %@" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -76958,12 +76782,6 @@
           }
         },
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "UUID: %@"
-          }
-        },
-        "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "UUID: %@"
@@ -77080,7 +76898,6 @@
       }
     },
     "Validation Error" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -77098,12 +76915,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Validierungsfehler"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Validation Error"
           }
         },
         "es" : {
@@ -77217,7 +77028,6 @@
       }
     },
     "Verifying account information" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -77235,12 +77045,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kontoinformationen werden überprüft"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verifying account information"
           }
         },
         "es" : {
@@ -77354,7 +77158,6 @@
       }
     },
     "Version" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -77372,12 +77175,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Spielversion"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Version"
           }
         },
         "es" : {
@@ -77491,7 +77288,6 @@
       }
     },
     "Version %@ (%@)" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -77506,12 +77302,6 @@
           }
         },
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Version %@ (%@)"
-          }
-        },
-        "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Version %@ (%@)"
@@ -77628,7 +77418,6 @@
       }
     },
     "Version data not found" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -77646,12 +77435,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Versionsdaten nicht gefunden"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Version data not found"
           }
         },
         "es" : {
@@ -77765,7 +77548,6 @@
       }
     },
     "Version ID" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -77783,12 +77565,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Versions-ID"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Version ID"
           }
         },
         "es" : {
@@ -77901,8 +77677,7 @@
         }
       }
     },
-    "Version Manifest Parse Failed" : {
-      "extractionState" : "manual",
+    "Version Manifest Parse Failed %@ %@" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -78039,7 +77814,6 @@
       }
     },
     "Versions" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -78057,12 +77831,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Spielversionen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versions"
           }
         },
         "es" : {
@@ -78314,7 +78082,6 @@
     },
     "View License" : {
       "comment" : "License View",
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -78332,12 +78099,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lizenz anzeigen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "View License"
           }
         },
         "es" : {
@@ -78451,7 +78212,6 @@
       }
     },
     "View Source Code" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -78469,12 +78229,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quellcode anzeigen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "View Source Code"
           }
         },
         "es" : {
@@ -78588,7 +78342,6 @@
       }
     },
     "Visit Wiki" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -78606,12 +78359,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wiki besuchen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Visit Wiki"
           }
         },
         "es" : {
@@ -78725,7 +78472,6 @@
       }
     },
     "Waiting for authorization" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -78743,12 +78489,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Warten auf Autorisierung"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Waiting for authorization"
           }
         },
         "es" : {
@@ -78862,7 +78602,6 @@
       }
     },
     "Weather" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -78880,12 +78619,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wetter"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Weather"
           }
         },
         "es" : {
@@ -78999,7 +78732,6 @@
       }
     },
     "When enabled, adds a proxy prefix to requests for github.com and raw.githubusercontent.com." : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -79017,12 +78749,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wenn aktiviert, wird ein Proxy-Präfix zu Anfragen für github.com und raw.githubusercontent.com hinzugefügt."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "When enabled, adds a proxy prefix to requests for github.com and raw.githubusercontent.com."
           }
         },
         "es" : {
@@ -79136,7 +78862,6 @@
       }
     },
     "Working Directory" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -79154,12 +78879,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Arbeitsverzeichnis"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Working Directory"
           }
         },
         "es" : {
@@ -79273,7 +78992,6 @@
       }
     },
     "World Border" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -79291,12 +79009,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Weltgrenze"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "World Border"
           }
         },
         "es" : {
@@ -79410,7 +79122,6 @@
       }
     },
     "World Name" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -79428,12 +79139,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Weltname"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "World Name"
           }
         },
         "es" : {
@@ -79547,7 +79252,6 @@
       }
     },
     "World Path" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -79565,12 +79269,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Weltpfad"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "World Path"
           }
         },
         "es" : {
@@ -79684,7 +79382,6 @@
       }
     },
     "World Seed" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -79702,12 +79399,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Welt-Samen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "World Seed"
           }
         },
         "es" : {
@@ -79821,7 +79512,6 @@
       }
     },
     "Worlds" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -79839,12 +79529,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Welten"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Worlds"
           }
         },
         "es" : {
@@ -79957,8 +79641,7 @@
         }
       }
     },
-    "Xbox Live Request Serialize Failed" : {
-      "extractionState" : "manual",
+    "Xbox Live Request Serialize Failed %@" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -80094,8 +79777,7 @@
         }
       }
     },
-    "Xbox Live Token Parse Failed" : {
-      "extractionState" : "manual",
+    "Xbox Live Token Parse Failed %@" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -80231,8 +79913,7 @@
         }
       }
     },
-    "XSTS Request Serialize Failed" : {
-      "extractionState" : "manual",
+    "XSTS Request Serialize Failed %@" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -80368,8 +80049,7 @@
         }
       }
     },
-    "XSTS Token Parse Failed" : {
-      "extractionState" : "manual",
+    "XSTS Token Parse Failed %@" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -80506,7 +80186,6 @@
       }
     },
     "Yes" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -80524,12 +80203,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ja"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yes"
           }
         },
         "es" : {
@@ -80643,7 +80316,6 @@
       }
     },
     "ZGC (Low Latency)" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -80661,12 +80333,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ZGC (Niedrige Latenz)"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ZGC (Low Latency)"
           }
         },
         "es" : {
@@ -80780,7 +80446,6 @@
       }
     },
     "ZGC garbage collector, extremely low latency, suitable for scenarios with extremely high response time requirements" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -80798,12 +80463,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ZGC Garbage Collector, extrem niedrige Latenz, geeignet für Szenarien mit extrem hohen Antwortzeit-Anforderungen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ZGC garbage collector, extremely low latency, suitable for scenarios with extremely high response time requirements"
           }
         },
         "es" : {
@@ -80917,7 +80576,6 @@
       }
     },
     "Zulu folder not found in ZIP file" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -80935,12 +80593,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zulu-Ordner in ZIP-Datei nicht gefunden"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zulu folder not found in ZIP file"
           }
         },
         "es" : {

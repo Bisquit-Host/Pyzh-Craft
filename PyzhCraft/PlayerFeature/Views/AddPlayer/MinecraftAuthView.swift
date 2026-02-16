@@ -88,6 +88,7 @@ struct MinecraftAuthView: View {
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
+            
             Text("Completing the authentication process, please wait...")
                 .font(.caption)
                 .foregroundColor(.secondary)
@@ -96,9 +97,7 @@ struct MinecraftAuthView: View {
     }
 
     // MARK: - Authentication success status
-    private func authenticatedView(
-        profile: MinecraftProfileResponse
-    ) -> some View {
+    private func authenticatedView(profile: MinecraftProfileResponse) -> some View {
         VStack(spacing: 20) {
             // User avatar
             if let skinUrl = profile.skins.first?.url {
@@ -123,15 +122,10 @@ struct MinecraftAuthView: View {
                 Text(profile.name)
                     .font(.headline)
 
-                Text(
-                    String(
-                        format: String(localized: "UUID: %@"),
-                        profile.id
-                    )
-                )
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .textSelection(.enabled)
+                Text("UUID: \(profile.id)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .textSelection(.enabled)
             }
 
             Text("Please click the \"Add\" button below to confirm using this account")

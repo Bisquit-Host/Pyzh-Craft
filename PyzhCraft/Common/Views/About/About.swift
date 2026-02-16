@@ -52,7 +52,7 @@ public struct AboutView: View {
                 .font(.system(size: 14, weight: .bold))
                 .multilineTextAlignment(.center)
 
-            Text(String(format: String(localized: "Version %@ (%@)"), appVersion, buildNumber))
+            Text("Version \(appVersion) (\(buildNumber))")
                 .foregroundColor(.primary)
                 .font(.system(size: 10))
         }

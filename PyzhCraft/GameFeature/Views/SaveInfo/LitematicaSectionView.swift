@@ -50,7 +50,7 @@ struct LitematicaFileRow: View {
                     .font(.headline)
 
                 if let author = file.author {
-                    Text(String(format: String(localized: "Author: %@"), author))
+                    Text("Author: \(author)")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
