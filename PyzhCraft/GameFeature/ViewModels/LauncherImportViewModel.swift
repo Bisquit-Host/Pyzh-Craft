@@ -163,6 +163,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
         let supportedModLoadersList = AppConstants.modLoaders.joined(separator: "、")
         let instanceName = selectedInstancePath?.lastPathComponent ?? "Unknown"
         let chineseMessage = "实例 \(instanceName) 使用了不支持的 Mod Loader (\(info.modLoader))，仅支持 \(supportedModLoadersList)"
+        Logger.shared.warning(chineseMessage)
 
         GlobalErrorHandler.shared.handle(
             GlobalError.fileSystem(

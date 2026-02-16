@@ -72,6 +72,7 @@ class CommonFileManager {
             )
         } catch {
             let globalError = GlobalError.from(error)
+            Logger.shared.error("JAR download failed: \(globalError.chineseMessage)")
             throw GlobalError.download(
                 i18nKey: "JAR Download Failed",
                 level: .notification
@@ -114,6 +115,7 @@ class CommonFileManager {
             )
         } catch {
             let globalError = GlobalError.from(error)
+            Logger.shared.error("JAR download failed: \(globalError.chineseMessage)")
             throw GlobalError.download(
                 i18nKey: "JAR Download Failed",
                 level: .notification

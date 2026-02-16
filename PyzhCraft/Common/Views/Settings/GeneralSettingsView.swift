@@ -203,6 +203,7 @@ public struct GeneralSettingsView: View {
                 }
             }
         case .failure(let error):
+            Logger.shared.error("Directory selection failed: \(error.localizedDescription)")
             let globalError = GlobalError.fileSystem(
                 i18nKey: "Directory Selection Failed",
                 level: .notification

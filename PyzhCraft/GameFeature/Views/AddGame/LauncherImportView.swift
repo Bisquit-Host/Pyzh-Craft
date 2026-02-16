@@ -255,6 +255,7 @@ struct LauncherImportView: View {
             // Verify that the selected folder is a valid instance
             guard viewModel.validateInstance(at: url) else {
                 let launcherName = viewModel.selectedLauncherType.rawValue
+                Logger.shared.error("Invalid instance path for launcher: \(launcherName)")
                 GlobalErrorHandler.shared.handle(
                     GlobalError.fileSystem(
                         i18nKey: "Invalid Instance Path",

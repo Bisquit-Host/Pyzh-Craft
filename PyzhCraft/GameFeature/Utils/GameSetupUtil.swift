@@ -254,6 +254,7 @@ class GameSetupUtil: ObservableObject {
             )
         } catch {
             let globalError = GlobalError.from(error)
+            Logger.shared.error("Asset index download failed: \(globalError.chineseMessage)")
             throw GlobalError.download(
                 i18nKey: "Asset Index Failed",
                 level: .notification

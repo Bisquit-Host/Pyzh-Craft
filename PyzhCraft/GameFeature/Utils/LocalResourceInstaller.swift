@@ -155,6 +155,7 @@ extension LocalResourceInstaller {
                             errorHandler.handle(error)
                         }
                     case .failure(let error):
+                        Logger.shared.error("File selection failed: \(error.localizedDescription)")
                         errorHandler.handle(GlobalError.fileSystem(
                             i18nKey: "File Selection Failed",
                             level: .notification

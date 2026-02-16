@@ -143,6 +143,7 @@ class AIChatManager: ObservableObject {
         guard (200...299).contains(httpResponse.statusCode) else {
             let errorData = try await asyncBytes.reduce(into: Data()) { $0.append($1) }
             let errorMessage = String(data: errorData, encoding: .utf8) ?? "未知错误"
+            Logger.shared.error("AI API error response: \(errorMessage)")
             throw GlobalError(
                 type: .network,
                 i18nKey: "API error",
@@ -272,6 +273,7 @@ class AIChatManager: ObservableObject {
         guard (200...299).contains(httpResponse.statusCode) else {
             let errorData = try await asyncBytes.reduce(into: Data()) { $0.append($1) }
             let errorMessage = String(data: errorData, encoding: .utf8) ?? "未知错误"
+            Logger.shared.error("AI API error response: \(errorMessage)")
             throw GlobalError(
                 type: .network,
                 i18nKey: "API error",
@@ -384,6 +386,7 @@ class AIChatManager: ObservableObject {
         guard (200...299).contains(httpResponse.statusCode) else {
             let errorData = try await asyncBytes.reduce(into: Data()) { $0.append($1) }
             let errorMessage = String(data: errorData, encoding: .utf8) ?? "未知错误"
+            Logger.shared.error("AI API error response: \(errorMessage)")
             throw GlobalError(
                 type: .network,
                 i18nKey: "API error",

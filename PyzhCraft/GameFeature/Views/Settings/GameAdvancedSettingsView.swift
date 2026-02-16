@@ -501,6 +501,7 @@ struct GameAdvancedSettingsView: View {
                 }
             }
         case .failure(let error):
+            Logger.shared.error("Java path selection failed: \(error.localizedDescription)")
             let globalError = GlobalError.fileSystem(
                 i18nKey: "Java Path Selection Failed",
                 level: .notification
