@@ -92,6 +92,16 @@ struct ModrinthDetailView: View {
             }
         }
         .listStyle(.plain)
+        .overlay {
+            if showsLoadingOverlay {
+                VStack(spacing: 12) {
+                    ProgressView()
+                        .controlSize(.small)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(.clear)
+            }
+        }
         .task {
             if gameType {
                 await initialLoadIfNeeded()
@@ -254,13 +264,6 @@ struct ModrinthDetailView: View {
                 newErrorView(error)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .listRowSeparator(.hidden)
-            } else if viewModel.isLoading {
-                HStack {
-                    ProgressView()
-                        .controlSize(.small)
-                }
-                .frame(maxWidth: .infinity, alignment: .center)
-                .listRowSeparator(.hidden)
             } else if hasLoaded && viewModel.results.isEmpty {
                 emptyResultView()
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -372,5 +375,9 @@ struct ModrinthDetailView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(16)
+    }
+
+    private var showsLoadingOverlay: Bool {
+        viewModel.isLoading && viewModel.results.isEmpty && error == nil
     }
 }

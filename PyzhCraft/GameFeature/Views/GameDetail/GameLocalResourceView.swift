@@ -52,6 +52,16 @@ struct GameLocalResourceView: View {
             }
         }
         .listStyle(.plain)
+        .overlay {
+            if showsLoadingOverlay {
+                VStack(spacing: 12) {
+                    ProgressView()
+                        .controlSize(.small)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(.clear)
+            }
+        }
         .searchable(
             text: $searchText,
             placement: .toolbar,
@@ -124,13 +134,6 @@ struct GameLocalResourceView: View {
             }
             .frame(maxWidth: .infinity, alignment: .center)
             .listRowSeparator(.hidden)
-        } else if isLoadingResources && scannedResources.isEmpty {
-            HStack {
-                ProgressView()
-                    .controlSize(.small)
-            }
-            .frame(maxWidth: .infinity, alignment: .center)
-            .listRowSeparator(.hidden)
         } else if hasLoaded && displayedResources.isEmpty {
             EmptyView()
         } else {
@@ -180,6 +183,10 @@ struct GameLocalResourceView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(16)
+    }
+
+    private var showsLoadingOverlay: Bool {
+        isLoadingResources && scannedResources.isEmpty && error == nil
     }
 
     // MARK: - Loading in pages
