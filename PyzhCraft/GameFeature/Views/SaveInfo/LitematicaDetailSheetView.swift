@@ -92,18 +92,18 @@ struct LitematicaDetailSheetView: View {
                 HStack {
                     // Basic information
                     infoSection(title: "Basic") {
-                        infoRow(label: String(localized: "Name"), value: metadata.name)
-                        infoRow(label: String(localized: "Author"), value: metadata.author.isEmpty ? String(localized: "Unknown") : metadata.author)
+                        infoRow(label: "Name", value: metadata.name)
+                        infoRow(label: "Author", value: metadata.author.isEmpty ? String(localized: "Unknown") : metadata.author)
                         if !metadata.description.isEmpty {
-                            infoRow(label: String(localized: "Description"), value: metadata.description, isMultiline: true)
+                            infoRow(label: "Description", value: metadata.description, isMultiline: true)
                         }
                     }
 
                     // time information
                     infoSection(title: "Time") {
                         VStack(alignment: .leading, spacing: 12) {
-                            infoRow(label: String(localized: "Created"), value: formatTimestamp(metadata.timeCreated))
-                            infoRow(label: String(localized: "Modified"), value: formatTimestamp(metadata.timeModified))
+                            infoRow(label: "Created", value: formatTimestamp(metadata.timeCreated))
+                            infoRow(label: "Modified", value: formatTimestamp(metadata.timeModified))
                         }
                     }
                 }
@@ -116,26 +116,26 @@ struct LitematicaDetailSheetView: View {
                         let hasSize = metadata.enclosingSize.x > 0 || metadata.enclosingSize.y > 0 || metadata.enclosingSize.z > 0
                         if hasSize {
                             infoRow(
-                                label: String(localized: "Enclosing Size"),
+                                label: "Enclosing Size",
                                 value: "\(metadata.enclosingSize.x) × \(metadata.enclosingSize.y) × \(metadata.enclosingSize.z)"
                             )
                         } else {
-                            infoRow(label: String(localized: "Enclosing Size"), value: String(localized: "Unknown"))
+                            infoRow(label: "Enclosing Size", value: String(localized: "Unknown"))
                         }
 
                         if metadata.totalVolume > 0 {
-                            infoRow(label: String(localized: "Total Volume"), value: formatNumber(Int(metadata.totalVolume)))
+                            infoRow(label: "Total Volume", value: formatNumber(Int(metadata.totalVolume)))
                         } else {
-                            infoRow(label: String(localized: "Total Volume"), value: String(localized: "Unknown"))
+                            infoRow(label: "Total Volume", value: String(localized: "Unknown"))
                         }
 
                         if metadata.totalBlocks > 0 {
-                            infoRow(label: String(localized: "Total Blocks"), value: formatNumber(Int(metadata.totalBlocks)))
+                            infoRow(label: "Total Blocks", value: formatNumber(Int(metadata.totalBlocks)))
                         } else {
-                            infoRow(label: String(localized: "Total Blocks"), value: String(localized: "Unknown"))
+                            infoRow(label: "Total Blocks", value: String(localized: "Unknown"))
                         }
 
-                        infoRow(label: String(localized: "Regions"), value: "\(metadata.regionCount)")
+                        infoRow(label: "Regions", value: "\(metadata.regionCount)")
                     }
                 }
             }
@@ -148,15 +148,20 @@ struct LitematicaDetailSheetView: View {
                 .font(.headline)
                 .foregroundColor(.primary)
                 .padding(.bottom, 10)
+            
             content()
         }
     }
 
-    private func infoRow(label: String, value: String, isMultiline: Bool = false) -> some View {
+    private func infoRow(label: LocalizedStringKey, value: String, isMultiline: Bool = false) -> some View {
         HStack(alignment: isMultiline ? .top : .center, spacing: 12) {
-            Text(label + ":")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+            HStack(spacing: 0) {
+                Text(label)
+                Text(":")
+            }
+            .font(.subheadline)
+            .foregroundColor(.secondary)
+            
             if isMultiline {
                 Text(value)
                     .font(.subheadline)
@@ -174,7 +179,6 @@ struct LitematicaDetailSheetView: View {
     // MARK: - Footer View
     private var footerView: some View {
         HStack {
-
             Label {
                 Text(filePath.lastPathComponent)
                     .lineLimit(1)
@@ -203,6 +207,7 @@ struct LitematicaDetailSheetView: View {
         do {
             Logger.shared.debug("开始加载投影详细信息: \(filePath.lastPathComponent)")
             let loadedMetadata = try await LitematicaService.shared.loadFullMetadata(filePath: filePath)
+            
             await MainActor.run {
                 if let metadata = loadedMetadata {
                     Logger.shared.debug("成功加载投影元数据: \(metadata.name)")
@@ -211,10 +216,12 @@ struct LitematicaDetailSheetView: View {
                     Logger.shared.warning("投影元数据为nil: \(filePath.lastPathComponent)")
                     self.errorMessage = String(localized: "Unable to parse schematic metadata. The file may be corrupted or in an unsupported format.")
                 }
+                
                 self.isLoading = false
             }
         } catch {
             Logger.shared.error("加载投影详细信息失败: \(error.localizedDescription)")
+            
             await MainActor.run {
                 self.isLoading = false
                 self.errorMessage = String(format: String(localized: "Failed to load schematic information: \(error.localizedDescription)"))

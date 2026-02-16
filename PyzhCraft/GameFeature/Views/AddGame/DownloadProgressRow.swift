@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct DownloadProgressRow: View {
-    let title: String
+    let title: LocalizedStringKey
     let progress: Double
     let currentFile: String
     let completed: Int

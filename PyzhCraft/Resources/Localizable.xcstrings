@@ -7251,7 +7251,6 @@
       }
     },
     "Basic Information" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -11815,7 +11814,6 @@
     },
     "Copy Files" : {
       "comment" : "Launcher import: copying files progress",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -12076,7 +12074,6 @@
       }
     },
     "Copying Files" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -12338,7 +12335,6 @@
     },
     "Core Files" : {
       "comment" : "Download Progress",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -32414,7 +32410,6 @@
       }
     },
     "Game Settings" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -46549,7 +46544,6 @@
       }
     },
     "Modpack Dependencies" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -46940,7 +46934,6 @@
       }
     },
     "Modpack Files" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -54247,7 +54240,6 @@
       }
     },
     "Other Information" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -62077,7 +62069,6 @@
       }
     },
     "Resource Files" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -63639,7 +63630,6 @@
       }
     },
     "Scanning Resources" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {

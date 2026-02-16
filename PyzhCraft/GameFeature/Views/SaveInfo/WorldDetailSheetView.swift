@@ -90,27 +90,27 @@ struct WorldDetailSheetView: View {
                 HStack(alignment: .top, spacing: 24) {
                     // Basic information
                     infoSection(title: "Basic Information") {
-                        infoRow(label: String(localized: "World Name"), value: metadata.levelName)
-                        infoRow(label: String(localized: "Save Folder"), value: metadata.folderName)
+                        infoRow(label: "World Name", value: metadata.levelName)
+                        infoRow(label: "Save Folder", value: metadata.folderName)
                         if let versionName = metadata.versionName {
-                            infoRow(label: String(localized: "Game Version"), value: versionName)
+                            infoRow(label: "Game Version", value: versionName)
                         }
                         if let versionId = metadata.versionId {
-                            infoRow(label: String(localized: "Version ID"), value: "\(versionId)")
+                            infoRow(label: "Version ID", value: "\(versionId)")
                         }
                         if let dataVersion = metadata.dataVersion {
-                            infoRow(label: String(localized: "Data Version"), value: "\(dataVersion)")
+                            infoRow(label: "Data Version", value: "\(dataVersion)")
                         }
                     }
 
                     // game settings
                     infoSection(title: "Game Settings") {
-                        infoRow(label: String(localized: "Game Mode"), value: metadata.gameMode)
-                        infoRow(label: String(localized: "Difficulty"), value: metadata.difficulty)
-                        infoRow(label: String(localized: "Hardcore Mode"), value: metadata.hardcore ? String(localized: "Yes") : String(localized: "No"))
-                        infoRow(label: String(localized: "Allow Cheats"), value: metadata.cheats ? String(localized: "Yes") : String(localized: "No"))
+                        infoRow(label: "Game Mode", value: metadata.gameMode)
+                        infoRow(label: "Difficulty", value: metadata.difficulty)
+                        infoRow(label: "Hardcore Mode", value: metadata.hardcore ? String(localized: "Yes") : String(localized: "No"))
+                        infoRow(label: "Allow Cheats", value: metadata.cheats ? String(localized: "Yes") : String(localized: "No"))
                         if let seed = metadata.seed {
-                            infoRow(label: String(localized: "World Seed"), value: "\(seed)")
+                            infoRow(label: "World Seed", value: "\(seed)")
                         }
                     }
                 }
@@ -118,28 +118,29 @@ struct WorldDetailSheetView: View {
                 // Other information
                 infoSection(title: "Other Information") {
                     if let lastPlayed = metadata.lastPlayed {
-                        infoRow(label: String(localized: "Last Played"), value: formatDate(lastPlayed))
+                        infoRow(label: "Last Played", value: formatDate(lastPlayed))
                     }
                     if let spawn = metadata.spawn {
-                        infoRow(label: String(localized: "Spawn Point"), value: spawn)
+                        infoRow(label: "Spawn Point", value: spawn)
                     }
                     if let time = metadata.time {
-                        infoRow(label: String(localized: "Time"), value: "\(time)")
+                        infoRow(label: "Time", value: "\(time)")
                     }
                     if let dayTime = metadata.dayTime {
-                        infoRow(label: String(localized: "DayTime"), value: "\(dayTime)")
+                        infoRow(label: "DayTime", value: "\(dayTime)")
                     }
                     if let weather = metadata.weather {
-                        infoRow(label: String(localized: "Weather"), value: weather)
+                        infoRow(label: "Weather", value: weather)
                     }
                     if let border = metadata.worldBorder {
-                        infoRow(label: String(localized: "World Border"), value: border, isMultiline: true)
+                        infoRow(label: "World Border", value: border, isMultiline: true)
                     }
                 }
 
                 HStack(alignment: .center, spacing: 12) {
                     Text("World Path" + ":")
                         .font(.headline)
+                    
                     Button {
                         // Open file location in Finder
                         NSWorkspace.shared.selectFile(metadata.path.path, inFileViewerRootedAtPath: "")
@@ -173,8 +174,10 @@ struct WorldDetailSheetView: View {
                                     Image(systemName: showRawData ? "chevron.down" : "chevron.right")
                                         .font(.headline)
                                         .foregroundColor(.secondary)
+                                    
                                     Text("Show Detailed Information")
                                         .font(.headline)
+                                    
                                     Spacer()
                                 }
                             }
@@ -194,7 +197,7 @@ struct WorldDetailSheetView: View {
         }
     }
 
-    private func infoSection<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
+    private func infoSection<Content: View>(title: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.headline)
@@ -204,11 +207,15 @@ struct WorldDetailSheetView: View {
         }
     }
 
-    private func infoRow(label: String, value: String, isMultiline: Bool = false) -> some View {
+    private func infoRow(label: LocalizedStringKey, value: String, isMultiline: Bool = false) -> some View {
         HStack(alignment: isMultiline ? .top : .center, spacing: 12) {
-            Text(label + ":")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+            HStack(spacing: 0) {
+                Text(label)
+                Text(":")
+            }
+            .font(.subheadline)
+            .foregroundColor(.secondary)
+            
             if isMultiline {
                 Text(value)
                     .font(.subheadline)

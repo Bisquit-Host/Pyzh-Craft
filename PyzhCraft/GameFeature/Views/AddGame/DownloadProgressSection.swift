@@ -67,7 +67,7 @@ struct DownloadProgressSection: View {
     }
 
     private func progressSection(
-        title: String,
+        title: LocalizedStringKey,
         state: DownloadState,
         type: ProgressType,
         version: String? = nil
@@ -85,7 +85,7 @@ struct DownloadProgressSection: View {
     }
 
     private struct LoaderProgressInfo {
-        let title: String
+        let title: LocalizedStringKey
         let state: DownloadState
         let version: String?
     }
@@ -124,29 +124,20 @@ struct DownloadProgressSection: View {
 
     private func getLoaderDownloadState(for loaderType: String) -> DownloadState? {
         switch loaderType.lowercased() {
-        case "fabric", "quilt":
-            return gameSetupService.fabricDownloadState
-        case "forge":
-            return gameSetupService.forgeDownloadState
-        case "neoforge":
-            return gameSetupService.neoForgeDownloadState
-        default:
-            return nil
+        case "fabric", "quilt": gameSetupService.fabricDownloadState
+        case "forge": gameSetupService.forgeDownloadState
+        case "neoforge": gameSetupService.neoForgeDownloadState
+        default: nil
         }
     }
 
-    private func getLoaderTitle(for loaderType: String) -> String {
+    private func getLoaderTitle(for loaderType: String) -> LocalizedStringKey {
         switch loaderType.lowercased() {
-        case "fabric":
-            return String(localized: "Fabric Loader")
-        case "quilt":
-            return String(localized: "QuiltMC Loader")
-        case "forge":
-            return String(localized: "Forge Loader")
-        case "neoforge":
-            return String(localized: "NeoForge Loader")
-        default:
-            return ""
+        case "fabric": "Fabric Loader"
+        case "quilt": "QuiltMC Loader"
+        case "forge": "Forge Loader"
+        case "neoforge": "NeoForge Loader"
+        default: ""
         }
     }
 }
@@ -189,7 +180,7 @@ private struct ModPackProgressView: View {
     }
 
     private func modPackProgressSection(
-        title: String,
+        title: LocalizedStringKey,
         state: ModPackInstallState,
         type: ModPackProgressType
     ) -> some View {

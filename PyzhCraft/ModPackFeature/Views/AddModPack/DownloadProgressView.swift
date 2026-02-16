@@ -90,7 +90,7 @@ struct DownloadProgressView: View {
     }
 
     private func progressRow(
-        title: String,
+        title: LocalizedStringKey,
         state: DownloadState,
         type: ProgressType,
         version: String? = nil
@@ -106,7 +106,7 @@ struct DownloadProgressView: View {
     }
 
     private func progressRow(
-        title: String,
+        title: LocalizedStringKey,
         installState: ModPackInstallState,
         type: InstallProgressType
     ) -> some View {
@@ -158,18 +158,13 @@ struct DownloadProgressView: View {
         }
     }
 
-    private func getLoaderTitle(for loaderType: String) -> String {
+    private func getLoaderTitle(for loaderType: String) -> LocalizedStringKey {
         switch loaderType.lowercased() {
-        case "fabric":
-            return String(localized: "Fabric Loader")
-        case "quilt":
-            return String(localized: "QuiltMC Loader")
-        case "forge":
-            return String(localized: "Forge Loader")
-        case "neoforge":
-            return String(localized: "NeoForge Loader")
-        default:
-            return ""
+        case "fabric": "Fabric Loader"
+        case "quilt": "QuiltMC Loader"
+        case "forge": "Forge Loader"
+        case "neoforge": "NeoForge Loader"
+        default: ""
         }
     }
 }
@@ -185,7 +180,7 @@ private enum InstallProgressType {
 
 // MARK: - Progress Row Wrapper
 private struct ProgressRowWrapper: View {
-    let title: String
+    let title: LocalizedStringKey
     @ObservedObject var state: DownloadState
     let type: ProgressType
     let version: String?

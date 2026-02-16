@@ -1,4 +1,4 @@
-import Foundation
+import SwiftUI
 
 /// Integrated package exporter
 /// Export the game instance to Modrinth official modpack format (.mrpack)
@@ -16,13 +16,13 @@ enum ModPackExporter {
     // MARK: - Export Progress
 
     struct ExportProgress {
-        var progress: Double = 0.0
-        var totalFiles: Int = 0
-        var processedFiles: Int = 0
+        var progress = 0.0
+        var totalFiles = 0
+        var processedFiles = 0
 
         // Multiple progress bars support
         struct ProgressItem {
-            var title: String
+            var title: LocalizedStringKey
             var progress: Double
             var currentFile: String
             var completed: Int
