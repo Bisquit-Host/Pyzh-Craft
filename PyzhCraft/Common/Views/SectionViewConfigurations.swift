@@ -4,7 +4,7 @@ import SwiftUI
 protocol SectionViewConfiguration {
     associatedtype Item: Identifiable
 
-    var title: String { get }
+    var title: LocalizedStringKey { get }
     var items: [Item] { get }
     var isLoading: Bool { get }
     var maxItems: Int { get }
@@ -15,14 +15,14 @@ protocol SectionViewConfiguration {
 struct CategorySectionConfiguration: SectionViewConfiguration {
     typealias Item = FilterItem
 
-    let title: String
+    let title: LocalizedStringKey
     let items: [FilterItem]
     let isLoading: Bool
     let maxItems: Int
     let iconName: String?
 
     init(
-        title: String,
+        title: LocalizedStringKey,
         items: [FilterItem],
         isLoading: Bool,
         maxItems: Int = SectionViewConstants.defaultMaxItems,
@@ -38,14 +38,14 @@ struct CategorySectionConfiguration: SectionViewConfiguration {
 
 // MARK: - File Section Configuration
 struct FileSectionConfiguration<Item: Identifiable>: SectionViewConfiguration {
-    let title: String
+    let title: LocalizedStringKey
     let items: [Item]
     let isLoading: Bool
     let maxItems: Int
     let iconName: String?
 
     init(
-        title: String,
+        title: LocalizedStringKey,
         items: [Item],
         isLoading: Bool,
         maxItems: Int = SectionViewConstants.defaultMaxItems,
@@ -63,14 +63,14 @@ struct FileSectionConfiguration<Item: Identifiable>: SectionViewConfiguration {
 struct SimpleStringSectionConfiguration: SectionViewConfiguration {
     typealias Item = IdentifiableString
 
-    let title: String
+    let title: LocalizedStringKey
     let items: [IdentifiableString]
     let isLoading: Bool
     let maxItems: Int
     let iconName: String?
 
     init(
-        title: String,
+        title: LocalizedStringKey,
         items: [IdentifiableString],
         isLoading: Bool,
         maxItems: Int = SectionViewConstants.defaultMaxItems,

@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Category Section View
 struct CategorySectionView: View {
     // MARK: - Properties
-    let title: String
+    let title: LocalizedStringKey
     let items: [FilterItem]
     @Binding var selectedItems: [String]
     let isLoading: Bool

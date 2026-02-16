@@ -7514,7 +7514,6 @@
       }
     },
     "Behavior" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -9602,7 +9601,6 @@
       }
     },
     "Category" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -20417,7 +20415,6 @@
       }
     },
     "Environment" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -40248,7 +40245,6 @@
       }
     },
     "Links" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -40379,7 +40375,6 @@
       }
     },
     "Litematica" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -40510,7 +40505,6 @@
       }
     },
     "Loader" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -41944,7 +41938,6 @@
       }
     },
     "Logs" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -46038,7 +46031,6 @@
       }
     },
     "Mod Loaders:" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -55041,7 +55033,6 @@
       }
     },
     "Performance" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -61571,7 +61562,6 @@
       }
     },
     "Resolutions" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -63918,7 +63908,6 @@
       }
     },
     "Screenshots" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -74490,7 +74479,6 @@
       }
     },
     "Versions" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -74621,7 +74609,6 @@
       }
     },
     "Versions:" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -76190,7 +76177,6 @@
       }
     },
     "Worlds" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
