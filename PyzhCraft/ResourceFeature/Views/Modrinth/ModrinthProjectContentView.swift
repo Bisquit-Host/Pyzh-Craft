@@ -13,19 +13,19 @@ private enum Constants {
 // MARK: - View Components
 private struct CompatibilitySection: View {
     let project: ModrinthProjectDetail
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-//                MinecraftVersionHeader()
-
+            //                MinecraftVersionHeader()
+            
             if !project.gameVersions.isEmpty {
                 GameVersionsSection(versions: project.gameVersions)
             }
-
+            
             if !project.loaders.isEmpty {
                 LoadersSection(loaders: project.loaders)
             }
-
+            
             PlatformSupportSection(
                 clientSide: project.clientSide,
                 serverSide: project.serverSide
@@ -48,7 +48,7 @@ private struct CompatibilitySection: View {
 
 private struct GameVersionsSection: View {
     let versions: [String]
-
+    
     var body: some View {
         GenericSectionView(
             title: "Versions:",
@@ -67,7 +67,7 @@ private struct GameVersionsSection: View {
 
 private struct GameVersionsPopover: View {
     let versions: [String]
-
+    
     var body: some View {
         VersionGroupedView(
             items: versions.map { FilterItem(id: $0, name: $0) },
@@ -81,7 +81,7 @@ private struct GameVersionsPopover: View {
 
 private struct VersionTag: View {
     let version: String
-
+    
     var body: some View {
         FilterChip(
             title: version,
@@ -92,7 +92,7 @@ private struct VersionTag: View {
 
 private struct LoadersSection: View {
     let loaders: [String]
-
+    
     var body: some View {
         GenericSectionView(
             title: "Mod Loaders:",
@@ -107,13 +107,13 @@ private struct LoadersSection: View {
 private struct PlatformSupportSection: View {
     let clientSide: String
     let serverSide: String
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Platform Support:")
                 .font(.headline)
                 .padding(.bottom, SectionViewConstants.defaultHeaderBottomPadding)
-
+            
             ContentWithOverflow(
                 items: [
                     IdentifiablePlatformItem(id: "client", icon: "laptopcomputer", text: supportLabel(for: clientSide)),
@@ -126,7 +126,7 @@ private struct PlatformSupportSection: View {
             }
         }
     }
-
+    
     private func supportLabel(for value: String) -> String {
         switch value.lowercased() {
         case "required":
@@ -150,7 +150,7 @@ private struct IdentifiablePlatformItem: Identifiable {
 private struct PlatformSupportItem: View {
     let icon: String
     let text: String
-
+    
     var body: some View {
         FilterChip(
             title: text,
@@ -164,7 +164,7 @@ private struct PlatformSupportItem: View {
 
 private struct LinksSection: View {
     let project: ModrinthProjectDetail
-
+    
     var body: some View {
         let links = [
             (project.issuesUrl, String(localized: "Report Issues")),
@@ -174,7 +174,7 @@ private struct LinksSection: View {
         ].compactMap { url, text in
             url.map { (text, $0) }
         }
-
+        
         GenericSectionView(
             title: "Links",
             items: links.map { IdentifiableLink(id: $0.0, text: $0.0, url: $0.1) },
@@ -194,7 +194,7 @@ private struct IdentifiableLink: Identifiable {
 private struct ProjectLink: View {
     let text: String
     let url: String
-
+    
     var body: some View {
         if let url = URL(string: url) {
             FilterChip(title: text, isSelected: false) {
@@ -206,40 +206,34 @@ private struct ProjectLink: View {
 
 private struct DetailsSection: View, Equatable {
     let project: ModrinthProjectDetail
-
+    
     // Cache date formatting results to avoid recalculating each rendering
     private var publishedDateString: String {
         project.published.formatted(.relative(presentation: .named))
     }
-
+    
     private var updatedDateString: String {
         project.updated.formatted(.relative(presentation: .named))
     }
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Details")
                 .font(.headline)
                 .padding(.bottom, 4)
-
+            
             VStack(alignment: .leading, spacing: 8) {
                 DetailRow(
-                    label: String(localized: "License"),
+                    label: "License",
                     value: (project.license?.name).map { $0.isEmpty ? String(localized: "Unknown") : $0 } ?? String(localized: "Unknown")
                 )
-
-                DetailRow(
-                    label: String(localized: "Published Date"),
-                    value: publishedDateString
-                )
-                DetailRow(
-                    label: String(localized: "Updated Date"),
-                    value: updatedDateString
-                )
+                
+                DetailRow(label: "Published Date", value: publishedDateString)
+                DetailRow(label: "Updated Date", value: updatedDateString)
             }
         }
     }
-
+    
     // Implement Equatable to avoid unnecessary re-rendering
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.project.id == rhs.project.id &&
@@ -254,7 +248,7 @@ struct ModrinthProjectContentView: View {
     @State private var error: GlobalError?
     @Binding var projectDetail: ModrinthProjectDetail?
     let projectId: String
-
+    
     var body: some View {
         VStack {
             if isLoading && projectDetail == nil && error == nil {
@@ -273,11 +267,11 @@ struct ModrinthProjectContentView: View {
             error = nil
         }
     }
-
+    
     private func loadProjectDetails() async {
         isLoading = true
         error = nil
-
+        
         do {
             try await loadProjectDetailsThrowing()
         } catch {
@@ -288,12 +282,12 @@ struct ModrinthProjectContentView: View {
                 self.error = globalError
             }
         }
-
+        
         await MainActor.run {
             isLoading = false
         }
     }
-
+    
     // MARK: - Loading View
     private var loadingView: some View {
         VStack(spacing: 8) {
@@ -303,7 +297,7 @@ struct ModrinthProjectContentView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .padding(Constants.padding)
     }
-
+    
     private func loadProjectDetailsThrowing() async throws {
         guard !projectId.isEmpty else {
             throw GlobalError.validation(
@@ -311,7 +305,7 @@ struct ModrinthProjectContentView: View {
                 level: .notification
             )
         }
-
+        
         guard
             let fetchedProject = await ModrinthService.fetchProjectDetails(id: projectId)
         else {
@@ -320,7 +314,7 @@ struct ModrinthProjectContentView: View {
                 level: .notification
             )
         }
-
+        
         await MainActor.run {
             projectDetail = fetchedProject
         }
@@ -330,15 +324,17 @@ struct ModrinthProjectContentView: View {
 // MARK: - Helper Views
 
 private struct DetailRow: View, Equatable {
-    let label: String
+    let label: LocalizedStringKey
     let value: String
-
+    
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
             Text(label)
                 .font(.callout.bold())
                 .fixedSize(horizontal: false, vertical: true)
+            
             Spacer(minLength: 8)
+            
             FilterChip(
                 title: value,
                 isSelected: false
@@ -346,7 +342,7 @@ private struct DetailRow: View, Equatable {
         }
         .frame(minHeight: 20) // Set minimum height to reduce layout calculations
     }
-
+    
     // Implement Equatable to avoid unnecessary re-rendering
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.label == rhs.label && lhs.value == rhs.value
