@@ -223,12 +223,10 @@ private struct DetailsSection: View, Equatable {
                 .padding(.bottom, 4)
 
             VStack(alignment: .leading, spacing: 8) {
-                if let license = project.license {
-                    DetailRow(
-                        label: String(localized: "License"),
-                        value: license.name
-                    )
-                }
+                DetailRow(
+                    label: String(localized: "License"),
+                    value: (project.license?.name).map { $0.isEmpty ? String(localized: "Unknown") : $0 } ?? String(localized: "Unknown")
+                )
 
                 DetailRow(
                     label: String(localized: "Published Date"),

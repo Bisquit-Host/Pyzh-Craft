@@ -159,6 +159,7 @@ struct GameLocalResourceView: View {
                     EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8)
                 )
                 .listRowSeparator(.hidden)
+                .contentShape(Rectangle())
                 .onTapGesture {
                     // Local resources do not jump to the details page (the original logic is used)
                     // Use id prefix to determine local resources, which is more reliable
