@@ -24,6 +24,9 @@
 
 ---
 
+## Supported platforms
+- macOS 14+
+
 ## 🎯 Overview
 
 Pyzh Craft is a native macOS Minecraft launcher 🍎 built with SwiftUI, offering a streamlined and efficient gaming experience. Designed for modern macOS systems, it provides comprehensive mod loader support, Microsoft account authentication, and intuitive game management.
