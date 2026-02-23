@@ -314,7 +314,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = PyzhCraft;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Swift Craft Launcher";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "需要麦克风权限用于语音聊天模组";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Microphone access is required for voice chat mods";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -348,7 +348,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = PyzhCraft;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Swift Craft Launcher";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "需要麦克风权限用于语音聊天模组";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Microphone access is required for voice chat mods";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
