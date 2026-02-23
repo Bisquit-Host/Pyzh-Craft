@@ -1,5 +1,4 @@
 import SwiftUI
-import AppKit
 
 class MinecraftAuthService: ObservableObject {
     static let shared = MinecraftAuthService()
