@@ -7,13 +7,7 @@ struct GameAdvancedSettingsView: View {
     
     @State private var memoryRange: ClosedRange<Double> = Double(GameSettingsManager.shared.globalXms)...Double(GameSettingsManager.shared.globalXmx)
     @State private var selectedGarbageCollector: GarbageCollector = .g1gc
-    @State private var optimizationPreset: OptimizationPreset = .balanced
-    @State private var enableOptimizations = true
-    @State private var enableAikarFlags = false
-    @State private var enableMemoryOptimizations = true
-    @State private var enableThreadOptimizations = true
-    @State private var enableNetworkOptimizations = false
-    @State private var customJvmArguments = ""
+    @State private var additionalJvmFlags = ""
     @State private var environmentVariables = ""
     @State private var javaPath = ""
     @State private var showResetAlert = false
@@ -25,11 +19,6 @@ struct GameAdvancedSettingsView: View {
     private var currentGame: GameVersionInfo? {
         guard let gameId = selectedGameManager.selectedGameId else { return nil }
         return gameRepository.getGame(by: gameId)
-    }
-    
-    /// Whether to use custom JVM parameters (mutually exclusive with garbage collector and performance optimization)
-    private var isUsingCustomArguments: Bool {
-        !customJvmArguments.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
     
     /// Get the Java version of the current game
@@ -44,17 +33,13 @@ struct GameAdvancedSettingsView: View {
         }
     }
     
-    /// Get available optimization presets based on the currently selected garbage collector
-    /// Maximum optimization is only available with G1GC
-    private var availableOptimizationPresets: [OptimizationPreset] {
-        if selectedGarbageCollector == .g1gc {
-            // G1GC supports all optimization presets, including maximum optimization
-            return OptimizationPreset.allCases
-        } else {
-            // Maximum optimization is not supported for non-G1GC (as Aikar Flags only apply to G1GC)
-            return OptimizationPreset.allCases.filter { $0 != .maximum }
-        }
-    }
+    private let gcFlagMap: [(String, GarbageCollector)] = [
+        ("-XX:+UseG1GC", .g1gc),
+        ("-XX:+UseZGC", .zgc),
+        ("-XX:+UseShenandoahGC", .shenandoah),
+        ("-XX:+UseParallelGC", .parallel),
+        ("-XX:+UseSerialGC", .serial),
+    ]
     
     var body: some View {
         Form {
@@ -88,54 +73,17 @@ struct GameAdvancedSettingsView: View {
                     }
                     .labelsHidden()
                     .fixedSize()
-                    .disabled(isUsingCustomArguments)  // Disabled when using custom parameters
                     .onChange(of: selectedGarbageCollector) { _, _ in
-                        if !isUsingCustomArguments {
-                            // If the selected garbage collector does not support the current Java version, automatically switches to a supported option
-                            if !selectedGarbageCollector.isSupported(by: currentJavaVersion) {
-                                selectedGarbageCollector = availableGarbageCollectors.first ?? .g1gc
-                            }
-                            autoSave()
+                        // If the selected garbage collector does not support the current Java version, automatically switches to a supported option
+                        if !selectedGarbageCollector.isSupported(by: currentJavaVersion) {
+                            selectedGarbageCollector = availableGarbageCollectors.first ?? .g1gc
                         }
+                        autoSave()
                     }
                     InfoIconWithPopover(text: selectedGarbageCollector.description)
                 }
             }
             .labeledContentStyle(.custom(alignment: .firstTextBaseline))
-            .opacity(isUsingCustomArguments ? 0.5 : 1.0)  // Reduce transparency when disabled
-            
-            LabeledContent("Performance Optimization") {
-                HStack {
-                    Picker("", selection: $optimizationPreset) {
-                        // Maximum optimization is only available with G1GC
-                        ForEach(availableOptimizationPresets, id: \.self) {
-                            Text($0.displayName)
-                                .tag($0)
-                        }
-                    }
-                    .labelsHidden()
-                    .fixedSize()
-                    .disabled(isUsingCustomArguments)  // Disabled when using custom parameters
-                    .onChange(of: optimizationPreset) { _, newValue in
-                        if !isUsingCustomArguments {
-                            applyOptimizationPreset(newValue)
-                            autoSave()
-                        }
-                    }
-                    .onChange(of: selectedGarbageCollector) { _, _ in
-                        // When the garbage collector changes, switch to balanced optimization if currently max-optimized but not G1GC
-                        if optimizationPreset == .maximum && selectedGarbageCollector != .g1gc {
-                            optimizationPreset = .balanced
-                            applyOptimizationPreset(.balanced)
-                            autoSave()
-                        }
-                    }
-                    
-                    InfoIconWithPopover(text: optimizationPreset.description)
-                }
-            }
-            .labeledContentStyle(.custom(alignment: .firstTextBaseline))
-            .opacity(isUsingCustomArguments ? 0.5 : 1.0)  // Reduce transparency when disabled
             
             LabeledContent("Memory Settings") {
                 HStack {
@@ -154,19 +102,19 @@ struct GameAdvancedSettingsView: View {
             }
             .labeledContentStyle(.custom)
             
-            LabeledContent("Custom Parameters") {
+            LabeledContent("Additional Flags") {
                 HStack {
-                    TextField("", text: $customJvmArguments)
+                    TextField("", text: $additionalJvmFlags, axis: .vertical)
                         .focusable(false)
                         .labelsHidden()
                         .textFieldStyle(.roundedBorder)
                         .lineLimit(2...4)
                         .frame(width: 200)
-                        .onChange(of: customJvmArguments) {
+                        .onChange(of: additionalJvmFlags) {
                             autoSave()
                         }
                     
-                    InfoIconWithPopover(text: "Note: Custom parameters will override the optimization settings above")
+                    InfoIconWithPopover(text: "These flags are appended to the generated JVM arguments")
                 }
             }
             .labeledContentStyle(.custom(alignment: .firstTextBaseline))
@@ -226,123 +174,30 @@ struct GameAdvancedSettingsView: View {
         memoryRange = Double(xms)...Double(xmx)
         environmentVariables = game.environmentVariables
         javaPath = game.javaPath
+        selectedGarbageCollector = availableGarbageCollectors.first ?? .g1gc
+        additionalJvmFlags = ""
         
         let jvmArgs = game.jvmArguments.trimmingCharacters(in: .whitespacesAndNewlines)
-        if jvmArgs.isEmpty {
-            customJvmArguments = ""
-            // Select default garbage collector based on Java version
-            selectedGarbageCollector = availableGarbageCollectors.first ?? .g1gc
-            optimizationPreset = .balanced
-            applyOptimizationPreset(.balanced)
-        } else {
-            customJvmArguments = parseExistingJvmArguments(jvmArgs) ? "" : jvmArgs
-            // If the resolved garbage collector does not support the current Java version, automatically switch to a supported option
-            if !selectedGarbageCollector.isSupported(by: currentJavaVersion) {
-                selectedGarbageCollector = availableGarbageCollectors.first ?? .g1gc
-                applyOptimizationPreset(.balanced)
-            }
+        if !jvmArgs.isEmpty {
+            parseExistingJvmArguments(jvmArgs)
         }
     }
     
-    private func parseExistingJvmArguments(_ arguments: String) -> Bool {
+    private func parseExistingJvmArguments(_ arguments: String) {
         let args = arguments.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }
         
-        let gcMap: [(String, GarbageCollector)] = [
-            ("-XX:+UseG1GC", .g1gc),
-            ("-XX:+UseZGC", .zgc),
-            ("-XX:+UseShenandoahGC", .shenandoah),
-            ("-XX:+UseParallelGC", .parallel),
-            ("-XX:+UseSerialGC", .serial),
-        ]
-        
-        guard let (_, gc) = gcMap.first(where: { args.contains($0.0) }) else {
-            selectedGarbageCollector = availableGarbageCollectors.first ?? .g1gc
-            optimizationPreset = .balanced
-            applyOptimizationPreset(.balanced)
-            return false
-        }
-        
-        // Verify that the garbage collector supports the current Java version
-        if gc.isSupported(by: currentJavaVersion) {
+        if let (_, gc) = gcFlagMap.first(where: { args.contains($0.0) }), gc.isSupported(by: currentJavaVersion) {
             selectedGarbageCollector = gc
         } else {
-            // If not supported, use the default supported garbage collector
-            Logger.shared.warning("Incompatible garbage collector \(gc.displayName) detected (requires Java \(gc.minimumJavaVersion)+, currently Java \(currentJavaVersion)), automatically switches to compatible option")
             selectedGarbageCollector = availableGarbageCollectors.first ?? .g1gc
-            optimizationPreset = .balanced
-            applyOptimizationPreset(.balanced)
-            return false
-        }
-        // Parsing optimization options
-        enableOptimizations = args.contains("-XX:+OptimizeStringConcat") ||
-        args.contains("-XX:+OmitStackTraceInFastThrow")
-        enableMemoryOptimizations = args.contains("-XX:+UseCompressedOops") ||
-        args.contains("-XX:+UseCompressedClassPointers") ||
-        args.contains("-XX:+UseCompactObjectHeaders")
-        enableThreadOptimizations = args.contains("-XX:+OmitStackTraceInFastThrow")
-        
-        if selectedGarbageCollector == .g1gc {
-            enableAikarFlags = args.contains("-XX:+ParallelRefProcEnabled") &&
-            args.contains("-XX:MaxGCPauseMillis=200") &&
-            args.contains("-XX:+AlwaysPreTouch")
-        } else {
-            enableAikarFlags = false
         }
         
-        enableNetworkOptimizations = args.contains("-Djava.net.preferIPv4Stack=true")
-        updateOptimizationPreset()
-        
-        // Ensure maximum optimization is only available during G1GC
-        if optimizationPreset == .maximum && selectedGarbageCollector != .g1gc {
-            optimizationPreset = .balanced
-            applyOptimizationPreset(.balanced)
-        }
-        return true
-    }
-    
-    private func applyOptimizationPreset(_ preset: OptimizationPreset) {
-        switch preset {
-        case .disabled:
-            enableOptimizations = false
-            enableAikarFlags = false
-            enableMemoryOptimizations = false
-            enableThreadOptimizations = false
-            enableNetworkOptimizations = false
-            
-        case .basic, .balanced:
-            enableOptimizations = true
-            enableAikarFlags = false
-            enableMemoryOptimizations = true
-            enableThreadOptimizations = true
-            enableNetworkOptimizations = false
-            
-        case .maximum:
-            enableOptimizations = true
-            enableAikarFlags = true
-            enableMemoryOptimizations = true
-            enableThreadOptimizations = true
-            enableNetworkOptimizations = true
-        }
-    }
-    
-    private func updateOptimizationPreset() {
-        if !enableOptimizations {
-            optimizationPreset = .disabled
-        } else if enableAikarFlags && enableNetworkOptimizations {
-            optimizationPreset = .maximum
-        } else if enableMemoryOptimizations && enableThreadOptimizations {
-            optimizationPreset = .balanced
-        } else {
-            optimizationPreset = .basic
-        }
+        let managedArgs = Set(defaultManagedArguments(for: selectedGarbageCollector) + gcFlagMap.map(\.0))
+        let extras = args.filter { !managedArgs.contains($0) }
+        additionalJvmFlags = extras.joined(separator: " ")
     }
     
     private func generateJvmArguments() -> String {
-        let trimmed = customJvmArguments.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !trimmed.isEmpty {
-            return customJvmArguments
-        }
-        
         // Make sure the selected garbage collector supports the current Java version
         let gc = selectedGarbageCollector.isSupported(by: currentJavaVersion)
         ? selectedGarbageCollector
@@ -350,66 +205,54 @@ struct GameAdvancedSettingsView: View {
         
         var arguments: [String] = []
         arguments.append(contentsOf: gc.arguments)
+
+        arguments.append(contentsOf: defaultManagedArguments(for: gc))
+        
+        let extras = additionalJvmFlags
+            .components(separatedBy: .whitespacesAndNewlines)
+            .filter { !$0.isEmpty }
+        if !extras.isEmpty {
+            arguments.append(contentsOf: extras)
+        }
+        
+        return arguments.joined(separator: " ")
+    }
+    
+    private func defaultManagedArguments(for gc: GarbageCollector) -> [String] {
+        var arguments: [String] = []
         
         if gc == .g1gc {
             arguments.append(contentsOf: [
                 "-XX:+ParallelRefProcEnabled",
                 "-XX:MaxGCPauseMillis=200",
             ])
-            
-            if enableAikarFlags {
-                arguments.append(contentsOf: [
-                    "-XX:+UnlockExperimentalVMOptions",
-                    "-XX:+DisableExplicitGC",
-                    "-XX:+AlwaysPreTouch",
-                    "-XX:G1NewSizePercent=30",
-                    "-XX:G1MaxNewSizePercent=40",
-                    "-XX:G1HeapRegionSize=8M",
-                    "-XX:G1ReservePercent=20",
-                    "-XX:G1HeapWastePercent=5",
-                    "-XX:G1MixedGCCountTarget=4",
-                    "-XX:InitiatingHeapOccupancyPercent=15",
-                    "-XX:G1MixedGCLiveThresholdPercent=90",
-                    "-XX:G1RSetUpdatingPauseTimePercent=5",
-                    "-XX:SurvivorRatio=32",
-                    "-XX:MaxTenuringThreshold=1",
-                ])
-            }
         }
         
-        if enableOptimizations {
+        arguments.append(contentsOf: [
+            "-XX:+OptimizeStringConcat",
+            "-XX:+OmitStackTraceInFastThrow",
+        ])
+        
+        // Memory optimization parameters
+        // Java 8-14: UseCompressedOops only
+        // Java 15-24: Oops + ClassPointers
+        // Java 25+: Oops + ClassPointers + CompactObjectHeaders
+        if currentJavaVersion < 15 {
+            arguments.append("-XX:+UseCompressedOops")
+        } else if currentJavaVersion < 25 {
             arguments.append(contentsOf: [
-                "-XX:+OptimizeStringConcat",
-                "-XX:+OmitStackTraceInFastThrow",
+                "-XX:+UseCompressedOops",
+                "-XX:+UseCompressedClassPointers",
+            ])
+        } else {
+            arguments.append(contentsOf: [
+                "-XX:+UseCompressedOops",
+                "-XX:+UseCompressedClassPointers",
+                "-XX:+UseCompactObjectHeaders",
             ])
         }
         
-        // Memory optimization parameters
-        // Java 8-14: UseCompressedOops and UseCompressedClassPointers bindings
-        // Java 15-24: Explicitly specify Oops + ClassPointers
-        // Java 25+: additionally enable CompactObjectHeaders
-        if enableMemoryOptimizations {
-            if currentJavaVersion < 15 {
-                arguments.append("-XX:+UseCompressedOops")
-            } else if currentJavaVersion < 25 {
-                arguments.append(contentsOf: [
-                    "-XX:+UseCompressedOops",
-                    "-XX:+UseCompressedClassPointers",
-                ])
-            } else {
-                arguments.append(contentsOf: [
-                    "-XX:+UseCompressedOops",
-                    "-XX:+UseCompressedClassPointers",
-                    "-XX:+UseCompactObjectHeaders",
-                ])
-            }
-        }
-        
-        if enableNetworkOptimizations {
-            arguments.append("-Djava.net.preferIPv4Stack=true")
-        }
-        
-        return arguments.joined(separator: " ")
+        return arguments
     }
     
     private func autoSave() {
@@ -460,9 +303,7 @@ struct GameAdvancedSettingsView: View {
         memoryRange = Double(GameSettingsManager.shared.globalXms)...Double(GameSettingsManager.shared.globalXmx)
         // Select default garbage collector based on Java version
         selectedGarbageCollector = availableGarbageCollectors.first ?? .g1gc
-        optimizationPreset = .balanced
-        applyOptimizationPreset(.balanced)
-        customJvmArguments = ""
+        additionalJvmFlags = ""
         environmentVariables = ""
         resetJavaPathSafely()
         autoSave()
@@ -547,11 +388,11 @@ enum GarbageCollector: String, CaseIterable {
     
     var displayName: LocalizedStringKey {
         switch self {
-        case .g1gc: "G1GC (recommended)"
-        case .zgc: "ZGC (Low Latency)"
-        case .shenandoah: "Shenandoah (Low Pause)"
-        case .parallel: "ParallelGC (High Throughput)"
-        case .serial: "SerialGC (Single Thread)"
+        case .g1gc: "G1GC (Balanced)"
+        case .zgc: "ZGC (Ultra-low pause)"
+        case .shenandoah: "Shenandoah (Low pause)"
+        case .parallel: "ParallelGC (Throughput-first)"
+        case .serial: "SerialGC (Small heaps)"
         }
     }
     
@@ -572,30 +413,6 @@ enum GarbageCollector: String, CaseIterable {
         case .shenandoah: ["-XX:+UseShenandoahGC"]
         case .parallel: ["-XX:+UseParallelGC"]
         case .serial: ["-XX:+UseSerialGC"]
-        }
-    }
-}
-
-// MARK: - Optimization Preset Enum
-
-enum OptimizationPreset: String, CaseIterable {
-    case disabled, basic, balanced, maximum
-    
-    var displayName: LocalizedStringKey {
-        switch self {
-        case .disabled: "None"
-        case .basic: "Basic"
-        case .balanced: "Balanced"
-        case .maximum: "Maximum"
-        }
-    }
-    
-    var description: LocalizedStringKey {
-        switch self {
-        case .disabled: "No JVM optimizations enabled"
-        case .basic: "Basic JVM optimizations for improved performance"
-        case .balanced: "Balanced optimizations for good performance and stability (recommended)"
-        case .maximum: "Maximum optimizations including Aikar flags for best performance"
         }
     }
 }
