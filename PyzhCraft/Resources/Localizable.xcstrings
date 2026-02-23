@@ -38936,8 +38936,12 @@
         }
       }
     },
+    "Java Executable" : {
+
+    },
     "Java Path" : {
       "comment" : "Game Advanced Settings - Java Path",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -70257,137 +70261,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "要使用的模型名稱（必填）"
-          }
-        }
-      }
-    },
-    "The path to the Java executable file. Click to choose or reset to the default path." : {
-      "comment" : "Game Advanced Settings - Java Path Description",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "مسار ملف Java القابل للتنفيذ. انقر للاختيار أو إعادة تعيين إلى المسار الافتراضي."
-          }
-        },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stien til den eksekverbare Java-fil. Klik for at vælge eller nulstille til standardstien."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Pfad zur ausführbaren Java-Datei. Klicken Sie, um auszuwählen oder auf den Standardpfad zurückzusetzen."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La ruta al archivo ejecutable de Java. Haz clic para elegir o restablecer a la ruta predeterminada."
-          }
-        },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Polku Java-ajettavaan tiedostoon. Napsauta valitaksesi tai palauttaaksesi oletuspolkuun."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le chemin vers le fichier exécutable Java. Cliquez pour choisir ou réinitialiser au chemin par défaut."
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Java निष्पादन योग्य फ़ाइल का पथ। चुनने या डिफ़ॉल्ट पथ पर रीसेट करने के लिए क्लिक करें।"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Il percorso al file eseguibile Java. Clicca per scegliere o reimpostare sul percorso predefinito."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Java実行可能ファイルへのパス。クリックして選択するか、デフォルトパスにリセットします。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Java 실행 파일의 경로입니다. 클릭하여 선택하거나 기본 경로로 재설정합니다."
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Banen til den kjørbare Java-filen. Klikk for å velge eller tilbakestille til standardbanen."
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Het pad naar het Java-uitvoerbare bestand. Klik om te kiezen of terug te zetten naar het standaardpad."
-          }
-        },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ścieżka do pliku wykonywalnego Java. Kliknij, aby wybrać lub zresetować do domyślnej ścieżki."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O caminho para o arquivo executável Java. Clique para escolher ou redefinir para o caminho padrão."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Путь к исполняемому файлу Java. Нажмите, чтобы выбрать или сбросить на путь по умолчанию."
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sökvägen till den körbara Java-filen. Klicka för att välja eller återställa till standardsökvägen."
-          }
-        },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "เส้นทางไปยังไฟล์ที่เรียกใช้งานได้ของ Java คลิกเพื่อเลือกหรือรีเซ็ตเป็นเส้นทางเริ่มต้น"
-          }
-        },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Java çalıştırılabilir dosyasının yolu. Seçmek veya varsayılan yola sıfırlamak için tıklayın."
-          }
-        },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Đường dẫn đến tệp thực thi Java. Nhấp để chọn hoặc đặt lại về đường dẫn mặc định."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Java可执行文件的路径。点击选择或重置为默认路径。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Java可執行檔案的路徑。點擊選擇或重置為預設路徑。"
           }
         }
       }

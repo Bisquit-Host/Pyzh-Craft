@@ -33,14 +33,23 @@ func spacerView() -> some View {
 
 // path setting line
 struct DirectorySettingRow: View {
-    let title: String
-    let path: String
-    let description: String
-    let onChoose: () -> Void
-    let onReset: () -> Void
-
+    private let title: String
+    private let path: String
+    private let description: String?
+    private let onChoose: () -> Void
+    private let onReset: () -> Void
+    
+    init(title: String, path: String, description: String? = nil, onChoose: @escaping () -> Void, onReset: @escaping () -> Void, showPopover: Bool = false) {
+        self.title = title
+        self.path = path
+        self.description = description
+        self.onChoose = onChoose
+        self.onReset = onReset
+        self.showPopover = showPopover
+    }
+    
     @State private var showPopover = false
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
@@ -56,13 +65,16 @@ struct DirectorySettingRow: View {
                         NSCursor.pop()
                     }
                 }
-
+                
                 Button("Reset", action: onReset)
                     .padding(.leading, 8)
             }
-            Text(description)
-                .font(.footnote)
-                .foregroundColor(.secondary)
+            
+            if let description {
+                Text(description)
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+            }
         }
     }
 }
@@ -70,7 +82,7 @@ struct DirectorySettingRow: View {
 struct PathBreadcrumbView: View {
     let path: String
     let maxVisible: Int = 3  // Maximum number of paragraphs to display (including first and last paragraphs)
-
+    
     var body: some View {
         let components = path.split(separator: "/").map(String.init)
         let paths: [String] = {
@@ -84,19 +96,19 @@ struct PathBreadcrumbView: View {
             }
             return result
         }()
-
+        
         let count = components.count
         let showEllipsis = count > maxVisible
         let headCount = showEllipsis ? 1 : max(0, count - maxVisible)
         let tailCount = showEllipsis ? maxVisible - 1 : count
         let startTail = max(count - tailCount, headCount)
-
+        
         func segmentView(idx: Int) -> some View {
             // Securely obtain file icons and avoid NSXPC warnings
             let icon: NSImage = {
                 // Check if the file exists
                 guard FileManager.default.fileExists(atPath: paths[idx]) else {
-                    if #available(macOS 12.0, *) {
+                    if #available(macOS 12, *) {
                         return NSWorkspace.shared.icon(for: .folder)
                     } else {
                         return NSWorkspace.shared.icon(forFileType: NSFileTypeForHFSTypeCode(0))
@@ -114,7 +126,7 @@ struct PathBreadcrumbView: View {
                     .font(.body)
             }
         }
-
+        
         return HStack(spacing: 0) {
             // beginning
             ForEach(0..<headCount, id: \.self) { idx in
@@ -191,7 +203,7 @@ extension Scene {
             return self
         }
     }
-
+    
     /// Disable window recovery behavior (on all supported macOS versions)
     func applyRestorationBehaviorDisabled() -> some Scene {
         if #available(macOS 15.0, *) {
@@ -211,11 +223,11 @@ struct InfoIconWithPopover<Content: View>: View {
     let iconSize: CGFloat
     /// Delay display time (seconds)
     let delay: Double
-
+    
     @State private var isHovering = false
     @State private var showPopover = false
     @State private var hoverTask: Task<Void, Never>?
-
+    
     init(
         iconSize: CGFloat = 14,
         delay: Double = 0.5,
@@ -225,7 +237,7 @@ struct InfoIconWithPopover<Content: View>: View {
         self.delay = delay
         self.content = content()
     }
-
+    
     var body: some View {
         Button {
             // Also show popover when clicked
@@ -240,7 +252,7 @@ struct InfoIconWithPopover<Content: View>: View {
             isHovering = hovering
             // Cancel previous task
             hoverTask?.cancel()
-
+            
             if hovering {
                 // Delay the display of popover to avoid frequent display when the mouse moves quickly
                 hoverTask = Task {
@@ -290,7 +302,7 @@ extension InfoIconWithPopover {
 
 struct HelpButton: NSViewRepresentable {
     var action: () -> Void
-
+    
     func makeNSView(context: Context) -> NSButton {
         let button = NSButton()
         button.bezelStyle = .helpButton
@@ -299,20 +311,20 @@ struct HelpButton: NSViewRepresentable {
         button.action = #selector(Coordinator.clicked)
         return button
     }
-
+    
     func updateNSView(_ nsView: NSButton, context: Context) {}
-
+    
     func makeCoordinator() -> Coordinator {
         Coordinator(action: action)
     }
-
+    
     class Coordinator: NSObject {
         let action: () -> Void
-
+        
         init(action: @escaping () -> Void) {
             self.action = action
         }
-
+        
         @objc func clicked() {
             action()
         }

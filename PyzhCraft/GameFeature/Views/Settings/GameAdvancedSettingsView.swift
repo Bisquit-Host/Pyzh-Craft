@@ -58,24 +58,25 @@ struct GameAdvancedSettingsView: View {
     
     var body: some View {
         Form {
-            LabeledContent("Java Path") {
+            LabeledContent("Java Executable") {
                 DirectorySettingRow(
-                    title: "Java Path",
+                    title: "Java Executable",
                     path: javaPath.isEmpty ? (currentGame?.javaPath ?? "") : javaPath,
-                    description: String(localized: "The path to the Java executable file. Click to choose or reset to the default path."),
                     onChoose: { showJavaPathPicker = true },
                     onReset: {
                         resetJavaPathSafely()
                     }
-                ).fixedSize()
-                    .fileImporter(
-                        isPresented: $showJavaPathPicker,
-                        allowedContentTypes: [.item],
-                        allowsMultipleSelection: false
-                    ) { result in
-                        handleJavaPathSelection(result)
-                    }
-            }.labeledContentStyle(.custom(alignment: .firstTextBaseline))
+                )
+                .fixedSize()
+                .fileImporter(
+                    isPresented: $showJavaPathPicker,
+                    allowedContentTypes: [.item],
+                    allowsMultipleSelection: false
+                ) { result in
+                    handleJavaPathSelection(result)
+                }
+            }
+            .labeledContentStyle(.custom(alignment: .firstTextBaseline))
             
             LabeledContent("Garbage Collector") {
                 HStack {
