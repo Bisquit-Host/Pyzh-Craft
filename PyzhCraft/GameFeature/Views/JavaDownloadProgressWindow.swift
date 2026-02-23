@@ -87,7 +87,9 @@ struct DownloadItemView: View {
                     Text(title)
                         .font(.headline)
                         .foregroundColor(.primary)
+                    
                     Spacer()
+                    
                     Text("\(Int((downloadState?.progress ?? 0) * 100))%")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
