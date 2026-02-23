@@ -1,31 +1,37 @@
 import Foundation
 
-// MARK: - Authorization Code Flow Response
-struct AuthorizationCodeResponse {
-    let code: String?
-    let error: String?
+// MARK: - Microsoft Device Code
+struct MicrosoftDeviceCodeResponse: Codable, Equatable {
+    let deviceCode: String
+    let userCode: String
+    let verificationURI: String
+    let verificationURIComplete: String?
+    let expiresIn: Int
+    let interval: Int?
+    let message: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case deviceCode = "device_code",
+             userCode = "user_code",
+             verificationURI = "verification_uri",
+             verificationURIComplete = "verification_uri_complete",
+             expiresIn = "expires_in",
+             interval,
+             message
+    }
+    
+    var displayVerificationURL: String {
+        verificationURIComplete ?? verificationURI
+    }
+}
+
+struct MicrosoftOAuthErrorResponse: Codable {
+    let error: String
     let errorDescription: String?
-
-    var isSuccess: Bool {
-        code != nil && error == nil
-    }
-
-    var isUserDenied: Bool {
-        error == "access_denied"
-    }
-
-    init?(from url: URL) {
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              let queryItems = components.queryItems else { return nil }
-        self.code = queryItems.first { $0.name == "code" }?.value
-        self.error = queryItems.first { $0.name == "error" }?.value
-        
-        // Decode error_description
-        if let encodedDescription = queryItems.first(where: { $0.name == "error_description" })?.value {
-            self.errorDescription = encodedDescription.removingPercentEncoding
-        } else {
-            self.errorDescription = nil
-        }
+    
+    enum CodingKeys: String, CodingKey {
+        case error
+        case errorDescription = "error_description"
     }
 }
 
@@ -33,10 +39,12 @@ struct AuthorizationCodeResponse {
 struct TokenResponse: Codable {
     let accessToken: String
     let refreshToken: String?
-
+    let expiresIn: Int?
+    
     enum CodingKeys: String, CodingKey {
         case accessToken = "access_token",
-             refreshToken = "refresh_token"
+             refreshToken = "refresh_token",
+             expiresIn = "expires_in"
     }
 }
 
@@ -44,7 +52,7 @@ struct TokenResponse: Codable {
 struct XboxLiveTokenResponse: Codable {
     let token: String
     let displayClaims: DisplayClaims
-
+    
     enum CodingKeys: String, CodingKey {
         case token = "Token",
              displayClaims = "DisplayClaims"
@@ -53,7 +61,7 @@ struct XboxLiveTokenResponse: Codable {
 
 struct DisplayClaims: Codable {
     let xui: [XUI]
-
+    
     enum CodingKeys: String, CodingKey {
         case xui
     }
@@ -61,7 +69,7 @@ struct DisplayClaims: Codable {
 
 struct XUI: Codable {
     let uhs: String
-
+    
     enum CodingKeys: String, CodingKey {
         case uhs
     }
@@ -76,12 +84,12 @@ struct MinecraftProfileResponse: Codable, Equatable {
     let accessToken: String
     let authXuid: String
     let refreshToken: String
-
+    
     enum CodingKeys: String, CodingKey {
         case id, name, skins, capes
         // accessToken and authXuid are not involved in decoding because they are not obtained from the API response
     }
-
+    
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(String.self, forKey: .id)
@@ -93,7 +101,7 @@ struct MinecraftProfileResponse: Codable, Equatable {
         authXuid = ""
         refreshToken = ""
     }
-
+    
     init(id: String, name: String, skins: [Skin], capes: [Cape]?, accessToken: String, authXuid: String, refreshToken: String = "") {
         self.id = id
         self.name = name
@@ -134,7 +142,7 @@ struct EntitlementItem: Codable {
 enum MinecraftEntitlement: String, CaseIterable {
     case productMinecraft = "product_minecraft"
     case gameMinecraft = "game_minecraft"
-
+    
     var displayName: String {
         switch self {
         case .productMinecraft: "Minecraft Product License"

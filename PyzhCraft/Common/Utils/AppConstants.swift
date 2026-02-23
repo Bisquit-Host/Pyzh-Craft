@@ -6,14 +6,11 @@ enum AppConstants {
     static let modrinthIndex = "relevance"
     static let modrinthIndexFileName = "modrinth.index.json"
 
-    // Minecraft client ID - will be replaced when building
-    // Minecraft/Xbox certification
-    static let minecraftClientId: String = {
-        let encrypted = "$(CLIENTID)"
-        return Obfuscator.decryptClientID(encrypted)
-    }()
-    static let minecraftScope = "XboxLive.signin offline_access"
-    static let callbackURLScheme = "swift-craft-launcher"
+    // Use Microsoft first-party launcher client ID so Azure app registration is not required
+    // From prismarine-auth Titles.MinecraftJava
+    static let minecraftClientId = "00000000402b5328"
+    // Scope used by live.com device code flow for Xbox authentication
+    static let minecraftScope = "service::user.auth.xboxlive.com::MBI_SSL"
 
     // CurseForge API Key - will be replaced when building
     static let curseForgeAPIKey: String? = {

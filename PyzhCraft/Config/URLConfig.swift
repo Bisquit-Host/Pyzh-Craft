@@ -87,10 +87,9 @@ enum URLConfig {
     enum API {
         // Authentication API
         enum Authentication {
-            // Microsoft OAuth - Authorization Code Flow
-            static let authorize = URLConfig.url("https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize")
-            static let token = URLConfig.url("https://login.microsoftonline.com/consumers/oauth2/v2.0/token")
-            static let redirectUri = "swift-craft-launcher://auth"
+            // Microsoft OAuth live.com endpoints for official launcher-style device code flow
+            static let deviceCode = URLConfig.url("https://login.live.com/oauth20_connect.srf")
+            static let token = URLConfig.url("https://login.live.com/oauth20_token.srf")
 
             // Xbox Live
             static let xboxLiveAuth = URLConfig.url("https://user.auth.xboxlive.com/user/authenticate")

@@ -1,197 +1,267 @@
 import SwiftUI
-import AuthenticationServices
+import AppKit
 
-class MinecraftAuthService: NSObject, ObservableObject {
+class MinecraftAuthService: ObservableObject {
     static let shared = MinecraftAuthService()
 
     @Published var authState: AuthenticationState = .notAuthenticated
     @Published var isLoading = false
-    private var webAuthSession: ASWebAuthenticationSession?
+    @Published var deviceCodeInfo: MicrosoftDeviceCodeResponse?
 
     private let clientId = AppConstants.minecraftClientId
     private let scope = AppConstants.minecraftScope
-    private let redirectUri = URLConfig.API.Authentication.redirectUri
+    private let fallbackVerificationURL = URL(string: "https://microsoft.com/link") ?? URL(fileURLWithPath: "/")
+    private var liveCookieHeader: String?
 
-    override private init() {
-        super.init()
-    }
+    private init() {}
 
-    // MARK: - Authentication process (using ASWebAuthenticationSession)
+    // MARK: - Authentication process (using Microsoft device code)
     @MainActor
     func startAuthentication() async {
-        // Clean up the previous state before starting a new authentication
-        webAuthSession?.cancel()
-        webAuthSession = nil
-
         isLoading = true
         authState = .waitingForBrowserAuth
-
-        guard let authURL = buildAuthorizationURL() else {
-            isLoading = false
-            authState = .error(String(localized: "Authentication failed"))
-            return
-        }
-
-        await withCheckedContinuation { continuation in
-            webAuthSession = ASWebAuthenticationSession(
-                url: authURL,
-                callbackURLScheme: AppConstants.callbackURLScheme
-            ) { [weak self] callbackURL, error in
-                Task { @MainActor in
-                    if let error {
-                        if let authError = error as? ASWebAuthenticationSessionError {
-                            if authError.code == .canceledLogin {
-                                Logger.shared.info("用户取消了 Microsoft 认证")
-                                self?.authState = .notAuthenticated
-                            } else {
-                                                        Logger.shared.error("Microsoft 认证失败: \(authError.localizedDescription)")
-                        self?.authState = .error(String(localized: "Authentication failed"))
-                            }
-                        } else {
-                                                    Logger.shared.error("Microsoft 认证发生未知错误: \(error.localizedDescription)")
-                        self?.authState = .error(String(localized: "Authentication failed"))
-                        }
-                        self?.isLoading = false
-                        continuation.resume()
-                        return
-                    }
-
-                    guard let callbackURL = callbackURL,
-                          let authResponse = AuthorizationCodeResponse(from: callbackURL) else {
-                        Logger.shared.error("Microsoft 无效的回调 URL")
-                        self?.authState = .error(String(localized: "Invalid callback URL"))
-                        self?.isLoading = false
-                        continuation.resume()
-                        return
-                    }
-
-                    // Check whether the user refused authorization
-                    if authResponse.isUserDenied {
-                        Logger.shared.info("用户拒绝了 Microsoft 授权")
-                        self?.authState = .notAuthenticated
-                        self?.isLoading = false
-                        continuation.resume()
-                        return
-                    }
-
-                    // Check for other errors
-                    if let error = authResponse.error {
-                        let description = authResponse.errorDescription ?? error
-                        Logger.shared.error("Microsoft 授权失败: \(description)")
-                        self?.authState = .error("授权失败: \(description)")
-                        self?.isLoading = false
-                        continuation.resume()
-                        return
-                    }
-
-                    // Check whether the authorization code was successfully obtained
-                    guard authResponse.isSuccess, let code = authResponse.code else {
-                        Logger.shared.error("未获取到授权码")
-                        self?.authState = .error(String(localized: "No authorization code received"))
-                        self?.isLoading = false
-                        continuation.resume()
-                        return
-                    }
-
-                    await self?.handleAuthorizationCode(code)
-                    continuation.resume()
-                }
-            }
-
-            webAuthSession?.presentationContextProvider = self
-            webAuthSession?.prefersEphemeralWebBrowserSession = false
-            webAuthSession?.start()
-        }
-    }
-
-    // MARK: - Construct the authorization URL (return nil in case of failure, handled by the caller to avoid crashing in the production environment)
-    private func buildAuthorizationURL() -> URL? {
-        guard var components = URLComponents(url: URLConfig.API.Authentication.authorize, resolvingAgainstBaseURL: false) else {
-            Logger.shared.error("Invalid authorization URL configuration")
-            return nil
-        }
-        components.queryItems = [
-            URLQueryItem(name: "client_id", value: clientId),
-            URLQueryItem(name: "response_type", value: "code"),
-            URLQueryItem(name: "redirect_uri", value: redirectUri),
-            URLQueryItem(name: "response_mode", value: "query"),
-            URLQueryItem(name: "scope", value: scope),
-            URLQueryItem(name: "state", value: UUID().uuidString),
-        ]
-        guard let url = components.url else {
-            Logger.shared.error("Failed to build authorization URL")
-            return nil
-        }
-        return url
-    }
-
-    // MARK: - Process authorization code
-    @MainActor
-    private func handleAuthorizationCode(_ code: String) async {
-        authState = .processingAuthCode
+        deviceCodeInfo = nil
+        liveCookieHeader = nil
+        Logger.shared.info("Microsoft 设备码登录开始")
 
         do {
-            // Get access token using authorization code
-            let tokenResponse = try await exchangeCodeForToken(code: code)
+            let deviceCode = try await requestDeviceCode()
+            deviceCodeInfo = deviceCode
+            openDeviceCodePage(for: deviceCode)
+            Logger.shared.info("已获取设备码，等待用户授权")
 
-            // Get the complete certification chain
-            let xboxToken = try await getXboxLiveTokenThrowing(accessToken: tokenResponse.accessToken)
-            let minecraftToken = try await getMinecraftTokenThrowing(xboxToken: xboxToken.token, uhs: xboxToken.displayClaims.xui.first?.uhs ?? "")
-            try await checkMinecraftOwnership(accessToken: minecraftToken)
-
-            // Use JWT parsing to get the true expiration time of Minecraft tokens
-            let minecraftTokenExpiration = JWTDecoder.getMinecraftTokenExpiration(from: minecraftToken)
-            Logger.shared.info("Minecraft token过期时间: \(minecraftTokenExpiration)")
-
-            // Create a profile with the correct expiration time
-            let profile = try await getMinecraftProfileThrowing(
-                accessToken: minecraftToken,
-                authXuid: xboxToken.displayClaims.xui.first?.uhs ?? "",
-                refreshToken: tokenResponse.refreshToken ?? ""
-            )
-
-            Logger.shared.info("Minecraft 认证成功，用户: \(profile.name)")
+            let tokenResponse = try await pollForDeviceCodeToken(deviceCode: deviceCode)
+            Logger.shared.info("设备码轮询成功，开始验证 Minecraft 账户")
+            try await completeAuthentication(tokenResponse: tokenResponse)
+        } catch is CancellationError {
+            Logger.shared.info("用户取消了 Microsoft 认证")
             isLoading = false
-            authState = .authenticated(profile: profile)
+            deviceCodeInfo = nil
+            authState = .notAuthenticated
         } catch {
             let globalError = GlobalError.from(error)
             Logger.shared.error("Minecraft 认证失败: \(globalError.chineseMessage)")
             isLoading = false
+            deviceCodeInfo = nil
             authState = .error(globalError.chineseMessage)
         }
     }
 
-    // MARK: - exchange authorization code for access token
-    private func exchangeCodeForToken(code: String) async throws -> TokenResponse {
-        let url = URLConfig.API.Authentication.token
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+    private func openDeviceCodePage(for deviceCode: MicrosoftDeviceCodeResponse) {
+        let verificationURL = URL(string: deviceCode.displayVerificationURL) ?? fallbackVerificationURL
+        NSWorkspace.shared.open(verificationURL)
+    }
 
+    private func requestDeviceCode() async throws -> MicrosoftDeviceCodeResponse {
+        let url = URLConfig.API.Authentication.deviceCode
         let bodyParameters = [
             "client_id": clientId,
-            "code": code,
-            "redirect_uri": redirectUri,
-            "grant_type": "authorization_code",
             "scope": scope,
+            "response_type": "device_code",
         ]
+        let bodyData = encodeFormBody(bodyParameters)
 
-        let bodyString = bodyParameters.map { "\($0.key)=\($0.value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")" }.joined(separator: "&")
-        let bodyData = bodyString.data(using: .utf8)
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        request.httpBody = bodyData
 
-        // Use a unified API client
-        let headers = ["Content-Type": "application/x-www-form-urlencoded"]
-        let data = try await APIClient.post(url: url, body: bodyData, headers: headers)
+        let (data, httpResponse) = try await APIClient.performRequestWithResponse(request: request)
+
+        if let setCookieHeader = httpResponse.value(forHTTPHeaderField: "Set-Cookie") {
+            liveCookieHeader = setCookieHeader
+                .split(separator: ";")
+                .first
+                .map(String.init)
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            if let oauthError = parseOAuthErrorResponse(from: data) {
+                Logger.shared.error("Microsoft 设备码请求失败: \(oauthError.error)")
+            }
+            throw GlobalError.authentication(
+                i18nKey: "Authentication failed",
+                level: .notification
+            )
+        }
 
         do {
-            return try JSONDecoder().decode(TokenResponse.self, from: data)
+            let response = try JSONDecoder().decode(MicrosoftDeviceCodeResponse.self, from: data)
+            Logger.shared.debug("设备码获取成功，过期时间: \(response.expiresIn)s")
+            return response
         } catch {
-            throw GlobalError(
-                type: .validation,
+            throw GlobalError.validation(
                 i18nKey: "Token response parse failed",
                 level: .notification
             )
         }
+    }
+
+    private enum DeviceCodePollingState {
+        case waiting, slowDown, declined, expired, token(TokenResponse), failed
+    }
+
+    private func pollForDeviceCodeToken(deviceCode: MicrosoftDeviceCodeResponse) async throws -> TokenResponse {
+        let expiresAt = Date().addingTimeInterval(TimeInterval(deviceCode.expiresIn))
+        var interval = max(deviceCode.interval ?? 5, 1)
+        var attempt = 0
+
+        while Date() < expiresAt {
+            try Task.checkCancellation()
+
+            let sleepNanoseconds = UInt64(interval) * 1_000_000_000
+            try await Task.sleep(nanoseconds: sleepNanoseconds)
+            attempt += 1
+
+            let pollingState = try await pollDeviceCodeTokenOnce(deviceCode: deviceCode.deviceCode)
+            switch pollingState {
+            case .waiting:
+                if attempt % 5 == 0 {
+                    Logger.shared.debug("设备码轮询中，等待用户完成授权")
+                }
+                continue
+            case .slowDown:
+                interval += 5
+                Logger.shared.debug("设备码轮询要求减速，新的轮询间隔: \(interval)s")
+            case .declined:
+                throw CancellationError()
+            case .expired:
+                throw GlobalError.authentication(
+                    i18nKey: "Authentication failed, timed out",
+                    level: .notification
+                )
+            case .token(let token):
+                return token
+            case .failed:
+                throw GlobalError.authentication(
+                    i18nKey: "Authentication failed",
+                    level: .notification
+                )
+            }
+        }
+
+        throw GlobalError.authentication(
+            i18nKey: "Authentication failed, timed out",
+            level: .notification
+        )
+    }
+
+    private func pollDeviceCodeTokenOnce(deviceCode: String) async throws -> DeviceCodePollingState {
+        let url = URLConfig.API.Authentication.token
+            .appending(queryItems: [
+                URLQueryItem(name: "client_id", value: clientId)
+            ])
+        let bodyParameters = [
+            "client_id": clientId,
+            "device_code": deviceCode,
+            "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
+        ]
+        let bodyData = encodeFormBody(bodyParameters)
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        request.httpBody = bodyData
+        if let liveCookieHeader, !liveCookieHeader.isEmpty {
+            request.setValue(liveCookieHeader, forHTTPHeaderField: "Cookie")
+        }
+
+        let (data, httpResponse) = try await APIClient.performRequestWithResponse(request: request)
+
+        if let oauthError = parseOAuthErrorResponse(from: data) {
+            switch oauthError.error {
+            case "authorization_pending":
+                return .waiting
+            case "slow_down":
+                return .slowDown
+            case "authorization_declined":
+                return .declined
+            case "expired_token", "bad_verification_code":
+                return .expired
+            default:
+                Logger.shared.error("Microsoft 设备码轮询失败: \(oauthError.error)")
+                return .failed
+            }
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            Logger.shared.error("Microsoft 设备码轮询失败: HTTP \(httpResponse.statusCode)")
+            return .failed
+        }
+
+        if let token = parseTokenResponse(from: data) {
+            return .token(token)
+        }
+
+        throw GlobalError.validation(
+            i18nKey: "Token response parse failed",
+            level: .notification
+        )
+    }
+
+    @MainActor
+    private func completeAuthentication(tokenResponse: TokenResponse) async throws {
+        authState = .processingAuthCode
+
+        let xboxToken = try await getXboxLiveTokenThrowing(accessToken: tokenResponse.accessToken)
+        let minecraftToken = try await getMinecraftTokenThrowing(
+            xboxToken: xboxToken.token,
+            uhs: xboxToken.displayClaims.xui.first?.uhs ?? ""
+        )
+        try await checkMinecraftOwnership(accessToken: minecraftToken)
+
+        let minecraftTokenExpiration = JWTDecoder.getMinecraftTokenExpiration(from: minecraftToken)
+        Logger.shared.info("Minecraft token过期时间: \(minecraftTokenExpiration)")
+
+        let profile = try await getMinecraftProfileThrowing(
+            accessToken: minecraftToken,
+            authXuid: xboxToken.displayClaims.xui.first?.uhs ?? "",
+            refreshToken: tokenResponse.refreshToken ?? ""
+        )
+
+        Logger.shared.info("Minecraft 认证成功，用户: \(profile.name)")
+        isLoading = false
+        deviceCodeInfo = nil
+        authState = .authenticated(profile: profile)
+    }
+
+    private func encodeFormBody(_ params: [String: String]) -> Data? {
+        let bodyString = params
+            .map { "\($0.key)=\($0.value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")" }
+            .joined(separator: "&")
+        return bodyString.data(using: .utf8)
+    }
+
+    private func parseOAuthErrorResponse(from data: Data) -> MicrosoftOAuthErrorResponse? {
+        if let oauthError = try? JSONDecoder().decode(MicrosoftOAuthErrorResponse.self, from: data) {
+            return oauthError
+        }
+
+        guard let body = String(data: data, encoding: .utf8), !body.isEmpty else { return nil }
+        guard let components = URLComponents(string: "?\(body)"),
+              let queryItems = components.queryItems else { return nil }
+
+        guard let error = queryItems.first(where: { $0.name == "error" })?.value else { return nil }
+        let errorDescription = queryItems.first(where: { $0.name == "error_description" })?.value
+        return MicrosoftOAuthErrorResponse(error: error, errorDescription: errorDescription)
+    }
+
+    private func parseTokenResponse(from data: Data) -> TokenResponse? {
+        if let token = try? JSONDecoder().decode(TokenResponse.self, from: data) {
+            return token
+        }
+
+        guard let body = String(data: data, encoding: .utf8), !body.isEmpty else { return nil }
+        guard let components = URLComponents(string: "?\(body)"),
+              let queryItems = components.queryItems else { return nil }
+
+        guard let accessToken = queryItems.first(where: { $0.name == "access_token" })?.value else { return nil }
+        let refreshToken = queryItems.first(where: { $0.name == "refresh_token" })?.value
+        let expiresIn = queryItems
+            .first(where: { $0.name == "expires_in" })?
+            .value
+            .flatMap(Int.init)
+        return TokenResponse(accessToken: accessToken, refreshToken: refreshToken, expiresIn: expiresIn)
     }
 
     // MARK: - Get Xbox Live token (silent version)
@@ -209,15 +279,12 @@ class MinecraftAuthService: NSObject, ObservableObject {
     // MARK: - Get Xbox Live token (throws exception version)
     private func getXboxLiveTokenThrowing(accessToken: String) async throws -> XboxLiveTokenResponse {
         let url = URLConfig.API.Authentication.xboxLiveAuth
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         let body: [String: Any] = [
             "Properties": [
                 "AuthMethod": "RPS",
                 "SiteName": "user.auth.xboxlive.com",
-                "RpsTicket": "d=\(accessToken)",
+                "RpsTicket": "t=\(accessToken)",
             ],
             "RelyingParty": "http://auth.xboxlive.com",
             "TokenType": "JWT",
@@ -263,9 +330,6 @@ class MinecraftAuthService: NSObject, ObservableObject {
     private func getMinecraftTokenThrowing(xboxToken: String, uhs: String) async throws -> String {
         // Get XSTS token
         let xstsUrl = URLConfig.API.Authentication.xstsAuth
-        var xstsRequest = URLRequest(url: xstsUrl)
-        xstsRequest.httpMethod = "POST"
-        xstsRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         let xstsBody: [String: Any] = [
             "Properties": [
@@ -468,8 +532,7 @@ class MinecraftAuthService: NSObject, ObservableObject {
     @MainActor
     func logout() {
         authState = .notAuthenticated
-        webAuthSession?.cancel()
-        webAuthSession = nil
+        deviceCodeInfo = nil
         isLoading = false
     }
 
@@ -477,9 +540,8 @@ class MinecraftAuthService: NSObject, ObservableObject {
     @MainActor
     func clearAuthenticationData() {
         authState = .notAuthenticated
+        deviceCodeInfo = nil
         isLoading = false
-        webAuthSession?.cancel()
-        webAuthSession = nil
     }
 }
 
@@ -588,6 +650,7 @@ extension MinecraftAuthService {
             "grant_type": "refresh_token",
             "client_id": clientId,
             "refresh_token": refreshToken,
+            "scope": scope,
         ]
         let bodyString = bodyParameters
             .map { "\($0.key)=\($0.value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")" }
@@ -649,13 +712,5 @@ extension MinecraftAuthService {
         )
 
         GlobalErrorHandler.shared.handle(notification)
-    }
-}
-
-// MARK: - ASWebAuthenticationPresentationContextProviding
-extension MinecraftAuthService: ASWebAuthenticationPresentationContextProviding {
-    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        // Return to the main window as the display anchor
-        return NSApplication.shared.windows.first ?? ASPresentationAnchor()
     }
 }

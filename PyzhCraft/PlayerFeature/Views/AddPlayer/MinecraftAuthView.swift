@@ -76,6 +76,18 @@ struct MinecraftAuthView: View {
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
+
+            if let deviceCode = authService.deviceCodeInfo {
+                Text(deviceCode.displayVerificationURL)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .textSelection(.enabled)
+
+                Text(deviceCode.userCode)
+                    .font(.system(.title3, design: .monospaced))
+                    .bold()
+                    .textSelection(.enabled)
+            }
         }
     }
 
