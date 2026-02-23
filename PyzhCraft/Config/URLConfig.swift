@@ -14,25 +14,25 @@ enum URLConfig {
         }
         return url
     }
-
+    
     /// GitHub proxy settings (read from UserDefaults, avoid UI dependencies)
     private enum GitHubProxySettings {
         static let defaultProxy = "https://gh-proxy.com"
         static let enableKey = "enableGitHubProxy"
         static let urlKey = "gitProxyURL"
-
+        
         static var isEnabled: Bool {
             let defaults = UserDefaults.standard
             // Enabled by default when not written
             return (defaults.object(forKey: enableKey) as? Bool) ?? true
         }
-
+        
         static var proxyString: String {
             let defaults = UserDefaults.standard
             return (defaults.string(forKey: urlKey) ?? defaultProxy)
                 .trimmingCharacters(in: .whitespacesAndNewlines)
         }
-
+        
         /// Returns the proxy prefix used for splicing (guaranteed to be http(s) and not ending with /), or nil if invalid
         static var normalizedProxyPrefix: String? {
             let proxy = proxyString
@@ -42,11 +42,11 @@ enum URLConfig {
             return proxy.hasSuffix("/") ? String(proxy.dropLast()) : proxy
         }
     }
-
+    
     // Constant string to avoid repeated creation
     private static let githubHost = "github.com"
     private static let rawGithubHost = "raw.githubusercontent.com"
-
+    
     // Public method: Apply proxy for GitHub URL (if needed)
     /// Apply gitProxyURL proxy for GitHub related URLs
     /// - Parameter url: original URL
@@ -54,23 +54,23 @@ enum URLConfig {
     static func applyGitProxyIfNeeded(_ url: URL) -> URL {
         guard GitHubProxySettings.isEnabled else { return url }
         guard let proxy = GitHubProxySettings.normalizedProxyPrefix else { return url }
-
+        
         // Optimization: Use the host attribute of URL directly to avoid conversion to String
         guard let host = url.host else { return url }
-
+        
         // Apply proxy only to GitHub related domains (excluding api.github.com)
         let isGitHubURL = host == githubHost || host == rawGithubHost
         guard isGitHubURL else { return url }
-
+        
         // Optimization: Use URL's absoluteString to check if there is already a proxy prefix
         let urlString = url.absoluteString
         if urlString.hasPrefix("\(proxy)/") { return url }
-
+        
         // Use string interpolation instead of string concatenation
         let proxiedString = "\(proxy)/\(urlString)"
         return Self.url(proxiedString)
     }
-
+    
     // Public method: Apply proxy for GitHub URL string (if needed)
     /// Apply the gitProxyURL proxy to GitHub-related URL strings
     /// - Parameter urlString: original URL string
@@ -82,7 +82,7 @@ enum URLConfig {
             return applyGitProxyIfNeeded(url).absoluteString
         }
     }
-
+    
     // API endpoint
     enum API {
         // Authentication API
@@ -90,11 +90,11 @@ enum URLConfig {
             // Microsoft OAuth live.com endpoints for official launcher-style device code flow
             static let deviceCode = URLConfig.url("https://login.live.com/oauth20_connect.srf")
             static let token = URLConfig.url("https://login.live.com/oauth20_token.srf")
-
+            
             // Xbox Live
             static let xboxLiveAuth = URLConfig.url("https://user.auth.xboxlive.com/user/authenticate")
             static let xstsAuth = URLConfig.url("https://xsts.auth.xboxlive.com/xsts/authorize")
-
+            
             // Minecraft Services
             static let minecraftLogin = URLConfig.url("https://api.minecraftservices.com/authentication/login_with_xbox")
             static let minecraftProfile = URLConfig.url("https://api.minecraftservices.com/minecraft/profile")
@@ -104,17 +104,17 @@ enum URLConfig {
             static let minecraftProfileActiveSkin = URLConfig.url("https://api.minecraftservices.com/minecraft/profile/skins/active")
             static let minecraftProfileActiveCape = URLConfig.url("https://api.minecraftservices.com/minecraft/profile/capes/active")
         }
-
+        
         // Minecraft API
         enum Minecraft {
             static let versionList = URLConfig.url("https://launchermeta.mojang.com/mc/game/version_manifest.json")
         }
-
+        
         // Java Runtime API
         enum JavaRuntime {
             static let baseURL = URLConfig.url("https://launchermeta.mojang.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871")
             static let allRuntimes = baseURL.appendingPathComponent("all.json")
-
+            
             /// Get Java runtime manifest
             /// - Parameter manifestURL: Manifest URL
             /// - Returns: Listing URL
@@ -122,21 +122,21 @@ enum URLConfig {
                 URLConfig.url(manifestURL)
             }
         }
-
+        
         // Zulu JDK download URL for the ARM platform-specific version
         enum JavaRuntimeARM {
             static let jreLegacy = URLConfig.url("https://cdn.azul.com/zulu/bin/zulu8.88.0.19-ca-jre8.0.462-macosx_aarch64.zip")
             static let javaRuntimeAlpha = URLConfig.url("https://cdn.azul.com/zulu/bin/zulu16.32.15-ca-jre16.0.2-macosx_aarch64.zip")
             static let javaRuntimeBeta = URLConfig.url("https://cdn.azul.com/zulu/bin/zulu17.60.17-ca-jre17.0.16-macosx_aarch64.zip")
         }
-
+        
         // Intel platform-specific version of Zulu JDK download URL
         enum JavaRuntimeIntel {
             static let jreLegacy = URLConfig.url("https://cdn.azul.com/zulu/bin/zulu8.88.0.19-ca-jre8.0.462-macosx_x64.zip")
             static let javaRuntimeAlpha = URLConfig.url("https://cdn.azul.com/zulu/bin/zulu16.32.15-ca-jre16.0.2-macosx_x64.zip")
             static let javaRuntimeBeta = URLConfig.url("https://cdn.azul.com/zulu/bin/zulu17.60.17-ca-jre17.0.16-macosx_x64.zip")
         }
-
+        
         // GitHub API
         enum GitHub {
             static let gitHubBase = URLConfig.url("https://github.com")
@@ -147,7 +147,7 @@ enum URLConfig {
             /// Announcement base address:
             /// For example: https://raw.githubusercontent.com/suhang12332/Swift-Craft-Launcher-Assets/refs/heads/main/news/api/announcements/0.3.1-beta/ar.json
             static let announcementBaseURL = URLConfig.url("https://raw.githubusercontent.com/\(repositoryOwner)/\(assetsRepositoryName)/refs/heads/main/news/api/announcements")
-
+            
             // Private method: Build the base path of the warehouse
             private static var repositoryBaseURL: URL {
                 baseURL
@@ -155,13 +155,13 @@ enum URLConfig {
                     .appendingPathComponent(repositoryOwner)
                     .appendingPathComponent(repositoryName)
             }
-
+            
             static func latestRelease() -> URL {
                 URLConfig.applyGitProxyIfNeeded(
                     repositoryBaseURL.appendingPathComponent("releases/latest")
                 )
             }
-
+            
             static func contributors(perPage: Int = 50) -> URL {
                 let url = repositoryBaseURL
                     .appendingPathComponent("contributors")
@@ -170,14 +170,14 @@ enum URLConfig {
                     ])
                 return URLConfig.applyGitProxyIfNeeded(url)
             }
-
+            
             // GitHub repository homepage URL
             static func repositoryURL() -> URL {
                 return gitHubBase
                     .appendingPathComponent(repositoryOwner)
                     .appendingPathComponent(repositoryName)
             }
-
+            
             // Appcast related
             static func appcastURL(
                 architecture: String
@@ -192,7 +192,7 @@ enum URLConfig {
                     .appendingPathComponent(appcastFileName)
                 return URLConfig.applyGitProxyIfNeeded(url)
             }
-
+            
             // Static contributor data
             static func staticContributors() -> URL {
                 let timestamp = Int(Date().timeIntervalSince1970)
@@ -209,7 +209,7 @@ enum URLConfig {
                     ])
                 return URLConfig.applyGitProxyIfNeeded(url)
             }
-
+            
             // Acknowledgments data
             static func acknowledgements() -> URL {
                 let timestamp = Int(Date().timeIntervalSince1970)
@@ -226,7 +226,7 @@ enum URLConfig {
                     ])
                 return URLConfig.applyGitProxyIfNeeded(url)
             }
-
+            
             // LICENSE file (API)
             static func license(ref: String = "main") -> URL {
                 let url = repositoryBaseURL
@@ -237,7 +237,7 @@ enum URLConfig {
                     ])
                 return URLConfig.applyGitProxyIfNeeded(url)
             }
-
+            
             // LICENSE file (web page)
             static func licenseWebPage(ref: String = "main") -> URL {
                 let url = gitHubBase
@@ -249,7 +249,7 @@ enum URLConfig {
                 // The License webpage does not go through the GitHub proxy and directly opens the original github.com link
                 return url
             }
-
+            
             // Announcement API
             /// Get announcement URL
             /// - Parameters:
@@ -267,65 +267,65 @@ enum URLConfig {
                 return URLConfig.applyGitProxyIfNeeded(url)
             }
         }
-
+        
         // Modrinth API
         enum Modrinth {
             static let baseURL = URLConfig.url("https://api.modrinth.com/v2")
             /// Modrinth project details base URL, for example: https://modrinth.com/mod/fabric-api
             static let webProjectBase = "https://modrinth.com/mod/"
-
+            
             // Project related
             static func project(id: String) -> URL {
                 baseURL.appendingPathComponent("project/\(id)")
             }
-
+            
             // Version related
             static func version(id: String) -> URL {
                 baseURL.appendingPathComponent("project/\(id)/version")
             }
-
+            
             static func versionId(versionId: String) -> URL {
                 baseURL.appendingPathComponent("version/\(versionId)")
             }
-
+            
             // Search related
             static var search: URL {
                 baseURL.appendingPathComponent("search")
             }
-
+            
             static func versionFile(hash: String) -> URL {
                 baseURL.appendingPathComponent("version_file/\(hash)")
             }
-
+            
             // tag related
             static var gameVersionTag: URL {
                 baseURL.appendingPathComponent("tag/game_version")
             }
-
+            
             static var loaderTag: URL {
                 baseURL.appendingPathComponent("tag/loader")
             }
-
+            
             static var categoryTag: URL {
                 baseURL.appendingPathComponent("tag/category")
             }
-
+            
             // Loader API
             static func loaderManifest(loader: String) -> URL {
                 URLConfig.url("https://launcher-meta.modrinth.com/\(loader)/v0/manifest.json")
             }
-
+            
             // Minecraft Version API
             static func versionInfo(version: String) -> URL {
                 URLConfig.url("https://launcher-meta.modrinth.com/minecraft/v0/versions/\(version).json")
             }
-
+            
             static let maven = URLConfig.url("https://launcher-meta.modrinth.com/maven/")
-
+            
             static func loaderProfile(loader: String, version: String) -> URL {
                 URLConfig.url("https://launcher-meta.modrinth.com/\(loader)/v0/versions/\(version).json")
             }
-
+            
             // Download URL
             /// Generate Modrinth file download URL
             /// - Parameters:
@@ -342,31 +342,40 @@ enum URLConfig {
         enum Fabric {
             static let loader = URLConfig.url("https://meta.fabricmc.net/v2/versions/loader")
         }
-
+        
         // Quilt API
         enum Quilt {
             static let loaderBase = URLConfig.url("https://meta.quiltmc.org/v3/versions/loader/")
         }
-
+        
         // CurseForge API
         enum CurseForge {
-            static let mirrorBaseURL = URLConfig.url("https://api.curseforge.com/v1")
+            private static let officialBaseURL = URLConfig.url("https://api.curseforge.com/v1")
+            private static let publicMirrorBaseURL = URLConfig.url("https://api.curse.tools/v1")
             static let fallbackDownloadBaseURL = URLConfig.url("https://edge.forgecdn.net/files")
             /// CurseForge project details base URL, for example: https://www.curseforge.com/minecraft/mc-mods/geckolib
             static let webProjectBase = "https://www.curseforge.com/minecraft/mc-mods/"
-
+            
+            /// Automatically select base URL
+            /// If API key exists, use official API first, otherwise use public mirror
+            private static var apiBaseURL: URL {
+                let key = AppConstants.curseForgeAPIKey?
+                    .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                return key.isEmpty ? publicMirrorBaseURL : officialBaseURL
+            }
+            
             static func fileDetail(projectId: Int, fileId: Int) -> URL {
-                mirrorBaseURL.appendingPathComponent("mods/\(projectId)/files/\(fileId)")
+                apiBaseURL.appendingPathComponent("mods/\(projectId)/files/\(fileId)")
             }
-
+            
             static func modDetail(modId: Int) -> URL {
-                mirrorBaseURL.appendingPathComponent("mods/\(modId)")
+                apiBaseURL.appendingPathComponent("mods/\(modId)")
             }
-
+            
             static func modDescription(modId: Int) -> URL {
-                mirrorBaseURL.appendingPathComponent("mods/\(modId)/description")
+                apiBaseURL.appendingPathComponent("mods/\(modId)/description")
             }
-
+            
             static func fallbackDownloadUrl(fileId: Int, fileName: String) -> URL {
                 // Format: https://edge.forgecdn.net/files/{first three digits of fileId}/{last three digits of fileId}/{fileName}
                 fallbackDownloadBaseURL
@@ -374,44 +383,49 @@ enum URLConfig {
                     .appendingPathComponent("\(fileId % 1000)")
                     .appendingPathComponent(fileName)
             }
-
+            
             static func projectFiles(projectId: Int, gameVersion: String? = nil, modLoaderType: Int? = nil) -> URL {
-                let url = mirrorBaseURL.appendingPathComponent("mods/\(projectId)/files")
-
+                let url = apiBaseURL.appendingPathComponent("mods/\(projectId)/files")
+                
                 var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
                 var queryItems: [URLQueryItem] = []
-
+                
                 if let gameVersion = gameVersion {
                     queryItems.append(URLQueryItem(name: "gameVersion", value: gameVersion))
                 }
-
+                
                 if let modLoaderType = modLoaderType {
                     queryItems.append(URLQueryItem(name: "modLoaderType", value: String(modLoaderType)))
                 }
-
+                
                 if !queryItems.isEmpty {
                     components?.queryItems = queryItems
                 }
-
+                
                 return components?.url ?? url
             }
-
+            
             // Search related
             static var search: URL {
-                mirrorBaseURL.appendingPathComponent("mods/search")
+                apiBaseURL.appendingPathComponent("mods/search")
             }
-
+            
             // Classification related
-            static var categories: URL {
-                mirrorBaseURL.appendingPathComponent("categories")
+            static func categories(gameId: Int = 432) -> URL {
+                var components = URLComponents(
+                    url: apiBaseURL.appendingPathComponent("categories"),
+                    resolvingAgainstBaseURL: false
+                )
+                components?.queryItems = [URLQueryItem(name: "gameId", value: String(gameId))]
+                return components?.url ?? apiBaseURL.appendingPathComponent("categories")
             }
-
+            
             // Game version related
             static var gameVersions: URL {
-                mirrorBaseURL.appendingPathComponent("minecraft/version")
+                apiBaseURL.appendingPathComponent("minecraft/version")
             }
         }
-
+        
         // IP Location API
         enum IPLocation {
             static var currentLocation: URL {
@@ -420,7 +434,7 @@ enum URLConfig {
             }
         }
     }
-
+    
     // Store URLs
     enum Store {
         // Minecraft purchase link

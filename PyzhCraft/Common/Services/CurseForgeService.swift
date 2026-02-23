@@ -9,7 +9,9 @@ enum CurseForgeService {
     /// Get the CurseForge API request header (including API key, if available)
     private static func getHeaders() -> [String: String] {
         var headers: [String: String] = ["Accept": "application/json"]
-        if let apiKey = AppConstants.curseForgeAPIKey {
+        if let apiKey = AppConstants.curseForgeAPIKey?
+            .trimmingCharacters(in: .whitespacesAndNewlines),
+           !apiKey.isEmpty {
             headers["x-api-key"] = apiKey
         }
         return headers
@@ -457,7 +459,10 @@ enum CurseForgeService {
     /// - Throws: GlobalError when the operation fails
     static func fetchCategoriesThrowing() async throws -> [CurseForgeCategory] {
         let headers = getHeaders()
-        let data = try await APIClient.get(url: URLConfig.API.CurseForge.categories, headers: headers)
+        let data = try await APIClient.get(
+            url: URLConfig.API.CurseForge.categories(),
+            headers: headers
+        )
         let result = try JSONDecoder().decode(CurseForgeCategoriesResponse.self, from: data)
         return result.data
     }
