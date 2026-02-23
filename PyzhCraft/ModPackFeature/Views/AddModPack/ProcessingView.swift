@@ -21,7 +21,7 @@ struct ProcessingView: View {
                 CircularProgressView(progress: progress)
                     .frame(width: 54, height: 54)
 
-                Text("\(Int(progress * 100))%")
+                Text(progress, format: .percent.precision(.fractionLength(0)))
                     .font(.headline)
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)

@@ -72,6 +72,10 @@ struct DownloadItemView: View {
     let onCancel: () -> Void
     let downloadState: JavaDownloadState?
 
+    private var progressText: String {
+        (downloadState?.progress ?? 0).formatted(.percent.precision(.fractionLength(0)))
+    }
+
     var body: some View {
         HStack(spacing: 12) {
             // icon
@@ -90,7 +94,7 @@ struct DownloadItemView: View {
                     
                     Spacer()
                     
-                    Text("\(Int((downloadState?.progress ?? 0) * 100))%")
+                    Text(progressText)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }

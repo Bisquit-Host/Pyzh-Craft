@@ -7,6 +7,10 @@ struct DownloadProgressRow: View {
     let completed: Int
     let total: Int
     let version: String?
+
+    private var progressText: String {
+        min(max(progress, 0), 1).formatted(.percent.precision(.fractionLength(0)))
+    }
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -22,7 +26,7 @@ struct DownloadProgressRow: View {
                 
                 Spacer()
                 
-                Text("Progress: \(Int32(progress * 100))%")
+                Text("Progress: \(progressText)")
                     .font(.headline)
                     .foregroundColor(.secondary)
             }
