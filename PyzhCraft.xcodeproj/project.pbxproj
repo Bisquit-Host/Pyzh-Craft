@@ -14,7 +14,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		90CE44FE2E7D65A5007C6F30 /* Swift Craft Launcher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Swift Craft Launcher.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		90CE44FE2E7D65A5007C6F30 /* PyzhCraft.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PyzhCraft.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F3277B4B2F4288120061E348 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -44,7 +44,7 @@
 			children = (
 				F3277B4B2F4288120061E348 /* README.md */,
 				9023D8332E3139B5005A53F1 /* PyzhCraft */,
-				90CE44FE2E7D65A5007C6F30 /* Swift Craft Launcher.app */,
+				90CE44FE2E7D65A5007C6F30 /* PyzhCraft.app */,
 			);
 			sourceTree = "<group>";
 		};
@@ -75,7 +75,7 @@
 				90E387012F28FB8100F5D101 /* SwiftMarkDownUI */,
 			);
 			productName = PyzhCraft;
-			productReference = 90CE44FE2E7D65A5007C6F30 /* Swift Craft Launcher.app */;
+			productReference = 90CE44FE2E7D65A5007C6F30 /* PyzhCraft.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -313,7 +313,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = PyzhCraft;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Swift Craft Launcher";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 PyzhCraft";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Microphone access is required for voice chat mods";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -323,7 +323,7 @@
 				MARKETING_VERSION = 0.1;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "host.bisquit.Pyzh-Craft";
-				PRODUCT_NAME = "Swift Craft Launcher";
+				PRODUCT_NAME = PyzhCraft;
 				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -347,7 +347,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = PyzhCraft;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Swift Craft Launcher";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 PyzhCraft";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Microphone access is required for voice chat mods";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -357,7 +357,7 @@
 				MARKETING_VERSION = 0.1;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "host.bisquit.Pyzh-Craft";
-				PRODUCT_NAME = "Swift Craft Launcher";
+				PRODUCT_NAME = PyzhCraft;
 				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
