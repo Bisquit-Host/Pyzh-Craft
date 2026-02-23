@@ -41,6 +41,24 @@ struct GameAdvancedSettingsView: View {
         ("-XX:+UseSerialGC", .serial),
     ]
     
+    /// Legacy G1 tuning flags from the removed "maximum" preset.
+    private let legacyManagedG1Flags: Set<String> = [
+        "-XX:+UnlockExperimentalVMOptions",
+        "-XX:+DisableExplicitGC",
+        "-XX:+AlwaysPreTouch",
+        "-XX:G1NewSizePercent=30",
+        "-XX:G1MaxNewSizePercent=40",
+        "-XX:G1HeapRegionSize=8M",
+        "-XX:G1ReservePercent=20",
+        "-XX:G1HeapWastePercent=5",
+        "-XX:G1MixedGCCountTarget=4",
+        "-XX:InitiatingHeapOccupancyPercent=15",
+        "-XX:G1MixedGCLiveThresholdPercent=90",
+        "-XX:G1RSetUpdatingPauseTimePercent=5",
+        "-XX:SurvivorRatio=32",
+        "-XX:MaxTenuringThreshold=1",
+    ]
+    
     var body: some View {
         Form {
             LabeledContent("Java Executable") {
@@ -78,6 +96,7 @@ struct GameAdvancedSettingsView: View {
                         if !selectedGarbageCollector.isSupported(by: currentJavaVersion) {
                             selectedGarbageCollector = availableGarbageCollectors.first ?? .g1gc
                         }
+                        sanitizeAdditionalFlags(for: selectedGarbageCollector)
                         autoSave()
                     }
                     InfoIconWithPopover(text: selectedGarbageCollector.description)
@@ -193,8 +212,18 @@ struct GameAdvancedSettingsView: View {
         }
         
         let managedArgs = Set(defaultManagedArguments(for: selectedGarbageCollector) + gcFlagMap.map(\.0))
+            .union(legacyManagedG1Flags)
         let extras = args.filter { !managedArgs.contains($0) }
         additionalJvmFlags = extras.joined(separator: " ")
+    }
+    
+    private func sanitizeAdditionalFlags(for gc: GarbageCollector) {
+        guard gc != .g1gc else { return }
+        
+        let filtered = additionalJvmFlags
+            .components(separatedBy: .whitespacesAndNewlines)
+            .filter { !$0.isEmpty && !legacyManagedG1Flags.contains($0) }
+        additionalJvmFlags = filtered.joined(separator: " ")
     }
     
     private func generateJvmArguments() -> String {
