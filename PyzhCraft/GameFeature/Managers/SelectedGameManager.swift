@@ -14,13 +14,6 @@ class SelectedGameManager: ObservableObject {
         }
     }
 
-    /// Whether the advanced settings tab should be opened
-    @Published var shouldOpenAdvancedSettings = false {
-        didSet {
-            objectWillChange.send()
-        }
-    }
-
     private init() {
     }
 
@@ -33,13 +26,5 @@ class SelectedGameManager: ObservableObject {
     /// Clear selected games
     func clearSelection() {
         selectedGameId = nil
-        shouldOpenAdvancedSettings = false
-    }
-
-    /// Settings selected game and mark should open advanced settings
-    /// - Parameter gameId: game ID
-    func setSelectedGameAndOpenAdvancedSettings(_ gameId: String?) {
-        selectedGameId = gameId
-        shouldOpenAdvancedSettings = true
     }
 }

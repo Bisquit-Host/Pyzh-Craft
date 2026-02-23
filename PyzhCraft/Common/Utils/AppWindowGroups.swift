@@ -51,6 +51,16 @@ extension PyzhCraftApp {
                 .windowCleanup(for: .skinPreview)
         }
         .defaultSize(width: 1200, height: 800)
+
+        // Server settings window
+        Window("Server Settings", id: WindowID.serverSettings.rawValue) {
+            ServerSettingsWindowView()
+                .environmentObject(gameRepository)
+                .preferredColorScheme(themeManager.currentColorScheme)
+                .windowStyleConfig(for: .serverSettings)
+                .windowCleanup(for: .serverSettings)
+        }
+        .defaultSize(width: 800, height: 640)
     }
 }
 

@@ -16,12 +16,9 @@ public struct SidebarView: View {
     @ObservedObject private var selectedGameManager = SelectedGameManager.shared
     @State private var iconRefreshTriggers: [String: UUID] = [:]
     @State private var cancellable: AnyCancellable?
-
-    @Environment(\.openSettings)
-    private var openSettings
-
+    
     public init() {}
-
+    
     public var body: some View {
         List(selection: detailState.selectedItemOptionalBinding) {
             // Resources section
@@ -37,7 +34,7 @@ public struct SidebarView: View {
                     }
                 }
             }
-
+            
             // game section
             Section(header: Text("Game List")) {
                 ForEach(filteredGames) { game in
@@ -56,7 +53,9 @@ public struct SidebarView: View {
                         GameContextMenu(
                             game: game,
                             onDelete: { gameToDelete = game; showDeleteAlert = true },
-                            onOpenSettings: { openSettings() },
+                            onOpenServerSettings: {
+                                WindowManager.shared.openWindow(id: .serverSettings)
+                            },
                             onExport: {
                                 gameToExport = game
                             }
@@ -129,7 +128,7 @@ public struct SidebarView: View {
             ModPackExportSheet(gameInfo: game)
         }
     }
-
+    
     // Only perform fuzzy search on game name
     private var filteredGames: [GameVersionInfo] {
         if searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -147,7 +146,7 @@ public struct SidebarView: View {
 private struct GameIconView: View {
     let game: GameVersionInfo
     let refreshTrigger: UUID
-
+    
     /// Get icon URL (add refresh trigger as query parameter, force AsyncImage to reload)
     private var iconURL: URL {
         let profileDir = AppPaths.profileDirectory(gameName: game.gameName)
@@ -157,7 +156,7 @@ private struct GameIconView: View {
         components?.queryItems = [URLQueryItem(name: "refresh", value: refreshTrigger.uuidString)]
         return components?.url ?? baseURL
     }
-
+    
     var body: some View {
         Group {
             if FileManager.default.fileExists(atPath: profileDir.appendingPathComponent(game.gameIcon).path) {
@@ -194,7 +193,7 @@ private struct GameIconView: View {
         }
         .frame(width: 20, height: 20, alignment: .center)
     }
-
+    
     private var profileDir: URL {
         AppPaths.profileDirectory(gameName: game.gameName)
     }
@@ -207,63 +206,50 @@ private struct GameIconView: View {
 private struct GameContextMenu: View {
     let game: GameVersionInfo
     let onDelete: () -> Void
-    let onOpenSettings: () -> Void
+    let onOpenServerSettings: () -> Void
     let onExport: () -> Void
-
+    
     @ObservedObject private var gameStatusManager = GameStatusManager.shared
     @ObservedObject private var gameActionManager = GameActionManager.shared
     @ObservedObject private var selectedGameManager = SelectedGameManager.shared
     @EnvironmentObject private var playerListViewModel: PlayerListViewModel
     @EnvironmentObject private var gameRepository: GameRepository
     @EnvironmentObject private var gameLaunchUseCase: GameLaunchUseCase
-
+    
     /// Use cached game state to avoid checking the process every render
     /// This is more efficient than calling isGameRunning() because it reads the cached state directly
     private var isRunning: Bool {
         gameStatusManager.allGameStates[game.id] ?? false
     }
-
+    
     var body: some View {
-        Button(action: {
-            toggleGameState()
-        }, label: {
-            Label(
-                isRunning
-                    ? LocalizedStringKey("Stop")
-                    : LocalizedStringKey("Start"),
-                systemImage: isRunning ? "stop.fill" : "play.fill"
-            )
-        })
-
-        Button(action: {
+        Button(
+            isRunning ? "Stop" : "Start",
+            systemImage: isRunning ? "stop.fill" : "play.fill",
+            action: toggleGameState
+        )
+        
+        Button("Show in Finder", systemImage: "folder") {
             gameActionManager.showInFinder(game: game)
-        }, label: {
-            Label("Show in Finder", systemImage: "folder")
-        })
-
-        Button(action: {
-            selectedGameManager.setSelectedGameAndOpenAdvancedSettings(game.id)
-            onOpenSettings()
-        }, label: {
-            Label("Advanced", systemImage: "gearshape")
-        })
-
+        }
+        
+        Button("Server Settings", systemImage: "server.rack") {
+            selectedGameManager.setSelectedGame(game.id)
+            onOpenServerSettings()
+        }
+        
         Divider()
-
-        Button(action: onExport) {
-            Label("Export", systemImage: "square.and.arrow.up")
-        }
-
-        Button(action: onDelete) {
-            Label("Delete Game", systemImage: "trash")
-        }
+        
+        Button("Export", systemImage: "square.and.arrow.up", action: onExport)
+        Button("Delete Game", systemImage: "trash", role: .destructive, action: onDelete)
     }
-
+    
     /// Start or stop the game
     private func toggleGameState() {
         Task {
             // Reduce process queries using cached state instead of rechecking
             let currentlyRunning = gameStatusManager.allGameStates[game.id] ?? false
+            
             if currentlyRunning {
                 await gameLaunchUseCase.stopGame(game: game)
             } else {
