@@ -55,8 +55,8 @@ struct ModrinthProjectTitleView: View {
                     // Project tags
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack {
-                            ForEach(projectDetail.categories, id: \.self) { category in
-                                Text(category)
+                            ForEach(projectDetail.categories, id: \.self) {
+                                Text($0)
                                     .font(.caption2)
                                     .padding(
                                         .horizontal,

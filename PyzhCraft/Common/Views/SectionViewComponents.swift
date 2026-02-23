@@ -47,8 +47,8 @@ struct OverflowPopoverContent<Item: Identifiable, Content: View>: View {
         VStack(alignment: .leading, spacing: 0) {
             ScrollView {
                 FlowLayout {
-                    ForEach(items) { item in
-                        content(item)
+                    ForEach(items) {
+                        content($0)
                     }
                 }
                 .padding()
@@ -129,8 +129,8 @@ struct ContentWithOverflow<Item: Identifiable, Content: View>: View {
 
     var body: some View {
         FlowLayout(spacing: spacing) {
-            ForEach(items) { item in
-                content(item)
+            ForEach(items) {
+                content($0)
             }
         }
         .frame(maxHeight: maxHeight)

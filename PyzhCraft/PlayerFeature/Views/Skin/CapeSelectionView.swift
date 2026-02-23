@@ -85,10 +85,11 @@ struct CapeSelectionView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
                         capeOption(id: nil, name: String(localized: "No Cape"), isSystemOption: true)
-                        ForEach(capes, id: \.id) { cape in
-                            capeOption(id: cape.id, name: cape.alias ?? String(localized: "Cape"), imageURL: cape.url)
+                        ForEach(capes, id: \.id) {
+                            capeOption(id: $0.id, name: $0.alias ?? String(localized: "Cape"), imageURL: $0.url)
                         }
-                    }.padding(4)
+                    }
+                    .padding(4)
                 }
             } else {
                 Text("No capes available")

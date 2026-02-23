@@ -95,8 +95,8 @@ struct ModrinthProjectDetailView: View {
             Label("\(project.followers)", systemImage: "heart")
 
             FlowLayout(spacing: Constants.categorySpacing) {
-                ForEach(project.categories, id: \.self) { category in
-                    CategoryTag(text: category)
+                ForEach(project.categories, id: \.self) {
+                    CategoryTag(text: $0)
                 }
             }
         }

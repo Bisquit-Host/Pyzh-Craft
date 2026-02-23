@@ -3,15 +3,15 @@ import SwiftUI
 struct VersionSelectionView: View {
     @Binding var selectedGameVersion: String
     @Binding var selectedModPackVersion: ModrinthProjectDetailVersion?
-
+    
     let availableGameVersions: [String]
     let filteredModPackVersions: [ModrinthProjectDetailVersion]
     let isLoadingModPackVersions: Bool
     let isProcessing: Bool
-
+    
     let onGameVersionChange: (String) -> Void
     let onModPackVersionAppear: () -> Void
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             gameVersionPicker
@@ -20,21 +20,24 @@ struct VersionSelectionView: View {
             }
         }
     }
-
+    
     private var gameVersionPicker: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Game Version")
                 .foregroundColor(.primary)
+            
             Picker(
                 "",
                 selection: $selectedGameVersion
             ) {
                 Text("Select game version").tag("")
-                ForEach(availableGameVersions, id: \.self) { version in
-                    Text(version).tag(version)
+                
+                ForEach(availableGameVersions, id: \.self) {
+                    Text($0)
+                        .tag($0)
                 }
             }
-            .pickerStyle(MenuPickerStyle())
+            .pickerStyle(.menu)
             .font(.subheadline)
             .labelsHidden()
             .onChange(of: selectedGameVersion) { _, newValue in
@@ -42,7 +45,7 @@ struct VersionSelectionView: View {
             }
         }
     }
-
+    
     private var modPackVersionPicker: some View {
         VStack(alignment: .leading, spacing: 8) {
             if isLoadingModPackVersions {
@@ -59,15 +62,14 @@ struct VersionSelectionView: View {
                     "",
                     selection: $selectedModPackVersion
                 ) {
-                    ForEach(filteredModPackVersions, id: \.id) { version in
-                        Text(version.name).tag(
-                            version as ModrinthProjectDetailVersion?
-                        )
+                    ForEach(filteredModPackVersions, id: \.id) {
+                        Text($0.name)
+                            .tag($0 as ModrinthProjectDetailVersion?)
                     }
                 }
                 .labelsHidden()
                 .font(.subheadline)
-                .pickerStyle(MenuPickerStyle())
+                .pickerStyle(.menu)
                 .onAppear {
                     onModPackVersionAppear()
                 }

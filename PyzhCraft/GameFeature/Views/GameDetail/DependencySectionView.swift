@@ -21,6 +21,7 @@ struct DependencySectionView: View {
                 ForEach(state.dependencies, id: \.id) { dep in
                     VStack(alignment: .leading) {
                         Text(dep.title).font(.headline).bold()
+                        
                         if let versions = state.versions[dep.id],
                             !versions.isEmpty {
                             Picker(
@@ -33,8 +34,9 @@ struct DependencySectionView: View {
                                     set: { state.selected[dep.id] = $0 }
                                 )
                             ) {
-                                ForEach(versions, id: \.id) { v in
-                                    Text(v.name).tag(Optional(v))
+                                ForEach(versions, id: \.id) {
+                                    Text($0.name)
+                                        .tag(Optional($0))
                                 }
                             }
                             .pickerStyle(.menu)

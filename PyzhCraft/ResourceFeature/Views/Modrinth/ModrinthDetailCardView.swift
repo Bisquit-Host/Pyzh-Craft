@@ -135,8 +135,8 @@ struct ModrinthDetailCardView: View {
                     )
                 ),
                 id: \.self
-            ) { tag in
-                TagView(text: tag)
+            ) {
+                TagView(text: $0)
             }
             if project.displayCategories.count > ModrinthConstants.UIConstants.maxTags {
                 Text(

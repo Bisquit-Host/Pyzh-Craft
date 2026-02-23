@@ -3,7 +3,7 @@ import SwiftUI
 struct PlayerInfoSectionView: View {
     let player: Player?
     @Binding var currentModel: PlayerSkinService.PublicSkinInfo.SkinModel
-
+    
     var body: some View {
         VStack(spacing: 16) {
             if let player = player {
@@ -13,13 +13,15 @@ struct PlayerInfoSectionView: View {
                         src: player.avatarName,
                         size: 88
                     )
-                    Text(player.name).font(.title2.bold())
-
+                    
+                    Text(player.name)
+                        .font(.title2.bold())
+                    
                     HStack(spacing: 4) {
                         Text("Classic")
                             .font(.caption)
                             .foregroundColor(currentModel == .classic ? .primary : .secondary)
-
+                        
                         Toggle(isOn: Binding(
                             get: { currentModel == .slim },
                             set: { currentModel = $0 ? .slim : .classic }
@@ -27,9 +29,9 @@ struct PlayerInfoSectionView: View {
                             EmptyView()
                         }
                         .labelsHidden()
-                        .toggleStyle(SwitchToggleStyle())
+                        .toggleStyle(.switch)
                         .controlSize(.mini)
-
+                        
                         Text("Slim")
                             .font(.caption)
                             .foregroundColor(currentModel == .slim ? .primary : .secondary)

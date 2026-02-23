@@ -7,8 +7,9 @@ public struct AISettingsView: View {
         Form {
             LabeledContent("API Type") {
                 Picker("", selection: $aiSettings.selectedProvider) {
-                    ForEach(AIProvider.allCases) { provider in
-                        Text(provider.displayName).tag(provider)
+                    ForEach(AIProvider.allCases) {
+                        Text($0.displayName)
+                            .tag($0)
                     }
                 }
                 .labelsHidden()
@@ -41,7 +42,7 @@ public struct AISettingsView: View {
                     .buttonStyle(.plain)
                     .applyReplaceTransition()
                     
-                    InfoIconWithPopover(text: String(localized: "API key is stored locally only and will not be shared"))
+                    InfoIconWithPopover(text: "API key is stored locally only and will not be shared")
                 }
             }
             .labeledContentStyle(.custom)
@@ -69,7 +70,8 @@ public struct AISettingsView: View {
                             .frame(width: 180)
                             .fixedSize()
                             .focusable(false)
-                        InfoIconWithPopover(text: String(localized: "Custom API URL (leave empty to use default address)"))
+                        
+                        InfoIconWithPopover(text: "Custom API URL (leave empty to use default address)")
                     }
                 }
                 .labeledContentStyle(.custom)
@@ -84,7 +86,8 @@ public struct AISettingsView: View {
                         .frame(width: 180)
                         .fixedSize()
                         .focusable(false)
-                    InfoIconWithPopover(text: String(localized: "The model name to use (required)"))
+                    
+                    InfoIconWithPopover(text: "The model name to use (required)")
                 }
             }
             .labeledContentStyle(.custom)
@@ -98,6 +101,7 @@ public struct AISettingsView: View {
                         src: aiSettings.aiAvatarURL,
                         size: 42
                     )
+                    
                     // URL input box
                     HStack {
                         TextField("Enter MC skin URL (64x64)", text: $aiSettings.aiAvatarURL)
@@ -106,7 +110,8 @@ public struct AISettingsView: View {
                             .frame(maxWidth: 300)
                             .fixedSize()
                             .focusable(false)
-                        InfoIconWithPopover(text: String(localized: "MC skin direct link, must be 64x64 pixels"))
+                        
+                        InfoIconWithPopover(text: "MC skin direct link, must be 64x64 pixels")
                     }
                 }
             }

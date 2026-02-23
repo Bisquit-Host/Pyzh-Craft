@@ -31,9 +31,10 @@ struct StaticContributorCardView: View {
 
                 // Contribution tag line
                 HStack(spacing: 6) {
-                    ForEach(contributor.contributions, id: \.self) { contribution in
-                        ContributionTagView(contribution: contribution)
+                    ForEach(contributor.contributions, id: \.self) {
+                        ContributionTagView(contribution: $0)
                     }
+                    
                     Spacer()
                 }
             }

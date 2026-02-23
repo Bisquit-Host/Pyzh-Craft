@@ -97,7 +97,7 @@ struct DownloadItemView: View {
                 if case .downloading(let progress) = status {
                     VStack(alignment: .leading, spacing: 2) {
                         ProgressView(value: progress)
-                            .progressViewStyle(LinearProgressViewStyle())
+                            .progressViewStyle(.linear)
                     }
                 }
             }

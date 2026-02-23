@@ -11,9 +11,9 @@ public struct GeneralSettingsView: View {
     @State private var isCancellingLanguageChange = false
     @State private var selectedLanguage = LanguageManager.shared.selectedLanguage
     @State private var error: GlobalError?
-
+    
     public init() {}
-
+    
     public var body: some View {
         Form {
             LabeledContent("Select Language") {
@@ -49,22 +49,23 @@ public struct GeneralSettingsView: View {
                     Text("Changing language requires restarting the application to take effect")
                 }
             }.labeledContentStyle(.custom).padding(.bottom, 10)
-
+            
             LabeledContent("Appearance") {
                 ThemeSelectorView(selectedTheme: $themeManager.themeMode)
                     .fixedSize()
             }.labeledContentStyle(.custom)
-
+            
             LabeledContent("Interface style") {
                 Picker("", selection: $generalSettings.interfaceLayoutStyle) {
-                    ForEach(InterfaceLayoutStyle.allCases, id: \.self) { style in
-                        Text(style.localizedName).tag(style)
+                    ForEach(InterfaceLayoutStyle.allCases, id: \.self) {
+                        Text($0.localizedName)
+                            .tag($0)
                     }
                 }
                 .labelsHidden()
                 .fixedSize()
             }.labeledContentStyle(.custom).padding(.bottom, 10)
-
+            
             LabeledContent("Working Directory") {
                 DirectorySettingRow(
                     title: "Working Directory",
@@ -79,7 +80,7 @@ public struct GeneralSettingsView: View {
                         handleDirectoryImport(result)
                     }
             }.labeledContentStyle(.custom(alignment: .firstTextBaseline))
-
+            
             LabeledContent("Concurrent Downloads") {
                 HStack {
                     Slider(
@@ -119,20 +120,19 @@ public struct GeneralSettingsView: View {
                             .foregroundColor(.primary)
                     }
                     HStack(spacing: 8) {
-                        TextField(
-                            "",
-                            text: $generalSettings.gitProxyURL
-                        )
-                        .labelsHidden()
-                        .textFieldStyle(.roundedBorder)
-                        .frame(width: 200)
-                        .focusable(false)
-                        .disabled(!generalSettings.enableGitHubProxy)
+                        TextField("", text: $generalSettings.gitProxyURL)
+                            .labelsHidden()
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 200)
+                            .focusable(false)
+                            .disabled(!generalSettings.enableGitHubProxy)
+                        
                         Button("Reset to Default") {
                             generalSettings.gitProxyURL = "https://gh-proxy.com"
                         }
                         .disabled(!generalSettings.enableGitHubProxy)
-                        InfoIconWithPopover(text: String(localized: "When enabled, adds a proxy prefix to requests for github.com and raw.githubusercontent.com."))
+                        
+                        InfoIconWithPopover(text: "When enabled, adds a proxy prefix to requests for github.com and raw.githubusercontent.com.")
                     }
                 }
             }.labeledContentStyle(.custom(alignment: .firstTextBaseline)).padding(.top, 10)
@@ -151,9 +151,9 @@ public struct GeneralSettingsView: View {
             }
         }
     }
-
+    
     // MARK: - Private Methods
-
+    
     /// Safely reset the working directory
     private func resetWorkingDirectorySafely() {
         do {
@@ -163,12 +163,12 @@ public struct GeneralSettingsView: View {
                     level: .popup
                 )
             }
-
+            
             // Make sure the directory exists
             try FileManager.default.createDirectory(at: supportDir, withIntermediateDirectories: true)
-
+            
             generalSettings.launcherWorkingDirectory = supportDir.path
-
+            
             Logger.shared.info("Working directory has been reset to: \(supportDir.path)")
         } catch {
             let globalError = GlobalError.from(error)
@@ -176,7 +176,7 @@ public struct GeneralSettingsView: View {
             self.error = globalError
         }
     }
-
+    
     /// Processing catalog import results
     private func handleDirectoryImport(_ result: Result<[URL], Error>) {
         switch result {
@@ -191,10 +191,10 @@ public struct GeneralSettingsView: View {
                             level: .notification
                         )
                     }
-
+                    
                     generalSettings.launcherWorkingDirectory = url.path
                     // GameRepository observers will automatically reload, no need to manually loadGames
-
+                    
                     Logger.shared.info("The working directory has been set to: \(url.path)")
                 } catch {
                     let globalError = GlobalError.from(error)
@@ -212,7 +212,7 @@ public struct GeneralSettingsView: View {
             self.error = globalError
         }
     }
-
+    
     /// Safely restart apps
     private func restartAppSafely() {
         do {
@@ -234,13 +234,13 @@ private func restartApp() throws {
             level: .popup
         )
     }
-
+    
     let task = Process()
     task.executableURL = URL(fileURLWithPath: "/usr/bin/open")
     task.arguments = [appURL.path]
-
+    
     try task.run()
-
+    
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
         NSApplication.shared.terminate(nil)
     }
@@ -249,14 +249,11 @@ private func restartApp() throws {
 // MARK: - Theme Selector View
 struct ThemeSelectorView: View {
     @Binding var selectedTheme: ThemeMode
-
+    
     var body: some View {
         HStack(spacing: 16) {
             ForEach(ThemeMode.allCases, id: \.self) { theme in
-                ThemeOptionView(
-                    theme: theme,
-                    isSelected: selectedTheme == theme
-                ) {
+                ThemeOptionView(theme: theme, isSelected: selectedTheme == theme) {
                     selectedTheme = theme
                 }
             }
@@ -269,7 +266,7 @@ struct ThemeOptionView: View {
     let theme: ThemeMode
     let isSelected: Bool
     let onTap: () -> Void
-
+    
     var body: some View {
         VStack(spacing: 12) {
             // theme icon
@@ -277,12 +274,12 @@ struct ThemeOptionView: View {
                 RoundedRectangle(cornerRadius: 6)
                     .stroke(isSelected ? Color.accentColor : Color.clear, lineWidth: isSelected ? 3 : 0)
                     .frame(width: 61, height: 41)
-
+                
                 // Window icon content
                 ThemeWindowIcon(theme: theme)
                     .frame(width: 60, height: 40)
             }
-
+            
             // Hashtag
             Text(theme.localizedName)
                 .font(.caption)
@@ -298,14 +295,14 @@ struct ThemeOptionView: View {
 // MARK: - Theme Window Icon
 struct ThemeWindowIcon: View {
     let theme: ThemeMode
-
+    
     var body: some View {
         Image(iconName)
             .resizable()
             .frame(width: 60, height: 40)
             .cornerRadius(6)
     }
-
+    
     private var iconName: String {
         let isSystem26 = ProcessInfo.processInfo.operatingSystemVersion.majorVersion == 26
         switch theme {

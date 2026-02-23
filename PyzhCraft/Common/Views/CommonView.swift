@@ -125,6 +125,7 @@ struct PathBreadcrumbView: View {
                         .foregroundColor(.primary)
                         .padding(.horizontal, 6)
                 }
+                
                 segmentView(idx: idx)
             }
             // Ellipsis
@@ -136,6 +137,7 @@ struct PathBreadcrumbView: View {
                         .foregroundColor(.primary)
                         .padding(.horizontal, 6)
                 }
+                
                 Text("…")
                     .font(.body)
                     .foregroundColor(.primary)
@@ -270,7 +272,7 @@ struct InfoIconWithPopover<Content: View>: View {
 extension InfoIconWithPopover {
     /// Convenience initialization method for creating InfoIconWithPopover using string literals
     init(
-        text: String,
+        text: LocalizedStringKey,
         iconSize: CGFloat = 14,
         delay: Double = 0.5
     ) where Content == AnyView {

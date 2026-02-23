@@ -91,9 +91,9 @@ struct LauncherImportView: View {
                     .foregroundColor(.secondary)
 
                 Picker("", selection: $viewModel.selectedLauncherType) {
-                    ForEach(ImportLauncherType.allCases, id: \.self) { launcherType in
-                        Text(launcherType.rawValue)
-                            .tag(launcherType)
+                    ForEach(ImportLauncherType.allCases, id: \.self) {
+                        Text($0.rawValue)
+                            .tag($0)
                     }
                 }
                 .labelsHidden()

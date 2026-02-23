@@ -220,11 +220,12 @@ struct GameCreationView: View {
                 .foregroundColor(.primary)
             Picker("", selection: $viewModel.selectedModLoader) {
                 ForEach(AppConstants.modLoaders, id: \.self) {
-                    Text($0).tag($0)
+                    Text($0)
+                        .tag($0)
                 }
             }
             .labelsHidden()
-            .pickerStyle(MenuPickerStyle())
+            .pickerStyle(.menu)
             .disabled(viewModel.gameSetupService.downloadState.isDownloading)
         }
     }
@@ -235,12 +236,13 @@ struct GameCreationView: View {
                 .font(.subheadline)
                 .foregroundColor(.primary)
             Picker("", selection: $viewModel.selectedLoaderVersion) {
-                ForEach(viewModel.availableLoaderVersions, id: \.self) { version in
-                    Text(version).tag(version)
+                ForEach(viewModel.availableLoaderVersions, id: \.self) {
+                    Text($0)
+                        .tag($0)
                 }
             }
             .labelsHidden()
-            .pickerStyle(MenuPickerStyle())
+            .pickerStyle(.menu)
             .disabled(viewModel.gameSetupService.downloadState.isDownloading || viewModel.availableLoaderVersions.isEmpty)
         }
     }

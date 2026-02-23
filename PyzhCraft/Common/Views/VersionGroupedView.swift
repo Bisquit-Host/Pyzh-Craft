@@ -45,8 +45,8 @@ struct VersionGroupedView: View {
 
         ScrollView {
             VStack(alignment: .leading, spacing: Constants.groupSpacing) {
-                ForEach(sortedKeys, id: \.self) { key in
-                    versionGroupView(key: key, items: groups[key] ?? [])
+                ForEach(sortedKeys, id: \.self) {
+                    versionGroupView(key: $0, items: groups[$0] ?? [])
                 }
             }
             .padding()
