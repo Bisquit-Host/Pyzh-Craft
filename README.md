@@ -6,20 +6,18 @@
   **✨ A modern Minecraft launcher for macOS ✨**
   
   [![Pyzh Craft](https://img.shields.io/badge/Swift%20Craft%20Launcher-SCL-orange.svg?logo=swift)](https://github.com/suhang12332/Swift-Craft-Launcher)
-  [![Swift](https://img.shields.io/badge/Swift-5.5+-red.svg?logo=swift)](https://swift.org/)
+  [![Swift](https://img.shields.io/badge/Swift-5.5+-red.svg?logo=swift)](https://swift.org)
 
   [![QQ Group](https://img.shields.io/badge/QQ%20Group-1057517524-blue.svg?logo=tencentqq)](https://qm.qq.com/cgi-bin/qm/qr?k=1057517524)
   [![Discord](https://img.shields.io/badge/Discord-bule.svg?logo=discord)](https://discord.gg/gYESVa3CZd)
 
   [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg?logo=gnu)](https://www.gnu.org/licenses/agpl-3.0)
   [![latest-release](https://img.shields.io/github/v/release/suhang12332/Swift-Craft-Launcher?label=latest-release&logo=github)](https://github.com/suhang12332/Swift-Craft-Launcher/releases/latest)
-  [![macOS](https://img.shields.io/badge/macOS-14.0+-blue.svg?logo=apple)](https://developer.apple.com/macos/)
+  [![macOS](https://img.shields.io/badge/macOS-14.0+-blue.svg?logo=apple)](https://developer.apple.com/macos)
   [![Homebrew](https://img.shields.io/badge/Homebrew-available-green.svg?logo=homebrew)](https://formulae.brew.sh/cask/swiftcraft-launcher)
   [![Contributors](https://img.shields.io/github/contributors/suhang12332/Swift-Craft-Launcher?color=ee8449&logo=githubsponsors)](https://github.com/suhang12332/Swift-Craft-Launcher/graphs/contributors)
   
-  🌐 [Website](https://suhang12332.github.io/Swift-Craft-Launcher-Assets/web/) • 💾 [Download](https://github.com/suhang12332/Swift-Craft-Launcher/releases/latest) • 📚 [Documentation](https://suhang12332.github.io/Swift-Craft-Launcher-Assets/web/)
-  
-  **🇬🇧 English** | [🇨🇳 简体中文](doc/README_zh-CN.md) | [🇭🇰 繁體中文](doc/README_zh-TW.md)
+  🌐 [Website](https://suhang12332.github.io/Swift-Craft-Launcher-Assets/web) • 💾 [Download](https://github.com/suhang12332/Swift-Craft-Launcher/releases/latest) • 📚 [Documentation](https://suhang12332.github.io/Swift-Craft-Launcher-Assets/web)
 </div>
 
 ---
@@ -29,7 +27,7 @@
 
 ## 🎯 Overview
 
-Pyzh Craft is a native macOS Minecraft launcher 🍎 built with SwiftUI, offering a streamlined and efficient gaming experience. Designed for modern macOS systems, it provides comprehensive mod loader support, Microsoft account authentication, and intuitive game management.
+Pyzh Craft is a native macOS Minecraft launcher 🍎 built with SwiftUI, offering a streamlined and efficient gaming experience. Designed for modern macOS systems, it provides comprehensive mod loader support, Microsoft account authentication, and intuitive game management
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/suhang12332/Swift-Craft-Launcher-Assets/refs/heads/main/imagebed/readme/screenshot2026-01-29-01.17.31.gif" alt="PyzhCraft Screenshot" width="800">
@@ -77,9 +75,9 @@ brew install --cask swift-craft-launcher
 > **💡 Tip**: We created a dedicated [Homebrew Tap](https://github.com/suhang12332/homebrew-swiftcraftlauncher) for Pyzh Craft
 
 ### 💾 Pre-built Release
-Download the latest version from [GitHub Releases](https://github.com/suhang12332/Swift-Craft-Launcher/releases/latest).
+Download the latest version from [GitHub Releases](https://github.com/suhang12332/Swift-Craft-Launcher/releases/latest)
 
-> **⚠️ Note**: The current available downloads are test versions. Stable releases are coming soon.
+> **⚠️ Note**: The current available downloads are test versions. Stable releases are coming soon
 
 ### ❓ Frequently Asked Questions
 Please visit [FAQ](doc/FAQ.md)
@@ -113,12 +111,9 @@ Please visit [FAQ](doc/FAQ.md)
 
 ## 📜 License
 
-This project is licensed under the GNU Affero General Public License v3.0. See [LICENSE](LICENSE) for details.
+This project is licensed under the GNU Affero General Public License v3.0. See [LICENSE](LICENSE) for details
 
-**Additional Terms**: This project includes additional terms requiring source attribution and prohibiting the use of the same software name. See:
-- [简体中文](doc/ADDITIONAL_TERMS.md)
-- [繁體中文](doc/ADDITIONAL_TERMS_zh-TW.md)
-- [English](doc/ADDITIONAL_TERMS_en.md)
+**Additional Terms**: This project includes additional terms requiring source attribution and prohibiting the use of the same software name. See [English terms](doc/ADDITIONAL_TERMS_en.md)
 
 ## 🤝 Community & Support
 

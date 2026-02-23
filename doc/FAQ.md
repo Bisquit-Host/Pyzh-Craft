@@ -1,53 +1,59 @@
-## 📖 FAQ
-[ 此文档正在初步编写，尚未收录很多常见问题，如果您发现了问题并知道解决方法，请向本项目提交PR ](https://github.com/suhang12332/Swift-Craft-Launcher/pulls>)
+## FAQ
 
-
-### ❓ PyzhCraft 是什么？
-
-PyzhCraft 是一个使用 Swift 编写的 Minecraft 启动器项目，主要用于学习、开发和社区交流。
+This document is still evolving
+If you find a problem and know the fix, open a pull request: [Pull Requests](https://github.com/suhang12332/Swift-Craft-Launcher/pulls)
 
 ---
 
-### ❓ 我需要什么环境？
+### What is PyzhCraft
+
+PyzhCraft is a Swift-based Minecraft launcher project focused on development, learning, and community collaboration
+
+---
+
+### What environment is required
 
 - macOS 14+
 
 ---
-### 软件常见问题
-Q：无法添加账号？(使用过`b2.0.0`以前的版本)
 
-A：在终端执行`defaults delete com.su.code.PyzhCraft savedPlayers` 后重启启动器即可
+### Common software issues
 
-Q：无法刷新出资源列表（模组、数据包…），无法安装资源？
+Q: I cannot add an account (after using versions older than `b2.0.0`)
 
-A：检查步骤（请依次执行）
-  1.检查网络环境是否能访问modrinth；
-  2.是否已安装游戏版本
+A: Run this command in Terminal, then restart the launcher:
 
-Q：无法安装游戏版本？
+```bash
+defaults delete com.su.code.PyzhCraft savedPlayers
+```
 
-A：请添加账号
+Q: The resource list (mods, datapacks, and more) does not load, or resource install fails
 
+A: Check these in order:
+1. Verify your network can access Modrinth
+2. Verify a game version is installed
 
----
+Q: I cannot install a game version
 
-### ❓ 遇到 Bug 怎么办？
-
-* 先看看 Issue 有没有类似问题
-* 没有的话，可以开一个新的 Issue，最好附上日志和截图 📷
-
-### ❓ 我可以贡献代码吗？
-
-当然可以！ 🎉
-
-* 请先阅读 [贡献指南](./CONTRIBUTING.md)
-* Fork 仓库 → 建立分支 → 提交 PR
-
-### ❓ 如何联系维护者？
-
-* 进入我们的 QQ 群（推荐）
-* 通过 GitHub Issue
+A: Add an account first
 
 ---
 
-✨ 如果觉得 FAQ 有遗漏，可以提 PR 来补充。
+### What should I do if I find a bug
+
+- Search existing issues first
+- If no match exists, open a new issue and include logs/screenshots
+
+### Can I contribute code
+
+Yes
+Read the [Contributing Guide](../CONTRIBUTING.md), then fork, create a branch, and open a pull request
+
+### How can I contact maintainers
+
+- QQ group (recommended)
+- GitHub issues
+
+---
+
+If something is missing from this FAQ, contributions are welcome
