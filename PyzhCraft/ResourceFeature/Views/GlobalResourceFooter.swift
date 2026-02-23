@@ -75,7 +75,7 @@ struct GlobalResourceFooter: View {
                 try await downloadMainOnlyThrowing(game: game)
             } catch {
                 let globalError = GlobalError.from(error)
-                Logger.shared.error("下载主资源失败: \(globalError.chineseMessage)")
+                Logger.shared.error("Failed to download main resource: \(globalError.chineseMessage)")
                 GlobalErrorHandler.shared.handle(globalError)
             }
             
@@ -120,7 +120,7 @@ struct GlobalResourceFooter: View {
             } catch {
                 let globalError = GlobalError.from(error)
                 Logger.shared.error(
-                    "手动下载所有依赖项失败: \(globalError.chineseMessage)"
+                    "Manual download of all dependencies failed: \(globalError.chineseMessage)"
                 )
                 GlobalErrorHandler.shared.handle(globalError)
             }
@@ -172,7 +172,7 @@ struct GlobalResourceFooter: View {
                 try await downloadResourceThrowing(game: game)
             } catch {
                 let globalError = GlobalError.from(error)
-                Logger.shared.error("下载资源失败: \(globalError.chineseMessage)")
+                Logger.shared.error("Failed to download resource: \(globalError.chineseMessage)")
                 GlobalErrorHandler.shared.handle(globalError)
             }
             _ = await MainActor.run {

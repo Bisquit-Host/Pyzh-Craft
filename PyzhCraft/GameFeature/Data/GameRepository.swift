@@ -118,7 +118,7 @@ class GameRepository: ObservableObject {
             }
         }
 
-        Logger.shared.info("成功添加游戏: \(game.gameName) (工作路径: \(workingPath))")
+        Logger.shared.info("Game added successfully: \(game.gameName) (working path: \(workingPath))")
     }
 
     func addGameSilently(_ game: GameVersionInfo) {
@@ -151,7 +151,7 @@ class GameRepository: ObservableObject {
             gamesByWorkingPath[workingPath]?.removeAll { $0.id == id }
         }
 
-        Logger.shared.info("成功删除游戏: \(game.gameName) (工作路径: \(workingPath))")
+        Logger.shared.info("Successfully deleted game: \(game.gameName) (working path: \(workingPath))")
     }
 
     func deleteGameSilently(id: String) {
@@ -194,7 +194,7 @@ class GameRepository: ObservableObject {
             }
         }
 
-        Logger.shared.info("成功更新游戏: \(game.gameName) (工作路径: \(workingPath))")
+        Logger.shared.info("Successfully updated game: \(game.gameName) (working path: \(workingPath))")
     }
 
     func updateGameSilently(_ game: GameVersionInfo) -> Bool {
@@ -232,7 +232,7 @@ class GameRepository: ObservableObject {
             }
         }
 
-        Logger.shared.info("成功更新游戏最后游玩时间: \(game.gameName) (工作路径: \(workingPath))")
+        Logger.shared.info("Successfully updated game last play time: \(game.gameName) (working path: \(workingPath))")
     }
 
     func updateGameLastPlayedSilently(id: String, lastPlayed: Date = Date()) -> Bool {
@@ -256,7 +256,7 @@ class GameRepository: ObservableObject {
 
         game.javaPath = javaPath
         try await updateGame(game)
-        Logger.shared.info("成功更新游戏 Java 路径: \(game.gameName)")
+        Logger.shared.info("Successfully updated game Java path: \(game.gameName)")
     }
 
     func updateJavaPathSilently(id: String, javaPath: String) -> Bool {
@@ -280,7 +280,7 @@ class GameRepository: ObservableObject {
 
         game.jvmArguments = jvmArguments
         try await updateGame(game)
-        Logger.shared.info("成功更新游戏 JVM 参数: \(game.gameName)")
+        Logger.shared.info("Successfully updated game JVM parameters: \(game.gameName)")
     }
 
     func updateJvmArgumentsSilently(id: String, jvmArguments: String) -> Bool {
@@ -313,7 +313,7 @@ class GameRepository: ObservableObject {
         game.xms = xms
         game.xmx = xmx
         try await updateGame(game)
-        Logger.shared.info("成功更新游戏内存大小: \(game.gameName)")
+        Logger.shared.info("Successfully updated game memory size: \(game.gameName)")
     }
 
     func updateMemorySizeSilently(id: String, xms: Int, xmx: Int) -> Bool {
@@ -354,7 +354,7 @@ class GameRepository: ObservableObject {
     // Asynchronously scan the mods directory of all games
     private func scanAllGamesModsDirectory() async {
         let games = games
-        Logger.shared.info("开始扫描 \(games.count) 个游戏的 mods 目录")
+        Logger.shared.info("Start scanning the mods directories of \(games.count) games")
 
         // Scan all games concurrently
         await withTaskGroup(of: Void.self) { group in
@@ -365,7 +365,7 @@ class GameRepository: ObservableObject {
             }
         }
 
-        Logger.shared.info("完成所有游戏的 mods 目录扫描")
+        Logger.shared.info("Complete mods directory scan for all games")
     }
 
     // Only load games in the current working path (database and directory scanning are performed in the background to avoid blocking the main thread)
@@ -389,7 +389,7 @@ class GameRepository: ObservableObject {
                     localGameNames = []
                 }
             } catch {
-                Logger.shared.warning("无法读取工作路径的游戏目录: \(workingPath), 错误: \(error.localizedDescription)")
+                Logger.shared.warning("Unable to read game directory from working path: \(workingPath), error: \(error.localizedDescription)")
                 localGameNames = []
             }
             let valid = games.filter { localGameNames.contains($0.gameName) }
@@ -400,6 +400,6 @@ class GameRepository: ObservableObject {
             gamesByWorkingPath = [workingPath: validGames]
         }
 
-        Logger.shared.info("成功加载 \(validGames.count) 个游戏（工作路径: \(pathForLog)）")
+        Logger.shared.info("Successfully loaded \(validGames.count) games (working path: \(pathForLog))")
     }
 }

@@ -80,11 +80,11 @@ struct ModPackExportSheet: View {
         ) { result in
             switch result {
             case .success(let url):
-                Logger.shared.info("整合包已保存到: \(url.path)")
+                Logger.shared.info("The integration package has been saved to: \(url.path)")
                 viewModel.handleSaveSuccess()
                 dismiss()
             case .failure(let error):
-                Logger.shared.error("保存文件失败: \(error.localizedDescription)")
+                Logger.shared.error("Failed to save file: \(error.localizedDescription)")
                 viewModel.handleSaveFailure(error: error.localizedDescription)
             }
             exportDocument = nil
@@ -252,7 +252,7 @@ struct ModPackExportSheet: View {
                     self.isExporting = true
                 }
             } catch {
-                Logger.shared.error("读取临时文件失败: \(error.localizedDescription)")
+                Logger.shared.error("Failed to read temporary file: \(error.localizedDescription)")
                 viewModel.handleSaveFailure(error: error.localizedDescription)
             }
         }

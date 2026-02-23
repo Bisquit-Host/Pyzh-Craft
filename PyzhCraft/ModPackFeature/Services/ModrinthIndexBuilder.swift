@@ -28,7 +28,7 @@ enum ModrinthIndexBuilder {
             gameInfo: gameInfo
         )
 
-        Logger.shared.info("导出整合包 - 加载器类型: \(loaderType), 版本: \(loaderVersion ?? "未找到")")
+        Logger.shared.info("Export modpack - Loader type: \(loaderType), Version: \(loaderVersion ?? "not found")")
 
         // Build dependency dictionary
         let dependencies = buildDependencies(

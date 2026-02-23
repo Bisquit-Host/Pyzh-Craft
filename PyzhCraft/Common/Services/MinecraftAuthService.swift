@@ -22,25 +22,25 @@ class MinecraftAuthService: ObservableObject {
         authState = .waitingForBrowserAuth
         deviceCodeInfo = nil
         liveCookieHeader = nil
-        Logger.shared.info("Microsoft 设备码登录开始")
+        Logger.shared.info("Microsoft device code sign-in starts")
 
         do {
             let deviceCode = try await requestDeviceCode()
             deviceCodeInfo = deviceCode
             openDeviceCodePage(for: deviceCode)
-            Logger.shared.info("已获取设备码，等待用户授权")
+            Logger.shared.info("Device code has been obtained, waiting for user authorization")
 
             let tokenResponse = try await pollForDeviceCodeToken(deviceCode: deviceCode)
-            Logger.shared.info("设备码轮询成功，开始验证 Minecraft 账户")
+            Logger.shared.info("Device code polling successful, Minecraft account verification begins")
             try await completeAuthentication(tokenResponse: tokenResponse)
         } catch is CancellationError {
-            Logger.shared.info("用户取消了 Microsoft 认证")
+            Logger.shared.info("User canceled Microsoft certification")
             isLoading = false
             deviceCodeInfo = nil
             authState = .notAuthenticated
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Minecraft 认证失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Minecraft authentication failed: \(globalError.chineseMessage)")
             isLoading = false
             deviceCodeInfo = nil
             authState = .error(globalError.chineseMessage)
@@ -77,7 +77,7 @@ class MinecraftAuthService: ObservableObject {
 
         guard httpResponse.statusCode == 200 else {
             if let oauthError = parseOAuthErrorResponse(from: data) {
-                Logger.shared.error("Microsoft 设备码请求失败: \(oauthError.error)")
+                Logger.shared.error("Microsoft device code request failed: \(oauthError.error)")
             }
             throw GlobalError.authentication(
                 i18nKey: "Authentication failed",
@@ -87,7 +87,7 @@ class MinecraftAuthService: ObservableObject {
 
         do {
             let response = try JSONDecoder().decode(MicrosoftDeviceCodeResponse.self, from: data)
-            Logger.shared.debug("设备码获取成功，过期时间: \(response.expiresIn)s")
+            Logger.shared.debug("Device code obtained successfully, expiration time: \(response.expiresIn)s")
             return response
         } catch {
             throw GlobalError.validation(
@@ -117,12 +117,12 @@ class MinecraftAuthService: ObservableObject {
             switch pollingState {
             case .waiting:
                 if attempt % 5 == 0 {
-                    Logger.shared.debug("设备码轮询中，等待用户完成授权")
+                    Logger.shared.debug("Device code polling is in progress, waiting for the user to complete authorization")
                 }
                 continue
             case .slowDown:
                 interval += 5
-                Logger.shared.debug("设备码轮询要求减速，新的轮询间隔: \(interval)s")
+                Logger.shared.debug("Device code polling requires slowing down, new polling interval: \(interval)s")
             case .declined:
                 throw CancellationError()
             case .expired:
@@ -179,13 +179,13 @@ class MinecraftAuthService: ObservableObject {
             case "expired_token", "bad_verification_code":
                 return .expired
             default:
-                Logger.shared.error("Microsoft 设备码轮询失败: \(oauthError.error)")
+                Logger.shared.error("Microsoft device code polling failed: \(oauthError.error)")
                 return .failed
             }
         }
 
         guard httpResponse.statusCode == 200 else {
-            Logger.shared.error("Microsoft 设备码轮询失败: HTTP \(httpResponse.statusCode)")
+            Logger.shared.error("Microsoft device code polling failed: HTTP \(httpResponse.statusCode)")
             return .failed
         }
 
@@ -211,7 +211,7 @@ class MinecraftAuthService: ObservableObject {
         try await checkMinecraftOwnership(accessToken: minecraftToken)
 
         let minecraftTokenExpiration = JWTDecoder.getMinecraftTokenExpiration(from: minecraftToken)
-        Logger.shared.info("Minecraft token过期时间: \(minecraftTokenExpiration)")
+        Logger.shared.info("Minecraft token expiration time: \(minecraftTokenExpiration)")
 
         let profile = try await getMinecraftProfileThrowing(
             accessToken: minecraftToken,
@@ -219,7 +219,7 @@ class MinecraftAuthService: ObservableObject {
             refreshToken: tokenResponse.refreshToken ?? ""
         )
 
-        Logger.shared.info("Minecraft 认证成功，用户: \(profile.name)")
+        Logger.shared.info("Minecraft authentication successful, user: \(profile.name)")
         isLoading = false
         deviceCodeInfo = nil
         authState = .authenticated(profile: profile)
@@ -270,7 +270,7 @@ class MinecraftAuthService: ObservableObject {
             return try await getXboxLiveTokenThrowing(accessToken: accessToken)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("获取 Xbox Live 令牌失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to obtain Xbox Live token: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return nil
         }
@@ -320,7 +320,7 @@ class MinecraftAuthService: ObservableObject {
             return try await getMinecraftTokenThrowing(xboxToken: xboxToken, uhs: uhs)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("获取 Minecraft 访问令牌失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to obtain Minecraft access token: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return nil
         }
@@ -362,7 +362,7 @@ class MinecraftAuthService: ObservableObject {
         }
 
         // Get Minecraft access token
-        Logger.shared.debug("开始获取 Minecraft 访问令牌")
+        Logger.shared.debug("Start getting your Minecraft access token")
         let minecraftUrl = URLConfig.API.Authentication.minecraftLogin
 
         let minecraftBody: [String: Any] = [
@@ -390,7 +390,7 @@ class MinecraftAuthService: ObservableObject {
 
         guard minecraftHttpResponse.statusCode == 200 else {
             let statusCode = minecraftHttpResponse.statusCode
-            Logger.shared.error("Minecraft 认证失败: HTTP \(statusCode)")
+            Logger.shared.error("Minecraft authentication failed: HTTP \(statusCode)")
 
             // Provide more specific error information based on different status codes
             switch statusCode {
@@ -559,7 +559,7 @@ extension MinecraftAuthService {
 
         do {
             let refreshedPlayer = try await validateAndRefreshPlayerTokenThrowing(for: player)
-            Logger.shared.info("成功刷新玩家 \(player.name) 的 Token")
+            Logger.shared.info("Successfully refreshed player \(player.name)'s Token")
             return .success(refreshedPlayer)
         } catch let error as GlobalError {
             return .failure(error)
@@ -590,11 +590,11 @@ extension MinecraftAuthService {
         let isTokenExpired = await isTokenExpiredBasedOnTime(for: player)
 
         if !isTokenExpired {
-            Logger.shared.debug("玩家 \(player.name) 的Token尚未过期，无需刷新")
+            Logger.shared.debug("Player \(player.name)'s Token has not expired and does not need to be refreshed")
             return player
         }
 
-        Logger.shared.info("玩家 \(player.name) 的Token已过期，尝试刷新")
+        Logger.shared.info("Player \(player.name)'s Token has expired, try to refresh it")
 
         // Token expires, try to refresh using refresh token
         guard !player.authRefreshToken.isEmpty else {
@@ -670,13 +670,13 @@ extension MinecraftAuthService {
            let error = errorResponse["error"] as? String {
             switch error {
             case "invalid_grant":
-                Logger.shared.error("刷新令牌已过期或无效")
+                Logger.shared.error("The refresh token has expired or is invalid")
                 throw GlobalError.authentication(
                     i18nKey: "Refresh token is expired or invalid",
                     level: .notification
                 )
             default:
-                Logger.shared.error("刷新令牌错误: \(error)")
+                Logger.shared.error("Refresh token error: \(error)")
                 throw GlobalError.authentication(
                     i18nKey: "Refresh token error",
                     level: .notification
@@ -685,7 +685,7 @@ extension MinecraftAuthService {
         }
 
         guard httpResponse.statusCode == 200 else {
-            Logger.shared.error("刷新访问令牌失败: HTTP \(httpResponse.statusCode)")
+            Logger.shared.error("Failed to refresh access token: HTTP \(httpResponse.statusCode)")
             throw GlobalError.download(
                 i18nKey: "Refresh token request failed",
                 level: .notification

@@ -23,7 +23,7 @@ class AIChatManager: ObservableObject {
                 i18nKey: "OpenAI service not configured, please check API Key",
                 level: .notification
             )
-            Logger.shared.error("AI 服务未配置，请检查 API Key")
+            Logger.shared.error("AI service is not configured, please check API Key")
             await MainActor.run {
                 chatState.isSending = false
                 GlobalErrorHandler.shared.handle(error)
@@ -36,7 +36,7 @@ class AIChatManager: ObservableObject {
                 i18nKey: "AI model not configured, please fill in the model name in settings",
                 level: .notification
             )
-            Logger.shared.error("AI 模型未配置，请在设置中填写模型名称")
+            Logger.shared.error("The AI model is not configured, please fill in the model name in the settings")
             await MainActor.run {
                 chatState.isSending = false
                 GlobalErrorHandler.shared.handle(error)
@@ -74,7 +74,7 @@ class AIChatManager: ObservableObject {
 //                try await sendGeminiMessage(messages: allMessages, chatState: chatState)
             }
         } catch {
-            Logger.shared.error("发送消息失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to send message: \(error.localizedDescription)")
             await MainActor.run {
                 chatState.isSending = false
 
@@ -142,7 +142,7 @@ class AIChatManager: ObservableObject {
 
         guard (200...299).contains(httpResponse.statusCode) else {
             let errorData = try await asyncBytes.reduce(into: Data()) { $0.append($1) }
-            let errorMessage = String(data: errorData, encoding: .utf8) ?? "未知错误"
+            let errorMessage = String(data: errorData, encoding: .utf8) ?? "Unknown error"
             Logger.shared.error("AI API error response: \(errorMessage)")
             throw GlobalError(
                 type: .network,
@@ -272,7 +272,7 @@ class AIChatManager: ObservableObject {
 
         guard (200...299).contains(httpResponse.statusCode) else {
             let errorData = try await asyncBytes.reduce(into: Data()) { $0.append($1) }
-            let errorMessage = String(data: errorData, encoding: .utf8) ?? "未知错误"
+            let errorMessage = String(data: errorData, encoding: .utf8) ?? "Unknown error"
             Logger.shared.error("AI API error response: \(errorMessage)")
             throw GlobalError(
                 type: .network,
@@ -385,7 +385,7 @@ class AIChatManager: ObservableObject {
 
         guard (200...299).contains(httpResponse.statusCode) else {
             let errorData = try await asyncBytes.reduce(into: Data()) { $0.append($1) }
-            let errorMessage = String(data: errorData, encoding: .utf8) ?? "未知错误"
+            let errorMessage = String(data: errorData, encoding: .utf8) ?? "Unknown error"
             Logger.shared.error("AI API error response: \(errorMessage)")
             throw GlobalError(
                 type: .network,

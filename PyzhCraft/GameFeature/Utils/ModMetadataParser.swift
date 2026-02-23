@@ -12,7 +12,7 @@ enum ModMetadataParser {
             completion(result.0, result.1)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("解析 mod 元数据失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to parse mod metadata: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             completion(nil, nil)
         }
@@ -46,12 +46,12 @@ enum ModMetadataParser {
                 entry: entry
             ) {
                 Logger.shared.info(
-                    "ModMetadataParser: 解析 mods.toml 成功: \(modid) \(version)"
+                    "ModMetadataParser: Parsed mods.toml successfully: \(modid) \(version)"
                 )
                 return (modid, version)
             } else {
                 Logger.shared.warning(
-                    "ModMetadataParser: 解析 mods.toml 失败: \(fileURL.lastPathComponent)"
+                    "ModMetadataParser: Failed to parse mods.toml: \(fileURL.lastPathComponent)"
                 )
             }
         }
@@ -63,12 +63,12 @@ enum ModMetadataParser {
                 entry: entry
             ) {
                 Logger.shared.info(
-                    "ModMetadataParser: 解析 fabric.mod.json 成功: \(modid) \(version)"
+                    "ModMetadataParser: Parsed fabric.mod.json successfully: \(modid) \(version)"
                 )
                 return (modid, version)
             } else {
                 Logger.shared.warning(
-                    "ModMetadataParser: 解析 fabric.mod.json 失败: \(fileURL.lastPathComponent)"
+                    "ModMetadataParser: Failed to parse fabric.mod.json: \(fileURL.lastPathComponent)"
                 )
             }
         }
@@ -80,18 +80,18 @@ enum ModMetadataParser {
                 entry: entry
             ) {
                 Logger.shared.info(
-                    "ModMetadataParser: 解析 mcmod.info 成功: \(modid) \(version)"
+                    "ModMetadataParser: Parsed mcmod.info successfully: \(modid) \(version)"
                 )
                 return (modid, version)
             } else {
                 Logger.shared.warning(
-                    "ModMetadataParser: 解析 mcmod.info 失败: \(fileURL.lastPathComponent)"
+                    "ModMetadataParser: Failed to parse mcmod.info: \(fileURL.lastPathComponent)"
                 )
             }
         }
 
         Logger.shared.warning(
-            "ModMetadataParser: 未能识别任何元数据: \(fileURL.lastPathComponent)"
+            "ModMetadataParser: Unable to recognize any metadata: \(fileURL.lastPathComponent)"
         )
         return (nil, nil)
     }

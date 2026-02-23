@@ -430,7 +430,7 @@ struct ModPackDownloadSheet: View {
                     },
                     onError: { error, message in
                         Task { @MainActor in
-                            Logger.shared.error("游戏设置失败: \(message)")
+                            Logger.shared.error("Game setup failed: \(message)")
                             GlobalErrorHandler.shared.handle(error)
                         }
                         continuation.resume(returning: false)
@@ -491,7 +491,7 @@ struct ModPackDownloadSheet: View {
             let allFiles = try InstanceFileCopier.getAllFiles(in: overridesPath)
             return allFiles.count
         } catch {
-            Logger.shared.error("计算 overrides 文件总数失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to calculate total number of overrides files: \(error.localizedDescription)")
             return 0
         }
     }
@@ -511,7 +511,7 @@ struct ModPackDownloadSheet: View {
                 )
             } catch {
                 Logger.shared.error(
-                    "创建目录失败: \(dir.path), 错误: \(error.localizedDescription)"
+                    "Failed to create directory: \(dir.path), error: \(error.localizedDescription)"
                 )
                 GlobalErrorHandler.shared.handle(
                     GlobalError.fileSystem(
@@ -572,12 +572,12 @@ struct ModPackDownloadSheet: View {
     
     private func handleInstallationResult(success: Bool, gameName: String) {
         if success {
-            Logger.shared.info("整合包依赖安装完成: \(gameName)")
+            Logger.shared.info("Integration package dependency installation completed: \(gameName)")
             // Clean up index data no longer needed to free up memory
             viewModel.clearParsedIndexInfo()
             dismiss()
         } else {
-            Logger.shared.error("整合包依赖安装失败: \(gameName)")
+            Logger.shared.error("Integration package dependency installation failed: \(gameName)")
             // Clean created game folders
             Task {
                 await cleanupGameDirectories(gameName: gameName)
@@ -602,7 +602,7 @@ struct ModPackDownloadSheet: View {
             let fileManager = MinecraftFileManager()
             try fileManager.cleanupGameDirectories(gameName: gameName)
         } catch {
-            Logger.shared.error("清理游戏文件夹失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to clean game folder: \(error.localizedDescription)")
             // No error is thrown because this is a cleanup operation and should not affect the main process
         }
     }

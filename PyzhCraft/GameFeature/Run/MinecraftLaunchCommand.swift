@@ -36,7 +36,7 @@ struct MinecraftLaunchCommand {
     /// - Throws: GlobalError when validation fails
     private func validatePlayerTokenBeforeLaunch() async throws -> Player? {
         guard let player = player else {
-            Logger.shared.warning("没有选择玩家，使用默认认证参数")
+            Logger.shared.warning("No player selected, default authentication parameters are used")
             return nil
         }
 
@@ -45,7 +45,7 @@ struct MinecraftLaunchCommand {
             return player
         }
 
-        Logger.shared.info("启动游戏前验证玩家 \(player.name) 的Token")
+        Logger.shared.info("Verify player \(player.name)'s Token before starting the game")
 
         // Load authentication credentials from Keychain for this player on demand before starting (only for the current player to avoid reading all accounts at once)
         var playerWithCredential = player
@@ -62,7 +62,7 @@ struct MinecraftLaunchCommand {
 
         // If the Token is updated, it needs to be saved to PlayerDataManager
         if validatedPlayer.authAccessToken != player.authAccessToken {
-            Logger.shared.info("玩家 \(player.name) 的Token已更新，保存到数据管理器")
+            Logger.shared.info("Player \(player.name)'s Token has been updated and saved to the data manager")
             await updatePlayerInDataManager(validatedPlayer)
         }
 
@@ -75,7 +75,7 @@ struct MinecraftLaunchCommand {
         let dataManager = PlayerDataManager()
         let success = dataManager.updatePlayerSilently(updatedPlayer)
         if success {
-            Logger.shared.debug("已更新玩家数据管理器中的Token信息")
+            Logger.shared.debug("Token information in player data manager has been updated")
             // Synchronously update the player list in memory (to avoid using old tokens at next startup)
             NotificationCenter.default.post(
                 name: PlayerSkinService.playerUpdatedNotification,
@@ -87,7 +87,7 @@ struct MinecraftLaunchCommand {
 
     private func replaceAuthParameters(command: [String], with validatedPlayer: Player?) -> [String] {
         guard let player = validatedPlayer else {
-            Logger.shared.warning("没有验证的玩家，使用默认认证参数")
+            Logger.shared.warning("For unverified players, use the default authentication parameters")
             return replaceGameParameters(command: command)
         }
 
@@ -189,8 +189,8 @@ struct MinecraftLaunchCommand {
         // Get the game working directory
         let gameWorkingDirectory = AppPaths.profileDirectory(gameName: game.gameName)
 
-        Logger.shared.info("启动游戏进程: \(javaExecutable) \(command.joined(separator: " "))")
-        Logger.shared.info("游戏工作目录: \(gameWorkingDirectory.path)")
+        Logger.shared.info("Start the game process: \(javaExecutable) \(command.joined(separator: " "))")
+        Logger.shared.info("Game working directory: \(gameWorkingDirectory.path)")
 
         let process = Process()
         process.executableURL = URL(fileURLWithPath: javaExecutable)
@@ -222,7 +222,7 @@ struct MinecraftLaunchCommand {
                 GameStatusManager.shared.setGameRunning(gameId: game.id, isRunning: true)
             }
         } catch {
-            Logger.shared.error("启动进程失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to start process: \(error.localizedDescription)")
 
             // Clean up process and reset state when startup fails
             _ = GameProcessManager.shared.stopProcess(for: game.id)
@@ -240,7 +240,7 @@ struct MinecraftLaunchCommand {
     /// Handle startup errors
     /// - Parameter error: startup error
     private func handleLaunchError(_ error: Error) async {
-        Logger.shared.error("启动游戏失败：\(error.localizedDescription)")
+        Logger.shared.error("Failed to start game: \(error.localizedDescription)")
 
         // Handling errors using a global error handler
         let globalError = GlobalError.from(error)

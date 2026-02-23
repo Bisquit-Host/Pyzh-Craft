@@ -169,7 +169,7 @@ public struct GeneralSettingsView: View {
 
             generalSettings.launcherWorkingDirectory = supportDir.path
 
-            Logger.shared.info("工作目录已重置为: \(supportDir.path)")
+            Logger.shared.info("Working directory has been reset to: \(supportDir.path)")
         } catch {
             let globalError = GlobalError.from(error)
             GlobalErrorHandler.shared.handle(globalError)
@@ -195,7 +195,7 @@ public struct GeneralSettingsView: View {
                     generalSettings.launcherWorkingDirectory = url.path
                     // GameRepository observers will automatically reload, no need to manually loadGames
 
-                    Logger.shared.info("工作目录已设置为: \(url.path)")
+                    Logger.shared.info("The working directory has been set to: \(url.path)")
                 } catch {
                     let globalError = GlobalError.from(error)
                     GlobalErrorHandler.shared.handle(globalError)

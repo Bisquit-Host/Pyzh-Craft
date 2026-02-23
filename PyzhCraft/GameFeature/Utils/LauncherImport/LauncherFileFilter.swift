@@ -69,11 +69,11 @@ enum LauncherFileFilter {
                 let range = NSRange(fileName.startIndex..<fileName.endIndex, in: fileName)
 
                 if regex.firstMatch(in: fileName, options: [], range: range) != nil {
-                    Logger.shared.debug("过滤文件: \(fileName) (匹配规则: \(pattern))")
+                    Logger.shared.debug("Filter file: \(fileName) (matching rule: \(pattern))")
                     return true
                 }
             } catch {
-                Logger.shared.warning("无效的正则表达式模式: \(pattern), 错误: \(error.localizedDescription)")
+                Logger.shared.warning("Invalid regular expression pattern: \(pattern), error: \(error.localizedDescription)")
             }
         }
 

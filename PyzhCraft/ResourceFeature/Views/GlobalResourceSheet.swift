@@ -109,7 +109,7 @@ struct GlobalResourceSheet: View {
                 try await loadDependenciesThrowing(for: version, game: game)
             } catch {
                 let globalError = GlobalError.from(error)
-                Logger.shared.error("加载依赖项失败: \(globalError.chineseMessage)")
+                Logger.shared.error("Failed to load dependencies: \(globalError.chineseMessage)")
                 GlobalErrorHandler.shared.handle(globalError)
                 _ = await MainActor.run {
                     dependencyState = DependencyState()

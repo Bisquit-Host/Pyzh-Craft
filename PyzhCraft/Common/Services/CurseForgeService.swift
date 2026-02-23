@@ -26,7 +26,7 @@ enum CurseForgeService {
         do {
             return try await fetchFileDetailThrowing(projectId: projectId, fileId: fileId)
         } catch {
-            Logger.shared.error("获取 CurseForge 文件详情失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to get CurseForge file details: \(error.localizedDescription)")
             return nil
         }
     }
@@ -51,7 +51,7 @@ enum CurseForgeService {
         do {
             return try await fetchModDetailThrowing(modId: modId)
         } catch {
-            Logger.shared.error("获取 CurseForge 模组详情失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to get CurseForge module details: \(error.localizedDescription)")
             return nil
         }
     }
@@ -88,7 +88,7 @@ enum CurseForgeService {
         do {
             return try await fetchProjectFilesThrowing(projectId: projectId, gameVersion: gameVersion, modLoaderType: modLoaderType)
         } catch {
-            Logger.shared.error("获取 CurseForge 项目文件列表失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to get CurseForge project file list: \(error.localizedDescription)")
             return nil
         }
     }
@@ -200,7 +200,7 @@ enum CurseForgeService {
                             let fileDetail = try await fetchFileDetailThrowing(projectId: projectId, fileId: file.id)
                             return (file.id, fileDetail)
                         } catch {
-                            Logger.shared.warning("获取文件详情失败 (fileId: \(file.id)): \(error.localizedDescription)")
+                            Logger.shared.warning("Failed to get file details (fileId: \(file.id)): \(error.localizedDescription)")
                             return (file.id, nil)
                         }
                     }
@@ -297,7 +297,7 @@ enum CurseForgeService {
             )
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("搜索 CurseForge 项目失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Search for CurseForge project failed: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return CurseForgeSearchResult(data: [], pagination: nil)
         }
@@ -446,7 +446,7 @@ enum CurseForgeService {
             return try await fetchCategoriesThrowing()
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("获取 CurseForge 分类列表失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to get CurseForge category list: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return []
         }
@@ -471,7 +471,7 @@ enum CurseForgeService {
             return try await fetchGameVersionsThrowing()
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("获取 CurseForge 游戏版本列表失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to get CurseForge game version list: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return []
         }
@@ -498,7 +498,7 @@ enum CurseForgeService {
             return try await fetchProjectDetailsAsModrinthThrowing(id: id)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("获取项目详情失败 (ID: \(id)): \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to get project details (ID: \(id)): \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return nil
         }
@@ -535,7 +535,7 @@ enum CurseForgeService {
             return try await fetchProjectVersionsAsModrinthThrowing(id: id)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("获取项目版本列表失败 (ID: \(id)): \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to get project version list (ID: \(id)): \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return []
         }
@@ -667,7 +667,7 @@ enum CurseForgeService {
             )
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("获取 CurseForge 项目依赖失败 (ID: \(id)): \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to obtain CurseForge project dependencies (ID: \(id)): \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return ModrinthProjectDependency(projects: [])
         }
@@ -779,7 +779,7 @@ enum CurseForgeService {
                             return depVersion
                         } catch {
                             let globalError = GlobalError.from(error)
-                            Logger.shared.error("获取依赖项目版本失败 (ID: \(projectId)): \(globalError.chineseMessage)")
+                            Logger.shared.error("Failed to obtain dependent project version (ID: \(projectId)): \(globalError.chineseMessage)")
                             return nil
                         }
                     }

@@ -24,7 +24,7 @@ final class GameProcessManager: ObservableObject, @unchecked Sendable {
         queue.async { [weak self] in
             self?.gameProcesses[gameId] = process
         }
-        Logger.shared.debug("存储游戏进程: \(gameId)")
+        Logger.shared.debug("Store game process: \(gameId)")
     }
 
     // Unified processing of all cleaning logic
@@ -39,11 +39,11 @@ final class GameProcessManager: ObservableObject, @unchecked Sendable {
             if isCrash {
                 let gameSettings = GameSettingsManager.shared
                 if gameSettings.enableAICrashAnalysis {
-                    Logger.shared.info("检测到游戏崩溃，启用AI分析: \(gameId)")
+                    Logger.shared.info("Game crash detected, AI analysis enabled: \(gameId)")
                     await collectLogsForGameImmediately(gameId: gameId)
                 }
             } else {
-                Logger.shared.debug("游戏正常退出，不触发AI分析: \(gameId)")
+                Logger.shared.debug("The game exits normally without triggering AI analysis: \(gameId)")
             }
         }
 
@@ -62,10 +62,10 @@ final class GameProcessManager: ObservableObject, @unchecked Sendable {
         let exitCode = process.terminationStatus
         if exitCode == 0 {
             // The exit code is 0, which may be a normal exit, but you also need to check whether there is a crash report
-            Logger.shared.debug("游戏退出码为0: \(gameId)")
+            Logger.shared.debug("The game exit code is 0: \(gameId)")
         } else {
             // If the exit code is non-0, it is likely a crash
-            Logger.shared.info("游戏退出码非0 (\(exitCode))，可能是崩溃: \(gameId)")
+            Logger.shared.info("The game exit code is non-0 (\(exitCode)), it may crash: \(gameId)")
             return true
         }
 
@@ -77,7 +77,7 @@ final class GameProcessManager: ObservableObject, @unchecked Sendable {
         do {
             try? database.initialize()
             guard let game = try database.getGame(by: gameId) else {
-                Logger.shared.warning("无法从数据库找到游戏，无法检查崩溃报告: \(gameId)")
+                Logger.shared.warning("Unable to find game from database, unable to check crash report: \(gameId)")
                 // If game information cannot be queried and the exit code is non-0, it is considered a crash
                 return exitCode != 0
             }
@@ -109,7 +109,7 @@ final class GameProcessManager: ObservableObject, @unchecked Sendable {
                     for crashFile in crashFiles {
                         if let creationDate = try? crashFile.resourceValues(forKeys: [.creationDateKey]).creationDate,
                            creationDate >= fiveMinutesAgo {
-                            Logger.shared.info("找到最近生成的崩溃报告: \(crashFile.lastPathComponent)")
+                            Logger.shared.info("Find the most recently generated crash report: \(crashFile.lastPathComponent)")
                             return true
                         }
                     }
@@ -117,14 +117,14 @@ final class GameProcessManager: ObservableObject, @unchecked Sendable {
                     // If the exit code is 0 but there is no recent crash report, it is considered a normal exit
                     // (The case of non-0 exit code has been dealt with above)
                 } catch {
-                    Logger.shared.warning("读取崩溃报告文件夹失败: \(error.localizedDescription)")
+                    Logger.shared.warning("Failed to read crash report folder: \(error.localizedDescription)")
                 }
             }
 
             // If the exit code is 0 and no crash is reported, it is considered a normal exit
             return false
         } catch {
-            Logger.shared.error("从数据库查询游戏失败: \(error.localizedDescription)")
+            Logger.shared.error("Querying game from database failed: \(error.localizedDescription)")
             // If it cannot be queried and the exit code is non-0, it is considered a crash
             return exitCode != 0
         }
@@ -143,7 +143,7 @@ final class GameProcessManager: ObservableObject, @unchecked Sendable {
 
             // Query games from database
             guard let game = try database.getGame(by: gameId) else {
-                Logger.shared.warning("无法从数据库找到游戏: \(gameId)")
+                Logger.shared.warning("Unable to find game from database: \(gameId)")
                 return
             }
 
@@ -157,16 +157,16 @@ final class GameProcessManager: ObservableObject, @unchecked Sendable {
                 gameRepository: gameRepository
             )
         } catch {
-            Logger.shared.error("从数据库查询游戏失败: \(error.localizedDescription)")
+            Logger.shared.error("Querying game from database failed: \(error.localizedDescription)")
         }
     }
 
     /// Handling process exit situations
     private func handleProcessExit(gameId: String, wasManuallyStopped: Bool) {
         if wasManuallyStopped {
-            Logger.shared.debug("游戏被用户主动停止: \(gameId)")
+            Logger.shared.debug("The game was actively stopped by the user: \(gameId)")
         } else {
-            Logger.shared.info("游戏进程已退出: \(gameId)")
+            Logger.shared.info("Game process has exited: \(gameId)")
         }
     }
 
@@ -196,7 +196,7 @@ final class GameProcessManager: ObservableObject, @unchecked Sendable {
             }
         }
 
-        Logger.shared.debug("停止游戏进程: \(gameId)")
+        Logger.shared.debug("Stop game process: \(gameId)")
         return true
     }
 
@@ -224,7 +224,7 @@ final class GameProcessManager: ObservableObject, @unchecked Sendable {
         guard !terminatedGameIds.isEmpty else { return }
 
         for gameId in terminatedGameIds {
-            Logger.shared.debug("清理已终止的进程: \(gameId)")
+            Logger.shared.debug("Clean up terminated processes: \(gameId)")
         }
 
         Task { @MainActor in

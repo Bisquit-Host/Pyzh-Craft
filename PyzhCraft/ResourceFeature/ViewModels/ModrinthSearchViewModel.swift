@@ -224,7 +224,7 @@ final class ModrinthSearchViewModel: ObservableObject {
                     self.isLoading = false
                     self.isLoadingMore = false
                 }
-                Logger.shared.error("搜索失败: \(globalError.chineseMessage)")
+                Logger.shared.error("Search failed: \(globalError.chineseMessage)")
                 GlobalErrorHandler.shared.handle(globalError)
             }
         }

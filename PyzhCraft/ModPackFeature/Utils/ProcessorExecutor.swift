@@ -103,7 +103,7 @@ enum ProcessorExecutor {
                 if FileManager.default.fileExists(atPath: cpPath.path) {
                     classpath.append(cpPath.path)
                 } else {
-                    Logger.shared.warning("classpath文件不存在: \(cpPath.path)")
+                    Logger.shared.warning("classpath file does not exist: \(cpPath.path)")
                 }
             }
         }
@@ -157,7 +157,7 @@ enum ProcessorExecutor {
         if let args = args {
             let processedArgs: [String] = args.compactMap { arg in
                 guard let extractedValue = CommonFileManager.extractClientValue(from: arg) else {
-                    Logger.shared.warning("无法提取客户端值: \(arg)")
+                    Logger.shared.warning("Unable to extract client value: \(arg)")
                     return nil
                 }
                 return processPlaceholders(

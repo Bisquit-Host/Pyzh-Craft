@@ -68,7 +68,7 @@ enum ModPackArchiver {
 
                     // Make sure the file path starts with the overridesDir path
                     guard filePath.hasPrefix(overridesDirPathWithSlash) else {
-                        Logger.shared.warning("文件路径不在 overrides 目录内: \(filePath)")
+                        Logger.shared.warning("File path is not in overrides directory: \(filePath)")
                         continue
                     }
 

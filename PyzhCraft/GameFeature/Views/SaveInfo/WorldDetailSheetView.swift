@@ -318,7 +318,7 @@ struct WorldDetailSheetView: View {
                 self.showError = true
             }
         } catch {
-            Logger.shared.error("加载世界详细信息失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to load world details: \(error.localizedDescription)")
             await MainActor.run {
                 self.isLoading = false
                 self.errorMessage = String(format: String(localized: "Failed to load world information: \(error.localizedDescription)"))

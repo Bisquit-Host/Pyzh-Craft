@@ -86,15 +86,15 @@ class GameCreationViewModel: BaseGameFormViewModel {
                     // Check if directory exists
                     if FileManager.default.fileExists(atPath: profileDir.path) {
                         try FileManager.default.removeItem(at: profileDir)
-                        Logger.shared.info("已删除取消创建的游戏文件夹: \(profileDir.path)")
+                        Logger.shared.info("Deleted uncreated game folder: \(profileDir.path)")
                     }
                 } catch {
-                    Logger.shared.error("删除游戏文件夹失败: \(error.localizedDescription)")
+                    Logger.shared.error("Failed to delete game folder: \(error.localizedDescription)")
                     // This should not prevent the window from closing even if the deletion fails
                 }
             } else {
                 // The game is saved and the folder should not be deleted
-                Logger.shared.info("游戏已成功保存，跳过删除文件夹: \(gameName)")
+                Logger.shared.info("Game saved successfully, skipping folder deletion: \(gameName)")
             }
         }
 
@@ -189,7 +189,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
                 let forgeVersions = try await ForgeLoaderService.fetchAllForgeVersions(for: gameVersion)
                 versions = forgeVersions.loaders.map { $0.id }
             } catch {
-                Logger.shared.error("获取 Forge 版本失败: \(error.localizedDescription)")
+                Logger.shared.error("Failed to get Forge version: \(error.localizedDescription)")
                 versions = []
             }
         case "neoforge":
@@ -197,7 +197,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
                 let neoforgeVersions = try await NeoForgeLoaderService.fetchAllNeoForgeVersions(for: gameVersion)
                 versions = neoforgeVersions.loaders.map { $0.id }
             } catch {
-                Logger.shared.error("获取 NeoForge 版本失败: \(error.localizedDescription)")
+                Logger.shared.error("Failed to get NeoForge version: \(error.localizedDescription)")
                 versions = []
             }
         case "quilt":
@@ -268,7 +268,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
 
     func handleImageDrop(_ providers: [NSItemProvider]) -> Bool {
         guard let provider = providers.first else {
-            Logger.shared.error("图片拖放失败：没有提供者")
+            Logger.shared.error("Image drag and drop failed: No provider")
             return false
         }
 
@@ -311,7 +311,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
             }
             return true
         }
-        Logger.shared.warning("图片拖放失败：不支持的类型")
+        Logger.shared.warning("Image drag and drop failed: Unsupported type")
         return false
     }
 
@@ -319,7 +319,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
     private func saveGame() async {
         guard let gameRepository = gameRepository,
               let playerListViewModel = playerListViewModel else {
-            Logger.shared.error("GameRepository 或 PlayerListViewModel 未设置")
+            Logger.shared.error("GameRepository or PlayerListViewModel is not set")
             return
         }
 

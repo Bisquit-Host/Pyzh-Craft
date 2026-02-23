@@ -33,7 +33,7 @@ class CommonFileManager {
             try await downloadForgeJarsThrowing(libraries: libraries)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("下载 Forge JAR 文件失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to download Forge JAR file: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
         }
     }
@@ -87,7 +87,7 @@ class CommonFileManager {
             try await downloadFabricJarsThrowing(libraries: libraries)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("下载 JAR 文件失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to download JAR file: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
         }
     }
@@ -140,11 +140,11 @@ class CommonFileManager {
         }
 
         guard !clientProcessors.isEmpty else {
-            Logger.shared.info("没有找到client端的processor，跳过执行")
+            Logger.shared.info("The client-side processor was not found and execution was skipped")
             return
         }
 
-        Logger.shared.info("找到 \(clientProcessors.count) 个client端processor，开始执行")
+        Logger.shared.info("Find \(clientProcessors.count) client processors and start execution")
 
         // Use the original data field from version.json and add the necessary environment variables
         var processorData: [String: String] = [:]
@@ -192,7 +192,7 @@ class CommonFileManager {
                     onProgressUpdate: onProgressUpdate
                 )
             } catch {
-                Logger.shared.error("执行处理器失败: \(error.localizedDescription)")
+                Logger.shared.error("Execution processor failed: \(error.localizedDescription)")
                 throw GlobalError.download(
                     i18nKey: "Processor Start Failed",
                     level: .notification

@@ -215,7 +215,7 @@ struct ModrinthDetailView: View {
             try await performSearchThrowing(page: page, append: append)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("搜索失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Search failed: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             await MainActor.run {
                 self.error = globalError

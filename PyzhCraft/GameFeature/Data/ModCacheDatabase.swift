@@ -45,7 +45,7 @@ class ModCacheDatabase {
         """
         try? db.execute(createIndexSQL)
 
-        Logger.shared.debug("mod 缓存表已创建或已存在")
+        Logger.shared.debug("mod cache table has been created or already exists")
     }
 
     /// Close database connection

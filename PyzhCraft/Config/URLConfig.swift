@@ -4,7 +4,7 @@ enum URLConfig {
     /// An auxiliary method for safely creating URLs. When invalid, logs are logged and return placeholder URLs to avoid crashes in the production environment
     private static func url(_ string: String) -> URL {
         guard let url = URL(string: string) else {
-            Logger.shared.error("Invalid URL: \(string)，使用占位 URL")
+            Logger.shared.error("Invalid URL: \(string), use placeholder URL")
             // Use guard let to avoid forced unwrapping
             guard let fallbackURL = URL(string: "https://localhost") else {
                 // If even localhost fails, a hardcoded URL is returned (this should not happen in theory)

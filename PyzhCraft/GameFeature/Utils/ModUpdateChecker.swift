@@ -103,7 +103,7 @@ enum ModUpdateChecker {
                 latestVersion: latestVersion
             )
         } catch {
-            Logger.shared.error("检测 mod 更新失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to detect mod updates: \(error.localizedDescription)")
             return UpdateCheckResult(
                 hasUpdate: false,
                 currentHash: currentHash,

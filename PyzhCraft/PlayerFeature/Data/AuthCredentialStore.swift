@@ -14,7 +14,7 @@ class AuthCredentialStore {
             let data = try encoder.encode(credential)
             return KeychainManager.save(data: data, account: credential.userId, key: "authCredential")
         } catch {
-            Logger.shared.error("编码认证凭据失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to encode authentication credentials: \(error.localizedDescription)")
             return false
         }
     }
@@ -31,7 +31,7 @@ class AuthCredentialStore {
             let decoder = JSONDecoder()
             return try decoder.decode(AuthCredential.self, from: data)
         } catch {
-            Logger.shared.error("解码认证凭据失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to decode authentication credentials: \(error.localizedDescription)")
             return nil
         }
     }

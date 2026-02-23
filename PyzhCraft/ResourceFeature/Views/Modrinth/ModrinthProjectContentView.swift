@@ -276,7 +276,7 @@ struct ModrinthProjectContentView: View {
             try await loadProjectDetailsThrowing()
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("加载项目详情失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to load project details: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             await MainActor.run {
                 self.error = globalError

@@ -92,7 +92,7 @@ class MinecraftFileManager {
         } catch {
             let globalError = GlobalError.from(error)
             Logger.shared.error(
-                "下载 Minecraft 版本文件失败: \(globalError.chineseMessage)"
+                "Failed to download Minecraft version file: \(globalError.chineseMessage)"
             )
             GlobalErrorHandler.shared.handle(globalError)
             return false
@@ -676,7 +676,7 @@ extension MinecraftFileManager {
                     minecraftVersion: minecraftVersion
                 )
             } catch {
-                Logger.shared.error("下载原生库失败")
+                Logger.shared.error("Failed to download native library")
             }
         }
     }

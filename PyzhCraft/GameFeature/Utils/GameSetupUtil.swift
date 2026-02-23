@@ -42,7 +42,7 @@ class GameSetupUtil: ObservableObject {
         // Validate the current player (only if playerListViewModel is provided)
         if let playerListViewModel = playerListViewModel {
             guard playerListViewModel.currentPlayer != nil else {
-                Logger.shared.error("无法保存游戏，因为没有选择当前玩家。")
+                Logger.shared.error("The game cannot be saved because the current player is not selected")
                 onError(
                     GlobalError.configuration(
                         i18nKey: "No Current Player",
@@ -140,7 +140,7 @@ class GameSetupUtil: ObservableObject {
             )
             onSuccess()
         } catch is CancellationError {
-            Logger.shared.info("游戏下载任务已取消")
+            Logger.shared.info("The game download task has been canceled")
             // Clean created game folders
             await cleanupGameDirectories(gameName: gameName)
             await MainActor.run {
@@ -164,7 +164,7 @@ class GameSetupUtil: ObservableObject {
             let fileManager = MinecraftFileManager()
             try fileManager.cleanupGameDirectories(gameName: gameName)
         } catch {
-            Logger.shared.error("清理游戏文件夹失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to clean game folder: \(error.localizedDescription)")
             // No error is thrown because this is a cleanup operation and should not affect the main process
         }
     }

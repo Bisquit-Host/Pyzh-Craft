@@ -60,18 +60,18 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             if fm.fileExists(atPath: downloadDir.path) {
                 do {
                     try fm.removeItem(at: downloadDir)
-                    Logger.shared.info("已清理临时下载目录: \(downloadDir.path)")
+                    Logger.shared.info("Cleaned temporary download directory: \(downloadDir.path)")
                 } catch {
-                    Logger.shared.warning("清理临时下载目录失败: \(error.localizedDescription)")
+                    Logger.shared.warning("Failed to clear temporary download directory: \(error.localizedDescription)")
                 }
             }
             let extractionDir = tempBaseDir.appendingPathComponent("modpack_extraction")
             if fm.fileExists(atPath: extractionDir.path) {
                 do {
                     try fm.removeItem(at: extractionDir)
-                    Logger.shared.info("已清理临时解压目录: \(extractionDir.path)")
+                    Logger.shared.info("Cleaned temporary decompression directory: \(extractionDir.path)")
                 } catch {
-                    Logger.shared.warning("清理临时解压目录失败: \(error.localizedDescription)")
+                    Logger.shared.warning("Failed to clear temporary decompression directory: \(error.localizedDescription)")
                 }
             }
         }
@@ -474,7 +474,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             return nil
         } catch {
             if error is DecodingError {
-                Logger.shared.error("解析 modrinth.index.json 失败: JSON 格式错误")
+                Logger.shared.error("Failed to parse modrinth.index.json: JSON format error")
             }
             return nil
         }

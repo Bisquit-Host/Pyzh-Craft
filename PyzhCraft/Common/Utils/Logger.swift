@@ -269,7 +269,7 @@ class Logger: AppLogging {
     /// Open current log file
     func openLogFile() {
         guard let logURL = logFileURL else {
-            Self.shared.error("无法获取日志文件路径")
+            Self.shared.error("Unable to get log file path")
             return
         }
 
@@ -288,10 +288,10 @@ class Logger: AppLogging {
                 dateFormatter.dateFormat = "yyyy-MM-dd"
                 let dateString = dateFormatter.string(from: Date())
 
-                try "日志文件已创建 - \(dateString)".write(to: logURL, atomically: true, encoding: .utf8)
+                try "Log file created - \(dateString)".write(to: logURL, atomically: true, encoding: .utf8)
                 NSWorkspace.shared.open(logURL)
             } catch {
-                Self.shared.error("无法创建或打开日志文件: \(error)")
+                Self.shared.error("Unable to create or open log file: \(error)")
             }
         }
     }

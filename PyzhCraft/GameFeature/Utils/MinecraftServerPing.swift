@@ -233,7 +233,7 @@ enum MinecraftServerPing {
                             // Data reception completed but parsing failed
                             if state.setResumed() {
                                 state.cancelTimeoutTask()
-                                Logger.shared.debug("解析服务器响应失败: \(connectAddress):\(connectPort)")
+                                Logger.shared.debug("Failed to parse server response: \(connectAddress):\(connectPort)")
                                 connection.cancel()
                                 continuation.resume(returning: nil)
                             }
@@ -268,7 +268,7 @@ enum MinecraftServerPing {
                     if !state.isTimeout {
                         if state.setResumed() {
                             state.cancelTimeoutTask()
-                            Logger.shared.debug("服务器连接失败: \(connectAddress):\(connectPort) - \(error.localizedDescription)")
+                            Logger.shared.debug("Server connection failed: \(connectAddress):\(connectPort) - \(error.localizedDescription)")
                             connection.cancel()
                             continuation.resume(returning: nil)
                         }
@@ -319,7 +319,7 @@ enum MinecraftServerPing {
         let handshakePacket = handshakeLength + packetData
         connection.send(content: handshakePacket, completion: .contentProcessed { error in
             if let error {
-                Logger.shared.debug("发送握手包失败: \(error.localizedDescription)")
+                Logger.shared.debug("Failed to send handshake packet: \(error.localizedDescription)")
                 return
             }
 
@@ -331,7 +331,7 @@ enum MinecraftServerPing {
             let statusRequestPacket = statusRequestLength + statusRequestData
             connection.send(content: statusRequestPacket, completion: .contentProcessed { error in
                 if let error {
-                    Logger.shared.debug("发送状态请求包失败: \(error.localizedDescription)")
+                    Logger.shared.debug("Failed to send status request packet: \(error.localizedDescription)")
                 }
             })
         })
@@ -380,7 +380,7 @@ enum MinecraftServerPing {
             return serverInfo
         } catch {
             // Log when JSON parsing fails (may be due to protocol incompatibility)
-            Logger.shared.debug("解析服务器 JSON 失败: \(error.localizedDescription)")
+            Logger.shared.debug("Failed to parse server JSON: \(error.localizedDescription)")
             return nil
         }
     }

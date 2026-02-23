@@ -127,7 +127,7 @@ enum PlayerSkinService {
 
             // Extract skin information from Minecraft Services API response
             guard !profile.skins.isEmpty else {
-                Logger.shared.warning("玩家没有皮肤信息")
+                Logger.shared.warning("Player has no skin information")
                 return nil
             }
 
@@ -135,7 +135,7 @@ enum PlayerSkinService {
             let activeSkin = profile.skins.first { $0.state == "ACTIVE" } ?? profile.skins.first
 
             guard let skin = activeSkin else {
-                Logger.shared.warning("没有找到激活的皮肤")
+                Logger.shared.warning("No active skin found")
                 return nil
             }
 
@@ -148,7 +148,7 @@ enum PlayerSkinService {
 
             return skinInfo
         } catch {
-            Logger.shared.error("从 Minecraft Services API 获取皮肤信息失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to get skin information from Minecraft Services API: \(error.localizedDescription)")
             return nil
         }
     }
@@ -296,7 +296,7 @@ enum PlayerSkinService {
             )
         default:
             Logger.shared.error("Skin upload failed with HTTP \(http.statusCode)")
-            try handleHTTPError(http, operation: "皮肤上传")
+            try handleHTTPError(http, operation: "skin upload")
         }
     }
 
@@ -392,7 +392,7 @@ enum PlayerSkinService {
         case 200:
             break
         default:
-            try handleHTTPError(http, operation: "获取个人资料")
+            try handleHTTPError(http, operation: "profile fetch")
         }
 
         let profile = try JSONDecoder().decode(

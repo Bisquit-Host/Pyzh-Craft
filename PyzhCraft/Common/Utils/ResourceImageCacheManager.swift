@@ -70,7 +70,7 @@ final class ResourceImageCacheManager: @unchecked Sendable {
                     _ = try await self.loadImage(from: url)
                 } catch {
                     // Silently handle preload failure
-                    Logger.shared.debug("预加载图片失败: \(url.absoluteString)")
+                    Logger.shared.debug("Failed to preload image: \(url.absoluteString)")
                 }
             }
         }

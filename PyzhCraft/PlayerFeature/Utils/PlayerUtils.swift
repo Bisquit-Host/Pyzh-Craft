@@ -30,7 +30,7 @@ enum PlayerUtils {
         bytes[8] = (bytes[8] & 0x3F) | 0x80 // RFC 4122
         let uuid = bytes.withUnsafeBytes { UUID(uuid: $0.load(as: uuid_t.self)) }
         let uuidString = uuid.uuidString.lowercased()
-        Logger.shared.debug("生成离线 UUID - 用户名：\(username), UUID：\(uuidString)")
+        Logger.shared.debug("Generate offline UUID - Username: \(username), UUID: \(uuidString)")
         return uuidString
     }
 
@@ -38,7 +38,7 @@ enum PlayerUtils {
 
     static func avatarName(for uuid: String) -> String? {
         guard let index = nameIndex(for: uuid) else {
-            Logger.shared.warning("无法获取头像名称 - 无效的UUID: \(uuid)")
+            Logger.shared.warning("Unable to get avatar name - invalid UUID: \(uuid)")
             return nil
         }
         return names[index]

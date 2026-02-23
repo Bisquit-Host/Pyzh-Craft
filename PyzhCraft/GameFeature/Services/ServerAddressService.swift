@@ -17,20 +17,20 @@ class ServerAddressService {
         let serversDatURL = profileDir.appendingPathComponent("servers.dat")
 
         guard FileManager.default.fileExists(atPath: serversDatURL.path) else {
-            Logger.shared.debug("servers.dat 文件不存在: \(serversDatURL.path)")
+            Logger.shared.debug("servers.dat file does not exist: \(serversDatURL.path)")
             return []
         }
-        Logger.shared.debug("开始读取 servers.dat: \(serversDatURL.path)")
+        Logger.shared.debug("Start reading servers.dat: \(serversDatURL.path)")
         do {
             let data = try await Task.detached(priority: .userInitiated) {
                 try Data(contentsOf: serversDatURL)
             }.value
-            Logger.shared.debug("servers.dat 文件大小: \(data.count) 字节")
+            Logger.shared.debug("servers.dat file size: \(data.count) bytes")
             let servers = try parseServersDat(data: data)
-            Logger.shared.debug("成功解析 \(servers.count) 个服务器")
+            Logger.shared.debug("Successfully resolved \(servers.count) servers")
             return servers
         } catch {
-            Logger.shared.warning("解析服务器地址 servers.dat 文件失败: \(error.localizedDescription)")
+            Logger.shared.warning("Failed to parse server address servers.dat file: \(error.localizedDescription)")
             // Return an empty array when parsing fails instead of throwing an error
             return []
         }
@@ -44,7 +44,7 @@ class ServerAddressService {
         let parser = NBTParser(data: data)
         let nbtData = try parser.parse()
 
-        Logger.shared.debug("NBT 解析完成，根标签键: \(nbtData.keys.joined(separator: ", "))")
+        Logger.shared.debug("NBT parsing completed, root tag key: \(nbtData.keys.joined(separator: ", "))")
 
         // servers.dat structure:
         // TAG_Compound("")
@@ -57,12 +57,12 @@ class ServerAddressService {
         //       TAG_Byte("acceptTextures") - whether to accept textures (optional, 0 or 1)
 
         guard let serversList = nbtData["servers"] as? [[String: Any]] else {
-            Logger.shared.debug("未找到 servers 列表，或类型不匹配")
+            Logger.shared.debug("Server list not found, or type does not match")
             // If there is no servers list, an empty array is returned
             return []
         }
 
-        Logger.shared.debug("找到 \(serversList.count) 个服务器条目")
+        Logger.shared.debug("Found \(serversList.count) server entries")
 
         var servers: [ServerAddress] = []
 
@@ -169,7 +169,7 @@ class ServerAddressService {
         let serversDatURL = AppPaths.profileDirectory(gameName: gameName)
             .appendingPathComponent("servers.dat")
 
-        Logger.shared.debug("开始保存服务器地址列表到: \(serversDatURL.path)")
+        Logger.shared.debug("Start saving the server address list to: \(serversDatURL.path)")
 
         // Build NBT data structure
         // servers.dat structure:
@@ -223,6 +223,6 @@ class ServerAddressService {
         // write file
         try encodedData.write(to: serversDatURL)
 
-        Logger.shared.debug("成功保存 \(servers.count) 个服务器地址到 servers.dat")
+        Logger.shared.debug("Successfully saved \(servers.count) server addresses to servers.dat")
     }
 }

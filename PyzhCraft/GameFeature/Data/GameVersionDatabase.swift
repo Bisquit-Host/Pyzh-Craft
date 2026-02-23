@@ -58,7 +58,7 @@ class GameVersionDatabase {
             try? db.execute(createIndexSQL) // Use try? because the index may already exist
         }
 
-        Logger.shared.debug("游戏版本表已创建或已存在")
+        Logger.shared.debug("The game version table has been created or already exists")
     }
 
     // MARK: - CRUD Operations
@@ -195,7 +195,7 @@ class GameVersionDatabase {
                 let game = try decoder.decode(GameVersionInfo.self, from: jsonData)
                 games.append(game)
             } catch {
-                Logger.shared.warning("解码游戏数据失败: \(error.localizedDescription)")
+                Logger.shared.warning("Failed to decode game data: \(error.localizedDescription)")
                 continue
             }
         }
@@ -234,7 +234,7 @@ class GameVersionDatabase {
                 }
                 gamesByPath[workingPath]?.append(game)
             } catch {
-                Logger.shared.warning("解码游戏数据失败: \(error.localizedDescription)")
+                Logger.shared.warning("Failed to decode game data: \(error.localizedDescription)")
                 continue
             }
         }

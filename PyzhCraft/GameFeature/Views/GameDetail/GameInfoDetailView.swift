@@ -223,7 +223,7 @@ struct GameInfoDetailView: View {
                 }
             } catch {
                 let globalError = GlobalError.from(error)
-                Logger.shared.error("扫描所有资源失败: \(globalError.chineseMessage)")
+                Logger.shared.error("Failed to scan all resources: \(globalError.chineseMessage)")
                 GlobalErrorHandler.shared.handle(globalError)
 
                 // Return to main thread update status
@@ -277,10 +277,10 @@ struct GameInfoDetailView: View {
                         IconRefreshNotifier.shared.notifyRefresh(for: gameName)
                         updateHeaders()
                     }
-                    Logger.shared.info("成功更新游戏图标: \(gameName)")
+                    Logger.shared.info("Successfully updated game icon: \(gameName)")
                 } catch {
                     let globalError = GlobalError.from(error)
-                    Logger.shared.error("更新游戏图标失败: \(globalError.chineseMessage)")
+                    Logger.shared.error("Failed to update game icon: \(globalError.chineseMessage)")
                     GlobalErrorHandler.shared.handle(globalError)
                 }
             }

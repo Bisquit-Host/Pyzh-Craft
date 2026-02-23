@@ -135,7 +135,7 @@ enum NetworkUtils {
                 try? stdoutPipe.fileHandleForReading.close()
 
                 guard proc.terminationStatus == 0 else {
-                    Logger.shared.debug("dig 查询失败，退出状态: \(proc.terminationStatus)")
+                    Logger.shared.debug("dig query failed, exit status: \(proc.terminationStatus)")
                     resumeGuard.resumeOnce(nil)
                     return
                 }
@@ -151,7 +151,7 @@ enum NetworkUtils {
             do {
                 try process.run()
             } catch {
-                Logger.shared.debug("无法启动 dig 进程: \(error.localizedDescription)")
+                Logger.shared.debug("Unable to start dig process: \(error.localizedDescription)")
                 resumeGuard.resumeOnce(nil)
             }
         }

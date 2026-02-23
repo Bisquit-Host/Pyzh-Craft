@@ -74,7 +74,7 @@ class SQLiteDatabase {
             // Enable JSON1 extension (built-in in SQLite 3.9.0+)
             // The JSON1 extension is enabled by default, no additional action is required
 
-            Logger.shared.debug("SQLite 数据库已打开: \(dbPath)")
+            Logger.shared.debug("SQLite database is open: \(dbPath)")
         }
     }
 
@@ -84,7 +84,7 @@ class SQLiteDatabase {
             guard let db else { return }
             sqlite3_close(db)
             self.db = nil
-            Logger.shared.debug("SQLite 数据库已关闭")
+            Logger.shared.debug("SQLite database is down")
         }
     }
 
@@ -104,7 +104,7 @@ class SQLiteDatabase {
 
         sqlite3_exec(db, "PRAGMA wal_autocheckpoint=1000;", nil, nil, nil)
 
-        Logger.shared.debug("WAL 模式已启用")
+        Logger.shared.debug("WAL mode enabled")
     }
 
     /// Enable mmap (memory mapping)
@@ -125,7 +125,7 @@ class SQLiteDatabase {
             )
         }
 
-        Logger.shared.debug("mmap 已启用 (64MB)")
+        Logger.shared.debug("mmap enabled (64MB)")
     }
 
     // MARK: - Transaction Management

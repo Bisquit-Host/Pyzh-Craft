@@ -115,7 +115,7 @@ enum RoomCodeGenerator {
             }
         }
 
-        Logger.shared.debug("生成房间码: \(code)")
+        Logger.shared.debug("Generate room code: \(code)")
         return code
     }
 

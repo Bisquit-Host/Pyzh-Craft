@@ -205,22 +205,22 @@ struct LitematicaDetailSheetView: View {
         errorMessage = nil
 
         do {
-            Logger.shared.debug("开始加载投影详细信息: \(filePath.lastPathComponent)")
+            Logger.shared.debug("Start loading projection details: \(filePath.lastPathComponent)")
             let loadedMetadata = try await LitematicaService.shared.loadFullMetadata(filePath: filePath)
             
             await MainActor.run {
                 if let metadata = loadedMetadata {
-                    Logger.shared.debug("成功加载投影元数据: \(metadata.name)")
+                    Logger.shared.debug("Successfully loaded projection metadata: \(metadata.name)")
                     self.metadata = metadata
                 } else {
-                    Logger.shared.warning("投影元数据为nil: \(filePath.lastPathComponent)")
+                    Logger.shared.warning("Projection metadata is nil: \(filePath.lastPathComponent)")
                     self.errorMessage = String(localized: "Unable to parse schematic metadata. The file may be corrupted or in an unsupported format.")
                 }
                 
                 self.isLoading = false
             }
         } catch {
-            Logger.shared.error("加载投影详细信息失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to load projection details: \(error.localizedDescription)")
             
             await MainActor.run {
                 self.isLoading = false

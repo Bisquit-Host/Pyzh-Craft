@@ -30,7 +30,7 @@ enum GameResourceHandler {
             try performDeleteThrowing(fileURL: fileURL)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("删除文件失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to delete file: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
         }
     }
@@ -105,7 +105,7 @@ enum GameResourceHandler {
             updateButtonState()
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("下载依赖项失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to download dependencies: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
         }
     }
@@ -155,7 +155,7 @@ enum GameResourceHandler {
             updateButtonState()
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("下载单个资源失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to download a single resource: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
         }
     }
@@ -197,7 +197,7 @@ enum GameResourceHandler {
             )
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("准备手动依赖项失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to prepare manual dependencies: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             depVM.missingDependencies = []
             depVM.dependencyVersions = [:]
@@ -256,7 +256,7 @@ enum GameResourceHandler {
             } catch {
                 // If the version of a dependency fails to be obtained, an error will be logged but other dependencies will continue to be processed
                 let globalError = GlobalError.from(error)
-                Logger.shared.error("获取依赖 \(dep.title) 的版本失败: \(globalError.chineseMessage)")
+                Logger.shared.error("Failed to get version of dependency \(dep.title): \(globalError.chineseMessage)")
                 // Set an empty version list to let users know that this dependency cannot be installed
                 versionDict[dep.id] = []
             }
@@ -291,7 +291,7 @@ enum GameResourceHandler {
             depVM.showDependenciesSheet = false
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("下载所有依赖项失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to download all dependencies: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             depVM.overallDownloadState = .failed
         }
@@ -363,7 +363,7 @@ enum GameResourceHandler {
             depVM.showDependenciesSheet = false
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("下载主资源失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to download main resource: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
         }
     }
@@ -416,7 +416,7 @@ enum GameResourceHandler {
             )
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("重试下载依赖项失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Retry downloading dependencies failed: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             depVM.dependencyDownloadStates[dep.id] = .failed
         }

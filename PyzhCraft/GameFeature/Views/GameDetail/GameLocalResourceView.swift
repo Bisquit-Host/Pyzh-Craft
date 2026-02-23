@@ -290,7 +290,7 @@ struct GameLocalResourceView: View {
                 i18nKey: "Resource Directory Not Found",
                 level: .notification
             )
-            Logger.shared.error("初始化资源目录失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to initialize resource directory: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             error = globalError
         }
@@ -490,12 +490,12 @@ struct GameLocalResourceView: View {
             for: query,
             gameName: game.gameName
         ) else {
-            Logger.shared.error("切换资源启用状态失败：资源目录不存在")
+            Logger.shared.error("Failed to switch resource enablement status: Resource directory does not exist")
             return
         }
 
         guard let fileName = mod.fileName else {
-            Logger.shared.error("切换资源启用状态失败：缺少文件名")
+            Logger.shared.error("Failed to switch resource enabled state: missing filename")
             return
         }
 
@@ -506,7 +506,7 @@ struct GameLocalResourceView: View {
         let isDisabled = fileName.hasSuffix(".disable")
         if isDisabled {
             guard fileName.hasSuffix(".disable") else {
-                Logger.shared.error("启用资源失败：文件后缀不包含 .disable")
+                Logger.shared.error("Failed to enable resource: file suffix does not contain .disable")
                 return
             }
             targetFileName = String(fileName.dropLast(".disable".count))
@@ -519,7 +519,7 @@ struct GameLocalResourceView: View {
         do {
             try fileManager.moveItem(at: currentURL, to: targetURL)
         } catch {
-            Logger.shared.error("切换资源启用状态失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to switch resource enable status: \(error.localizedDescription)")
             GlobalErrorHandler.shared.handle(GlobalError(
                 type: .resource,
                 i18nKey: "Toggle state failed",

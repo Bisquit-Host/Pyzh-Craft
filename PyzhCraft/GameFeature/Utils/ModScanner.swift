@@ -20,7 +20,7 @@ class ModScanner {
             } catch {
                 let globalError = GlobalError.from(error)
                 Logger.shared.error(
-                    "获取 Modrinth 项目详情失败: \(globalError.chineseMessage)"
+                    "Failed to get Modrinth project details: \(globalError.chineseMessage)"
                 )
                 GlobalErrorHandler.shared.handle(globalError)
                 completion(nil)
@@ -95,7 +95,7 @@ class ModScanner {
         do {
             return try JSONDecoder().decode(ModrinthProjectDetail.self, from: jsonData)
         } catch {
-            Logger.shared.error("解码 mod 缓存失败: \(error.localizedDescription)")
+            Logger.shared.error("Decoding mod cache failed: \(error.localizedDescription)")
             return nil
         }
     }
@@ -105,7 +105,7 @@ class ModScanner {
             let jsonData = try JSONEncoder().encode(detail)
             ModCacheManager.shared.setSilently(hash: hash, jsonData: jsonData)
         } catch {
-            Logger.shared.error("编码 mod 缓存失败: \(error.localizedDescription)")
+            Logger.shared.error("Encoding mod cache failed: \(error.localizedDescription)")
             GlobalErrorHandler.shared.handle(GlobalError.validation(
                 i18nKey: "Failed to save mod cache: \(error.localizedDescription)",
                 level: .silent
@@ -333,7 +333,7 @@ extension ModScanner {
             return try localModDetailsThrowing(in: dir)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("获取本地 mod 详情失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to get local mod details: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return []
         }
@@ -378,7 +378,7 @@ extension ModScanner {
                 completion(detailIds)
             } catch {
                 let globalError = GlobalError.from(error)
-                Logger.shared.error("扫描所有 detailId 失败: \(globalError.chineseMessage)")
+                Logger.shared.error("Scanning all detailId failed: \(globalError.chineseMessage)")
                 GlobalErrorHandler.shared.handle(globalError)
                 completion(Set<String>())
             }
@@ -449,16 +449,16 @@ extension ModScanner {
 
         // Check if directory exists
         guard FileManager.default.fileExists(atPath: modsDir.path) else {
-            Logger.shared.debug("游戏 \(game.gameName) 的 mods 目录不存在，跳过扫描")
+            Logger.shared.debug("The mods directory of game \(game.gameName) does not exist, skipping scanning")
             return
         }
 
         do {
             let detailIds = try await scanAllDetailIdsThrowing(in: modsDir)
-            Logger.shared.debug("游戏 \(game.gameName) 扫描完成，发现 \(detailIds.count) 个 mod")
+            Logger.shared.debug("Game \(game.gameName) scan completed, found \(detailIds.count) mods")
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.warning("扫描游戏 \(game.gameName) 的 mods 目录失败: \(globalError.chineseMessage)")
+            Logger.shared.warning("Scanning mods directory for game \(game.gameName) failed: \(globalError.chineseMessage)")
             // No error notifications are shown because this is a background scan
         }
     }
@@ -468,7 +468,7 @@ extension ModScanner {
 
         // Check if directory exists
         guard FileManager.default.fileExists(atPath: modsDir.path) else {
-            Logger.shared.debug("游戏 \(game.gameName) 的 mods 目录不存在，跳过扫描")
+            Logger.shared.debug("The mods directory of game \(game.gameName) does not exist, skipping scanning")
             return
         }
 
@@ -478,10 +478,10 @@ extension ModScanner {
             defer { semaphore.signal() }
             do {
                 let detailIds = try await scanAllDetailIdsThrowing(in: modsDir)
-                Logger.shared.debug("游戏 \(game.gameName) 扫描完成，发现 \(detailIds.count) 个 mod")
+                Logger.shared.debug("Game \(game.gameName) scan completed, found \(detailIds.count) mods")
             } catch {
                 let globalError = GlobalError.from(error)
-                Logger.shared.warning("扫描游戏 \(game.gameName) 的 mods 目录失败: \(globalError.chineseMessage)")
+                Logger.shared.warning("Scanning mods directory for game \(game.gameName) failed: \(globalError.chineseMessage)")
                 // No error notifications are shown because this is a background scan
             }
         }
@@ -507,7 +507,7 @@ extension ModScanner {
             )
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("检查 mod 安装状态失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to check mod installation status: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return false
         }
@@ -551,7 +551,7 @@ extension ModScanner {
             } catch {
                 let globalError = GlobalError.from(error)
                 Logger.shared.error(
-                    "检查 mod 安装状态失败: \(globalError.chineseMessage)"
+                    "Failed to check mod installation status: \(globalError.chineseMessage)"
                 )
                 GlobalErrorHandler.shared.handle(globalError)
                 completion(false)
@@ -582,7 +582,7 @@ extension ModScanner {
                 completion(results)
             } catch {
                 let globalError = GlobalError.from(error)
-                Logger.shared.error("扫描资源目录失败: \(globalError.chineseMessage)")
+                Logger.shared.error("Failed to scan resource directory: \(globalError.chineseMessage)")
                 GlobalErrorHandler.shared.handle(globalError)
                 completion([])
             }
@@ -685,7 +685,7 @@ extension ModScanner {
             return try getAllResourceFilesThrowing(dir)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("获取资源文件列表失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to obtain resource file list: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return []
         }
@@ -718,7 +718,7 @@ extension ModScanner {
                 completion(results, hasMore)
             } catch {
                 let globalError = GlobalError.from(error)
-                Logger.shared.error("分页扫描资源目录失败: \(globalError.chineseMessage)")
+                Logger.shared.error("Paging scan resource directory failed: \(globalError.chineseMessage)")
                 GlobalErrorHandler.shared.handle(globalError)
                 completion([], false)
             }
@@ -742,7 +742,7 @@ extension ModScanner {
                 completion(results, hasMore)
             } catch {
                 let globalError = GlobalError.from(error)
-                Logger.shared.error("分页扫描资源文件失败: \(globalError.chineseMessage)")
+                Logger.shared.error("Paging scan resource file failed: \(globalError.chineseMessage)")
                 GlobalErrorHandler.shared.handle(globalError)
                 completion([], false)
             }

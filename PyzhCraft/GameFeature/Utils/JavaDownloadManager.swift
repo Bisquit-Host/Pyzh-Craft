@@ -46,7 +46,7 @@ class JavaDownloadManager: ObservableObject {
 
             // Check if canceled
             if downloadState.isCancelled {
-                Logger.shared.info("Java下载已被取消")
+                Logger.shared.info("Java download has been canceled")
                 cleanupCancelledDownload()
                 return
             }

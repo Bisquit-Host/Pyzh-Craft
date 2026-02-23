@@ -14,7 +14,7 @@ enum CurseForgeManifestParser {
             // Find the manifest.json file
             let manifestPath = extractedPath.appendingPathComponent("manifest.json")
 
-            Logger.shared.info("尝试解析 CurseForge manifest.json: \(manifestPath.path)")
+            Logger.shared.info("Try parsing CurseForge manifest.json: \(manifestPath.path)")
 
             guard FileManager.default.fileExists(atPath: manifestPath.path) else {
                 // List the files in the unzipped directory to help debugging
@@ -23,28 +23,28 @@ enum CurseForgeManifestParser {
                         at: extractedPath,
                         includingPropertiesForKeys: nil
                     )
-                    Logger.shared.info("解压目录内容: \(contents.map { $0.lastPathComponent })")
+                    Logger.shared.info("Unzip directory contents: \(contents.map { $0.lastPathComponent })")
                 } catch {
-                    Logger.shared.error("无法列出解压目录内容: \(error.localizedDescription)")
+                    Logger.shared.error("Unable to list unzipped directory contents: \(error.localizedDescription)")
                 }
 
-                Logger.shared.warning("CurseForge 整合包中未找到 manifest.json 文件")
+                Logger.shared.warning("Manifest.json file not found in CurseForge integration package")
                 return nil
             }
 
             // Get file size
             let fileAttributes = try FileManager.default.attributesOfItem(atPath: manifestPath.path)
             let fileSize = fileAttributes[.size] as? Int64 ?? 0
-            Logger.shared.info("manifest.json 文件大小: \(fileSize) 字节")
+            Logger.shared.info("manifest.json file size: \(fileSize) bytes")
 
             guard fileSize > 0 else {
-                Logger.shared.error("manifest.json 文件为空")
+                Logger.shared.error("manifest.json file is empty")
                 return nil
             }
 
             // Read and parse files
             let manifestData = try Data(contentsOf: manifestPath)
-            Logger.shared.info("成功读取 manifest.json 数据，大小: \(manifestData.count) 字节")
+            Logger.shared.info("Successfully read manifest.json data, size: \(manifestData.count) bytes")
 
             // Try to parse JSON
             let manifest = try JSONDecoder().decode(CurseForgeManifest.self, from: manifestData)
@@ -66,20 +66,20 @@ enum CurseForgeManifestParser {
                 generatedVersion: modPackVersion
             )
 
-            Logger.shared.info("解析 CurseForge manifest.json 成功: \(manifest.name) v\(modPackVersion)")
+            Logger.shared.info("Parsing CurseForge manifest.json successfully: \(manifest.name) v\(modPackVersion)")
             if manifest.version == nil {
-                Logger.shared.info("⚠️ 整合包缺少version字段，已自动生成版本: \(modPackVersion)")
+                Logger.shared.info("⚠️ The integration package lacks the version field and the version has been automatically generated: \(modPackVersion)")
             }
-            Logger.shared.info("游戏版本: \(manifest.minecraft.version), 加载器: \(loaderInfo.type) \(loaderInfo.version)")
-            Logger.shared.info("文件数量: \(manifest.files.count)")
+            Logger.shared.info("Game version: \(manifest.minecraft.version), loader: \(loaderInfo.type) \(loaderInfo.version)")
+            Logger.shared.info("Number of files: \(manifest.files.count)")
 
             return modrinthInfo
         } catch {
-            Logger.shared.error("解析 CurseForge manifest.json 详细错误: \(error)")
+            Logger.shared.error("Detailed error in parsing CurseForge manifest.json: \(error)")
 
             // If it is a JSON parsing error, try to display part of the content
             if let jsonError = error as? DecodingError {
-                Logger.shared.error("JSON 解析错误: \(jsonError)")
+                Logger.shared.error("JSON parsing error: \(jsonError)")
             }
 
             return nil
@@ -164,7 +164,7 @@ enum CurseForgeManifestParser {
         // For example: 1.20.1-forge-20241212
         let autoVersion = "\(gameVersion)-\(loaderInfo.type)-\(dateString)"
 
-        Logger.shared.info("自动生成整合包版本: \(autoVersion)")
+        Logger.shared.info("Automatically generate integration package version: \(autoVersion)")
         return autoVersion
     }
 
@@ -179,7 +179,7 @@ enum CurseForgeManifestParser {
         loaderInfo: (type: String, version: String),
         generatedVersion: String
     ) async -> ModrinthIndexInfo {
-        Logger.shared.info("转换 CurseForge 格式到 Modrinth 格式，模组数量: \(manifest.files.count)")
+        Logger.shared.info("Convert CurseForge format to Modrinth format, number of modules: \(manifest.files.count)")
 
         // Optimization: Instead of getting file details here, create a file object with lazy parsing
         // Delay the acquisition of real file details until the download stage to improve import speed
@@ -203,7 +203,7 @@ enum CurseForgeManifestParser {
             ))
         }
 
-        Logger.shared.info("快速转换完成，将在下载阶段获取详细信息")
+        Logger.shared.info("Quick conversion completed, details will be fetched during download stage")
 
         return ModrinthIndexInfo(
             gameVersion: manifest.minecraft.version,

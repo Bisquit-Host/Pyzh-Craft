@@ -83,7 +83,7 @@ class PlayerDataManager {
                 }
             }
 
-            Logger.shared.debug("已添加新玩家: \(name)")
+            Logger.shared.debug("New player added: \(name)")
         } catch {
             throw GlobalError.player(
                 i18nKey: "Creation Failed",
@@ -127,7 +127,7 @@ class PlayerDataManager {
             return true
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("添加玩家失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to add player: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return false
         }
@@ -140,7 +140,7 @@ class PlayerDataManager {
             return try loadPlayersThrowing()
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("加载玩家数据失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to load player data: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return []
         }
@@ -178,7 +178,7 @@ class PlayerDataManager {
             return players.contains { $0.name.lowercased() == name.lowercased() }
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("检查玩家存在性失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to check player existence: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return false
         }
@@ -208,10 +208,10 @@ class PlayerDataManager {
                     var firstPlayer = remainingPlayers[0]
                     firstPlayer.isCurrent = true
                     try updatePlayer(firstPlayer)
-                    Logger.shared.debug("当前玩家被删除，已设置第一个玩家为当前玩家: \(firstPlayer.name)")
+                    Logger.shared.debug("The current player has been deleted and the first player has been set as the current player: \(firstPlayer.name)")
                 }
             }
-            Logger.shared.debug("已删除玩家 (ID: \(id))")
+            Logger.shared.debug("Player deleted (ID: \(id))")
         }
     }
 
@@ -224,7 +224,7 @@ class PlayerDataManager {
             return true
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("删除玩家失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to delete player: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return false
         }
@@ -237,7 +237,7 @@ class PlayerDataManager {
             try savePlayersThrowing(players)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("保存玩家数据失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to save player data: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
         }
     }
@@ -275,7 +275,7 @@ class PlayerDataManager {
             _ = credentialStore.deleteCredential(userId: credential.userId)
         }
 
-        Logger.shared.debug("玩家数据已保存")
+        Logger.shared.debug("Player data saved")
     }
 
     /// Update the specified player's information
@@ -294,10 +294,10 @@ class PlayerDataManager {
                 )
             }
         } else {
-            Logger.shared.debug("未提供新的认证凭据，保留现有 Keychain 状态 - userId: \(updatedPlayer.id)")
+            Logger.shared.debug("No new authentication credentials provided, existing Keychain state retained - userId: \(updatedPlayer.id)")
         }
 
-        Logger.shared.debug("已更新玩家信息: \(updatedPlayer.name)")
+        Logger.shared.debug("Updated player information: \(updatedPlayer.name)")
     }
 
     /// Update the specified player's information (silent version)
@@ -309,7 +309,7 @@ class PlayerDataManager {
             return true
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("更新玩家信息失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to update player information: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return false
         }

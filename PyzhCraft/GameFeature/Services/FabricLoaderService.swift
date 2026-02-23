@@ -10,7 +10,7 @@ enum FabricLoaderService {
             return try await fetchAllLoaderVersionsThrowing(for: minecraftVersion)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("获取 Fabric 加载器版本失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to get Fabric loader version: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return []
         }
@@ -94,7 +94,7 @@ enum FabricLoaderService {
             )
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Fabric 指定版本设置失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Fabric specified version setting failed: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return nil
         }
@@ -114,7 +114,7 @@ enum FabricLoaderService {
         gameInfo: GameVersionInfo,
         onProgressUpdate: @escaping (String, Int, Int) -> Void
     ) async throws -> (loaderVersion: String, classpath: String, mainClass: String) {
-        Logger.shared.info("开始设置指定版本的 Fabric 加载器: \(loaderVersion)")
+        Logger.shared.info("Start setting up the Fabric loader for the specified version: \(loaderVersion)")
 
         let fabricProfile = try await fetchSpecificLoaderVersion(for: gameVersion, loaderVersion: loaderVersion)
         let librariesDirectory = AppPaths.librariesDirectory

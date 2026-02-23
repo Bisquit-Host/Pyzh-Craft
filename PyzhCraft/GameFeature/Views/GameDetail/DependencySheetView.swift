@@ -166,7 +166,7 @@ struct DependencySheetView: View {
 
     private func handleDownloadError(_ error: Error) {
         let globalError = GlobalError.from(error)
-        Logger.shared.error("依赖下载错误: \(globalError.chineseMessage)")
+        Logger.shared.error("Dependency download error: \(globalError.chineseMessage)")
         GlobalErrorHandler.shared.handle(globalError)
         
         Task { @MainActor in

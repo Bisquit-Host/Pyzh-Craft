@@ -43,7 +43,7 @@ class SparkleUpdateService: NSObject, ObservableObject, SPUUpdaterDelegate {
             updater?.updateCheckInterval = 24 * 60 * 60 // Check once every 24 hours
             updater?.sendsSystemProfile = false
         } catch {
-            Logger.shared.error("初始化更新器失败：\(error.localizedDescription)")
+            Logger.shared.error("Failed to initialize updater: \(error.localizedDescription)")
         }
     }
 
@@ -70,14 +70,14 @@ class SparkleUpdateService: NSObject, ObservableObject, SPUUpdaterDelegate {
 
     /// Update check completed (no updates)
     func updaterDidNotFindUpdate(_ updater: SPUUpdater) {
-        Logger.shared.info("检查完成，未发现新版本")
+        Logger.shared.info("Check completed, no new version found")
         isCheckingForUpdates = false
         updateAvailable = false
     }
 
     /// Update check completed (there are updates)
     func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) {
-        Logger.shared.info("发现新版本：\(item.versionString)")
+        Logger.shared.info("New version found: \(item.versionString)")
         isCheckingForUpdates = false
         updateAvailable = true
         latestVersion = item.versionString
@@ -86,20 +86,20 @@ class SparkleUpdateService: NSObject, ObservableObject, SPUUpdaterDelegate {
 
     /// Update check failed
     func updater(_ updater: SPUUpdater, didFailToCheckForUpdatesWithError error: Error) {
-        Logger.shared.error("更新检查失败：\(error.localizedDescription)")
+        Logger.shared.error("Update check failed: \(error.localizedDescription)")
         isCheckingForUpdates = false
         updateAvailable = false
     }
 
     /// Update session starts
     func updater(_ updater: SPUUpdater, willInstallUpdate item: SUAppcastItem) {
-        Logger.shared.info("开始安装更新：\(item.versionString)")
+        Logger.shared.info("Start installing updates: \(item.versionString)")
         isCheckingForUpdates = false
     }
 
     /// Update session ends
     func updater(_ updater: SPUUpdater, didFinishLoading appcast: SUAppcast) {
-        Logger.shared.info("更新清单加载完成")
+        Logger.shared.info("Update list loading completed")
     }
 
     /// Get system architecture
@@ -125,13 +125,13 @@ class SparkleUpdateService: NSObject, ObservableObject, SPUUpdaterDelegate {
     /// Manually check for updates (shows Sparkle standard UI)
     func checkForUpdatesWithUI() {
         guard let updater = updater else {
-            Logger.shared.error("更新器尚未初始化")
+            Logger.shared.error("Updater has not been initialized yet")
             return
         }
 
         // Check if an update session is in progress
         if updater.sessionInProgress {
-            Logger.shared.warning("更新会话正在进行中，跳过重复的更新检查")
+            Logger.shared.warning("Update session in progress, skipping repeated update checks")
             return
         }
 
@@ -144,13 +144,13 @@ class SparkleUpdateService: NSObject, ObservableObject, SPUUpdaterDelegate {
     /// Check for updates silently (no UI)
     func checkForUpdatesSilently() {
         guard let updater = updater else {
-            Logger.shared.error("更新器尚未初始化")
+            Logger.shared.error("Updater has not been initialized yet")
             return
         }
 
         // Check if an update session is in progress
         if updater.sessionInProgress {
-            Logger.shared.warning("更新会话正在进行中，跳过重复的更新检查")
+            Logger.shared.warning("Update session in progress, skipping repeated update checks")
             return
         }
 
@@ -168,7 +168,7 @@ extension SparkleUpdateService {
 
         let proxiedURL = URLConfig.applyGitProxyIfNeeded(originalURL)
         if proxiedURL != originalURL {
-            Logger.shared.info("更新下载链接已重写：\(originalURL.absoluteString) -> \(proxiedURL.absoluteString)")
+            Logger.shared.info("Update download link has been rewritten: \(originalURL.absoluteString) -> \(proxiedURL.absoluteString)")
             request.url = proxiedURL
         }
     }

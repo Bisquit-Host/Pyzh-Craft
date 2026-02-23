@@ -83,7 +83,7 @@ class CacheCalculator {
                     totalSize += Int64(fileSize)
                 }
             } catch {
-                Logger.shared.warning("无法获取文件大小: \(fileURL.path), 错误: \(error.localizedDescription)")
+                Logger.shared.warning("Unable to get file size: \(fileURL.path), error: \(error.localizedDescription)")
                 // Continue processing other files without interrupting the entire calculation process
             }
         }

@@ -259,7 +259,7 @@ struct GameAdvancedSettingsView: View {
             selectedGarbageCollector = gc
         } else {
             // If not supported, use the default supported garbage collector
-            Logger.shared.warning("检测到不兼容的垃圾回收器 \(gc.displayName)（需要 Java \(gc.minimumJavaVersion)+，当前 Java \(currentJavaVersion)），自动切换到兼容选项")
+            Logger.shared.warning("Incompatible garbage collector \(gc.displayName) detected (requires Java \(gc.minimumJavaVersion)+, currently Java \(currentJavaVersion)), automatically switches to compatible option")
             selectedGarbageCollector = availableGarbageCollectors.first ?? .g1gc
             optimizationPreset = .balanced
             applyOptimizationPreset(.balanced)
@@ -433,13 +433,13 @@ struct GameAdvancedSettingsView: View {
                 updatedGame.javaPath = javaPath
 
                 try await gameRepository.updateGame(updatedGame)
-                Logger.shared.debug("自动保存游戏设置: \(game.gameName)")
+                Logger.shared.debug("Auto-save game settings: \(game.gameName)")
             } catch {
                 let globalError = error as? GlobalError ?? GlobalError.unknown(
                     i18nKey: "Failed to save settings",
                     level: .notification
                 )
-                Logger.shared.error("自动保存游戏设置失败: \(globalError.chineseMessage)")
+                Logger.shared.error("Auto-save game settings failed: \(globalError.chineseMessage)")
                 await MainActor.run { self.error = globalError }
             }
         }
@@ -492,7 +492,7 @@ struct GameAdvancedSettingsView: View {
                 if JavaManager.shared.canJavaRun(at: url.path) {
                     javaPath = url.path
                     autoSave()
-                    Logger.shared.info("Java路径已设置为: \(url.path)")
+                    Logger.shared.info("Java path has been set to: \(url.path)")
                 } else {
                     error = GlobalError.validation(
                         i18nKey: "The selected file is not a valid Java executable",

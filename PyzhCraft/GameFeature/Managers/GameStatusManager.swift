@@ -30,7 +30,7 @@ class GameStatusManager: ObservableObject {
     private func updateGameStatusIfNeeded(gameId: String, actuallyRunning: Bool) {
         if let cachedState = gameRunningStates[gameId], cachedState != actuallyRunning {
             gameRunningStates[gameId] = actuallyRunning
-            Logger.shared.debug("游戏状态同步更新: \(gameId) -> \(actuallyRunning ? "运行中" : "已停止")")
+            Logger.shared.debug("Synchronous update of game status: \(gameId) -> \(actuallyRunning ? "running" : "stopped")")
         } else if gameRunningStates[gameId] == nil {
             gameRunningStates[gameId] = actuallyRunning
         }
@@ -43,7 +43,7 @@ class GameStatusManager: ObservableObject {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             self.gameRunningStates[gameId] = actuallyRunning
-            Logger.shared.debug("强制刷新游戏状态: \(gameId) -> \(actuallyRunning ? "运行中" : "已停止")")
+            Logger.shared.debug("Force refresh of game state: \(gameId) -> \(actuallyRunning ? "running" : "stopped")")
         }
     }
 
@@ -56,7 +56,7 @@ class GameStatusManager: ObservableObject {
             let currentState = self.gameRunningStates[gameId]
             if currentState != isRunning {
                 self.gameRunningStates[gameId] = isRunning
-                Logger.shared.debug("游戏状态更新: \(gameId) -> \(isRunning ? "运行中" : "已停止")")
+                Logger.shared.debug("Game status update: \(gameId) -> \(isRunning ? "running" : "stopped")")
             }
         }
     }
@@ -96,7 +96,7 @@ class GameStatusManager: ObservableObject {
             let currentState = self.gameLaunchingStates[gameId] ?? false
             if currentState != isLaunching {
                 self.gameLaunchingStates[gameId] = isLaunching
-                Logger.shared.debug("游戏启动中状态更新: \(gameId) -> \(isLaunching ? "启动中" : "非启动中")")
+                Logger.shared.debug("Game startup status update: \(gameId) -> \(isLaunching ? "launching" : "not launching")")
             }
         }
     }

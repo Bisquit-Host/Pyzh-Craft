@@ -111,14 +111,14 @@ struct CustomVersionPicker: View {
             i18nKey: "No Versions Available",
             level: .notification
         )
-        Logger.shared.error("版本选择器错误: \(globalError.chineseMessage)")
+        Logger.shared.error("Version selector error: \(globalError.chineseMessage)")
         GlobalErrorHandler.shared.handle(globalError)
         error = globalError
     }
 
     private func handleVersionSelectionError(_ error: Error) {
         let globalError = GlobalError.from(error)
-        Logger.shared.error("版本选择错误: \(globalError.chineseMessage)")
+        Logger.shared.error("Wrong version selection: \(globalError.chineseMessage)")
         GlobalErrorHandler.shared.handle(globalError)
         self.error = globalError
     }

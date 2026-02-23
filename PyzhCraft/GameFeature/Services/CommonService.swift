@@ -17,7 +17,7 @@ enum CommonService {
         } catch {
             let globalError = GlobalError.from(error)
             Logger.shared.error(
-                "获取 \(loader) 版本失败: \(globalError.chineseMessage)"
+                "Failed to get version \(loader): \(globalError.chineseMessage)"
             )
             GlobalErrorHandler.shared.handle(globalError)
             return []
@@ -109,7 +109,7 @@ enum CommonService {
             )
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("获取加载器版本失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to get loader version: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return nil
         }

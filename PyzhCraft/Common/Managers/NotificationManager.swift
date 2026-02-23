@@ -43,7 +43,7 @@ enum NotificationManager {
         semaphore.wait()
 
         if let error = notificationError {
-            Logger.shared.error("添加通知请求时出错：\(error.localizedDescription)")
+            Logger.shared.error("Error adding notification request: \(error.localizedDescription)")
             throw GlobalError.resource(
                 i18nKey: "Notification Send Failed",
                 level: .silent
@@ -60,7 +60,7 @@ enum NotificationManager {
             try send(title: title, body: body)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("发送通知失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to send notification: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
         }
     }
@@ -73,16 +73,16 @@ enum NotificationManager {
                 .requestAuthorization(options: [.alert, .sound, .badge])
 
             if granted {
-                Logger.shared.info("通知权限已授予")
+                Logger.shared.info("Notification permission granted")
             } else {
-                Logger.shared.warning("用户拒绝了通知权限")
+                Logger.shared.warning("User denied notification permission")
                 throw GlobalError.configuration(
                     i18nKey: "Notification Permission Denied",
                     level: .notification
                 )
             }
         } catch {
-            Logger.shared.error("请求通知权限时出错: \(error.localizedDescription)")
+            Logger.shared.error("Error while requesting notification permission: \(error.localizedDescription)")
             if error is GlobalError {
                 throw error
             } else {
@@ -100,7 +100,7 @@ enum NotificationManager {
             try await requestAuthorization()
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("请求通知权限失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to request notification permission: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
         }
     }

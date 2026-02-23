@@ -62,7 +62,7 @@ enum ForgeLoaderService {
             )
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Forge 指定版本设置失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Forge specified version setting failed: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return nil
         }
@@ -82,7 +82,7 @@ enum ForgeLoaderService {
         gameInfo: GameVersionInfo,
         onProgressUpdate: @escaping (String, Int, Int) -> Void
     ) async throws -> (loaderVersion: String, classpath: String, mainClass: String) {
-        Logger.shared.info("开始设置指定版本的 Forge 加载器: \(loaderVersion)")
+        Logger.shared.info("Start setting up the specified version of the Forge loader: \(loaderVersion)")
 
         let forgeProfile = try await fetchSpecificForgeProfile(for: gameVersion, loaderVersion: loaderVersion)
         let librariesDirectory = AppPaths.librariesDirectory

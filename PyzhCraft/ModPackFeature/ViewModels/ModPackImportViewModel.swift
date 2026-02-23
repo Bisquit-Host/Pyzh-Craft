@@ -86,18 +86,18 @@ class ModPackImportViewModel: BaseGameFormViewModel {
                 if fm.fileExists(atPath: profileDir.path) {
                     do {
                         try fm.removeItem(at: profileDir)
-                        Logger.shared.info("已删除取消创建的ModPack游戏文件夹: \(profileDir.path)")
+                        Logger.shared.info("Deleted uncreated ModPack game folder: \(profileDir.path)")
                     } catch {
-                        Logger.shared.error("删除ModPack游戏文件夹失败: \(error.localizedDescription)")
+                        Logger.shared.error("Failed to delete ModPack game folder: \(error.localizedDescription)")
                     }
                 }
             }
             if let path = extractedPath, fm.fileExists(atPath: path.path) {
                 do {
                     try fm.removeItem(at: path)
-                    Logger.shared.info("已删除ModPack临时解压文件: \(path.path)")
+                    Logger.shared.info("Deleted ModPack temporary decompression file: \(path.path)")
                 } catch {
-                    Logger.shared.error("删除ModPack临时文件失败: \(error.localizedDescription)")
+                    Logger.shared.error("Failed to delete ModPack temporary files: \(error.localizedDescription)")
                 }
             }
         }.value
@@ -288,7 +288,7 @@ class ModPackImportViewModel: BaseGameFormViewModel {
                     },
                     onError: { error, message in
                         Task { @MainActor in
-                            Logger.shared.error("游戏设置失败: \(message)")
+                            Logger.shared.error("Game setup failed: \(message)")
                             GlobalErrorHandler.shared.handle(error)
                         }
                         continuation.resume(returning: false)
@@ -327,7 +327,7 @@ class ModPackImportViewModel: BaseGameFormViewModel {
             let allFiles = try InstanceFileCopier.getAllFiles(in: overridesPath)
             return allFiles.count
         } catch {
-            Logger.shared.error("计算 overrides 文件总数失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to calculate total number of overrides files: \(error.localizedDescription)")
             return 0
         }
     }
@@ -346,7 +346,7 @@ class ModPackImportViewModel: BaseGameFormViewModel {
                     withIntermediateDirectories: true
                 )
             } catch {
-                Logger.shared.error("创建目录失败: \(dir.path), 错误: \(error.localizedDescription)")
+                Logger.shared.error("Failed to create directory: \(dir.path), error: \(error.localizedDescription)")
                 GlobalErrorHandler.shared.handle(
                     GlobalError.fileSystem(
                         i18nKey: "Directory Creation Failed",
@@ -407,12 +407,12 @@ class ModPackImportViewModel: BaseGameFormViewModel {
 
     private func handleModPackInstallationResult(success: Bool, gameName: String) {
         if success {
-            Logger.shared.info("本地整合包导入完成: \(gameName)")
+            Logger.shared.info("Local integration package import completed: \(gameName)")
             // Clean up index data no longer needed to free up memory
             modPackViewModel.clearParsedIndexInfo()
             configuration.actions.onCancel() // Use cancel to dismiss
         } else {
-            Logger.shared.error("本地整合包导入失败: \(gameName)")
+            Logger.shared.error("Local integration package import failed: \(gameName)")
             // Clean created game folders
             Task {
                 await cleanupGameDirectories(gameName: gameName)
@@ -435,7 +435,7 @@ class ModPackImportViewModel: BaseGameFormViewModel {
             let fileManager = MinecraftFileManager()
             try fileManager.cleanupGameDirectories(gameName: gameName)
         } catch {
-            Logger.shared.error("清理游戏文件夹失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to clean game folder: \(error.localizedDescription)")
         }
     }
 

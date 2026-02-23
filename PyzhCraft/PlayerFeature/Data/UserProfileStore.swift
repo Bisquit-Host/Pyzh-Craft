@@ -18,7 +18,7 @@ class UserProfileStore {
             let decoder = JSONDecoder()
             return try decoder.decode([UserProfile].self, from: profilesData)
         } catch {
-            Logger.shared.error("加载用户基本信息失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to load basic user information: \(error.localizedDescription)")
             return []
         }
     }
@@ -49,7 +49,7 @@ class UserProfileStore {
             try saveProfilesThrowing(profiles)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("保存用户基本信息失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to save basic user information: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
         }
     }
@@ -62,7 +62,7 @@ class UserProfileStore {
             let encoder = JSONEncoder()
             let encodedData = try encoder.encode(profiles)
             UserDefaults.standard.set(encodedData, forKey: profilesKey)
-            Logger.shared.debug("用户基本信息已保存")
+            Logger.shared.debug("Basic user information has been saved")
         } catch {
             throw GlobalError.validation(
                 i18nKey: "Failed to save user basic information: \(error.localizedDescription)",
@@ -94,7 +94,7 @@ class UserProfileStore {
         }
 
         try saveProfilesThrowing(profiles)
-        Logger.shared.debug("已添加新用户: \(profile.name)")
+        Logger.shared.debug("New user added: \(profile.name)")
     }
 
     /// Update basic user information
@@ -112,7 +112,7 @@ class UserProfileStore {
 
         profiles[index] = profile
         try saveProfilesThrowing(profiles)
-        Logger.shared.debug("已更新用户信息: \(profile.name)")
+        Logger.shared.debug("Updated user information: \(profile.name)")
     }
 
     /// Delete basic user information
@@ -131,11 +131,11 @@ class UserProfileStore {
             // If the current user is deleted, a new current user needs to be set up
             if isDeletingCurrentUser && !profiles.isEmpty {
                 profiles[0].isCurrent = true
-                Logger.shared.debug("当前用户被删除，已设置第一个用户为当前用户: \(profiles[0].name)")
+                Logger.shared.debug("The current user has been deleted and the first user has been set as the current user: \(profiles[0].name)")
             }
 
             try saveProfilesThrowing(profiles)
-            Logger.shared.debug("已删除用户 (ID: \(id))")
+            Logger.shared.debug("Deleted user (ID: \(id))")
         } else {
             throw GlobalError.player(
                 i18nKey: "Not Found",
@@ -152,7 +152,7 @@ class UserProfileStore {
             let profiles = try loadProfilesThrowing()
             return profiles.contains { $0.id == id }
         } catch {
-            Logger.shared.error("检查用户存在性失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to check user existence: \(error.localizedDescription)")
             return false
         }
     }

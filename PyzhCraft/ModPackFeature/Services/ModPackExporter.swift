@@ -156,7 +156,7 @@ enum ModPackExporter {
                 message: ""
             )
         } catch {
-            Logger.shared.error("导出整合包失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to export integration package: \(error.localizedDescription)")
             return ExportResult(
                 success: false,
                 outputPath: nil,
@@ -265,11 +265,11 @@ enum ModPackExporter {
                         if let resourceType = ResourceScanner.ResourceType(rawValue: result.relativePath) {
                             filesToCopy.append((file: result.sourceFile, resourceType: resourceType))
                         } else {
-                            Logger.shared.warning("无法识别资源类型: \(result.relativePath)")
+                            Logger.shared.warning("Unrecognized resource type: \(result.relativePath)")
                         }
                     } else {
                         // This theoretically shouldn't happen, but the warning is logged just in case
-                        Logger.shared.warning("资源文件既没有索引文件也不需要复制: \(result.sourceFile.lastPathComponent)")
+                        Logger.shared.warning("Resource files have neither index files nor need to be copied: \(result.sourceFile.lastPathComponent)")
                     }
                 }
             }
@@ -339,7 +339,7 @@ enum ModPackExporter {
                             let updatedProgress = await progressUpdater.getFullProgress()
                             progressCallback?(updatedProgress)
                         } catch {
-                            Logger.shared.warning("复制资源文件失败: \(file.lastPathComponent), 错误: \(error.localizedDescription)")
+                            Logger.shared.warning("Failed to copy resource file: \(file.lastPathComponent), error: \(error.localizedDescription)")
 
                             // Update progress (counts as processed even if it fails)
                             let (processed, total) = await copyCounter.increment()

@@ -148,7 +148,7 @@ extension AppPaths {
             return cachesDirectory.appendingPathComponent(Bundle.main.identifier)
         }
         
-        Logger.shared.error("无法获取系统缓存目录，使用应用支持目录下的 Cache")
+        Logger.shared.error("Unable to obtain the system cache directory, use the Cache in the application support directory")
         return launcherSupportDirectory.appendingPathComponent("Cache", isDirectory: true)
     }
 

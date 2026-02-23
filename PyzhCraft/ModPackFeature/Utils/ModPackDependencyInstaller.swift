@@ -47,12 +47,12 @@ enum ModPackDependencyInstaller {
 
         // Check results
         if !filesSuccess {
-            Logger.shared.error("整合包文件安装失败")
+            Logger.shared.error("Integration package file installation failed")
             return false
         }
 
         if !dependenciesSuccess {
-            Logger.shared.error("整合包依赖安装失败")
+            Logger.shared.error("Integration package dependency installation failed")
             return false
         }
 
@@ -119,7 +119,7 @@ enum ModPackDependencyInstaller {
         let failedCount = results.count - successCount
 
         if failedCount > 0 {
-            Logger.shared.error("有 \(failedCount) 个文件下载失败")
+            Logger.shared.error("\(failedCount) files failed to download")
             return false
         }
 
@@ -211,7 +211,7 @@ enum ModPackDependencyInstaller {
     private static func downloadCurseForgeFileWithFallback(projectId: Int, resourceDir: URL, gameInfo: GameVersionInfo?, modDetail: CurseForgeModDetail? = nil) async -> Bool {
         // Game information is required for exact matching
         guard let gameInfo = gameInfo else {
-            Logger.shared.error("缺少游戏信息，无法进行文件过滤: \(projectId)")
+            Logger.shared.error("Missing game information, unable to filter files: \(projectId)")
             return false
         }
 
@@ -234,14 +234,14 @@ enum ModPackDependencyInstaller {
                 gameVersion: gameInfo.gameVersion,
                 modLoaderType: modLoaderTypeValue
             ) else {
-                Logger.shared.error("精确匹配失败，未找到兼容文件: \(projectId)")
+                Logger.shared.error("Exact match failed, no compatible file found: \(projectId)")
                 return false
             }
             filteredFiles = files
         }
 
         guard !filteredFiles.isEmpty else {
-            Logger.shared.error("精确匹配失败，未找到兼容文件: \(projectId)")
+            Logger.shared.error("Exact match failed, no compatible file found: \(projectId)")
             return false
         }
 
@@ -254,7 +254,7 @@ enum ModPackDependencyInstaller {
             )
         }
 
-        Logger.shared.error("未找到可下载的文件: \(projectId)")
+        Logger.shared.error("Downloadable file not found: \(projectId)")
         return false
     }
 
@@ -317,7 +317,7 @@ enum ModPackDependencyInstaller {
 
             return true
         } catch {
-            Logger.shared.error("下载 CurseForge 文件失败: \(fileDetail.fileName)")
+            Logger.shared.error("Failed to download CurseForge files: \(fileDetail.fileName)")
             return false
         }
     }
@@ -395,7 +395,7 @@ enum ModPackDependencyInstaller {
     /// - Returns: Whether the download is successful
     private static func downloadModrinthFile(file: ModrinthIndexFile, resourceDir: URL) async -> Bool {
         guard let urlString = file.downloads.first, !urlString.isEmpty else {
-            Logger.shared.error("文件无可用下载链接: \(file.path)")
+            Logger.shared.error("No download link available for file: \(file.path)")
             return false
         }
 
@@ -434,7 +434,7 @@ enum ModPackDependencyInstaller {
 
             return true
         } catch {
-            Logger.shared.error("下载文件失败: \(file.path)")
+            Logger.shared.error("Failed to download file: \(file.path)")
             return false
         }
     }
@@ -508,7 +508,7 @@ enum ModPackDependencyInstaller {
         let failedCount = results.count - successCount
 
         if failedCount > 0 {
-            Logger.shared.error("有 \(failedCount) 个依赖安装失败")
+            Logger.shared.error("\(failedCount) dependencies failed to install")
             return false
         }
 
@@ -629,7 +629,7 @@ enum ModPackDependencyInstaller {
 
             return true
         } catch {
-            Logger.shared.error("处理 overrides 文件夹失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to process overrides folder: \(error.localizedDescription)")
             return false
         }
     }
@@ -648,7 +648,7 @@ enum ModPackDependencyInstaller {
         resourceDir: URL
     ) async -> Bool {
         guard let projectId = dep.projectId else {
-            Logger.shared.error("依赖缺少项目ID")
+            Logger.shared.error("Dependency is missing project ID")
             return false
         }
 
@@ -691,7 +691,7 @@ enum ModPackDependencyInstaller {
             // Check version compatibility
             guard version.gameVersions.contains(gameInfo.gameVersion) &&
                   version.loaders.contains(gameInfo.modLoader) else {
-                Logger.shared.error("版本不兼容: \(versionId)")
+                Logger.shared.error("Incompatible version: \(versionId)")
                 return false
             }
 
@@ -706,7 +706,7 @@ enum ModPackDependencyInstaller {
                 resourceDir: resourceDir
             )
         } catch {
-            Logger.shared.error("获取版本详情失败")
+            Logger.shared.error("Failed to get version details")
             return false
         }
     }
@@ -738,7 +738,7 @@ enum ModPackDependencyInstaller {
             }
 
             guard let latestVersion = latestCompatibleVersion else {
-                Logger.shared.error("未找到兼容版本: \(projectId)")
+                Logger.shared.error("No compatible version found: \(projectId)")
                 return false
             }
 
@@ -750,7 +750,7 @@ enum ModPackDependencyInstaller {
                 resourceDir: resourceDir
             )
         } catch {
-            Logger.shared.error("获取项目详情失败")
+            Logger.shared.error("Failed to get project details")
             return false
         }
     }
@@ -771,7 +771,7 @@ enum ModPackDependencyInstaller {
         do {
             // Get main file
             guard let primaryFile = ModrinthService.filterPrimaryFiles(from: version.files) else {
-                Logger.shared.error("未找到主文件: \(version.id)")
+                Logger.shared.error("Master file not found: \(version.id)")
                 return false
             }
 
@@ -794,7 +794,7 @@ enum ModPackDependencyInstaller {
 
             return true
         } catch {
-            Logger.shared.error("下载依赖失败")
+            Logger.shared.error("Failed to download dependencies")
             return false
         }
     }

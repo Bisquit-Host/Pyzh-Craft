@@ -19,12 +19,12 @@ class PremiumAccountFlagManager {
     /// Set the genuine account mark added
     func setPremiumAccountAdded() {
         UserDefaults.standard.set(true, forKey: flagKey)
-        Logger.shared.debug("已设置正版账户添加标记")
+        Logger.shared.debug("A genuine account has been set up to add a mark")
     }
 
     /// Clear genuine account mark (for testing or reset)
     func clearPremiumAccountFlag() {
         UserDefaults.standard.removeObject(forKey: flagKey)
-        Logger.shared.debug("已清除正版账户标记")
+        Logger.shared.debug("Genuine account mark cleared")
     }
 }

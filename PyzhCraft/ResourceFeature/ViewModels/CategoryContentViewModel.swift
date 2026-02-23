@@ -208,7 +208,7 @@ final class CategoryContentViewModel: ObservableObject {
 
     private func handleError(_ error: Error) {
         let globalError = GlobalError.from(error)
-        Logger.shared.error("加载分类数据错误: \(globalError.chineseMessage)")
+        Logger.shared.error("Error loading classification data: \(globalError.chineseMessage)")
         GlobalErrorHandler.shared.handle(globalError)
         Task { @MainActor in
             self.error = globalError

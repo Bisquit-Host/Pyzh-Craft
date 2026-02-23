@@ -77,7 +77,7 @@ class JavaRuntimeService {
     func getMacJavaRuntimeData(for version: String) async throws -> [[String: Any]] {
         let platformData = try await getMacJavaRuntimeData()
         guard let versionData = platformData[version] as? [[String: Any]] else {
-            Logger.shared.error("版本 \(version) 的数据类型不正确，期望 [[String: Any]]，实际: \(type(of: platformData[version]))")
+            Logger.shared.error("Incorrect data type for version \(version), expected [[String: Any]], actual: \(type(of: platformData[version]))")
             throw GlobalError.validation(
                 i18nKey: "Version data not found",
                 level: .notification
@@ -93,14 +93,14 @@ class JavaRuntimeService {
         guard let firstVersion = versionData.first,
               let manifest = firstVersion["manifest"] as? [String: Any],
               let manifestURL = manifest["url"] as? String else {
-            Logger.shared.error("无法解析版本 \(version) 的数据结构")
+            Logger.shared.error("Unable to parse data structure for version \(version)")
             throw GlobalError.validation(
                 i18nKey: "Manifest URL not found",
                 level: .notification
             )
         }
 
-        Logger.shared.info("找到版本 \(version) 的manifest URL: \(manifestURL)")
+        Logger.shared.info("Found manifest URL for version \(version): \(manifestURL)")
         return manifestURL
     }
     /// Download the specified version of Java runtime
@@ -158,7 +158,7 @@ class JavaRuntimeService {
                 group.addTask { [progressActor, cancelActor, self] in
                     // Check if it should be canceled
                     if await cancelActor.shouldCancel() {
-                        Logger.shared.info("Java下载已被取消")
+                        Logger.shared.info("Java download has been canceled")
                         throw GlobalError.download(
                             i18nKey: "Download cancelled",
                             level: .notification
@@ -176,7 +176,7 @@ class JavaRuntimeService {
 
                     // Only use raw format
                     guard let raw = downloads["raw"] as? [String: Any] else {
-                        Logger.shared.warning("文件 \(filePath) 没有RAW格式，跳过")
+                        Logger.shared.warning("File \(filePath) does not have RAW format, skip")
                         return
                     }
 
@@ -220,7 +220,7 @@ class JavaRuntimeService {
                                 await progressActor.callProgressUpdate(filePath, completed, totalFiles)
                             }
                         } catch {
-                            Logger.shared.warning("无法验证文件 \(filePath) 的下载状态: \(error.localizedDescription)")
+                            Logger.shared.warning("Unable to verify download status of file \(filePath): \(error.localizedDescription)")
                         }
                     }
                 }
@@ -338,7 +338,7 @@ class JavaRuntimeService {
                 destinationPath: finalJreBundlePath
             )
         } catch {
-            Logger.shared.error("解压Java运行时失败: \(error.localizedDescription)")
+            Logger.shared.error("Unpacking Java runtime failed: \(error.localizedDescription)")
 
             throw GlobalError.validation(
                 i18nKey: "Extraction failed",
@@ -441,7 +441,7 @@ class JavaRuntimeService {
                 }
 
                 // For other errors, log and throw
-                Logger.shared.error("解压失败: \(entry.path) - \(error.localizedDescription)")
+                Logger.shared.error("Decompression failed: \(entry.path) - \(error.localizedDescription)")
                 throw error
             }
         }
@@ -490,11 +490,11 @@ class JavaRuntimeService {
                         try fileManager.moveItem(at: tempURL, to: destinationURL)
                         continuation.resume()
                     } catch {
-                        Logger.shared.error("移动下载文件失败: \(error.localizedDescription)")
+                        Logger.shared.error("Mobile download file failed: \(error.localizedDescription)")
                         continuation.resume(throwing: error)
                     }
                 case .failure(let error):
-                    Logger.shared.error("下载失败: \(error.localizedDescription)")
+                    Logger.shared.error("Download failed: \(error.localizedDescription)")
                     continuation.resume(throwing: error)
                 }
             }

@@ -95,7 +95,7 @@ struct GameResourceInstallSheet: View {
                 try await loadDependenciesThrowing(for: version, game: game)
             } catch {
                 let globalError = GlobalError.from(error)
-                Logger.shared.error("加载依赖项失败: \(globalError.chineseMessage)")
+                Logger.shared.error("Failed to load dependencies: \(globalError.chineseMessage)")
                 GlobalErrorHandler.shared.handle(globalError)
                 _ = await MainActor.run {
                     dependencyState = DependencyState()
@@ -217,7 +217,7 @@ struct GameResourceInstallFooter: View {
             } catch {
                 let globalError = GlobalError.from(error)
                 Logger.shared.error(
-                    "手动下载所有依赖项失败: \(globalError.chineseMessage)"
+                    "Manual download of all dependencies failed: \(globalError.chineseMessage)"
                 )
                 GlobalErrorHandler.shared.handle(globalError)
                 _ = await MainActor.run {
@@ -276,7 +276,7 @@ struct GameResourceInstallFooter: View {
                 // Successful download has been handled in downloadResourceThrowing to close the sheet
             } catch {
                 let globalError = GlobalError.from(error)
-                Logger.shared.error("下载资源失败: \(globalError.chineseMessage)")
+                Logger.shared.error("Failed to download resource: \(globalError.chineseMessage)")
                 GlobalErrorHandler.shared.handle(globalError)
                 _ = await MainActor.run {
                     isDownloadingAll = false

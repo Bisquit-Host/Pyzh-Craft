@@ -18,13 +18,13 @@ class GameActionManager: ObservableObject {
 
         // Check if directory exists
         guard FileManager.default.fileExists(atPath: gameDirectory.path) else {
-            Logger.shared.warning("游戏目录不存在: \(gameDirectory.path)")
+            Logger.shared.warning("Game directory does not exist: \(gameDirectory.path)")
             return
         }
 
         // Show directory in Finder
         NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: gameDirectory.path)
-        Logger.shared.info("在访达中显示游戏目录: \(game.gameName)")
+        Logger.shared.info("Show game directory in Finder: \(game.gameName)")
     }
 
     /// Delete the game and its folder
@@ -75,7 +75,7 @@ class GameActionManager: ObservableObject {
                 if FileManager.default.fileExists(atPath: profileDir.path) {
                     try FileManager.default.removeItem(at: profileDir)
                 } else {
-                    Logger.shared.warning("删除游戏时未找到游戏目录，跳过文件删除: \(profileDir.path)")
+                    Logger.shared.warning("Game directory not found when deleting game, file deletion skipped: \(profileDir.path)")
                 }
 
                 // Clear all memory cache related to this game (icons, paths, mod scan results)
@@ -86,13 +86,13 @@ class GameActionManager: ObservableObject {
                 // Delete game history
                 try await gameRepository.deleteGame(id: game.id)
 
-                Logger.shared.info("成功删除游戏: \(game.gameName)")
+                Logger.shared.info("Game deleted successfully: \(game.gameName)")
             } catch {
                 let globalError = GlobalError.fileSystem(
                     i18nKey: "Game Deletion Failed",
                     level: .notification
                 )
-                Logger.shared.error("删除游戏失败: \(globalError.chineseMessage)")
+                Logger.shared.error("Failed to delete game: \(globalError.chineseMessage)")
                 GlobalErrorHandler.shared.handle(globalError)
             }
         }

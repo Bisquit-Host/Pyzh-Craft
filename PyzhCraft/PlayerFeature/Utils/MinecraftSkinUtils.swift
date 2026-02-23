@@ -227,7 +227,7 @@ struct MinecraftSkinUtils: View {
     static func clearCache() {
         imageCache.removeAllObjects()
         cacheStats = CacheStats()
-        Logger.shared.debug("🧹 MinecraftSkinUtils 缓存已清理")
+        Logger.shared.debug("🧹 MinecraftSkinUtils cache cleared")
     }
 
     // Get the current cache configuration (for debugging)
@@ -396,7 +396,7 @@ struct MinecraftSkinUtils: View {
                     self.error = globalError.chineseMessage
                     self.isLoading = false
                 }
-                Logger.shared.error("❌ 皮肤加载失败: \(globalError.chineseMessage)")
+                Logger.shared.error("❌ Skin loading failed: \(globalError.chineseMessage)")
                 GlobalErrorHandler.shared.handle(globalError)
             }
         }

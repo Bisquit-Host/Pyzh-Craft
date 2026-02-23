@@ -27,7 +27,7 @@ enum InstanceFileCopier {
                 let filePath = standardizedFileURL.path
 
                 guard filePath.hasPrefix(sourcePath) else {
-                    Logger.shared.warning("文件路径不在源目录内: \(filePath) (源目录: \(sourcePath))")
+                    Logger.shared.warning("File path is not in source directory: \(filePath) (source directory: \(sourcePath))")
                     return nil
                 }
 
@@ -45,7 +45,7 @@ enum InstanceFileCopier {
                 let filePath = standardizedFileURL.path
 
                 guard filePath.hasPrefix(sourcePath) else {
-                    Logger.shared.warning("文件路径不在源目录内: \(filePath) (源目录: \(sourcePath))")
+                    Logger.shared.warning("File path is not in source directory: \(filePath) (source directory: \(sourcePath))")
                     return nil
                 }
 
@@ -59,9 +59,9 @@ enum InstanceFileCopier {
         let filteredCount = allFiles.count - totalFiles
 
         if filteredCount > 0 {
-            Logger.shared.info("开始合并目录: \(sourceDirectory.path) -> \(targetDirectory.path), 共 \(totalFiles) 个文件（已过滤 \(filteredCount) 个文件）")
+            Logger.shared.info("Start merging directories: \(sourceDirectory.path) -> \(targetDirectory.path), total \(totalFiles) files (filtered \(filteredCount) files)")
         } else {
-            Logger.shared.info("开始合并目录: \(sourceDirectory.path) -> \(targetDirectory.path), 共 \(totalFiles) 个文件")
+            Logger.shared.info("Start merging directories: \(sourceDirectory.path) -> \(targetDirectory.path), total \(totalFiles) files")
         }
 
         var completed = 0
@@ -85,7 +85,7 @@ enum InstanceFileCopier {
             try await Task.sleep(nanoseconds: 1_000_000)
         }
 
-        Logger.shared.info("目录合并完成: \(completed)/\(totalFiles) 个文件")
+        Logger.shared.info("Directory merge completed: \(completed)/\(totalFiles) files")
     }
 
     static func copyGameDirectory(

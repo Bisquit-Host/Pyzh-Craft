@@ -42,14 +42,14 @@ class JavaManager {
 
             let exitCode = process.terminationStatus
             if exitCode == 0 {
-                Logger.shared.debug("Java启动验证成功: \(javaPath)")
+                Logger.shared.debug("Java startup verification successful: \(javaPath)")
                 return true
             } else {
-                Logger.shared.warning("Java启动验证失败，退出码: \(exitCode)")
+                Logger.shared.warning("Java startup verification failed, exit code: \(exitCode)")
                 return false
             }
         } catch {
-            Logger.shared.error("Java启动验证异常: \(error.localizedDescription)")
+            Logger.shared.error("Java startup verification exception: \(error.localizedDescription)")
             return false
         }
     }
@@ -59,19 +59,19 @@ class JavaManager {
         // Prefer existing and working Java
         let existingPath = findJavaExecutable(version: version)
         if !existingPath.isEmpty {
-            Logger.shared.info("Java版本 \(version) 已存在")
+            Logger.shared.info("Java version \(version) already exists")
             return existingPath
         }
 
         // If not present, use the progress window to download the Java runtime
-        Logger.shared.info("Java版本 \(version) 不存在，开始下载...")
+        Logger.shared.info("Java version \(version) does not exist, start downloading")
         await JavaDownloadManager.shared.downloadJavaRuntime(version: version)
-        Logger.shared.info("Java版本 \(version) 下载完成")
+        Logger.shared.info("Java version \(version) download completed")
 
         // After the download is complete try to get the Java path again
         let newPath = findJavaExecutable(version: version)
         if newPath.isEmpty {
-            Logger.shared.error("Java版本 \(version) 下载完成后仍无法找到可用的Java可执行文件")
+            Logger.shared.error("Java version \(version) The available Java executable file cannot be found after the download is completed")
         }
         return newPath
     }
@@ -85,7 +85,7 @@ class JavaManager {
             // Use component to splice Java paths (without verification)
             return getJavaExecutablePath(version: component)
         } catch {
-            Logger.shared.error("获取游戏版本信息失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to obtain game version information: \(error.localizedDescription)")
             return ""
         }
     }

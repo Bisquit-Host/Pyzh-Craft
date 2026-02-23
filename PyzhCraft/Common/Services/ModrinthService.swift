@@ -111,7 +111,7 @@ enum ModrinthService {
             )
         }.catching { error in
             let globalError = GlobalError.from(error)
-            Logger.shared.error("搜索 Modrinth 项目失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Search for Modrinth project failed: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return ModrinthResult(hits: [], offset: offset, limit: limit, totalHits: 0)
         }
@@ -179,7 +179,7 @@ enum ModrinthService {
             return try await fetchLoadersThrowing()
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("获取 Modrinth 加载器列表失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to get Modrinth loader list: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return []
         }
@@ -197,7 +197,7 @@ enum ModrinthService {
             return try await fetchCategoriesThrowing()
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("获取 Modrinth 分类列表失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to get Modrinth category list: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return []
         }
@@ -215,7 +215,7 @@ enum ModrinthService {
             return try await fetchGameVersionsThrowing(includeSnapshots: includeSnapshots)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("获取 Modrinth 游戏版本列表失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to get Modrinth game version list: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return []
         }
@@ -242,7 +242,7 @@ enum ModrinthService {
             return try await fetchProjectDetailsThrowing(id: id)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("获取项目详情失败 (ID: \(id)): \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to get project details (ID: \(id)): \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return nil
         }
@@ -283,7 +283,7 @@ enum ModrinthService {
             return try await fetchProjectVersionsThrowing(id: id)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("获取项目版本列表失败 (ID: \(id)): \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to get project version list (ID: \(id)): \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return []
         }
@@ -361,7 +361,7 @@ enum ModrinthService {
             )
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("获取项目依赖失败 (ID: \(id)): \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to obtain project dependencies (ID: \(id)): \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return ModrinthProjectDependency(projects: [])
         }
@@ -428,7 +428,7 @@ enum ModrinthService {
                                     type: type
                                 )
                                 guard let firstDepVersion = depVersions.first else {
-                                    Logger.shared.warning("未找到兼容的依赖版本 (ID: \(projectId))")
+                                    Logger.shared.warning("No compatible dependency version found (ID: \(projectId))")
                                     return nil
                                 }
                                 depVersion = firstDepVersion
@@ -437,7 +437,7 @@ enum ModrinthService {
                             return depVersion
                         } catch {
                             let globalError = GlobalError.from(error)
-                            Logger.shared.error("获取依赖项目版本失败 (ID: \(projectId)): \(globalError.chineseMessage)")
+                            Logger.shared.error("Failed to obtain dependent project version (ID: \(projectId)): \(globalError.chineseMessage)")
                             return nil
                         }
                     }
@@ -509,7 +509,7 @@ enum ModrinthService {
                     }
                 } catch {
                     let globalError = GlobalError.from(error)
-                    Logger.shared.error("通过哈希获取项目详情失败 (Hash: \(hash)): \(globalError.chineseMessage)")
+                    Logger.shared.error("Failed to get project details via hash (Hash: \(hash)): \(globalError.chineseMessage)")
                     GlobalErrorHandler.shared.handle(globalError)
                     await MainActor.run {
                         completion(nil)

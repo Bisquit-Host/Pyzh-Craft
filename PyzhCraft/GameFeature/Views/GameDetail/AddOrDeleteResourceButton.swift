@@ -302,7 +302,7 @@ struct AddOrDeleteResourceButton: View {
                 i18nKey: "Delete File Failed",
                 level: .notification
             )
-            Logger.shared.error("删除文件失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to delete file: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return
         }
@@ -317,7 +317,7 @@ struct AddOrDeleteResourceButton: View {
                 i18nKey: "Delete File Failed",
                 level: .notification
             )
-            Logger.shared.error("删除文件失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to delete file: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return
         }
@@ -329,7 +329,7 @@ struct AddOrDeleteResourceButton: View {
                 i18nKey: "File name missing",
                 level: .notification
             )
-            Logger.shared.error("删除文件失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to delete file: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return
         }
@@ -617,14 +617,14 @@ struct AddOrDeleteResourceButton: View {
                 gameName: gameInfo.gameName
             )
         else {
-            Logger.shared.error("切换资源启用状态失败：资源目录不存在")
+            Logger.shared.error("Failed to switch resource enablement status: Resource directory does not exist")
             return
         }
 
         // Use currentFileName if it exists, otherwise use project.fileName
         let fileName = currentFileName ?? project.fileName
         guard let fileName = fileName else {
-            Logger.shared.error("切换资源启用状态失败：缺少文件名")
+            Logger.shared.error("Failed to switch resource enabled state: missing filename")
             return
         }
 
@@ -642,7 +642,7 @@ struct AddOrDeleteResourceButton: View {
             // Notify external local resources that their enabled/disabled status has changed
             onToggleDisableState?(isDisabled)
         } catch {
-            Logger.shared.error("切换资源启用状态失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to switch resource enable status: \(error.localizedDescription)")
         }
     }
 }

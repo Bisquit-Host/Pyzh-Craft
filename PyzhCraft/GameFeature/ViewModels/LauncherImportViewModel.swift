@@ -106,7 +106,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
                         : gameNameValidator.gameName
                     try fileManager.cleanupGameDirectories(gameName: gameName)
                 } catch {
-                    Logger.shared.error("清理游戏文件夹失败: \(error.localizedDescription)")
+                    Logger.shared.error("Failed to clean game folder: \(error.localizedDescription)")
                 }
             }
         }
@@ -160,10 +160,10 @@ class LauncherImportViewModel: BaseGameFormViewModel {
         guard !AppConstants.modLoaders.contains(info.modLoader.lowercased()) else { return }
 
         // If not supported, show notification
-        let supportedModLoadersList = AppConstants.modLoaders.joined(separator: "、")
+        let supportedModLoadersList = AppConstants.modLoaders.joined(separator: ", ")
         let instanceName = selectedInstancePath?.lastPathComponent ?? "Unknown"
-        let chineseMessage = "实例 \(instanceName) 使用了不支持的 Mod Loader (\(info.modLoader))，仅支持 \(supportedModLoadersList)"
-        Logger.shared.warning(chineseMessage)
+        let warningMessage = "Instance \(instanceName) uses an unsupported mod loader (\(info.modLoader)), only \(supportedModLoadersList) are supported"
+        Logger.shared.warning(warningMessage)
 
         GlobalErrorHandler.shared.handle(
             GlobalError.fileSystem(
@@ -213,7 +213,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
         let instanceInfo: ImportInstanceInfo
         do {
             guard let parsedInfo = try parser.parseInstance(at: instancePath, basePath: basePath) else {
-                Logger.shared.error("解析实例失败: \(instanceName) - 返回 nil")
+                Logger.shared.error("Failed to parse instance: \(instanceName) - returns nil")
                 GlobalErrorHandler.shared.handle(
                     GlobalError.fileSystem(
                         i18nKey: "Parse Instance Failed",
@@ -224,7 +224,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             }
             instanceInfo = parsedInfo
         } catch {
-            Logger.shared.error("解析实例失败: \(instanceName) - \(error.localizedDescription)")
+            Logger.shared.error("Failed to parse instance: \(instanceName) - \(error.localizedDescription)")
             GlobalErrorHandler.shared.handle(
                 GlobalError.fileSystem(
                     i18nKey: "Parse Instance Failed",
@@ -236,7 +236,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
 
         // The verification instance must have a version
         guard !instanceInfo.gameVersion.isEmpty else {
-            Logger.shared.error("实例 \(instanceName) 没有游戏版本")
+            Logger.shared.error("Instance \(instanceName) has no game version")
             GlobalErrorHandler.shared.handle(
                 GlobalError.fileSystem(
                     i18nKey: "Instance Has No Version",
@@ -248,7 +248,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
 
         // Verified Mod Loader support, error shown, only logged here
         guard AppConstants.modLoaders.contains(instanceInfo.modLoader.lowercased()) else {
-            Logger.shared.error("实例 \(instanceName) 使用了不支持的 Mod Loader: \(instanceInfo.modLoader)")
+            Logger.shared.error("Instance \(instanceName) uses an unsupported Mod Loader: \(instanceInfo.modLoader)")
             return
         }
 
@@ -277,15 +277,15 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             try await copyTask?.value
             copyTask = nil
 
-            Logger.shared.info("成功复制游戏目录: \(instanceName) -> \(finalGameName)")
+            Logger.shared.info("Successfully copied game directory: \(instanceName) -> \(finalGameName)")
         } catch is CancellationError {
-            Logger.shared.info("复制游戏目录已取消: \(instanceName)")
+            Logger.shared.info("Copying game directory canceled: \(instanceName)")
             copyTask = nil
             // Clean copied files
             await performCancelCleanup()
             return
         } catch {
-            Logger.shared.error("复制游戏目录失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to copy game directory: \(error.localizedDescription)")
             copyTask = nil
             GlobalErrorHandler.shared.handle(
                 GlobalError.fileSystem(
@@ -312,7 +312,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
                         continuation.resume(returning: true)
                     },
                     onError: { error, message in
-                        Logger.shared.error("游戏下载失败: \(message)")
+                        Logger.shared.error("Game download failed: \(message)")
                         GlobalErrorHandler.shared.handle(error)
                         continuation.resume(returning: false)
                     }
@@ -321,11 +321,11 @@ class LauncherImportViewModel: BaseGameFormViewModel {
         }
 
         if !downloadSuccess {
-            Logger.shared.error("导入实例失败: \(instanceName)")
+            Logger.shared.error("Failed to import instance: \(instanceName)")
             return
         }
 
-        Logger.shared.info("成功导入实例: \(instanceName) -> \(finalGameName)")
+        Logger.shared.info("Successfully imported instance: \(instanceName) -> \(finalGameName)")
 
         // Import completed
         await MainActor.run {
@@ -382,7 +382,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
 
             return data
         } catch {
-            Logger.shared.warning("下载图标失败: \(error.localizedDescription)")
+            Logger.shared.warning("Failed to download icon: \(error.localizedDescription)")
             return nil
         }
     }
@@ -409,17 +409,17 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             if let info = try parser.parseInstance(at: instancePath, basePath: basePath) {
                 // Verification must have a version (only records logs, does not display errors, errors will be displayed during import)
                 guard !info.gameVersion.isEmpty else {
-                    Logger.shared.warning("选中的实例没有游戏版本")
+                    Logger.shared.warning("The selected instance does not have a game version")
                     return nil
                 }
 
                 return info
             } else {
-                Logger.shared.warning("解析实例返回 nil")
+                Logger.shared.warning("Parse instance returns nil")
                 return nil
             }
         } catch {
-            Logger.shared.error("解析实例失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to parse instance: \(error.localizedDescription)")
             return nil
         }
     }

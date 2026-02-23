@@ -44,7 +44,7 @@ struct LogSectionView: View {
         do {
             try process.run()
         } catch {
-            Logger.shared.error("打开日志文件失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to open log file: \(error.localizedDescription)")
         }
     }
 }

@@ -75,9 +75,9 @@ public struct ContentToolbarView: ToolbarContent {
                     isPlayerNameValid: $isPlayerNameValid,
                     onAdd: {
                         if playerListViewModel.addPlayer(name: playerName) {
-                            Logger.shared.debug("玩家 \(playerName) 添加成功 (通过 ViewModel)。")
+                            Logger.shared.debug("Player \(playerName) was added successfully (via ViewModel)")
                         } else {
-                            Logger.shared.debug("添加玩家 \(playerName) 失败 (通过 ViewModel)。")
+                            Logger.shared.debug("Failed to add player \(playerName) (via ViewModel)")
                         }
                         isPlayerNameValid = true
                         showingAddPlayerSheet = false
@@ -94,7 +94,7 @@ public struct ContentToolbarView: ToolbarContent {
                     },
                     onLogin: { profile in
                         // Processing genuine login successfully, using Minecraft user profile
-                        Logger.shared.debug("正版登录成功，用户: \(profile.name)")
+                        Logger.shared.debug("Genuine login successful, user: \(profile.name)")
                         // Add genuine players
                         _ = playerListViewModel.addOnlinePlayer(profile: profile)
 
@@ -190,7 +190,7 @@ public struct ContentToolbarView: ToolbarContent {
             return
         }
 
-        Logger.shared.info("打开皮肤管理器前验证玩家 \(player.name) 的Token")
+        Logger.shared.info("Verify player \(player.name)'s Token before opening the skin manager")
 
         // Load authentication credentials on demand from Keychain (only for current player, avoid reading all accounts at once)
         var playerWithCredential = player
@@ -209,11 +209,11 @@ public struct ContentToolbarView: ToolbarContent {
 
             // If the Token is updated, it needs to be saved to PlayerDataManager
             if validatedPlayer.authAccessToken != player.authAccessToken {
-                Logger.shared.info("玩家 \(player.name) 的Token已更新，保存到数据管理器")
+                Logger.shared.info("Player \(player.name)'s Token has been updated and saved to the data manager")
                 let dataManager = PlayerDataManager()
                 let success = dataManager.updatePlayerSilently(validatedPlayer)
                 if success {
-                    Logger.shared.debug("已更新玩家数据管理器中的Token信息")
+                    Logger.shared.debug("Token information in player data manager has been updated")
                     // Synchronously update the player list in memory (to avoid using old tokens at next startup)
                     NotificationCenter.default.post(
                         name: PlayerSkinService.playerUpdatedNotification,
@@ -223,7 +223,7 @@ public struct ContentToolbarView: ToolbarContent {
                 }
             }
         } catch {
-            Logger.shared.error("刷新Token失败: \(error.localizedDescription)")
+            Logger.shared.error("Failed to refresh Token: \(error.localizedDescription)")
             // When token refresh fails, still try to use the original token to load skin data
             validatedPlayer = playerWithCredential
         }

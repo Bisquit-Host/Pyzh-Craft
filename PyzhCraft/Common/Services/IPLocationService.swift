@@ -15,7 +15,7 @@ class IPLocationService: ObservableObject {
             return try await isForeignIPThrowing()
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("检测IP地理位置失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to detect IP location: \(globalError.chineseMessage)")
             // Fail silently and return false (allow adding offline accounts)
             return false
         }
@@ -40,9 +40,9 @@ class IPLocationService: ObservableObject {
             locationResponse = try JSONDecoder().decode(IPLocationResponse.self, from: data)
         } catch {
             // If parsing fails, log the status code for debugging
-            Logger.shared.error("解析IP地理位置响应失败: HTTP \(httpResponse.statusCode), error: \(error.localizedDescription)")
+            Logger.shared.error("Failed to parse IP geographical location response: HTTP \(httpResponse.statusCode), error: \(error.localizedDescription)")
             if let responseString = String(data: data, encoding: .utf8) {
-                Logger.shared.error("响应内容: \(responseString)")
+                Logger.shared.error("Response content: \(responseString)")
             }
             throw GlobalError.validation(
                 i18nKey: "Failed to parse IP location response",
@@ -52,20 +52,20 @@ class IPLocationService: ObservableObject {
 
         // If the status code is not 200, log a warning but continue processing (as there may still be valid data)
         if httpResponse.statusCode != 200 {
-            Logger.shared.warning("IP地理位置API返回非200状态码: \(httpResponse.statusCode)")
+            Logger.shared.warning("IP Geolocation API returns non-200 status code: \(httpResponse.statusCode)")
         }
 
         // Check if the request was successful
         guard locationResponse.isSuccess else {
-            let errorMessage = locationResponse.reason ?? "IP地理位置检测失败"
-            Logger.shared.error("IP地理位置检测失败: \(errorMessage), 国家代码: \(locationResponse.countryCode ?? "未知")")
+            let errorMessage = locationResponse.reason ?? "IP geolocation detection failed"
+            Logger.shared.error("IP geolocation detection failed: \(errorMessage), country code: \(locationResponse.countryCode ?? "unknown")")
             throw GlobalError.network(
                 i18nKey: "IP location detection failed",
                 level: .notification
             )
         }
 
-        Logger.shared.debug("IP地理位置检测完成: 国家代码 = \(locationResponse.countryCode ?? "未知"), 是否为国外 = \(locationResponse.isForeign)")
+        Logger.shared.debug("IP geolocation detection completed: country code = \(locationResponse.countryCode ?? "unknown"), isForeign = \(locationResponse.isForeign)")
 
         return locationResponse.isForeign
     }

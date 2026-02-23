@@ -86,7 +86,7 @@ struct CategoryContentView: View {
             try await loadDataThrowing()
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("加载分类数据失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to load classification data: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             await MainActor.run {
                 viewModel.setError(globalError)

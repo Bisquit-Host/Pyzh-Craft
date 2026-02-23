@@ -10,7 +10,7 @@ class CacheManager: ObservableObject {
             self.cacheInfo = try calculator.calculateMetaCacheInfo()
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("计算元数据缓存信息失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to calculate metadata cache information: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             // keep default value
         }
@@ -34,7 +34,7 @@ class CacheManager: ObservableObject {
             self.cacheInfo = try calculator.calculateCacheInfo()
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("计算数据缓存信息失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to calculate data cache information: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             // keep default value
         }
@@ -59,7 +59,7 @@ class CacheManager: ObservableObject {
             self.cacheInfo = try calculator.calculateProfileCacheInfo(gameName: game)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("计算游戏缓存信息失败: \(globalError.chineseMessage)")
+            Logger.shared.error("Failed to calculate game cache information: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             // keep default value
         }

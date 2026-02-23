@@ -271,7 +271,7 @@ struct LauncherImportView: View {
             // Automatically fill in the game name into the input box
             viewModel.autoFillGameNameIfNeeded()
 
-            Logger.shared.info("成功选择 \(viewModel.selectedLauncherType.rawValue) 实例路径: \(url.path)")
+            Logger.shared.info("Successfully selected \(viewModel.selectedLauncherType.rawValue) instance path: \(url.path)")
 
         case .failure(let error):
             let globalError = GlobalError.from(error)
