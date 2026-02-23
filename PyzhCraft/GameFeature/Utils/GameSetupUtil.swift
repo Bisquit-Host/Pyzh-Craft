@@ -92,7 +92,8 @@ class GameSetupUtil: ObservableObject {
 
             // Ensure and obtain the Java path to avoid repeated verification in the future
             let javaPath = await JavaManager.shared.ensureJavaExists(
-                version: downloadedManifest.javaVersion.component
+                version: downloadedManifest.javaVersion.component,
+                requiredMajorVersion: downloadedManifest.javaVersion.majorVersion
             )
 
             // Set up file manager

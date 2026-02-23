@@ -15,6 +15,9 @@ struct GameAdvancedSettingsView: View {
     @State private var error: GlobalError?
     @State private var isLoadingSettings = false
     @State private var saveTask: Task<Void, Never>?
+    @State private var detectedJavaRuntimes: [JavaManager.DetectedJavaRuntime] = []
+    @State private var selectedDetectedJavaPath = ""
+    @State private var isLoadingDetectedJavaRuntimes = false
     
     private var currentGame: GameVersionInfo? {
         guard let gameId = selectedGameManager.selectedGameId else { return nil }
@@ -24,6 +27,11 @@ struct GameAdvancedSettingsView: View {
     /// Get the Java version of the current game
     private var currentJavaVersion: Int {
         currentGame?.javaVersion ?? 8
+    }
+
+    /// Effective Java path (user-set or game default)
+    private var effectiveJavaPath: String {
+        javaPath.isEmpty ? (currentGame?.javaPath ?? "") : javaPath
     }
     
     /// Get available garbage collectors based on current Java version
@@ -62,15 +70,53 @@ struct GameAdvancedSettingsView: View {
     var body: some View {
         Form {
             LabeledContent("Java Executable") {
-                DirectorySettingRow(
-                    title: "Java Executable",
-                    path: javaPath.isEmpty ? (currentGame?.javaPath ?? "") : javaPath,
-                    onChoose: { showJavaPathPicker = true },
-                    onReset: {
-                        resetJavaPathSafely()
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 8) {
+                        Picker("", selection: $selectedDetectedJavaPath) {
+                            Text("Select Java Runtime")
+                                .tag("")
+                            ForEach(detectedJavaRuntimes) { runtime in
+                                Text(detectedJavaLabel(runtime))
+                                    .tag(runtime.path)
+                            }
+                        }
+                        .labelsHidden()
+                        .onChange(of: selectedDetectedJavaPath) { _, newValue in
+                            guard !newValue.isEmpty else { return }
+                            guard javaPath != newValue else { return }
+                            javaPath = newValue
+                            autoSave()
+                        }
+
+                        Button {
+                            loadDetectedJavaRuntimes()
+                        } label: {
+                            Image(systemName: "arrow.clockwise")
+                        }
+                        .buttonStyle(.borderless)
+                        .help("Refresh installed Java list")
+
+                        if isLoadingDetectedJavaRuntimes {
+                            ProgressView()
+                                .controlSize(.small)
+                        }
+
+                        Button("Browse\u{2026}") {
+                            showJavaPathPicker = true
+                        }
+                        .help("Choose a Java executable manually")
+
+                        Button("Reset") {
+                            resetJavaPathSafely()
+                        }
+                        .help("Reset to default Java for this version")
                     }
-                )
-                .fixedSize()
+
+                    if !effectiveJavaPath.isEmpty {
+                        PathBreadcrumbView(path: effectiveJavaPath)
+                            .help(effectiveJavaPath)
+                    }
+                }
                 .fileImporter(
                     isPresented: $showJavaPathPicker,
                     allowedContentTypes: [.item],
@@ -200,6 +246,57 @@ struct GameAdvancedSettingsView: View {
         if !jvmArgs.isEmpty {
             parseExistingJvmArguments(jvmArgs)
         }
+
+        syncSelectedDetectedJavaPath()
+        loadDetectedJavaRuntimes()
+    }
+
+    private func loadDetectedJavaRuntimes() {
+        let requiredJavaVersion = currentJavaVersion
+        isLoadingDetectedJavaRuntimes = true
+
+        Task {
+            let runtimes = await Task.detached(priority: .userInitiated) {
+                JavaManager.shared.listInstalledJavaRuntimes(
+                    requiredMajorVersion: requiredJavaVersion,
+                    includeIncompatible: true
+                )
+            }.value
+
+            await MainActor.run {
+                detectedJavaRuntimes = runtimes
+                isLoadingDetectedJavaRuntimes = false
+                syncSelectedDetectedJavaPath()
+            }
+        }
+    }
+
+    private func detectedJavaLabel(_ runtime: JavaManager.DetectedJavaRuntime) -> String {
+        let version = "Java \(runtime.majorVersion) (\(runtime.versionString))"
+
+        // Extract JVM name from standard macOS path (e.g. "temurin-21" from ".../JavaVirtualMachines/temurin-21.jdk/...")
+        let components = runtime.path.split(separator: "/").map(String.init)
+        let shortName: String
+        if let jvmIdx = components.firstIndex(of: "JavaVirtualMachines"),
+           jvmIdx + 1 < components.count {
+            shortName = components[jvmIdx + 1]
+                .replacingOccurrences(of: ".jdk", with: "")
+                .replacingOccurrences(of: ".jre", with: "")
+        } else {
+            shortName = runtime.path
+        }
+
+        let suffix = runtime.majorVersion < currentJavaVersion
+            ? " (incompatible)"
+            : ""
+
+        return "\(version) — \(shortName)\(suffix)"
+    }
+
+    private func syncSelectedDetectedJavaPath() {
+        selectedDetectedJavaPath = detectedJavaRuntimes.contains(where: { $0.path == javaPath })
+            ? javaPath
+            : ""
     }
     
     private func parseExistingJvmArguments(_ arguments: String) {
@@ -346,6 +443,7 @@ struct GameAdvancedSettingsView: View {
             let defaultPath = await JavaManager.shared.findDefaultJavaPath(for: game.gameVersion)
             await MainActor.run {
                 javaPath = defaultPath
+                syncSelectedDetectedJavaPath()
                 autoSave()
             }
         }
@@ -369,6 +467,7 @@ struct GameAdvancedSettingsView: View {
                 // Verify if it is an executable file (verified through JavaManager)
                 if JavaManager.shared.canJavaRun(at: url.path) {
                     javaPath = url.path
+                    syncSelectedDetectedJavaPath()
                     autoSave()
                     Logger.shared.info("Java path has been set to: \(url.path)")
                 } else {

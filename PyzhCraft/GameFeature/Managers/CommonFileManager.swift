@@ -172,7 +172,10 @@ class CommonFileManager {
 
         // Obtain the corresponding Java version through gameVersion and only obtain it once to avoid repeated requests and verification in each processor
         let versionInfo = try await ModrinthService.fetchVersionInfo(from: gameVersion)
-        let javaPath = JavaManager.shared.findJavaExecutable(version: versionInfo.javaVersion.component)
+        let javaPath = await JavaManager.shared.ensureJavaExists(
+            version: versionInfo.javaVersion.component,
+            requiredMajorVersion: versionInfo.javaVersion.majorVersion
+        )
 
         for (index, processor) in clientProcessors.enumerated() {
             do {
