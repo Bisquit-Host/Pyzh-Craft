@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		9023D91C2E313A67005A53F1 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 9023D91B2E313A67005A53F1 /* ZIPFoundation */; };
 		9049FDB12F1151B50070A9E3 /* SkinRenderKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9049FDB02F1151B50070A9E3 /* SkinRenderKit */; };
+		90EDAA112F9AABCD00112233 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 90EDAA102F9AABCD00112233 /* Kingfisher */; };
 		90E123456789ABCD0001 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 90E123456789ABCD0002 /* Sparkle */; };
 		90E387022F28FB8100F5D101 /* SwiftMarkDownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 90E387012F28FB8100F5D101 /* SwiftMarkDownUI */; };
 /* End PBXBuildFile section */
@@ -33,6 +34,7 @@
 				9023D91C2E313A67005A53F1 /* ZIPFoundation in Frameworks */,
 				90E387022F28FB8100F5D101 /* SwiftMarkDownUI in Frameworks */,
 				90E123456789ABCD0001 /* Sparkle in Frameworks */,
+				90EDAA112F9AABCD00112233 /* Kingfisher in Frameworks */,
 				9049FDB12F1151B50070A9E3 /* SkinRenderKit in Frameworks */,
 			);
 		};
@@ -73,6 +75,7 @@
 				90E123456789ABCD0002 /* Sparkle */,
 				9049FDB02F1151B50070A9E3 /* SkinRenderKit */,
 				90E387012F28FB8100F5D101 /* SwiftMarkDownUI */,
+				90EDAA102F9AABCD00112233 /* Kingfisher */,
 			);
 			productName = PyzhCraft;
 			productReference = 90CE44FE2E7D65A5007C6F30 /* PyzhCraft.app */;
@@ -129,6 +132,7 @@
 				033870FA2E6059570056BDB2 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
 				9049FDAF2F1151B50070A9E3 /* XCRemoteSwiftPackageReference "NSSkinRender" */,
 				90E387002F28FB8100F5D101 /* XCRemoteSwiftPackageReference "SwiftMarkDownUI" */,
+				90EDAA0F2F9AABCD00112233 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			preferredProjectObjectVersion = 90;
 			productRefGroup = 9023D8282E3139B5005A53F1;
@@ -410,6 +414,14 @@
 				kind = branch;
 			};
 		};
+		90EDAA0F2F9AABCD00112233 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
 		90E123456789ABCD0003 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sparkle-project/Sparkle.git";
@@ -443,6 +455,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9049FDAF2F1151B50070A9E3 /* XCRemoteSwiftPackageReference "NSSkinRender" */;
 			productName = SkinRenderKit;
+		};
+		90EDAA102F9AABCD00112233 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 90EDAA0F2F9AABCD00112233 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
 		};
 		90E123456789ABCD0002 /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;

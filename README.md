@@ -22,7 +22,8 @@
 ---
 
 ## Supported platforms
-- macOS 14+
+- 🖥️ macOS 14+
+- ☕️ Java: 8 or later (for Minecraft runtime)
 
 ## 🎯 Overview
 
@@ -53,11 +54,6 @@ Pyzh Craft is a native macOS Minecraft launcher 🍎 built with SwiftUI, offerin
 - **☕ Java Management** - Per-profile Java path configuration with automatic version detection
 - **🧠 Memory Allocation** - Visual range slider for Xms/Xmx parameter settings
 - **🔧 Custom Launch Parameters** - JVM and game argument customization
-
-## 📋 System Requirements
-
-- **💻 macOS**: 14.0 or later
-- **☕️ Java**: 8 or later (for Minecraft runtime)
 
 ## 📥 Installation
 
