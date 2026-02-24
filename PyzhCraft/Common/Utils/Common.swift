@@ -21,6 +21,7 @@ extension URL {
         return self
     }
 }
+
 extension String {
     /// Convert HTTP URL in string to HTTPS
     func httpToHttps() -> String {
