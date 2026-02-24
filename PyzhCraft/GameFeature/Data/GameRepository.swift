@@ -1,5 +1,5 @@
-import Combine
 import Foundation
+import Combine
 
 /// Game version information warehouse
 class GameRepository: ObservableObject {

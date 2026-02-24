@@ -40,6 +40,7 @@ public struct SidebarView: View {
                             Image(systemName: type.systemImage)
                                 .frame(width: 16, height: 16)
                                 .foregroundColor(.secondary)
+                            
                             Text(type.localizedNameKey)
                         }
                     }
@@ -55,6 +56,7 @@ public struct SidebarView: View {
                                 game: game,
                                 refreshTrigger: iconRefreshTriggers[game.gameName] ?? UUID()
                             )
+                            
                             Text(game.gameName)
                                 .lineLimit(1)
                         }

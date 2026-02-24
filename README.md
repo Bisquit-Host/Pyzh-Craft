@@ -9,7 +9,7 @@
   [![Discord](https://img.shields.io/badge/Discord-bule.svg?logo=discord)](https://discord.com/invite/kerMT2r9rz)
   [![Homebrew](https://img.shields.io/badge/Homebrew-available-green.svg?logo=homebrew)](https://formulae.brew.sh/cask/swiftcraft-launcher)
   
-  🌐 [Website](https://suhang12332.github.io/Swift-Craft-Launcher-Assets/web) • 💾 [Download](https://github.com/suhang12332/Swift-Craft-Launcher/releases/latest) • 📚 [Documentation](https://suhang12332.github.io/Swift-Craft-Launcher-Assets/web)
+  🌐 [Website](https://suhang12332.github.io/Swift-Craft-Launcher-Assets/web) • 💾 [Download](https://github.com/suhang12332/Swift-Craft-Launcher/releases/latest)
 </div>
 
 ---
@@ -95,7 +95,7 @@ Please visit [FAQ](doc/FAQ.md)
 | **💻 Language** | Swift |
 | **🎨 UI Framework** | SwiftUI |
 | **🔄 Reactive Programming** | Combine |
-| **📱 Target Platform** | macOS 14.0+ |
+| **📱 Target Platform** | macOS 14+ |
 
 ## 📜 License
 

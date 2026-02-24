@@ -1,5 +1,4 @@
 import Combine
-import Foundation
 
 /// work path provider
 public protocol WorkingPathProviding: AnyObject {
