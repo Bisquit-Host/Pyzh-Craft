@@ -16,6 +16,17 @@ public struct SidebarView: View {
     @ObservedObject private var selectedGameManager = SelectedGameManager.shared
     @State private var iconRefreshTriggers: [String: UUID] = [:]
     @State private var cancellable: AnyCancellable?
+
+    // MARK: - Add Player State
+    @State private var showingAddPlayerSheet = false
+    @State private var playerName = ""
+    @State private var isPlayerNameValid = false
+
+    // MARK: - Skin Editor State
+    @State private var showEditSkin = false
+    @State private var isLoadingSkin = false
+    @State private var preloadedSkinInfo: PlayerSkinService.PublicSkinInfo?
+    @State private var preloadedProfile: MinecraftProfileResponse?
     
     public init() {}
     
@@ -66,12 +77,86 @@ public struct SidebarView: View {
         }
         .searchable(text: $searchText, placement: .sidebar, prompt: Localized.Sidebar.Search.games)
         .safeAreaInset(edge: .bottom) {
-            // Show player list (if there are players)
-            if !playerListViewModel.players.isEmpty {
-                PlayerListView()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
+            HStack(spacing: 8) {
+                // Show player selector (if there are players)
+                if !playerListViewModel.players.isEmpty {
+                    PlayerListView()
+                }
+
+                Spacer()
+
+                // Skin management button - only for online accounts
+                if currentPlayer?.isOnlineAccount == true {
+                    Button {
+                        Task { await openSkinManager() }
+                    } label: {
+                        if isLoadingSkin {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Image(systemName: "tshirt")
+                        }
+                    }
+                    .buttonStyle(.borderless)
+                    .help("Skin")
+                    .disabled(isLoadingSkin)
+                    .sheet(isPresented: $showEditSkin) {
+                        SkinToolDetailView(
+                            preloadedSkinInfo: preloadedSkinInfo,
+                            preloadedProfile: preloadedProfile
+                        )
+                        .onDisappear {
+                            preloadedSkinInfo = nil
+                            preloadedProfile = nil
+                        }
+                    }
+                }
+
+                // Add player button
+                Button {
+                    playerName = ""
+                    isPlayerNameValid = false
+                    showingAddPlayerSheet = true
+                } label: {
+                    Image(systemName: "person.badge.plus")
+                }
+                .buttonStyle(.borderless)
+                .help("Add Player")
+                .sheet(isPresented: $showingAddPlayerSheet) {
+                    AddPlayerSheetView(
+                        playerName: $playerName,
+                        isPlayerNameValid: $isPlayerNameValid,
+                        onAdd: {
+                            if playerListViewModel.addPlayer(name: playerName) {
+                                Logger.shared.debug("Player \(playerName) was added successfully (via ViewModel)")
+                            } else {
+                                Logger.shared.debug("Failed to add player \(playerName) (via ViewModel)")
+                            }
+                            isPlayerNameValid = true
+                            showingAddPlayerSheet = false
+                        },
+                        onCancel: {
+                            playerName = ""
+                            isPlayerNameValid = false
+                            showingAddPlayerSheet = false
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                MinecraftAuthService.shared.clearAuthenticationData()
+                            }
+                        },
+                        onLogin: { profile in
+                            Logger.shared.debug("Genuine login successful, user: \(profile.name)")
+                            _ = playerListViewModel.addOnlinePlayer(profile: profile)
+                            PremiumAccountFlagManager.shared.setPremiumAccountAdded()
+                            showingAddPlayerSheet = false
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                MinecraftAuthService.shared.clearAuthenticationData()
+                            }
+                        },
+                        playerListViewModel: playerListViewModel
+                    )
+                }
             }
+            .padding()
         }
         .listStyle(.sidebar)
         .onAppear {
@@ -129,6 +214,12 @@ public struct SidebarView: View {
         }
     }
     
+    // MARK: - Computed Properties
+
+    private var currentPlayer: Player? {
+        playerListViewModel.currentPlayer
+    }
+
     // Only perform fuzzy search on game name
     private var filteredGames: [GameVersionInfo] {
         if searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -137,6 +228,79 @@ public struct SidebarView: View {
         
         let lower = searchText.lowercased()
         return gameRepository.games.filter { $0.gameName.lowercased().contains(lower) }
+    }
+
+    // MARK: - Skin Manager
+
+    /// Open the skin manager (load data first, then display the sheet)
+    private func openSkinManager() async {
+        guard let player = currentPlayer else { return }
+
+        await MainActor.run {
+            isLoadingSkin = true
+        }
+
+        // If it is an offline account, use it directly without refreshing the token
+        guard player.isOnlineAccount else {
+            async let skinInfo = PlayerSkinService.fetchCurrentPlayerSkinFromServices(player: player)
+            async let profile = PlayerSkinService.fetchPlayerProfile(player: player)
+            let (loadedSkinInfo, loadedProfile) = await (skinInfo, profile)
+
+            await MainActor.run {
+                preloadedSkinInfo = loadedSkinInfo
+                preloadedProfile = loadedProfile
+                isLoadingSkin = false
+                showEditSkin = true
+            }
+            return
+        }
+
+        Logger.shared.info("Verify player \(player.name)'s Token before opening the skin manager")
+
+        // Load authentication credentials on demand from Keychain
+        var playerWithCredential = player
+        if playerWithCredential.credential == nil {
+            let dataManager = PlayerDataManager()
+            if let credential = dataManager.loadCredential(userId: playerWithCredential.id) {
+                playerWithCredential.credential = credential
+            }
+        }
+
+        // Verify and try to refresh the token
+        let authService = MinecraftAuthService.shared
+        let validatedPlayer: Player
+        do {
+            validatedPlayer = try await authService.validateAndRefreshPlayerTokenThrowing(for: playerWithCredential)
+
+            if validatedPlayer.authAccessToken != player.authAccessToken {
+                Logger.shared.info("Player \(player.name)'s Token has been updated and saved to the data manager")
+                let dataManager = PlayerDataManager()
+                let success = dataManager.updatePlayerSilently(validatedPlayer)
+                if success {
+                    Logger.shared.debug("Token information in player data manager has been updated")
+                    NotificationCenter.default.post(
+                        name: PlayerSkinService.playerUpdatedNotification,
+                        object: nil,
+                        userInfo: ["updatedPlayer": validatedPlayer]
+                    )
+                }
+            }
+        } catch {
+            Logger.shared.error("Failed to refresh Token: \(error.localizedDescription)")
+            validatedPlayer = playerWithCredential
+        }
+
+        // Preload skin data
+        async let skinInfo = PlayerSkinService.fetchCurrentPlayerSkinFromServices(player: validatedPlayer)
+        async let profile = PlayerSkinService.fetchPlayerProfile(player: validatedPlayer)
+        let (loadedSkinInfo, loadedProfile) = await (skinInfo, profile)
+
+        await MainActor.run {
+            preloadedSkinInfo = loadedSkinInfo
+            preloadedProfile = loadedProfile
+            isLoadingSkin = false
+            showEditSkin = true
+        }
     }
 }
 
