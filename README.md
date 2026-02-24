@@ -85,7 +85,7 @@ Please visit [FAQ](doc/FAQ.md)
 3. **🚀 Build and run** using Xcode (⌘R)
 
 **Build Requirements:**
-- Xcode 13.0+
+- Xcode 13+
 - Swift 5.5+
 
 ## 🧪 Technical Architecture
@@ -105,10 +105,9 @@ This project is licensed under the GNU Affero General Public License v3.0. See [
 
 ## 🤝 Community & Support
 
-- **👥 Official QQ Group**: [1057517524](https://qm.qq.com/cgi-bin/qm/qr?k=1057517524)
-- **Discord**: [Discord](https://discord.gg/gYESVa3CZd)
-- **🐛 Issue Reports**: [GitHub Issues](https://github.com/suhang12332/Pyzh-Craft/issues)
-- **💡 Feature Suggestions**: [GitHub Discussions](https://github.com/suhang12332/Pyzh-Craft/discussions)
+- **Discord**: [Discord](https://discord.com/invite/kerMT2r9rz)
+- **🐛 Issue Reports**: [GitHub Issues](https://github.com/TopScrech/Pyzh-Craft/issues)
+- **💡 Feature Suggestions**: [GitHub Discussions](https://github.com/TopScrech/Pyzh-Craft/discussions)
 
 ## 🌟 Contributing
 
