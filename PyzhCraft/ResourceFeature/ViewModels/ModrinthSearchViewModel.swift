@@ -52,6 +52,24 @@ struct FilterOptions {
 /// Modrinth search view model
 @MainActor
 final class ModrinthSearchViewModel: ObservableObject {
+    private struct SearchCachePayload: Codable {
+        let hits: [ModrinthProject]
+        let totalHits: Int
+        let updatedAt: Date
+    }
+
+    private struct SearchCacheContext {
+        let query: String
+        let projectType: String
+        let versions: [String]
+        let categories: [String]
+        let features: [String]
+        let resolutions: [String]
+        let performanceImpact: [String]
+        let loaders: [String]
+        let dataSource: DataSource
+    }
+
     // MARK: - Published Properties
     @Published private(set) var results: [ModrinthProject] = []
     @Published private(set) var isLoading = false
@@ -61,6 +79,7 @@ final class ModrinthSearchViewModel: ObservableObject {
     
     // MARK: - Private Properties
     private var searchTask: Task<Void, Never>?
+    private var cacheTask: Task<Void, Never>?
     private let pageSize: Int = 20
     private let cacheManager = ResourceSearchCacheManager.shared
     
@@ -69,6 +88,7 @@ final class ModrinthSearchViewModel: ObservableObject {
     
     deinit {
         searchTask?.cancel()
+        cacheTask?.cancel()
     }
     
     // MARK: - Public Methods
@@ -126,7 +146,7 @@ final class ModrinthSearchViewModel: ObservableObject {
                 if append {
                     isLoadingMore = true
                 } else {
-                    isLoading = true
+                    isLoading = results.isEmpty
                 }
                 error = nil
                 
@@ -199,8 +219,16 @@ final class ModrinthSearchViewModel: ObservableObject {
                     )
                     if append {
                         results.append(contentsOf: result.hits)
+                        trimResultsIfNeeded()
                     } else {
-                        results = result.hits
+                        results = Array(result.hits.prefix(maxRetainedResults))
+                        if settings.enableResourcePageCache {
+                            saveFirstPageCache(
+                                cacheKey: searchCacheKey,
+                                hits: result.hits,
+                                totalHits: result.totalHits
+                            )
+                        }
                     }
                     totalHits = result.totalHits
                 }
@@ -232,6 +260,7 @@ final class ModrinthSearchViewModel: ObservableObject {
     
     func clearResults() {
         searchTask?.cancel()
+        cacheTask?.cancel()
         results.removeAll()
         totalHits = 0
         error = nil
@@ -243,6 +272,53 @@ final class ModrinthSearchViewModel: ObservableObject {
     func beginNewSearch() {
         isLoading = true
         results.removeAll()
+    }
+
+    private func trimResultsIfNeeded() {
+        if results.count > maxRetainedResults {
+            results.removeFirst(results.count - maxRetainedResults)
+        }
+    }
+
+    private func cacheKey(context: SearchCacheContext) -> String {
+        let keyParts = [
+            "q:\(context.query)",
+            "type:\(context.projectType)",
+            "v:\(context.versions.sorted().joined(separator: ","))",
+            "c:\(context.categories.sorted().joined(separator: ","))",
+            "f:\(context.features.sorted().joined(separator: ","))",
+            "r:\(context.resolutions.sorted().joined(separator: ","))",
+            "p:\(context.performanceImpact.sorted().joined(separator: ","))",
+            "l:\(context.loaders.sorted().joined(separator: ","))",
+            "ds:\(context.dataSource.rawValue)",
+        ]
+        return keyParts.joined(separator: "|")
+    }
+
+    private func loadCachedFirstPageAsync(cacheKey: String) async -> SearchCachePayload? {
+        await withCheckedContinuation { continuation in
+            DispatchQueue.global(qos: .utility).async {
+                let cached: SearchCachePayload? = AppCacheManager.shared.get(
+                    namespace: self.cacheNamespace,
+                    key: cacheKey,
+                    as: SearchCachePayload.self
+                )
+                continuation.resume(returning: cached)
+            }
+        }
+    }
+
+    private func saveFirstPageCache(cacheKey: String, hits: [ModrinthProject], totalHits: Int) {
+        let payload = SearchCachePayload(
+            hits: Array(hits.prefix(maxRetainedResults)),
+            totalHits: totalHits,
+            updatedAt: Date()
+        )
+        AppCacheManager.shared.setSilently(
+            namespace: cacheNamespace,
+            key: cacheKey,
+            value: payload
+        )
     }
     // MARK: - Private Methods
     private func buildFacets(

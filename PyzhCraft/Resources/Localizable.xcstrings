@@ -1,17 +1,17 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "" : {
-      "shouldTranslate" : false
+  "sourceLanguage": "en",
+  "strings": {
+    "": {
+      "shouldTranslate": false
     },
-    ":" : {
-      "shouldTranslate" : false
+    ":": {
+      "shouldTranslate": false
     },
-    "…" : {
-      "shouldTranslate" : false
+    "…": {
+      "shouldTranslate": false
     },
-    "(%@)" : {
-      "shouldTranslate" : false
+    "(%@)": {
+      "shouldTranslate": false
     },
     "(content truncated)" : {
       "localizations" : {
@@ -21,16 +21,16 @@
             "value" : "(تم اقتطاع المحتوى)"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(indhold afkortet)"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(indhold afkortet)"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(Inhalt abgeschnitten)"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(Inhalt abgeschnitten)"
           }
         },
         "es" : {
@@ -39,106 +39,106 @@
             "value" : "(contenido truncado)"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(sisältö katkaistu)"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(sisältö katkaistu)"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(contenu tronqué)"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(contenu tronqué)"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(सामग्री काट दी गई)"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(सामग्री काट दी गई)"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(contenuto troncato)"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(contenuto troncato)"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(コンテンツが切り詰められました)"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(コンテンツが切り詰められました)"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(내용 잘림)"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(내용 잘림)"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(innhold avkortet)"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(innhold avkortet)"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(inhoud afgekapt)"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(inhoud afgekapt)"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(zawartość obcięta)"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(zawartość obcięta)"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(conteúdo truncado)"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(conteúdo truncado)"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(содержимое обрезано)"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(содержимое обрезано)"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(innehåll avkortat)"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(innehåll avkortat)"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(เนื้อหาถูกตัด)"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(เนื้อหาถูกตัด)"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(içerik kesildi)"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(içerik kesildi)"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(nội dung đã bị cắt)"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(nội dung đã bị cắt)"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(内容已截断)"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(内容已截断)"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(內容已截斷)"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(內容已截斷)"
           }
         }
       }
@@ -7915,16 +7915,16 @@
             "value" : "تصفح"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gennemse"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gennemse"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Durchsuchen"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Durchsuchen"
           }
         },
         "es" : {
@@ -7933,106 +7933,106 @@
             "value" : "Examinar"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Selaa"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selaa"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Parcourir"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parcourir"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ब्राउज़ करें"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ब्राउज़ करें"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sfoglia"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sfoglia"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "参照"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "参照"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "찾아보기"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "찾아보기"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bla gjennom"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bla gjennom"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bladeren"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bladeren"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Przeglądaj"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Przeglądaj"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Procurar"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Procurar"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Обзор"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обзор"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bläddra"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bläddra"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "เรียกดู"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เรียกดู"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gözat"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gözat"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Duyệt"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duyệt"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "浏览"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浏览"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "瀏覽"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "瀏覽"
           }
         }
       }
@@ -8049,16 +8049,16 @@
             "value" : "المتصفح"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Browser"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luk"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Browser"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schließen"
           }
         },
         "es" : {
@@ -8067,106 +8067,106 @@
             "value" : "Navegador"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Selain"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sulje"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Navigateur"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fermer"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ब्राउज़र"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "बंद करें"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Browser"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chiudi"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ブラウザ"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "閉じる"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "브라우저"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "닫기"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nettleser"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lukk"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Browser"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sluiten"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Przeglądarka"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zamknij"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Navegador"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fechar"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Браузер"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрыть"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Webbläsare"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stäng"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "เบราว์เซอร์"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ปิด"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tarayıcı"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kapat"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trình duyệt"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đóng"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "浏览器"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "瀏覽器"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "關閉"
           }
         }
       }
@@ -10530,16 +10530,16 @@
             "value" : "العميل"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klient"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Client"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server"
           }
         },
         "es" : {
@@ -10548,106 +10548,106 @@
             "value" : "Cliente"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Asiakas"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Palvelin"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Client"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serveur"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "क्लाइंट"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सर्वर"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Client"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "クライアント"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "サーバー"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "클라이언트"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "서버"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klient"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Client"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klient"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serwer"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cliente"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servidor"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Клиент"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сервер"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klient"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ไคลเอนต์"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เซิร์ฟเวอร์"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "İstemci"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunucu"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Máy khách"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Máy chủ"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "客户端"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务端"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "客戶端"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服務端"
           }
         }
       }
@@ -10660,16 +10660,16 @@
             "value" : "فشل في تحميل ملف JAR للعميل"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Download af klient JAR-fil mislykkedes"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download af klient JAR-fil mislykkedes"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Download der Client-JAR-Datei fehlgeschlagen"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download der Client-JAR-Datei fehlgeschlagen"
           }
         },
         "es" : {
@@ -10678,106 +10678,106 @@
             "value" : "Falló la descarga del archivo JAR del cliente"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Asiakas JAR-tiedoston lataus epäonnistui"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Asiakas JAR-tiedoston lataus epäonnistui"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Échec du téléchargement du fichier JAR client"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Échec du téléchargement du fichier JAR client"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "क्लाइंट JAR फ़ाइल डाउनलोड करने में विफल"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "क्लाइंट JAR फ़ाइल डाउनलोड करने में विफल"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Download del file JAR client fallito"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download del file JAR client fallito"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "クライアントJARファイルのダウンロードに失敗しました"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "クライアントJARファイルのダウンロードに失敗しました"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "클라이언트 JAR 파일 다운로드에 실패했습니다"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "클라이언트 JAR 파일 다운로드에 실패했습니다"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nedlasting av klient JAR-fil mislyktes"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nedlasting av klient JAR-fil mislyktes"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Download van client JAR-bestand mislukt"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download van client JAR-bestand mislukt"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pobieranie pliku JAR klienta nie powiodło się"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pobieranie pliku JAR klienta nie powiodło się"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Falha no download do arquivo JAR do cliente"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Falha no download do arquivo JAR do cliente"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Не удалось загрузить JAR файл клиента"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось загрузить JAR файл клиента"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nedladdning av klient JAR-fil misslyckades"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nedladdning av klient JAR-fil misslyckades"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "การดาวน์โหลดไฟล์ JAR ของไคลเอนต์ล้มเหลว"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "การดาวน์โหลดไฟล์ JAR ของไคลเอนต์ล้มเหลว"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "İstemci JAR dosyası indirme başarısız"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İstemci JAR dosyası indirme başarısız"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tải xuống tệp JAR khách hàng thất bại"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tải xuống tệp JAR khách hàng thất bại"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下载客户端JAR文件失败"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下载客户端JAR文件失败"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下載客戶端JAR檔案失敗"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下載客戶端JAR檔案失敗"
           }
         }
       }
@@ -10790,16 +10790,16 @@
             "value" : "ملف JAR للعميل غير موجود"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klient JAR-fil ikke fundet"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mappe ikke fundet"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Client-JAR-Datei nicht gefunden"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verzeichnis nicht gefunden"
           }
         },
         "es" : {
@@ -10808,106 +10808,106 @@
             "value" : "Archivo JAR del cliente no encontrado"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Asiakas JAR-tiedostoa ei löytynyt"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hakemistoa ei löytynyt"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fichier JAR client introuvable"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Répertoire introuvable"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "क्लाइंट JAR फ़ाइल नहीं मिली"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "निर्देशिका नहीं मिली"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "File JAR del client non trovato"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Directory non trovata"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "クライアントJARファイルが見つかりません"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ディレクトリが見つかりません"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "클라이언트 JAR 파일을 찾을 수 없습니다"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "디렉토리를 찾을 수 없습니다"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klient JAR-fil ikke funnet"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mappe ikke funnet"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Client JAR bestand niet gevonden"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Directory niet gevonden"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nie znaleziono pliku JAR klienta"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Katalog nie znaleziony"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Arquivo JAR do cliente não encontrado"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diretório não encontrado"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "JAR-файл клиента не найден"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Каталог не найден"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klient JAR-fil hittades inte"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Katalog hittades inte"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ไม่พบไฟล์ JAR ของไคลเอนต์"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ไม่พบไดเรกทอรี"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "İstemci JAR dosyası bulunamadı"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dizin bulunamadı"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Không tìm thấy tệp JAR khách hàng"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không tìm thấy thư mục"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "客户端JAR文件不存在"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目录不存在"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "客戶端JAR檔案不存在"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目錄不存在"
           }
         }
       }
@@ -14305,16 +14305,16 @@
             "value" : "قاعدة البيانات غير مفتوحة"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Databasen er ikke åben"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunne ikke åbne database: %@"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Datenbank ist nicht geöffnet"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datenbank konnte nicht geöffnet werden: %@"
           }
         },
         "es" : {
@@ -14323,106 +14323,106 @@
             "value" : "La base de datos no está abierta"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tietokanta ei ole auki"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tietokannan avaaminen epäonnistui: %@"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La base de données n'est pas ouverte"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Échec de l'ouverture de la base de données: %@"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "डेटाबेस खुला नहीं है"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "डेटाबेस खोलने में विफल: %@"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Il database non è aperto"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossibile aprire il database: %@"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "データベースが開いていません"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "データベースを開けませんでした: %@"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "데이터베이스가 열려 있지 않습니다"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "데이터베이스 열기 실패: %@"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Databasen er ikke åpen"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunne ikke åpne database: %@"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Database is niet open"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kan database niet openen: %@"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Baza danych nie jest otwarta"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie można otworzyć bazy danych: %@"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O banco de dados não está aberto"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Falha ao abrir o banco de dados: %@"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "База данных не открыта"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось открыть базу данных: %@"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Databasen är inte öppen"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunde inte öppna databasen: %@"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ฐานข้อมูลไม่ได้เปิดอยู่"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ไม่สามารถเปิดฐานข้อมูลได้: %@"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Veritabanı açık değil"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Veritabanı açılamadı: %@"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cơ sở dữ liệu chưa được mở"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể mở cơ sở dữ liệu: %@"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "数据库未打开"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法打开数据库: %@"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "資料庫未打開"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法打開資料庫: %@"
           }
         }
       }
@@ -19775,16 +19775,16 @@
             "value" : "فشل ترميز معرفات الفئات"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kodning af kategor-ID'er mislykkedes"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kodning af spilversioner mislykkedes"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kodierung der Kategorie-IDs fehlgeschlagen"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kodierung der Spielversionen fehlgeschlagen"
           }
         },
         "es" : {
@@ -19793,106 +19793,106 @@
             "value" : "Codificación de ID de categorías falló"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Luokkatunnusten koodaus epäonnistui"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peliversioiden koodaus epäonnistui"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Encodage des ID de catégories échoué"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encodage des versions de jeu échoué"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "श्रेणी ID एन्कोड करने में विफल"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "गेम संस्करण एन्कोड करने में विफल"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Codifica ID categorie fallita"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codifica versioni di gioco fallita"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "カテゴリIDのエンコードに失敗"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ゲームバージョンのエンコードに失敗"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "카테고리 ID 인코딩 실패"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "게임 버전 인코딩 실패"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Koding av kategor-ID'er mislyktes"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koding av spillversjoner mislyktes"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Coderen van categorie-ID's mislukt"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coderen van spelversies mislukt"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kodowanie ID kategorii nie powiodło się"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kodowanie wersji gry nie powiodło się"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Codificação de IDs de categoria falhou"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codificação de versões do jogo falhou"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Кодирование ID категорий не удалось"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кодирование версий игры не удалось"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kodning av kategor-ID:er misslyckades"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kodning av spelversioner misslyckades"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "การเข้ารหัส ID หมวดหมู่ล้มเหลว"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "การเข้ารหัสเวอร์ชันเกมล้มเหลว"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kategori ID'lerinin kodlanması başarısız"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oyun sürümlerinin kodlanması başarısız"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mã hóa ID danh mục thất bại"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mã hóa phiên bản trò chơi thất bại"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "编码 categoryIds 失败"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编码 gameVersions 失败"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "編碼 categoryIds 失敗"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "編碼 gameVersions 失敗"
           }
         }
       }
@@ -19905,16 +19905,16 @@
             "value" : "فشل ترميز إصدارات اللعبة"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kodning af spilversioner mislykkedes"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kodning af mod-loader-typer mislykkedes"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kodierung der Spielversionen fehlgeschlagen"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kodierung der Mod-Loader-Typen fehlgeschlagen"
           }
         },
         "es" : {
@@ -19923,106 +19923,106 @@
             "value" : "Codificación de versiones de juego falló"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Peliversioiden koodaus epäonnistui"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mod-lataajatyyppien koodaus epäonnistui"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Encodage des versions de jeu échoué"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encodage des types de chargeur de mods échoué"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "गेम संस्करण एन्कोड करने में विफल"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "मॉड लोडर प्रकार एन्कोड करने में विफल"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Codifica versioni di gioco fallita"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codifica tipi di caricatore mod fallita"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ゲームバージョンのエンコードに失敗"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modローダータイプのエンコードに失敗"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "게임 버전 인코딩 실패"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "모드 로더 타입 인코딩 실패"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Koding av spillversjoner mislyktes"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koding av mod-loader-typer mislyktes"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Coderen van spelversies mislukt"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coderen van mod-loader-typen mislukt"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kodowanie wersji gry nie powiodło się"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kodowanie typów mod loadera nie powiodło się"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Codificação de versões do jogo falhou"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codificação de tipos de carregador de mods falhou"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Кодирование версий игры не удалось"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кодирование типов загрузчика модов не удалось"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kodning av spelversioner misslyckades"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kodning av mod-laddartyper misslyckades"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "การเข้ารหัสเวอร์ชันเกมล้มเหลว"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "การเข้ารหัสประเภทตัวโหลด Mod ล้มเหลว"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oyun sürümlerinin kodlanması başarısız"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mod yükleyici türlerinin kodlanması başarısız"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mã hóa phiên bản trò chơi thất bại"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mã hóa loại trình tải mod thất bại"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "编码 gameVersions 失败"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编码 modLoaderTypes 失败"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "編碼 gameVersions 失敗"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "編碼 modLoaderTypes 失敗"
           }
         }
       }
@@ -20035,16 +20035,16 @@
             "value" : "فشل ترميز أنواع محملات الـ Mod"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kodning af mod-loader-typer mislykkedes"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ukendt fejl opstod under kontroll af spilejerskab: %@"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kodierung der Mod-Loader-Typen fehlgeschlagen"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unbekannter Fehler beim Überprüfen des Spielbesitzes: %@"
           }
         },
         "es" : {
@@ -20053,106 +20053,106 @@
             "value" : "Codificación de tipos de cargador de mods falló"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mod-lataajatyyppien koodaus epäonnistui"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tuntematon virhe tapahtui pelien omistajuutta tarkistettaessa: %@"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Encodage des types de chargeur de mods échoué"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erreur inconnue lors de la vérification de la propriété du jeu : %@"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "मॉड लोडर प्रकार एन्कोड करने में विफल"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "गेम स्वामित्व जांचते समय अज्ञात त्रुटि हुई: %@"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Codifica tipi di caricatore mod fallita"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Errore sconosciuto durante la verifica della proprietà del gioco: %@"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Modローダータイプのエンコードに失敗"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ゲームの所有権確認中に不明なエラーが発生しました: %@"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "모드 로더 타입 인코딩 실패"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "게임 소유권 확인 중 알 수 없는 오류가 발생했습니다: %@"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Koding av mod-loader-typer mislyktes"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ukjent feil oppstod under kontroll av spileierskap: %@"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Coderen van mod-loader-typen mislukt"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Onbekende fout opgetreden bij het controleren van spelbezit: %@"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kodowanie typów mod loadera nie powiodło się"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nieznany błąd wystąpił podczas sprawdzania własności gry: %@"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Codificação de tipos de carregador de mods falhou"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erro desconhecido ao verificar a propriedade do jogo: %@"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Кодирование типов загрузчика модов не удалось"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Произошла неизвестная ошибка при проверке владения игрой: %@"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kodning av mod-laddartyper misslyckades"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Okänt fel uppstod vid kontroll av spelägande: %@"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "การเข้ารหัสประเภทตัวโหลด Mod ล้มเหลว"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุขณะตรวจสอบความเป็นเจ้าของเกม: %@"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mod yükleyici türlerinin kodlanması başarısız"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oyun sahipliği kontrol edilirken bilinmeyen bir hata oluştu: %@"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mã hóa loại trình tải mod thất bại"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã xảy ra lỗi không xác định khi kiểm tra quyền sở hữu trò chơi: %@"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "编码 modLoaderTypes 失败"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "检查游戏拥有情况时发生未知错误: %@"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "編碼 modLoaderTypes 失敗"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "檢查遊戲擁有情況時發生未知錯誤: %@"
           }
         }
       }
@@ -21597,16 +21597,16 @@
             "value" : "فشل في استخراج الملفات"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Udpakning mislykkedes"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fabric Loader-versionsdata kunne ikke analyseres: %@"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Entpacken fehlgeschlagen"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fabric Loader-Versionsdaten konnten nicht analysiert werden: %@"
           }
         },
         "es" : {
@@ -21615,106 +21615,106 @@
             "value" : "Falló la extracción"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Purkaminen epäonnistui"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fabric Loader -versiotietojen jäsentäminen epäonnistui: %@"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Extraction échouée"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Échec de l'analyse des données de version du chargeur Fabric: %@"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "निकालने में विफल"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fabric लोडर संस्करण डेटा पार्स करना विफल: %@"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Estrazione fallita"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analisi dei dati della versione del caricatore Fabric fallita: %@"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "展開に失敗しました"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fabric ローダーバージョンデータの解析に失敗: %@"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "압축 해제에 실패했습니다"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fabric 로더 버전 데이터 분석 실패: %@"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Utpakking mislyktes"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fabric Loader-versjonsdata kunne ikke analyseres: %@"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uitpakken mislukt"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fabric Loader versiegegevens parseren mislukt: %@"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rozpakowywanie nie powiodło się"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie udało się przeanalizować danych wersji Fabric Loader: %@"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Extração falhou"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Falha ao analisar dados da versão do Fabric Loader: %@"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Извлечение не удалось"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ошибка анализа данных версии Fabric Loader: %@"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Extraktion misslyckades"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunde inte analysera Fabric Loader-versionsdata: %@"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "การแตกไฟล์ล้มเหลว"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "การแยกวิเคราะห์ข้อมูลเวอร์ชัน Fabric Loader ล้มเหลว: %@"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Çıkarma başarısız"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fabric Loader sürüm verileri ayrıştırılamadı: %@"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Giải nén thất bại"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phân tích dữ liệu phiên bản Fabric Loader thất bại: %@"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "解压失败"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解析 Fabric 加载器版本数据失败: %@"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "解壓失敗"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解析 Fabric 加載器版本數據失敗: %@"
           }
         }
       }
@@ -21728,16 +21728,16 @@
             "value" : "Fabric المحمل"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fabric Loader"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adfærd"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fabric Loader"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verhalten"
           }
         },
         "es" : {
@@ -21746,106 +21746,106 @@
             "value" : "Fabric Loader"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fabric Loader"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Käyttäytyminen"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fabric Loader"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comportement"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fabric लोडर"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "व्यवहार"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fabric Loader"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comportamento"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fabric ローダー"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "動作"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fabric 로더"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "동작"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fabric Loader"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oppførsel"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fabric Loader"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gedrag"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fabric Loader"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zachowanie"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fabric Loader"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comportamento"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fabric Loader"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поведение"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fabric Loader"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beteende"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fabric Loader"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "พฤติกรรม"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fabric Loader"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Davranış"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fabric Loader"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hành vi"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fabric 加载器"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行为"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fabric 加載器"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行為"
           }
         }
       }
@@ -29564,16 +29564,16 @@
             "value" : "Forge المحمل"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forge Loader"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søg spil"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forge Loader"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spiel suchen"
           }
         },
         "es" : {
@@ -29582,106 +29582,106 @@
             "value" : "Forge Loader"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forge Loader"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etsi peliä"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forge Loader"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher un jeu"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forge लोडर"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "गेम खोजें"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forge Loader"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cerca gioco"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forge ローダー"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ゲームを検索"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forge 로더"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "게임 검색"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forge Loader"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søk spill"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forge Loader"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spel zoeken"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forge Loader"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szukaj gry"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forge Loader"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pesquisar jogo"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forge Loader"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поиск игры"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forge Loader"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sök spel"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forge Loader"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ค้นหาเกม"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forge Loader"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oyun ara"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forge Loader"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tìm kiếm trò chơi"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forge 加载器"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索游戏"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forge 加載器"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜尋遊戲"
           }
         }
       }
@@ -32302,130 +32302,130 @@
             "value" : "البحث عن لعبة"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Søg spil"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spilikon"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spiel suchen"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spielsymbol"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Game search"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icon"
           }
         },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Buscar juego"
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icono del juego"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Etsi peliä"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pelikuvake"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rechercher un jeu"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icône du jeu"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "गेम खोजें"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खेल आइकन"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cerca gioco"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icona del gioco"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ゲームを検索"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ゲームアイコン"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "게임 검색"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "게임 아이콘"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Søk spill"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spillikon"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spel zoeken"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spelicoon"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Szukaj gry"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikona gry"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pesquisar jogo"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ícone do jogo"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Поиск игры"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Значок игры"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sök spel"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spelikon"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ค้นหาเกม"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ไอคอนเกม"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oyun ara"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oyun simgesi"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tìm kiếm trò chơi"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biểu tượng trò chơi"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "搜索游戏"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "游戏图标"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "搜尋遊戲"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "遊戲圖標"
           }
         }
       }
@@ -32569,16 +32569,16 @@
             "value" : "إصدار اللعبة"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spil version"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj ressource"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spielversion"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hinzufügen"
           }
         },
         "es" : {
@@ -32587,106 +32587,106 @@
             "value" : "Versión del juego"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pelin versio"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lisää resurssi"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Version du jeu"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "गेम संस्करण"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "संसाधन जोड़ें"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versione del gioco"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiungi"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ゲームバージョン"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "追加"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "게임 버전"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "추가"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spill versjon"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legg til ressurs"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spelversie"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bron toevoegen"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wersja gry"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dodaj zasób"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versão do jogo"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Версия игры"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spelversion"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lägg till resurs"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "เวอร์ชันเกม"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เพิ่มทรัพยากร"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oyun sürümü"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaynak ekle"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Phiên bản trò chơi"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm tài nguyên"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "游戏版本"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加资源"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "遊戲版本"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加資源"
           }
         }
       }
@@ -34777,8 +34777,143 @@
         }
       }
     },
-    "http://localhost:11434" : {
-      "shouldTranslate" : false
+    "launcher.import.error.game_directory_not_found": {
+      "comment": "Launcher import error: game directory not found, %@ is the path",
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لم يتم العثور على دليل اللعبة: %@"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spilmappe ikke fundet: %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spielverzeichnis nicht gefunden: %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Game directory not found: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Directorio del juego no encontrado: %@"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pelikansiota ei löytynyt: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Répertoire du jeu introuvable : %@"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "गेम निर्देशिका नहीं मिली: %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Directory del gioco non trovata: %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ゲームディレクトリが見つかりません: %@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "게임 디렉토리를 찾을 수 없습니다: %@"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spillmappe ikke funnet: %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speldirectory niet gevonden: %@"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie znaleziono katalogu gry: %@"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diretório do jogo não encontrado: %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Каталог игры не найден: %@"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spelkatalog hittades inte: %@"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ไม่พบไดเรกทอรีเกม: %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oyun dizini bulunamadı: %@"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không tìm thấy thư mục trò chơi: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未找到游戏目录：%@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未找到遊戲目錄：%@"
+          }
+        }
+      }
     },
     "I Understand" : {
       "localizations" : {
@@ -35315,10 +35450,10 @@
             "value" : "Importer"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Importieren"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ungültige Konfiguration: %@"
           }
         },
         "es" : {
@@ -35327,16 +35462,16 @@
             "value" : "Importar"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tuo"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Virheellinen konfiguraatio: %@"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Importer"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configuration invalide : %@"
           }
         },
         "hi" : {
@@ -35345,22 +35480,22 @@
             "value" : "आयात"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Importa"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configurazione non valida: %@"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "インポート"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無効な設定: %@"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "가져오기"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "잘못된 구성: %@"
           }
         },
         "nb" : {
@@ -35369,40 +35504,40 @@
             "value" : "Importer"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Importeren"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongeldige configuratie: %@"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Importuj"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nieprawidłowa konfiguracja: %@"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Importar"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configuração inválida: %@"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Импорт"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Неверная конфигурация: %@"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Importera"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ogiltig konfiguration: %@"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "นำเข้า"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "การกำหนดค่าที่ไม่ถูกต้อง: %@"
           }
         },
         "tr" : {
@@ -35411,16 +35546,16 @@
             "value" : "İçe aktar"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nhập"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cấu hình không hợp lệ: %@"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "导入"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配置无效：%@"
           }
         },
         "zh-Hant" : {
@@ -35440,16 +35575,16 @@
             "value" : "استيراد المشغل"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Importer launcher"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forfatter"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Launcher importieren"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autor"
           }
         },
         "es" : {
@@ -35458,106 +35593,106 @@
             "value" : "Importar launcher"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tuo launcher"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tekijä"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Importer le lanceur"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auteur"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "लॉन्चर आयात करें"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "लेखक"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Importa launcher"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autore"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ランチャーをインポート"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "作者"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "런처 가져오기"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "작성자"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Importer launcher"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forfatter"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Launcher importeren"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auteur"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Importuj launcher"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autor"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Importar launcher"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autor"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Импортировать лаунчер"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Автор"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Importera launcher"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Författare"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "นำเข้า Launcher"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ผู้เขียน"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Launcher içe aktar"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yazar"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nhập launcher"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tác giả"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "导入启动器"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "作者"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "匯入啟動器"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "作者"
           }
         }
       }
@@ -36612,16 +36747,16 @@
             "value" : "رابط الاستدعاء غير صالح"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ugyldig callback URL"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verificerer kontooplysninger"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ungültige Callback-URL"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontoinformationen werden überprüft"
           }
         },
         "es" : {
@@ -36630,106 +36765,106 @@
             "value" : "URL de callback inválida"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Virheellinen callback URL"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarkistetaan tilin tietoja"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "URL de rappel invalide"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérification des informations du compte"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "अमान्य कॉलबैक URL"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खाता जानकारी सत्यापित की जा रही है"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "URL di callback non valida"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verifica delle informazioni dell'account"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "無効なコールバックURL"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アカウント情報を確認中"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "잘못된 콜백 URL"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "계정 정보 확인 중"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ugyldig callback URL"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verifiserer kontoinformasjon"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ongeldige callback URL"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accountinformatie wordt geverifieerd"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nieprawidłowy URL zwrotny"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weryfikacja informacji o koncie"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "URL de callback inválida"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verificando informações da conta"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Неверный URL обратного вызова"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверка информации аккаунта"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ogiltig callback URL"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verifierar kontoinformation"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "URL callback ไม่ถูกต้อง"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "กำลังตรวจสอบข้อมูลบัญชี"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geçersiz callback URL"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hesap bilgileri doğrulanıyor"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "URL callback không hợp lệ"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang xác minh thông tin tài khoản"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无效的回调 URL"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在验证账户信息"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "無效的回調 URL"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在驗證賬戶信息"
           }
         }
       }
@@ -40007,16 +40142,16 @@
             "value" : "الترخيص"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Licens"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deltag i Discord"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lizenz"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discord beitreten"
           }
         },
         "es" : {
@@ -40025,106 +40160,106 @@
             "value" : "Licencia"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lisenssi"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liity Discordiin"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Licence"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rejoindre Discord"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "लाइसेंस"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discord में शामिल हों"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Licenza"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unisciti a Discord"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ライセンス"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discordに参加"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "라이선스"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discord 참여"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lisens"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bli med på Discord"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Licentie"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deelnemen aan Discord"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Licencja"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dołącz do Discord"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Licença"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrar no Discord"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Лицензия"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Присоединиться к Discord"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Licens"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gå med i Discord"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ใบอนุญาต"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เข้าร่วม Discord"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lisans"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discord'a katıl"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Giấy phép"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tham gia Discord"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "许可证"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加入 Discord"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "許可證"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加入 Discord"
           }
         }
       }
@@ -40267,16 +40402,16 @@
             "value" : "الروابط"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Links"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Besøg Wiki"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Links"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiki besuchen"
           }
         },
         "es" : {
@@ -40285,106 +40420,106 @@
             "value" : "Enlaces"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Linkit"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vieraile Wikissä"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Liens"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visiter le Wiki"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "लिंक्स"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "विकि देखें"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Collegamenti"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visita Wiki"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "リンク"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wikiを訪問"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "링크"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiki 방문"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lenker"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Besøk Wiki"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Links"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bezoek Wiki"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Linki"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odwiedź Wiki"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Links"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visitar Wiki"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ссылки"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Посетить Wiki"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Länkar"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Besök Wiki"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ลิงค์"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เยี่ยมชม Wiki"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bağlantılar"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiki'yi ziyaret et"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Liên kết"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thăm Wiki"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "链接"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "访问维基"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "連結"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "訪問維基"
           }
         }
       }
@@ -45249,16 +45384,16 @@
             "value" : "Minecraft:"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minecraft:"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuiltMC Loader"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minecraft:"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuiltMC Loader"
           }
         },
         "es" : {
@@ -45267,106 +45402,106 @@
             "value" : "Minecraft:"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minecraft:"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuiltMC Loader"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minecraft :"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuiltMC Loader"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minecraft:"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuiltMC लोडर"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minecraft:"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuiltMC Loader"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minecraft:"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuiltMC ローダー"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minecraft:"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuiltMC 로더"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minecraft:"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuiltMC Loader"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minecraft:"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuiltMC Loader"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minecraft:"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuiltMC Loader"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minecraft:"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuiltMC Loader"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minecraft:"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuiltMC Loader"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minecraft:"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuiltMC Loader"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minecraft:"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuiltMC Loader"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minecraft:"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuiltMC Loader"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minecraft:"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuiltMC Loader"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minecraft:"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuiltMc 加载器"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minecraft:"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuiltMC 加載器"
           }
         }
       }
@@ -46030,16 +46165,16 @@
             "value" : "محملات المود:"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mod-indlæsere:"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installer"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mod-Loader:"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installieren"
           }
         },
         "es" : {
@@ -46048,106 +46183,106 @@
             "value" : "Cargadores de mods:"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mod-lataajat:"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Asenna"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chargeurs de mods :"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installer"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "मॉड लोडर:"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "इंस्टॉल करें"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Caricatori mod:"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installa"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Modローダー:"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "インストール"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "모드 로더:"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "설치"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mod-lastere:"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installer"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mod-laders:"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installeren"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ładowacze modów:"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zainstaluj"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Carregadores de mods:"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instalar"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Загрузчики модов:"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Установить"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mod-laddare:"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installera"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ตัวโหลดมอด:"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ติดตั้ง"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mod yükleyicileri:"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yükle"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trình tải mod:"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cài đặt"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mod 加载器:"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mod 加載器:"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安裝"
           }
         }
       }
@@ -74898,130 +75033,130 @@
             "value" : "الإصدارات:"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versioner:"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ressourceplacering"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versionen:"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ressourcenort"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versions:"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resource Location"
           }
         },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versiones:"
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ubicación del recurso"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versiot:"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resurssin sijainti"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versions :"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emplacement de la ressource"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "संस्करण:"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "संसाधन स्थान"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versioni:"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posizione risorsa"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "バージョン:"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "リソースの場所"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "버전:"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "리소스 위치"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versjoner:"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ressursplassering"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versies:"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bronlocatie"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wersje:"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lokalizacja zasobów"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versões:"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Localização do recurso"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Версии:"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Местоположение ресурса"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versioner:"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resursplats"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "เวอร์ชัน:"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ตำแหน่งทรัพยากร"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Versiyonlar:"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaynak konumu"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Phiên bản:"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vị trí tài nguyên"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "版本:"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "资源位置"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "版本:"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "資源位置"
           }
         }
       }
@@ -75555,16 +75690,16 @@
             "value" : "الطقس"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vejr"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grundlæggende information"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wetter"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grundinformationen"
           }
         },
         "es" : {
@@ -75573,106 +75708,106 @@
             "value" : "Clima"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sää"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perustiedot"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Météo"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informations de base"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "मौसम"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "मूल जानकारी"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tempo"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informazioni di base"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "天気"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "基本情報"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "날씨"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기본 정보"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vær"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grunnleggende informasjon"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Weer"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Basisinformatie"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pogoda"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Podstawowe informacje"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clima"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informações básicas"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Погода"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Основная информация"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Väder"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grundläggande information"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "สภาพอากาศ"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ข้อมูลพื้นฐาน"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hava"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temel bilgiler"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Thời tiết"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thông tin cơ bản"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "天气"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "基本信息"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "天氣"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "基本資訊"
           }
         }
       }
@@ -75685,16 +75820,16 @@
             "value" : "عند التفعيل، سيتم إضافة بادئة وكيل لطلبات github.com و raw.githubusercontent.com."
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Når aktiveret, tilføjes en proxy-præfiks til anmodninger for github.com og raw.githubusercontent.com."
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klassisk"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wenn aktiviert, wird ein Proxy-Präfix zu Anfragen für github.com und raw.githubusercontent.com hinzugefügt."
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klassisch"
           }
         },
         "es" : {
@@ -75703,106 +75838,106 @@
             "value" : "Cuando está habilitado, agrega un prefijo de proxy a las solicitudes para github.com y raw.githubusercontent.com."
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kun käytössä, lisää välityspalvelimen etuliitteen pyyntöihin github.com ja raw.githubusercontent.com."
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klassinen"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lorsqu'il est activé, ajoute un préfixe proxy aux requêtes pour github.com et raw.githubusercontent.com."
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Classique"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "सक्षम होने पर, github.com और raw.githubusercontent.com के लिए अनुरोधों में एक प्रॉक्सी उपसर्ग जोड़ता है।"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "क्लासिक"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quando abilitato, aggiunge un prefisso proxy alle richieste per github.com e raw.githubusercontent.com."
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Classico"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "有効にすると、github.com と raw.githubusercontent.com へのリクエストにプロキシプレフィックスが追加されます。"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "クラシック"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "활성화되면 github.com 및 raw.githubusercontent.com에 대한 요청에 프록시 접두사를 추가합니다."
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "클래식"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Når aktivert, legger til en proxy-prefiks til forespørsler for github.com og raw.githubusercontent.com."
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klassisk"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wanneer ingeschakeld, voegt een proxy-voorvoegsel toe aan verzoeken voor github.com en raw.githubusercontent.com."
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klassiek"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Po włączeniu dodaje prefiks proxy do żądań dla github.com i raw.githubusercontent.com."
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klasyczny"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quando habilitado, adiciona um prefixo de proxy às solicitações para github.com e raw.githubusercontent.com."
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clássico"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "При включении добавляет префикс прокси к запросам для github.com и raw.githubusercontent.com."
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Классический"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "När aktiverad lägger till ett proxy-prefix till förfrågningar för github.com och raw.githubusercontent.com."
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klassisk"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "เมื่อเปิดใช้งาน จะเพิ่มคำนำหน้าพร็อกซี่ให้กับคำขอสำหรับ github.com และ raw.githubusercontent.com"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "คลาสสิก"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Etkinleştirildiğinde, github.com ve raw.githubusercontent.com için isteklere bir proxy öneki ekler."
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klasik"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Khi được bật, thêm tiền tố proxy vào các yêu cầu cho github.com và raw.githubusercontent.com."
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cổ điển"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "开启后会对 github.com 与 raw.githubusercontent.com 的请求添加代理前缀。"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "经典"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "開啟後會對 github.com 與 raw.githubusercontent.com 的請求添加代理前綴。"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "經典"
           }
         }
       }
@@ -75815,16 +75950,16 @@
             "value" : "دليل العمل"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Arbejdsmappe"
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pladsholder"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Arbeitsverzeichnis"
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Platzhalter"
           }
         },
         "es" : {
@@ -75833,106 +75968,106 @@
             "value" : "Directorio de Trabajo"
           }
         },
-        "fi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Työhakemisto"
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paikkamerkki"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Répertoire de travail"
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Espace réservé"
           }
         },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "कार्य निर्देशिका"
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "प्लेसहोल्डर"
           }
         },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Directory di lavoro"
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Segnaposto"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "作業ディレクトリ"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "プレースホルダー"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "작업 디렉토리"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "플레이스홀더"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Arbeidsmappe"
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plassholder"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Werkmap"
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tijdelijke aanduiding"
           }
         },
-        "pl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Katalog roboczy"
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Symbol zastępczy"
           }
         },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Diretório de Trabalho"
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Espaço reservado"
           }
         },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Рабочая папка"
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заполнитель"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Arbetskatalog"
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Platshållare"
           }
         },
-        "th" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ไดเร็กทอรีการทำงาน"
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ตัวยึดตำแหน่ง"
           }
         },
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Çalışma Dizini"
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yer tutucu"
           }
         },
-        "vi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Thư mục làm việc"
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trình giữ chỗ"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "工作目录"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "占位符"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "工作目錄"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "佔位符"
           }
         }
       }
@@ -77657,5 +77792,5 @@
       }
     }
   },
-  "version" : "1.1"
+  "version": "1.1"
 }

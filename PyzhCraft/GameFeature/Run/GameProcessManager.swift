@@ -17,12 +17,12 @@ final class GameProcessManager: ObservableObject, @unchecked Sendable {
         // Not executed on the main thread: database and file scanning are placed in the background, and only the UI status is updated back to the main thread
         process.terminationHandler = { [weak self] process in
             Task {
-                await self?.handleProcessTermination(gameId: gameId, process: process)
+                await self?.handleProcessTermination(gameId: gameId, userId: userId, process: process)
             }
         }
         
         queue.async { [weak self] in
-            self?.gameProcesses[gameId] = process
+            self?.gameProcesses[key] = process
         }
         
         Logger.shared.debug("Store game process: \(gameId)")
@@ -49,11 +49,11 @@ final class GameProcessManager: ObservableObject, @unchecked Sendable {
         }
         
         await MainActor.run {
-            GameStatusManager.shared.setGameRunning(gameId: gameId, isRunning: false)
+            GameStatusManager.shared.setGameRunning(gameId: gameId, userId: userId, isRunning: false)
         }
         queue.async { [weak self] in
-            self?.gameProcesses.removeValue(forKey: gameId)
-            self?.manuallyStoppedGames.remove(gameId)
+            self?.gameProcesses.removeValue(forKey: key)
+            self?.manuallyStoppedGames.remove(key)
         }
     }
     
@@ -183,8 +183,8 @@ final class GameProcessManager: ObservableObject, @unchecked Sendable {
     /// - Returns: Whether the stop was initiated successfully
     func stopProcess(for gameId: String) -> Bool {
         let process: Process? = queue.sync {
-            guard let proc = gameProcesses[gameId] else { return nil }
-            manuallyStoppedGames.insert(gameId)
+            guard let proc = gameProcesses[key] else { return nil }
+            manuallyStoppedGames.insert(key)
             return proc
         }
         guard let process = process else { return false }
@@ -210,16 +210,16 @@ final class GameProcessManager: ObservableObject, @unchecked Sendable {
     
     // Clean up processes that did not trigger terminationHandler correctly
     func cleanupTerminatedProcesses() {
-        let terminatedGameIds: [String] = queue.sync {
-            let ids = gameProcesses.compactMap { gameId, process in
-                !process.isRunning ? gameId : nil
+        let terminatedKeys: [String] = queue.sync {
+            let keys = gameProcesses.compactMap { key, process in
+                !process.isRunning ? key : nil
             }
-            guard !ids.isEmpty else { return [] }
-            for gameId in ids {
-                gameProcesses.removeValue(forKey: gameId)
-                manuallyStoppedGames.remove(gameId)
+            guard !keys.isEmpty else { return [] }
+            for key in keys {
+                gameProcesses.removeValue(forKey: key)
+                manuallyStoppedGames.remove(key)
             }
-            return ids
+            return keys
         }
         
         guard !terminatedGameIds.isEmpty else { return }
@@ -229,8 +229,13 @@ final class GameProcessManager: ObservableObject, @unchecked Sendable {
         }
         
         Task { @MainActor in
-            for gameId in terminatedGameIds {
-                GameStatusManager.shared.setGameRunning(gameId: gameId, isRunning: false)
+            for key in terminatedKeys {
+                // key 格式为 "gameId_userId"
+                if let idx = key.firstIndex(of: "_") {
+                    let gameId = String(key[..<idx])
+                    let userId = String(key[key.index(after: idx)...])
+                    GameStatusManager.shared.setGameRunning(gameId: gameId, userId: userId, isRunning: false)
+                }
             }
         }
     }
@@ -246,12 +251,16 @@ final class GameProcessManager: ObservableObject, @unchecked Sendable {
     /// If the game is running, the process will be terminated first, wait in the background for exit, and then be removed from the memory without blocking the calling thread
     /// - Parameter gameId: Game ID
     func removeGameState(gameId: String) {
-        let process: Process? = queue.sync {
-            let proc = gameProcesses[gameId]
-            if proc?.isRunning == true {
-                manuallyStoppedGames.insert(gameId)
+        let prefix = "\(gameId)_"
+        let toRemove: [(String, Process)] = queue.sync {
+            let pairs = gameProcesses.filter { key, _ in key.hasPrefix(prefix) }
+            for (key, proc) in pairs {
+                gameProcesses.removeValue(forKey: key)
+                if proc.isRunning {
+                    manuallyStoppedGames.insert(key)
+                }
             }
-            return proc
+            return pairs.map { ($0.key, $0.value) }
         }
         
         if let process = process, process.isRunning {
@@ -260,14 +269,19 @@ final class GameProcessManager: ObservableObject, @unchecked Sendable {
             DispatchQueue.global(qos: .utility).async { [weak self] in
                 process.waitUntilExit()
                 self?.queue.async {
-                    self?.gameProcesses.removeValue(forKey: gameId)
-                    self?.manuallyStoppedGames.remove(gameId)
+                    self?.gameProcesses.removeValue(forKey: key)
+                    self?.manuallyStoppedGames.remove(key)
                 }
             }
-        } else {
-            queue.async { [weak self] in
-                self?.gameProcesses.removeValue(forKey: gameId)
-                self?.manuallyStoppedGames.remove(gameId)
+        }
+
+        Task { @MainActor in
+            for (key, process) in toRemove where !process.isRunning {
+                if let idx = key.firstIndex(of: "_") {
+                    let gameId = String(key[..<idx])
+                    let userId = String(key[key.index(after: idx)...])
+                    GameStatusManager.shared.setGameRunning(gameId: gameId, userId: userId, isRunning: false)
+                }
             }
         }
     }

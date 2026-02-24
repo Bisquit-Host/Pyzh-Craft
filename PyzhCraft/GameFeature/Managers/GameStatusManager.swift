@@ -18,7 +18,7 @@ class GameStatusManager: ObservableObject {
         let actuallyRunning = GameProcessManager.shared.isGameRunning(gameId: gameId)
         
         DispatchQueue.main.async {
-            self.updateGameStatusIfNeeded(gameId: gameId, actuallyRunning: actuallyRunning)
+            self.updateGameStatusIfNeeded(key: key, actuallyRunning: actuallyRunning)
         }
         
         return actuallyRunning
@@ -53,7 +53,7 @@ class GameStatusManager: ObservableObject {
     func setGameRunning(gameId: String, isRunning: Bool) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            let currentState = self.gameRunningStates[gameId]
+            let currentState = self.gameRunningStates[key]
             if currentState != isRunning {
                 self.gameRunningStates[gameId] = isRunning
                 Logger.shared.debug("Game status update: \(gameId) -> \(isRunning ? "running" : "stopped")")
@@ -67,8 +67,14 @@ class GameStatusManager: ObservableObject {
         
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            self.gameRunningStates = self.gameRunningStates.filter { gameId, _ in
-                processManager.isGameRunning(gameId: gameId)
+            self.gameRunningStates = self.gameRunningStates.filter { key, isRunning in
+                guard isRunning else { return false }
+                if let idx = key.firstIndex(of: "_") {
+                    let gameId = String(key[..<idx])
+                    let userId = String(key[key.index(after: idx)...])
+                    return processManager.isGameRunning(gameId: gameId, userId: userId)
+                }
+                return false
             }
         }
     }
@@ -93,7 +99,7 @@ class GameStatusManager: ObservableObject {
     func setGameLaunching(gameId: String, isLaunching: Bool) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            let currentState = self.gameLaunchingStates[gameId] ?? false
+            let currentState = self.gameLaunchingStates[key] ?? false
             if currentState != isLaunching {
                 self.gameLaunchingStates[gameId] = isLaunching
                 Logger.shared.debug("Game startup status update: \(gameId) -> \(isLaunching ? "launching" : "not launching")")
@@ -109,10 +115,15 @@ class GameStatusManager: ObservableObject {
     
     /// - Parameter gameId: game ID
     func removeGameState(gameId: String) {
+        let prefix = "\(gameId)_"
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            self.gameRunningStates.removeValue(forKey: gameId)
-            self.gameLaunchingStates.removeValue(forKey: gameId)
+            let keysToRemove = self.gameRunningStates.keys.filter { $0.hasPrefix(prefix) }
+                + self.gameLaunchingStates.keys.filter { $0.hasPrefix(prefix) }
+            for key in keysToRemove {
+                self.gameRunningStates.removeValue(forKey: key)
+                self.gameLaunchingStates.removeValue(forKey: key)
+            }
         }
     }
 }
