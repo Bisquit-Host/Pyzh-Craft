@@ -399,7 +399,7 @@ private struct GameContextMenu: View {
             gameActionManager.showInFinder(game: game)
         }
         
-        Button("Server Settings", systemImage: "server.rack") {
+        Button("Settings", systemImage: "server.rack") {
             selectedGameManager.setSelectedGame(game.id)
             onOpenServerSettings()
         }
@@ -407,7 +407,7 @@ private struct GameContextMenu: View {
         Divider()
         
         Button("Export", systemImage: "square.and.arrow.up", action: onExport)
-        Button("Delete Game", systemImage: "trash", role: .destructive, action: onDelete)
+        Button("Delete", systemImage: "trash", role: .destructive, action: onDelete)
     }
     
     /// Start or stop the game
