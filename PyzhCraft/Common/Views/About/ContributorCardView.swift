@@ -5,7 +5,7 @@ struct ContributorCardView: View {
     let contributor: GitHubContributor
     let isTopContributor: Bool
     let rank: Int
-    let contributionsText: String
+    let contributionsText: LocalizedStringKey
     
     var body: some View {
         Group {

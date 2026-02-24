@@ -98,9 +98,7 @@ public struct ContributorsView: View {
                         contributor: contributor,
                         isTopContributor: true,
                         rank: index + 1,
-                        contributionsText: String(
-                            format: String(localized: "\(viewModel.formatContributions(contributor.contributions)) contributions")
-                        )
+                        contributionsText: "\(viewModel.formatContributions(contributor.contributions)) contributions"
                     )
                     .id("top-\(contributor.id)")
                     
@@ -125,9 +123,7 @@ public struct ContributorsView: View {
                     contributor: contributor,
                     isTopContributor: false,
                     rank: index + viewModel.topContributors.count + 1,
-                    contributionsText: String(
-                        format: String(localized: "\(viewModel.formatContributions(contributor.contributions)) contributions")
-                    )
+                    contributionsText: "\(viewModel.formatContributions(contributor.contributions)) contributions"
                 )
                 .id("other-\(contributor.id)")
                 
@@ -150,6 +146,7 @@ public struct ContributorsView: View {
         // reset state
         staticContributorsLoaded = false
         staticContributorsLoadFailed = false
+        
         Task {
             do {
                 let contributorsData: ContributorsData = try await gitHubService.fetchStaticContributors()
@@ -167,6 +164,7 @@ public struct ContributorsView: View {
                     }
                     staticContributorsLoaded = true
                     staticContributorsLoadFailed = false
+                    
                     Logger.shared.info(
                         "Successfully loaded",
                         staticContributors.count,
@@ -175,6 +173,7 @@ public struct ContributorsView: View {
                 }
             } catch {
                 Logger.shared.error("Failed to load contributors from GitHubService:", error)
+                
                 await MainActor.run {
                     staticContributorsLoadFailed = true
                 }
