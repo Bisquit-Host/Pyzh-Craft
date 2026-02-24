@@ -63,7 +63,7 @@ brew install --cask swift-craft-launcher
 > **💡 Tip**: We created a dedicated [Homebrew Tap](https://github.com/suhang12332/homebrew-swiftcraftlauncher) for Pyzh Craft
 
 ### 💾 Pre-built Release
-Download the latest version from [GitHub Releases](https://github.com/suhang12332/Swift-Craft-Launcher/releases/latest)
+Download the latest version from [GitHub Releases](https://github.com/suhang12332/Pyzh-Craft/releases/latest)
 
 > **⚠️ Note**: The current available downloads are test versions. Stable releases are coming soon
 
@@ -73,8 +73,8 @@ Please visit [FAQ](doc/FAQ.md)
 ### 🔨 Build from Source
 1. **⏬ Clone the repository**
    ```bash
-   git clone https://github.com/suhang12332/Swift-Craft-Launcher.git
-   cd Swift-Craft-Launcher
+   git clone https://github.com/suhang12332/Pyzh-Craft.git
+   cd Pyzh-Craft
    ```
 
 2. **🛠️ Open in Xcode**
@@ -107,8 +107,8 @@ This project is licensed under the GNU Affero General Public License v3.0. See [
 
 - **👥 Official QQ Group**: [1057517524](https://qm.qq.com/cgi-bin/qm/qr?k=1057517524)
 - **Discord**: [Discord](https://discord.gg/gYESVa3CZd)
-- **🐛 Issue Reports**: [GitHub Issues](https://github.com/suhang12332/Swift-Craft-Launcher/issues)
-- **💡 Feature Suggestions**: [GitHub Discussions](https://github.com/suhang12332/Swift-Craft-Launcher/discussions)
+- **🐛 Issue Reports**: [GitHub Issues](https://github.com/suhang12332/Pyzh-Craft/issues)
+- **💡 Feature Suggestions**: [GitHub Discussions](https://github.com/suhang12332/Pyzh-Craft/discussions)
 
 ## 🌟 Contributing
 
