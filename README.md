@@ -73,7 +73,7 @@ Please visit [FAQ](doc/FAQ.md)
 ### 🔨 Build from Source
 1. **⏬ Clone the repository**
    ```bash
-   git clone https://github.com/suhang12332/Pyzh-Craft.git
+   git clone https://github.com/TopScrech/Pyzh-Craft.git
    cd Pyzh-Craft
    ```
 
