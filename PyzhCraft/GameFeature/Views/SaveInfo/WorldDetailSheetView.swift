@@ -90,27 +90,31 @@ struct WorldDetailSheetView: View {
                 HStack(alignment: .top, spacing: 24) {
                     // Basic information
                     infoSection(title: "Basic Information") {
-                        infoRow(label: "World Name", value: metadata.levelName)
-                        infoRow(label: "Save Folder", value: metadata.folderName)
+                        infoRow("World Name", value: metadata.levelName)
+                        infoRow("Save Folder", value: metadata.folderName)
+                        
                         if let versionName = metadata.versionName {
-                            infoRow(label: "Game Version", value: versionName)
+                            infoRow("Game Version", value: versionName)
                         }
+                        
                         if let versionId = metadata.versionId {
-                            infoRow(label: "Version ID", value: "\(versionId)")
+                            infoRow("Version ID", value: "\(versionId)")
                         }
+                        
                         if let dataVersion = metadata.dataVersion {
-                            infoRow(label: "Data Version", value: "\(dataVersion)")
+                            infoRow("Data Version", value: "\(dataVersion)")
                         }
                     }
                     
                     // game settings
                     infoSection(title: "Game Settings") {
-                        infoRow(label: "Game Mode", value: metadata.gameMode)
-                        infoRow(label: "Difficulty", value: metadata.difficulty)
-                        infoRow(label: "Hardcore Mode", value: metadata.hardcore ? String(localized: "Yes") : String(localized: "No"))
-                        infoRow(label: "Allow Cheats", value: metadata.cheats ? String(localized: "Yes") : String(localized: "No"))
+                        infoRow("Game Mode", value: metadata.gameMode)
+                        infoRow("Difficulty", value: metadata.difficulty)
+                        infoRow("Hardcore Mode", value: metadata.hardcore ? String(localized: "Yes") : String(localized: "No"))
+                        infoRow("Allow Cheats", value: metadata.cheats ? String(localized: "Yes") : String(localized: "No"))
+                        
                         if let seed = metadata.seed {
-                            infoRow(label: "World Seed", value: "\(seed)")
+                            infoRow("World Seed", value: "\(seed)")
                         }
                     }
                 }
@@ -118,22 +122,22 @@ struct WorldDetailSheetView: View {
                 // Other information
                 infoSection(title: "Other Information") {
                     if let lastPlayed = metadata.lastPlayed {
-                        infoRow(label: "Last Played", value: formatDate(lastPlayed))
+                        infoRow("Last Played", value: formatDate(lastPlayed))
                     }
                     if let spawn = metadata.spawn {
-                        infoRow(label: "Spawn Point", value: spawn)
+                        infoRow("Spawn Point", value: spawn)
                     }
                     if let time = metadata.time {
-                        infoRow(label: "Time", value: "\(time)")
+                        infoRow("Time", value: "\(time)")
                     }
                     if let dayTime = metadata.dayTime {
-                        infoRow(label: "DayTime", value: "\(dayTime)")
+                        infoRow("DayTime", value: "\(dayTime)")
                     }
                     if let weather = metadata.weather {
-                        infoRow(label: "Weather", value: weather)
+                        infoRow("Weather", value: weather)
                     }
                     if let border = metadata.worldBorder {
-                        infoRow(label: "World Border", value: border, isMultiline: true)
+                        infoRow("World Border", value: border, isMultiline: true)
                     }
                 }
                 
@@ -211,7 +215,7 @@ struct WorldDetailSheetView: View {
         }
     }
     
-    private func infoRow(label: LocalizedStringKey, value: String, isMultiline: Bool = false) -> some View {
+    private func infoRow(_ label: LocalizedStringKey, value: String, isMultiline: Bool = false) -> some View {
         HStack(alignment: isMultiline ? .top : .center, spacing: 12) {
             HStack(spacing: 0) {
                 Text(label)

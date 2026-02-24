@@ -3,11 +3,11 @@ import SwiftUI
 // MARK: - Constants
 enum ModrinthProjectContentConstants {
     static let maxVisibleVersions = 15
-    static let popoverWidth: CGFloat = 300
-    static let popoverHeight: CGFloat = 400
-    static let cornerRadius: CGFloat = 4
-    static let spacing: CGFloat = 6
-    static let padding: CGFloat = 8
+    static let popoverWidth = 300.0
+    static let popoverHeight = 400.0
+    static let cornerRadius = 4.0
+    static let spacing = 6.0
+    static let padding = 8.0
 }
 
 struct ModrinthProjectContentView: View {
@@ -45,6 +45,7 @@ struct ModrinthProjectContentView: View {
             let globalError = GlobalError.from(error)
             Logger.shared.error("Failed to load project details: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
+            
             await MainActor.run {
                 self.error = globalError
             }

@@ -91,17 +91,17 @@ struct LitematicaDetailSheetView: View {
             VStack {
                 HStack {
                     infoSection(title: "Basic") {
-                        infoRow(label: "Name", value: metadata.name)
-                        infoRow(label: "Author", value: metadata.author.isEmpty ? String(localized: "Unknown") : metadata.author)
+                        infoRow("Name", value: metadata.name)
+                        infoRow("Author", value: metadata.author.isEmpty ? String(localized: "Unknown") : metadata.author)
                         if !metadata.description.isEmpty {
-                            infoRow(label: "Description", value: metadata.description, isMultiline: true)
+                            infoRow("Description", value: metadata.description, isMultiline: true)
                         }
                     }
 
                     infoSection(title: "Time") {
                         VStack(alignment: .leading, spacing: 12) {
-                            infoRow(label: "Created", value: formatTimestamp(metadata.timeCreated))
-                            infoRow(label: "Modified", value: formatTimestamp(metadata.timeModified))
+                            infoRow("Created", value: formatTimestamp(metadata.timeCreated))
+                            infoRow("Modified", value: formatTimestamp(metadata.timeModified))
                         }
                     }
                 }
@@ -111,28 +111,29 @@ struct LitematicaDetailSheetView: View {
                 infoSection(title: "Size") {
                     VStack(alignment: .leading, spacing: 12) {
                         let hasSize = metadata.enclosingSize.x > 0 || metadata.enclosingSize.y > 0 || metadata.enclosingSize.z > 0
+                        
                         if hasSize {
                             infoRow(
-                                label: "Enclosing Size",
+                                "Enclosing Size",
                                 value: "\(metadata.enclosingSize.x) × \(metadata.enclosingSize.y) × \(metadata.enclosingSize.z)"
                             )
                         } else {
-                            infoRow(label: "Enclosing Size", value: String(localized: "Unknown"))
+                            infoRow("Enclosing Size", value: String(localized: "Unknown"))
                         }
 
                         if metadata.totalVolume > 0 {
-                            infoRow(label: "Total Volume", value: formatNumber(Int(metadata.totalVolume)))
+                            infoRow("Total Volume", value: formatNumber(Int(metadata.totalVolume)))
                         } else {
-                            infoRow(label: "Total Volume", value: String(localized: "Unknown"))
+                            infoRow("Total Volume", value: String(localized: "Unknown"))
                         }
 
                         if metadata.totalBlocks > 0 {
-                            infoRow(label: "Total Blocks", value: formatNumber(Int(metadata.totalBlocks)))
+                            infoRow("Total Blocks", value: formatNumber(Int(metadata.totalBlocks)))
                         } else {
-                            infoRow(label: "Total Blocks", value: String(localized: "Unknown"))
+                            infoRow("Total Blocks", value: String(localized: "Unknown"))
                         }
 
-                        infoRow(label: "Regions", value: "\(metadata.regionCount)")
+                        infoRow("Regions", value: "\(metadata.regionCount)")
                     }
                 }
             }
@@ -150,7 +151,7 @@ struct LitematicaDetailSheetView: View {
         }
     }
 
-    private func infoRow(label: LocalizedStringKey, value: String, isMultiline: Bool = false) -> some View {
+    private func infoRow(_ label: LocalizedStringKey, value: String, isMultiline: Bool = false) -> some View {
         HStack(alignment: isMultiline ? .top : .center, spacing: 12) {
             HStack(spacing: 0) {
                 Text(label)
