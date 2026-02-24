@@ -20,7 +20,7 @@ struct MiniRangeSlider: View {
                     .strokeBorder(Color.secondary.opacity(0.05), lineWidth: 0.5 ) // Border color and width
                     .background(
                         Capsule()
-                            .fill(Color.secondary.opacity(0.1))
+                            .fill(.secondary.opacity(0.1))
                     )
                     .frame(height: trackHeight)
                 // Selected range track
@@ -31,7 +31,7 @@ struct MiniRangeSlider: View {
                 
                 // left slider
                 Circle()
-                    .fill(colorScheme == .dark ? Color.gray : Color.white)
+                    .fill(colorScheme == .dark ? .gray : .white)
                     .frame(width: thumbDiameter, height: thumbDiameter)
                     .overlay(
                         Circle()
@@ -52,7 +52,7 @@ struct MiniRangeSlider: View {
                 
                 // right slider
                 Circle()
-                    .fill(colorScheme == .dark ? Color.gray : Color.white)
+                    .fill(colorScheme == .dark ? .gray : .white)
                     .frame(width: thumbDiameter, height: thumbDiameter)
                     .overlay(
                         Circle()

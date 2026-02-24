@@ -97,7 +97,7 @@ struct GameHeaderListRow: View {
                 defaultIcon
             }
         }
-        .contentShape(Rectangle())
+        .contentShape(.rect)
         .onTapGesture {
             onIconTap?()
         }

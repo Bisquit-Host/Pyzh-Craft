@@ -137,7 +137,7 @@ private struct CategoryTag: View {
             .font(.caption)
             .padding(.horizontal, Constants.categoryPadding)
             .padding(.vertical, Constants.categoryVerticalPadding)
-            .background(Color.gray.opacity(0.2))
+            .background(.gray.opacity(0.2))
             .cornerRadius(Constants.categoryCornerRadius)
     }
 }

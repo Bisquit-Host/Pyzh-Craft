@@ -116,7 +116,7 @@ struct ContributorAvatarView: View {
             }
         }
         .frame(width: size, height: size)
-        .clipShape(Circle())
+        .clipShape(.circle)
         .onAppear {
             loadImage()
         }
@@ -264,7 +264,7 @@ struct StaticContributorAvatarView: View {
                     }
                 }
                 .frame(width: size, height: size)
-                .clipShape(Circle())
+                .clipShape(.circle)
                 .onAppear {
                     loadImage()
                 }
@@ -276,8 +276,8 @@ struct StaticContributorAvatarView: View {
                 Text(avatar)
                     .font(.system(size: 24))
                     .frame(width: size, height: size)
-                    .background(Color.gray.opacity(0.1))
-                    .clipShape(Circle())
+                    .background(.gray.opacity(0.1))
+                    .clipShape(.circle)
             }
         }
     }

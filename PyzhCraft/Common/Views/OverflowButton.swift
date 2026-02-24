@@ -24,7 +24,7 @@ struct OverflowButton<Content: View>: View {
                 .font(.caption)
                 .padding(.horizontal, 4)
                 .padding(.vertical, 2)
-                .background(Color.gray.opacity(0.15))
+                .background(.gray.opacity(0.15))
                 .cornerRadius(4)
         }
         .buttonStyle(.plain)

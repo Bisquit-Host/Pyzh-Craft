@@ -163,7 +163,7 @@ struct AttachmentPreview: View {
                     .foregroundStyle(.blue)
                     .frame(width: Constants.previewSize, height: Constants.previewSize)
                     .background(Color(nsColor: .controlBackgroundColor))
-                    .clipShape(RoundedRectangle(cornerRadius: Constants.cornerRadius))
+                    .clipShape(.rect(cornerRadius: Constants.cornerRadius))
                 
                 Text(fileName)
                     .font(.caption)
@@ -180,7 +180,7 @@ struct AttachmentPreview: View {
         }
         .padding(Constants.padding)
         .background(Color(nsColor: .controlBackgroundColor))
-        .clipShape(RoundedRectangle(cornerRadius: Constants.containerCornerRadius))
+        .clipShape(.rect(cornerRadius: Constants.containerCornerRadius))
     }
 }
 
@@ -242,9 +242,9 @@ struct AttachmentView: View {
         }
         .padding(Constants.filePadding)
         .background(Color(nsColor: .controlBackgroundColor))
-        .clipShape(RoundedRectangle(cornerRadius: Constants.fileCornerRadius))
+        .clipShape(.rect(cornerRadius: Constants.fileCornerRadius))
         .frame(maxWidth: Constants.fileMaxWidth)
-        .contentShape(Rectangle())
+        .contentShape(.rect)
         .onTapGesture {
             NSWorkspace.shared.activateFileViewerSelecting([url])
         }

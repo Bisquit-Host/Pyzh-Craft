@@ -645,7 +645,7 @@ struct NBTDisclosureButton: View {
                     .font(.system(size: 11, weight: .medium))
                     .foregroundColor(.secondary)
                     .frame(width: 14, alignment: .leading)
-                    .contentShape(Rectangle())
+                    .contentShape(.rect)
                 
                 Text(label)
                     .font(.system(.subheadline, design: .monospaced))

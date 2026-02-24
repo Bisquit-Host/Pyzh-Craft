@@ -94,7 +94,7 @@ struct ModrinthDetailCardView: View {
                 width: ModrinthConstants.UIConstants.iconSize,
                 height: ModrinthConstants.UIConstants.iconSize
             )
-            .background(Color.gray.opacity(0.2))
+            .background(.gray.opacity(0.2))
             .cornerRadius(ModrinthConstants.UIConstants.cornerRadius)
     }
     
@@ -206,7 +206,7 @@ private struct TagView: View {
             .font(.caption2)
             .padding(.horizontal, ModrinthConstants.UIConstants.tagHorizontalPadding)
             .padding(.vertical, ModrinthConstants.UIConstants.tagVerticalPadding)
-            .background(Color.gray.opacity(0.15))
+            .background(.gray.opacity(0.15))
             .cornerRadius(ModrinthConstants.UIConstants.tagCornerRadius)
     }
 }

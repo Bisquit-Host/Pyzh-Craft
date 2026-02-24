@@ -19,7 +19,7 @@ func emptyResultView() -> some View {
 
 func emptyDropBackground() -> some View {
     RoundedRectangle(cornerRadius: 12)
-        .fill(Color.gray.opacity(0.05))
+        .fill(.gray.opacity(0.05))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(style: StrokeStyle(lineWidth: 1, dash: [5, 5]))

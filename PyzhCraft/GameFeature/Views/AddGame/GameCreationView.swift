@@ -168,14 +168,14 @@ struct GameCreationView: View {
                                     cornerRadius: Constants.cornerRadius
                                 )
                             )
-                            .contentShape(Rectangle())
+                            .contentShape(.rect)
                     case .failure:
                         RoundedRectangle(cornerRadius: Constants.cornerRadius)
                             .stroke(
                                 Color.accentColor.opacity(0.3),
                                 lineWidth: 1
                             )
-                            .background(Color.gray.opacity(0.08))
+                            .background(.gray.opacity(0.08))
                     @unknown default:
                         EmptyView()
                     }
@@ -207,8 +207,8 @@ struct GameCreationView: View {
             selected: $viewModel.selectedGameVersion,
             availableVersions: viewModel.availableVersions,
             time: $viewModel.versionTime
-        ) { version in
-            await ModrinthService.queryVersionTime(from: version)
+        ) {
+            await ModrinthService.queryVersionTime(from: $0)
         }
         .disabled(viewModel.gameSetupService.downloadState.isDownloading)
     }

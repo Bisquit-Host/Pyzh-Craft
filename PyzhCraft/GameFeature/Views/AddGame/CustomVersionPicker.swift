@@ -49,6 +49,7 @@ struct CustomVersionPicker: View {
             RoundedRectangle(cornerRadius: 6)
                 .stroke(Color(.quaternaryLabelColor), lineWidth: 1)
                 .background(Color(.textBackgroundColor))
+            
             HStack {
                 if selected.isEmpty {
                     Text("Select game version")
@@ -58,6 +59,7 @@ struct CustomVersionPicker: View {
                     Text(selected).foregroundColor(.primary)
                         .padding(.horizontal, 8)
                 }
+                
                 Spacer()
             }
         }

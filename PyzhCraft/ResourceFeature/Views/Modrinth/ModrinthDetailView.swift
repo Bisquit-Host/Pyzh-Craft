@@ -285,7 +285,7 @@ struct ModrinthDetailView: View {
                         EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8)
                     )
                     .listRowSeparator(.hidden)
-                    .contentShape(Rectangle())
+                    .contentShape(.rect)
                     .onTapGesture {
                         selectedProjectId = mod.projectId
                         if let type = ResourceType(rawValue: query) {
@@ -304,14 +304,17 @@ struct ModrinthDetailView: View {
         guard hasMoreResults, !viewModel.isLoading, !viewModel.isLoadingMore else {
             return
         }
+        
         guard
             let index = viewModel.results.firstIndex(where: { $0.projectId == mod.projectId })
         else { return }
         
         let thresholdIndex = max(viewModel.results.count - 5, 0)
+        
         if index >= thresholdIndex {
             currentPage += 1
             let nextPage = currentPage
+            
             Task {
                 await performSearchWithErrorHandling(page: nextPage, append: true)
             }

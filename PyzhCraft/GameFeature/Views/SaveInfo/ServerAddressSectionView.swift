@@ -97,7 +97,7 @@ struct ServerAddressSectionView: View {
                 .font(.caption)
                 .padding(.horizontal, 4)
                 .padding(.vertical, 2)
-                .background(Color.gray.opacity(0.15))
+                .background(.gray.opacity(0.15))
                 .cornerRadius(4)
         }
         .buttonStyle(.plain)
@@ -291,7 +291,7 @@ struct ServerAddressChip: View {
             .padding(.vertical, 6)
             .background(
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.clear)
+                    .fill(.clear)
             )
             .foregroundStyle(.primary)
             .overlay(
@@ -306,16 +306,11 @@ struct ServerAddressChip: View {
     /// Return icon color based on connection status
     private var iconColor: Color {
         switch connectionStatus {
-        case .success:
-            return .green
-        case .timeout:
-            return .yellow
-        case .failed:
-            return .red
-        case .checking:
-            return .blue.opacity(0.5)
-        case .unknown:
-            return .secondary
+        case .success: .green
+        case .timeout: .yellow
+        case .failed: .red
+        case .checking: .blue.opacity(0.5)
+        case .unknown: .secondary
         }
     }
 }

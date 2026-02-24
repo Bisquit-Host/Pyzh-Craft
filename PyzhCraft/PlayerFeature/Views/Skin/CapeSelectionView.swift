@@ -143,12 +143,12 @@ struct CapeSelectionView: View {
     private func capeIconContainer(isSelected: Bool, imageURL: String?, isSystemOption: Bool) -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color.gray.opacity(0.1))
+                .fill(.gray.opacity(0.1))
                 .frame(width: 50, height: 70)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(
-                            isSelected ? Color.accentColor : Color.gray.opacity(0.3),
+                            isSelected ? Color.accentColor : .gray.opacity(0.3),
                             lineWidth: isSelected ? 2 : 1
                         )
                 )

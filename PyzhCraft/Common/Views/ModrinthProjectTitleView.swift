@@ -15,13 +15,13 @@ struct ModrinthProjectTitleView: View {
                             .aspectRatio(contentMode: .fit)
                     } placeholder: {
                         RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.secondary.opacity(0.2))
+                            .fill(.secondary.opacity(0.2))
                     }
                     .frame(width: 64, height: 64)
                     .cornerRadius(8)
                 } else {
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.secondary.opacity(0.2))
+                        .fill(.secondary.opacity(0.2))
                         .frame(width: 64, height: 64)
                         .overlay(
                             Image(systemName: "cube.box")
@@ -67,7 +67,7 @@ struct ModrinthProjectTitleView: View {
                                         .vertical,
                                         ModrinthConstants.UIConstants.tagVerticalPadding
                                     )
-                                    .background(Color.gray.opacity(0.15))
+                                    .background(.gray.opacity(0.15))
                                     .cornerRadius(
                                         ModrinthConstants.UIConstants.tagCornerRadius
                                     )

@@ -116,7 +116,7 @@ struct MinecraftAuthView: View {
                 MinecraftSkinUtils(type: .url, src: skinUrl.httpToHttps())
             } else {
                 Circle()
-                    .fill(Color.gray.opacity(0.3))
+                    .fill(.gray.opacity(0.3))
                     .frame(width: 80, height: 80)
                     .overlay(
                         Image(systemName: "person.fill")

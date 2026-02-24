@@ -26,14 +26,10 @@ struct ContributorRankBadgeView: View {
     
     private func rankBadgeStyle(_ rank: Int) -> (Color, String?) {
         switch rank {
-        case 1:
-            return (.yellow, "crown.fill")
-        case 2:
-            return (.gray, "2.circle.fill")
-        case 3:
-            return (.orange, "3.circle.fill")
-        default:
-            return (.accentColor, nil)
+        case 1: (.yellow, "crown.fill")
+        case 2: (.gray, "2.circle.fill")
+        case 3: (.orange, "3.circle.fill")
+        default: (.accentColor, nil)
         }
     }
 }
