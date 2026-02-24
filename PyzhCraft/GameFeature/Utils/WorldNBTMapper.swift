@@ -3,7 +3,7 @@ import Foundation
 /// Generic NBT parsing tool related to Minecraft world saves (level.dat / world_gen_settings.dat etc.)
 enum WorldNBTMapper {
     // MARK: - Basic numerical/boolean reading
-
+    
     /// Try to uniformly convert any NBT numerical type to Int64, compatible with Int/Int8/Int16/Int32/UInt, etc
     static func readInt64(_ any: Any?) -> Int64? {
         if let v = any as? Int64 { return v }
@@ -17,7 +17,7 @@ enum WorldNBTMapper {
         if let v = any as? UInt8 { return Int64(v) }
         return nil
     }
-
+    
     /// Convert the numeric value or Boolean in NBT to Bool (non-0 means true), and return false if it cannot be parsed
     static func readBoolFlag(_ any: Any?) -> Bool {
         guard let any else { return false }
@@ -25,9 +25,9 @@ enum WorldNBTMapper {
         if let v = readInt64(any) { return v != 0 }
         return false
     }
-
+    
     // MARK: - Game Mode / Difficulty
-
+    
     static func mapGameMode(_ value: Int) -> String {
         switch value {
         case 0: String(localized: "Survival")
@@ -37,7 +37,7 @@ enum WorldNBTMapper {
         default: String(localized: "Unknown")
         }
     }
-
+    
     static func mapDifficulty(_ value: Int) -> String {
         switch value {
         case 0: String(localized: "Peaceful")
@@ -47,7 +47,7 @@ enum WorldNBTMapper {
         default: String(localized: "Unknown")
         }
     }
-
+    
     /// Map new difficulty_settings.difficulty (string) to localized text
     static func mapDifficultyString(_ value: String) -> String {
         switch value.lowercased() {
@@ -58,9 +58,9 @@ enum WorldNBTMapper {
         default: String(localized: "Unknown")
         }
     }
-
+    
     // MARK: - seed reading
-
+    
     /// Parse the seed from the Data tag of level.dat and the optional world path
     /// - Prioritize RandomSeed
     /// - Then WorldGenSettings/worldGenSettings.seed
@@ -70,7 +70,7 @@ enum WorldNBTMapper {
         if let seed = readInt64(dataTag["RandomSeed"]) {
             return seed
         }
-
+        
         // Then: WorldGenSettings / worldGenSettings.seed in level.dat
         if let worldGenSettings = dataTag["WorldGenSettings"] as? [String: Any],
            let seed = readInt64(worldGenSettings["seed"]) {
@@ -80,12 +80,12 @@ enum WorldNBTMapper {
            let seed = readInt64(worldGenSettings["seed"]) {
             return seed
         }
-
+        
         // New version: world_gen_settings.dat
         guard let worldPath else { return nil }
         return readSeedFromWorldGenSettings(worldPath: worldPath)
     }
-
+    
     /// Read the seed from world_gen_settings.dat in the 26+ new version archive (path: data/minecraft/world_gen_settings.dat)
     private static func readSeedFromWorldGenSettings(worldPath: URL) -> Int64? {
         let fm = FileManager.default

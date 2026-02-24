@@ -6,7 +6,7 @@ struct ContentView: View {
     @EnvironmentObject var detailState: ResourceDetailState
     @EnvironmentObject var gameRepository: GameRepository
     @EnvironmentObject var playerListViewModel: PlayerListViewModel
-
+    
     var body: some View {
         List {
             switch detailState.selectedItem {
@@ -17,7 +17,7 @@ struct ContentView: View {
             }
         }
     }
-
+    
     @ViewBuilder
     private func gameContentView(gameId: String) -> some View {
         if let game = gameRepository.getGame(by: gameId) {
@@ -28,7 +28,7 @@ struct ContentView: View {
             }
         }
     }
-
+    
     private func serverModeView(game: GameVersionInfo) -> some View {
         CategoryContentView(
             project: detailState.gameResourcesType,
@@ -45,12 +45,12 @@ struct ContentView: View {
         )
         .id(detailState.gameResourcesType)
     }
-
+    
     private func localModeView(game: GameVersionInfo, gameId: String) -> some View {
         SaveInfoView(gameId: gameId, gameName: game.gameName)
             .id(gameId)
     }
-
+    
     @ViewBuilder
     private func resourceContentView(type: ResourceType) -> some View {
         if let projectId = detailState.selectedProjectId {

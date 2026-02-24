@@ -5,7 +5,7 @@ struct FilterChip: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void
-
+    
     // Optional parameters
     let iconName: String?
     let isLoading: Bool
@@ -14,7 +14,7 @@ struct FilterChip: View {
     let verticalPadding: CGFloat
     let maxTextWidth: CGFloat?
     let iconColor: Color?
-
+    
     init(
         title: String,
         isSelected: Bool = false,
@@ -38,7 +38,7 @@ struct FilterChip: View {
         self.maxTextWidth = maxTextWidth
         self.iconColor = iconColor
     }
-
+    
     var body: some View {
         Button(action: action) {
             HStack(spacing: iconName != nil ? 4 : 0) {
@@ -67,14 +67,14 @@ struct FilterChip: View {
         .buttonStyle(.plain)
         .disabled(isLoading)
     }
-
+    
     private var backgroundColor: Color {
         if let customBackgroundColor = customBackgroundColor {
             return customBackgroundColor
         }
         return isSelected ? Color.accentColor : Color.clear
     }
-
+    
     private var borderColor: Color {
         if let customBorderColor = customBorderColor {
             return customBorderColor

@@ -4,7 +4,7 @@ import SwiftUI
 /// Decoupled from GeneralSettingsManager to avoid non-theme setting changes triggering root view reconstruction
 final class ThemeManager: ObservableObject {
     static let shared = ThemeManager()
-
+    
     @AppStorage("themeMode")
     var themeMode: ThemeMode = .system {
         didSet {
@@ -12,22 +12,22 @@ final class ThemeManager: ObservableObject {
             objectWillChange.send()
         }
     }
-
+    
     private var appearanceObserver: NSKeyValueObservation?
     private var debounceWorkItem: DispatchWorkItem?
-
+    
     private init() {
         DispatchQueue.main.async { [weak self] in
             self?.applyAppAppearance()
             self?.setupAppearanceObserver()
         }
     }
-
+    
     deinit {
         appearanceObserver?.invalidate()
         debounceWorkItem?.cancel()
     }
-
+    
     /// When the theme mode is system, return the current theme of the system
     var currentColorScheme: ColorScheme? {
         guard NSApplication.shared.isRunning else {
@@ -35,12 +35,12 @@ final class ThemeManager: ObservableObject {
         }
         return themeMode.effectiveColorScheme
     }
-
+    
     /// Set system appearance change observer (debounce reduces trigger frequency)
     private func setupAppearanceObserver() {
         appearanceObserver = NSApp.observe(
             \.effectiveAppearance,
-            options: [.new, .initial]
+             options: [.new, .initial]
         ) { [weak self] _, _ in
             guard let self else { return }
             self.debounceWorkItem?.cancel()
@@ -54,7 +54,7 @@ final class ThemeManager: ObservableObject {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15, execute: item)
         }
     }
-
+    
     /// Apply global AppKit appearance based on theme settings (affects AppKit UI such as Sparkle)
     func applyAppAppearance() {
         let appearance = themeMode.nsAppearance

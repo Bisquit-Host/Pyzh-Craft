@@ -8,7 +8,7 @@ struct GameNameInputView: View {
     @State private var showErrorPopover = false
     let isDisabled: Bool
     let gameSetupService: GameSetupUtil
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Name")

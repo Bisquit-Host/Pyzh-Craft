@@ -3,9 +3,9 @@ import ZIPFoundation
 
 /// CurseForge integration package manifest.json parser
 enum CurseForgeManifestParser {
-
+    
     // MARK: - Public Methods
-
+    
     /// Parse the manifest.json file of the CurseForge integration package
     /// - Parameter extractedPath: decompressed integration package path
     /// - Returns: parsed Modrinth index information
@@ -13,9 +13,9 @@ enum CurseForgeManifestParser {
         do {
             // Find the manifest.json file
             let manifestPath = extractedPath.appendingPathComponent("manifest.json")
-
+            
             Logger.shared.info("Try parsing CurseForge manifest.json: \(manifestPath.path)")
-
+            
             guard FileManager.default.fileExists(atPath: manifestPath.path) else {
                 // List the files in the unzipped directory to help debugging
                 do {
@@ -27,67 +27,67 @@ enum CurseForgeManifestParser {
                 } catch {
                     Logger.shared.error("Unable to list unzipped directory contents: \(error.localizedDescription)")
                 }
-
+                
                 Logger.shared.warning("Manifest.json file not found in CurseForge integration package")
                 return nil
             }
-
+            
             // Get file size
             let fileAttributes = try FileManager.default.attributesOfItem(atPath: manifestPath.path)
             let fileSize = fileAttributes[.size] as? Int64 ?? 0
             Logger.shared.info("manifest.json file size: \(fileSize) bytes")
-
+            
             guard fileSize > 0 else {
                 Logger.shared.error("manifest.json file is empty")
                 return nil
             }
-
+            
             // Read and parse files
             let manifestData = try Data(contentsOf: manifestPath)
             Logger.shared.info("Successfully read manifest.json data, size: \(manifestData.count) bytes")
-
+            
             // Try to parse JSON
             let manifest = try JSONDecoder().decode(CurseForgeManifest.self, from: manifestData)
-
+            
             // Extract loader information
             let loaderInfo = determineLoaderInfo(from: manifest.minecraft.modLoaders)
-
+            
             // Generate version information (if version field is missing)
             let modPackVersion = manifest.version ?? generateAutoVersion(
                 modPackName: manifest.name,
                 gameVersion: manifest.minecraft.version,
                 loaderInfo: loaderInfo
             )
-
+            
             // Convert to Modrinth format
             let modrinthInfo = await convertToModrinthFormat(
                 manifest: manifest,
                 loaderInfo: loaderInfo,
                 generatedVersion: modPackVersion
             )
-
+            
             Logger.shared.info("Parsing CurseForge manifest.json successfully: \(manifest.name) v\(modPackVersion)")
             if manifest.version == nil {
                 Logger.shared.info("⚠️ The integration package lacks the version field and the version has been automatically generated: \(modPackVersion)")
             }
             Logger.shared.info("Game version: \(manifest.minecraft.version), loader: \(loaderInfo.type) \(loaderInfo.version)")
             Logger.shared.info("Number of files: \(manifest.files.count)")
-
+            
             return modrinthInfo
         } catch {
             Logger.shared.error("Detailed error in parsing CurseForge manifest.json: \(error)")
-
+            
             // If it is a JSON parsing error, try to display part of the content
             if let jsonError = error as? DecodingError {
                 Logger.shared.error("JSON parsing error: \(jsonError)")
             }
-
+            
             return nil
         }
     }
-
+    
     // MARK: - Helper Methods
-
+    
     /// Determine the loader type and version from the list of mod loaders
     /// - Parameter modLoaders: Mod loader list
     /// - Returns: loader type and version
@@ -96,19 +96,19 @@ enum CurseForgeManifestParser {
         guard let primaryLoader = modLoaders.first(where: { $0.primary }) ?? modLoaders.first else {
             return ("vanilla", "unknown")
         }
-
+        
         let loaderId = primaryLoader.id.lowercased()
-
+        
         // Resolves the loader ID, usually in the format "forge-40.2.0" or "fabric-0.14.21"
         let components = loaderId.split(separator: "-")
-
+        
         if components.count >= 2 {
             let loaderType = String(components[0])
             let loaderVersion = components.dropFirst().joined(separator: "-")
-
+            
             // Standardized loader type name
             let normalizedType = normalizeLoaderType(loaderType)
-
+            
             return (normalizedType, loaderVersion)
         } else {
             // If the format is not standard, try to extract the type from the ID
@@ -125,7 +125,7 @@ enum CurseForgeManifestParser {
             }
         }
     }
-
+    
     /// Standardized loader type name
     /// - Parameter loaderType: original loader type
     /// - Returns: standardized loader type
@@ -143,7 +143,7 @@ enum CurseForgeManifestParser {
             return loaderType.lowercased()
         }
     }
-
+    
     /// Automatically generate integration package version number
     /// - Parameters:
     ///   - modPackName: integration package name
@@ -159,15 +159,15 @@ enum CurseForgeManifestParser {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyyMMdd"
         let dateString = dateFormatter.string(from: Date())
-
+        
         // Generate version format: game version-loader type-date
         // For example: 1.20.1-forge-20241212
         let autoVersion = "\(gameVersion)-\(loaderInfo.type)-\(dateString)"
-
+        
         Logger.shared.info("Automatically generate integration package version: \(autoVersion)")
         return autoVersion
     }
-
+    
     /// Convert CurseForge manifest to Modrinth format
     /// - Parameters:
     ///   - manifest: CurseForge manifest
@@ -180,16 +180,16 @@ enum CurseForgeManifestParser {
         generatedVersion: String
     ) async -> ModrinthIndexInfo {
         Logger.shared.info("Convert CurseForge format to Modrinth format, number of modules: \(manifest.files.count)")
-
+        
         // Optimization: Instead of getting file details here, create a file object with lazy parsing
         // Delay the acquisition of real file details until the download stage to improve import speed
         var modrinthFiles: [ModrinthIndexFile] = []
-
+        
         for file in manifest.files {
             // Create a placeholder file object containing basic information
             // The real file name, path and download URL will be obtained when downloading
             let placeholderPath = "mods/curseforge_\(file.projectID)_\(file.fileID).jar" // temporary path
-
+            
             modrinthFiles.append(ModrinthIndexFile(
                 path: placeholderPath,
                 hashes: ModrinthIndexFileHashes(from: [:]), // CurseForge does not provide hashes
@@ -202,9 +202,9 @@ enum CurseForgeManifestParser {
                 curseForgeFileId: file.fileID
             ))
         }
-
+        
         Logger.shared.info("Quick conversion completed, details will be fetched during download stage")
-
+        
         return ModrinthIndexInfo(
             gameVersion: manifest.minecraft.version,
             loaderType: loaderInfo.type,

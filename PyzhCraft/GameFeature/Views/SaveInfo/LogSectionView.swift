@@ -5,7 +5,7 @@ struct LogSectionView: View {
     // MARK: - Properties
     let logs: [LogInfo]
     let isLoading: Bool
-
+    
     // MARK: - Body
     var body: some View {
         GenericSectionView(
@@ -17,7 +17,7 @@ struct LogSectionView: View {
             logChip(for: log)
         }
     }
-
+    
     // MARK: - Chip Builder
     private func logChip(for log: LogInfo) -> some View {
         FilterChip(
@@ -33,14 +33,14 @@ struct LogSectionView: View {
             iconColor: log.isCrashLog ? .red : nil
         )
     }
-
+    
     // MARK: - Actions
     /// Open the log file using the Console app
     private func openLogInConsole(log: LogInfo) {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
         process.arguments = ["-a", "Console", log.path.path]
-
+        
         do {
             try process.run()
         } catch {

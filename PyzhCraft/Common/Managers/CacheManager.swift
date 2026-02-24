@@ -3,7 +3,7 @@ import SwiftUI
 class CacheManager: ObservableObject {
     @Published var cacheInfo = CacheInfo(fileCount: 0, totalSize: 0)
     private let calculator = CacheCalculator.shared
-
+    
     /// Compute metadata cache information (silent version)
     func calculateMetaCacheInfo() {
         do {
@@ -15,7 +15,7 @@ class CacheManager: ObservableObject {
             // keep default value
         }
     }
-
+    
     /// - Throws: GlobalError when the operation fails
     func calculateMetaCacheInfoThrowing() throws {
         do {
@@ -27,7 +27,7 @@ class CacheManager: ObservableObject {
             )
         }
     }
-
+    
     /// Calculate data cache information (silent version)
     func calculateDataCacheInfo() {
         do {
@@ -39,7 +39,7 @@ class CacheManager: ObservableObject {
             // keep default value
         }
     }
-
+    
     /// - Throws: GlobalError when the operation fails
     func calculateDataCacheInfoThrowing() throws {
         do {
@@ -51,7 +51,7 @@ class CacheManager: ObservableObject {
             )
         }
     }
-
+    
     /// Calculate game cache information (silent version)
     /// - Parameter game: game name
     func calculateGameCacheInfo(_ game: String) {
@@ -64,7 +64,7 @@ class CacheManager: ObservableObject {
             // keep default value
         }
     }
-
+    
     /// - Parameter game: game name
     /// - Throws: GlobalError when the operation fails
     func calculateGameCacheInfoThrowing(_ game: String) throws {

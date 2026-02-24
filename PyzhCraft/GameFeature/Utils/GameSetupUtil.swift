@@ -4,17 +4,17 @@ import SwiftUI
 /// Responsible for handling the complete process of game download, configuration and saving
 @MainActor
 class GameSetupUtil: ObservableObject {
-
+    
     // MARK: - Properties
     @Published var downloadState = DownloadState()
     @Published var fabricDownloadState = DownloadState()
     @Published var forgeDownloadState = DownloadState()
     @Published var neoForgeDownloadState = DownloadState()
-
+    
     private var downloadTask: Task<Void, Never>?
-
+    
     // MARK: - Public Methods
-
+    
     /// Internal game save method
     /// - Parameters:
     ///   - gameName: game name
@@ -53,14 +53,14 @@ class GameSetupUtil: ObservableObject {
                 return
             }
         }
-
+        
         // Set download status
         await MainActor.run {
             self.objectWillChange.send()
             downloadState.reset()
             downloadState.isDownloading = true
         }
-
+        
         defer {
             Task { @MainActor in
                 self.objectWillChange.send()
@@ -68,14 +68,14 @@ class GameSetupUtil: ObservableObject {
                 downloadTask = nil
             }
         }
-
+        
         // save game icon
         await saveGameIcon(
             gameName: gameName,
             pendingIconData: pendingIconData,
             onError: onError
         )
-
+        
         // Create initial game information
         var gameInfo = GameVersionInfo(
             id: UUID(),
@@ -85,20 +85,20 @@ class GameSetupUtil: ObservableObject {
             assetIndex: "",
             modLoader: selectedModLoader
         )
-
+        
         do {
             // Download Mojang manifest
             let downloadedManifest = try await ModrinthService.fetchVersionInfo(from: selectedGameVersion)
-
+            
             // Ensure and obtain the Java path to avoid repeated verification in the future
             let javaPath = await JavaManager.shared.ensureJavaExists(
                 version: downloadedManifest.javaVersion.component,
                 requiredMajorVersion: downloadedManifest.javaVersion.majorVersion
             )
-
+            
             // Set up file manager
             let fileManager = try await setupFileManager(manifest: downloadedManifest, modLoader: gameInfo.modLoader)
-
+            
             // Start download process
             try await startDownloadProcess(
                 fileManager: fileManager,
@@ -128,12 +128,12 @@ class GameSetupUtil: ObservableObject {
             // Use the result returned by ensureJavaExists to avoid triggering Java verification again
             gameInfo.javaPath = javaPath
             // Save game configuration
-
+            
             gameRepository.addGameSilently(gameInfo)
-
+            
             // Scan the game's mods directory (sync blocking)
             ModScanner.shared.scanGameModsDirectorySync(game: gameInfo)
-
+            
             // Send notification
             NotificationManager.sendSilently(
                 title: String(localized: "Download Complete"),
@@ -155,9 +155,9 @@ class GameSetupUtil: ObservableObject {
         }
         return
     }
-
+    
     // MARK: - Private Methods
-
+    
     /// Clean game folder
     /// - Parameter gameName: game name
     private func cleanupGameDirectories(gameName: String) async {
@@ -169,7 +169,7 @@ class GameSetupUtil: ObservableObject {
             // No error is thrown because this is a cleanup operation and should not affect the main process
         }
     }
-
+    
     private func saveGameIcon(
         gameName: String,
         pendingIconData: Data?,
@@ -180,7 +180,7 @@ class GameSetupUtil: ObservableObject {
         }
         let profileDir = AppPaths.profileDirectory(gameName: gameName)
         let iconURL = profileDir.appendingPathComponent(AppConstants.defaultGameIcon)
-
+        
         do {
             try FileManager.default.createDirectory(at: profileDir, withIntermediateDirectories: true)
             try data.write(to: iconURL)
@@ -194,13 +194,13 @@ class GameSetupUtil: ObservableObject {
             )
         }
     }
-
+    
     private func setupFileManager(manifest: MinecraftVersionManifest, modLoader: String) async throws -> MinecraftFileManager {
         let nativesDir = AppPaths.nativesDirectory
         try FileManager.default.createDirectory(at: nativesDir, withIntermediateDirectories: true)
         return MinecraftFileManager()
     }
-
+    
     private func startDownloadProcess(
         fileManager: MinecraftFileManager,
         manifest: MinecraftVersionManifest,
@@ -209,19 +209,19 @@ class GameSetupUtil: ObservableObject {
         // First download the resource index to get the total number of resource files
         let assetIndex = try await downloadAssetIndex(manifest: manifest)
         let resourceTotalFiles = assetIndex.objects.count
-
+        
         downloadState.startDownload(
             coreTotalFiles: 1 + manifest.libraries.count + 1,
             resourcesTotalFiles: resourceTotalFiles
         )
-
+        
         fileManager.onProgressUpdate = { fileName, completed, total, type in
             Task { @MainActor in
                 self.objectWillChange.send()
                 self.downloadState.updateProgress(fileName: fileName, completed: completed, total: total, type: type)
             }
         }
-
+        
         // Use a silent version of the API to avoid throwing exceptions
         let success = await fileManager.downloadVersionFiles(manifest: manifest, gameName: gameName)
         if !success {
@@ -231,11 +231,11 @@ class GameSetupUtil: ObservableObject {
             )
         }
     }
-
+    
     private func downloadAssetIndex(manifest: MinecraftVersionManifest) async throws -> DownloadedAssetIndex {
-
+        
         let destinationURL = AppPaths.metaDirectory.appendingPathComponent("assets/indexes").appendingPathComponent("\(manifest.assetIndex.id).json")
-
+        
         do {
             _ = try await DownloadManager.downloadFile(urlString: manifest.assetIndex.url.absoluteString, destinationURL: destinationURL, expectedSha1: manifest.assetIndex.sha1)
             let assetIndexData = try await Task.detached(priority: .userInitiated) {
@@ -262,7 +262,7 @@ class GameSetupUtil: ObservableObject {
             )
         }
     }
-
+    
     private func setupModLoaderIfNeeded(
         selectedModLoader: String,
         selectedGameVersion: String,
@@ -272,7 +272,7 @@ class GameSetupUtil: ObservableObject {
     ) async throws -> (loaderVersion: String, classpath: String, mainClass: String)? {
         let loaderType = selectedModLoader.lowercased()
         let handler: (any ModLoaderHandler.Type)?
-
+        
         switch loaderType {
         case "fabric":
             handler = FabricLoaderService.self
@@ -285,9 +285,9 @@ class GameSetupUtil: ObservableObject {
         default:
             handler = nil
         }
-
+        
         guard let handler else { return nil }
-
+        
         // Create GameVersionInfo directly without relying on mojangVersions
         let gameInfo = GameVersionInfo(
             gameName: gameName,
@@ -296,7 +296,7 @@ class GameSetupUtil: ObservableObject {
             assetIndex: "",
             modLoader: selectedModLoader
         )
-
+        
         // Choose a different method depending on whether a loader version is specified or not
         let progressCallback: (String, Int, Int) -> Void = { [weak self] fileName, completed, total in
             Task { @MainActor in
@@ -316,7 +316,7 @@ class GameSetupUtil: ObservableObject {
                 }
             }
         }
-
+        
         return await handler.setupWithSpecificVersion(
             for: selectedGameVersion,
             loaderVersion: specifiedLoaderVersion,
@@ -324,7 +324,7 @@ class GameSetupUtil: ObservableObject {
             onProgressUpdate: progressCallback
         )
     }
-
+    
     private func finalizeGameInfo(
         gameInfo: GameVersionInfo,
         manifest: MinecraftVersionManifest,
@@ -339,14 +339,14 @@ class GameSetupUtil: ObservableObject {
         var updatedGameInfo = gameInfo
         updatedGameInfo.assetIndex = manifest.assetIndex.id
         updatedGameInfo.javaVersion = manifest.javaVersion.majorVersion
-
+        
         switch selectedModLoader.lowercased() {
         case "fabric", "quilt":
             if let result = selectedModLoader.lowercased() == "fabric" ? fabricResult : quiltResult {
                 updatedGameInfo.modVersion = result.loaderVersion
                 updatedGameInfo.modClassPath = result.classpath
                 updatedGameInfo.mainClass = result.mainClass
-
+                
                 if selectedModLoader.lowercased() == "fabric" {
                     if let fabricLoader = try? await FabricLoaderService.fetchSpecificLoaderVersion(for: selectedGameVersion, loaderVersion: specifiedLoaderVersion) {
                         let jvmArgs = fabricLoader.arguments.jvm ?? []
@@ -363,13 +363,13 @@ class GameSetupUtil: ObservableObject {
                     }
                 }
             }
-
+            
         case "forge":
             if let result = forgeResult {
                 updatedGameInfo.modVersion = result.loaderVersion
                 updatedGameInfo.modClassPath = result.classpath
                 updatedGameInfo.mainClass = result.mainClass
-
+                
                 if let forgeLoader = try? await ForgeLoaderService.fetchSpecificForgeProfile(for: selectedGameVersion, loaderVersion: specifiedLoaderVersion) {
                     let gameArgs = forgeLoader.arguments.game ?? []
                     updatedGameInfo.gameArguments = gameArgs
@@ -381,17 +381,17 @@ class GameSetupUtil: ObservableObject {
                     }
                 }
             }
-
+            
         case "neoforge":
             if let result = neoForgeResult {
                 updatedGameInfo.modVersion = result.loaderVersion
                 updatedGameInfo.modClassPath = result.classpath
                 updatedGameInfo.mainClass = result.mainClass
-
+                
                 if let neoForgeLoader = try? await NeoForgeLoaderService.fetchSpecificNeoForgeProfile(for: selectedGameVersion, loaderVersion: specifiedLoaderVersion) {
                     let gameArgs = neoForgeLoader.arguments.game ?? []
                     updatedGameInfo.gameArguments = gameArgs
-
+                    
                     let jvmArgs = neoForgeLoader.arguments.jvm ?? []
                     // Use NSMutableString to avoid chaining calls that create multiple temporary strings
                     updatedGameInfo.modJvm = jvmArgs.map { arg -> String in
@@ -418,31 +418,31 @@ class GameSetupUtil: ObservableObject {
                     }
                 }
             }
-
+            
         default:
             updatedGameInfo.mainClass = manifest.mainClass
         }
-
+        
         // Build startup command
         let launcherBrand = Bundle.main.appName
         let launcherVersion = Bundle.main.fullVersion
-
+        
         updatedGameInfo.launchCommand = MinecraftLaunchCommandBuilder.build(
             manifest: manifest,
             gameInfo: updatedGameInfo,
             launcherBrand: launcherBrand,
             launcherVersion: launcherVersion
         )
-
+        
         return updatedGameInfo
     }
-
+    
     /// Check if game name is duplicate
     /// - Parameter name: game name
     /// - Returns: Whether it is repeated
     func checkGameNameDuplicate(_ name: String) async -> Bool {
         guard !name.isEmpty else { return false }
-
+        
         let fileManager = FileManager.default
         let gameDir = AppPaths.profileRootDirectory.appendingPathComponent(name)
         return fileManager.fileExists(atPath: gameDir.path)

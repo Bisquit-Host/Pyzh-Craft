@@ -11,13 +11,13 @@ struct GameResourceInstallSheet: View {
     @EnvironmentObject var gameRepository: GameRepository
     /// Download success callback, the parameters are (fileName, hash), only the downloadResource path will pass the value, downloadAllManual will pass (nil, nil)
     var onDownloadSuccess: ((String?, String?) -> Void)?
-
+    
     @State private var selectedVersion: ModrinthProjectDetailVersion?
     @State private var availableVersions: [ModrinthProjectDetailVersion] = []
     @State private var dependencyState = DependencyState()
     @State private var isDownloadingAll = false
     @State private var mainVersionId = ""
-
+    
     var body: some View {
         CommonSheetView(
             header: {
@@ -84,7 +84,7 @@ struct GameResourceInstallSheet: View {
             mainVersionId = ""
         }
     }
-
+    
     private func loadDependencies(
         for version: ModrinthProjectDetailVersion,
         game: GameVersionInfo
@@ -103,7 +103,7 @@ struct GameResourceInstallSheet: View {
             }
         }
     }
-
+    
     private func loadDependenciesThrowing(
         for version: ModrinthProjectDetailVersion,
         game: GameVersionInfo
@@ -114,25 +114,25 @@ struct GameResourceInstallSheet: View {
                 level: .notification
             )
         }
-
+        
         // Get missing dependencies (with version information)
         let missingWithVersions =
-            await ModrinthDependencyDownloader
+        await ModrinthDependencyDownloader
             .getMissingDependenciesWithVersions(
                 for: project.projectId,
                 gameInfo: game
             )
-
+        
         var depVersions: [String: [ModrinthProjectDetailVersion]] = [:]
         var depSelected: [String: ModrinthProjectDetailVersion?] = [:]
         var dependencies: [ModrinthProjectDetail] = []
-
+        
         for (detail, versions) in missingWithVersions {
             dependencies.append(detail)
             depVersions[detail.id] = versions
             depSelected[detail.id] = versions.first
         }
-
+        
         _ = await MainActor.run {
             dependencyState = DependencyState(
                 dependencies: dependencies,
@@ -157,11 +157,11 @@ struct GameResourceInstallFooter: View {
     @Binding var isDownloadingAll: Bool
     let gameRepository: GameRepository
     let loadDependencies:
-        (ModrinthProjectDetailVersion, GameVersionInfo) -> Void
+    (ModrinthProjectDetailVersion, GameVersionInfo) -> Void
     @Binding var mainVersionId: String
     /// Download success callback, the parameters are (fileName, hash), only the downloadResource path will pass the value, downloadAllManual will pass (nil, nil)
     var onDownloadSuccess: ((String?, String?) -> Void)?
-
+    
     var body: some View {
         Group {
             if projectDetail != nil {
@@ -206,7 +206,7 @@ struct GameResourceInstallFooter: View {
             }
         }
     }
-
+    
     private func downloadAllManual() {
         guard selectedVersion != nil else { return }
         isDownloadingAll = true
@@ -226,7 +226,7 @@ struct GameResourceInstallFooter: View {
             }
         }
     }
-
+    
     private func downloadAllManualThrowing() async throws {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
@@ -234,31 +234,31 @@ struct GameResourceInstallFooter: View {
                 level: .notification
             )
         }
-
+        
         let success =
-            await ModrinthDependencyDownloader.downloadManualDependenciesAndMain(
-                dependencies: dependencyState.dependencies,
-                selectedVersions: dependencyState.selected.compactMapValues {
-                    $0?.id
-                },
-                dependencyVersions: dependencyState.versions,
-                mainProjectId: project.projectId,
-                mainProjectVersionId: mainVersionId.isEmpty
-                    ? nil : mainVersionId,
-                gameInfo: gameInfo,
-                query: resourceType,
-                gameRepository: gameRepository,
-                onDependencyDownloadStart: { _ in },
-                onDependencyDownloadFinish: { _, _ in }
-            )
-
+        await ModrinthDependencyDownloader.downloadManualDependenciesAndMain(
+            dependencies: dependencyState.dependencies,
+            selectedVersions: dependencyState.selected.compactMapValues {
+                $0?.id
+            },
+            dependencyVersions: dependencyState.versions,
+            mainProjectId: project.projectId,
+            mainProjectVersionId: mainVersionId.isEmpty
+            ? nil : mainVersionId,
+            gameInfo: gameInfo,
+            query: resourceType,
+            gameRepository: gameRepository,
+            onDependencyDownloadStart: { _ in },
+            onDependencyDownloadFinish: { _, _ in }
+        )
+        
         if !success {
             throw GlobalError.download(
                 i18nKey: "Manual Dependencies Failed",
                 level: .notification
             )
         }
-
+        
         // The download is successful, the button status is updated and the sheet is closed (downloadAllManual does not pass fileName/hash)
         _ = await MainActor.run {
             onDownloadSuccess?(nil, nil)
@@ -266,7 +266,7 @@ struct GameResourceInstallFooter: View {
             isPresented = false
         }
     }
-
+    
     private func downloadResource() {
         guard selectedVersion != nil else { return }
         isDownloadingAll = true
@@ -284,7 +284,7 @@ struct GameResourceInstallFooter: View {
             }
         }
     }
-
+    
     private func downloadResourceThrowing() async throws {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
@@ -292,23 +292,23 @@ struct GameResourceInstallFooter: View {
                 level: .notification
             )
         }
-
+        
         let (success, fileName, hash) =
-            await ModrinthDependencyDownloader.downloadMainResourceOnly(
-                mainProjectId: project.projectId,
-                gameInfo: gameInfo,
-                query: resourceType,
-                gameRepository: gameRepository,
-                filterLoader: true
-            )
-
+        await ModrinthDependencyDownloader.downloadMainResourceOnly(
+            mainProjectId: project.projectId,
+            gameInfo: gameInfo,
+            query: resourceType,
+            gameRepository: gameRepository,
+            filterLoader: true
+        )
+        
         if !success {
             throw GlobalError.download(
                 i18nKey: "Resource Download Failed",
                 level: .notification
             )
         }
-
+        
         // If the download is successful, update the button status and close the sheet. Pass (fileName, hash) for partial refresh in the update process
         _ = await MainActor.run {
             onDownloadSuccess?(fileName, hash)

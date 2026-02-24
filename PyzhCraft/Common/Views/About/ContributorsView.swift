@@ -6,9 +6,9 @@ public struct ContributorsView: View {
     @State private var staticContributorsLoaded = false
     @State private var staticContributorsLoadFailed = false
     private let gitHubService = GitHubService.shared
-
+    
     public init() {}
-
+    
     public var body: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
@@ -32,7 +32,7 @@ public struct ContributorsView: View {
             clearAllData()
         }
     }
-
+    
     // MARK: - Loading View
     private var loadingView: some View {
         VStack(spacing: 12) {
@@ -40,7 +40,7 @@ public struct ContributorsView: View {
         }
         .frame(maxWidth: .infinity, minHeight: 100)
     }
-
+    
     // MARK: - Contributors Content
     private var contributorsContent: some View {
         LazyVStack(spacing: 16) {
@@ -54,7 +54,7 @@ public struct ContributorsView: View {
             }
         }
     }
-
+    
     // MARK: - Static Contributors List
     private var staticContributorsList: some View {
         VStack(spacing: 0) {
@@ -64,11 +64,11 @@ public struct ContributorsView: View {
                 .padding(.horizontal)
                 .padding(.bottom, 8)
                 .frame(maxWidth: .infinity, alignment: .leading)
-
+            
             ForEach(staticContributors.indices, id: \.self) { index in
                 staticContributorRow(staticContributors[index])
                     .id("static-\(index)")
-
+                
                 if index < staticContributors.count - 1 {
                     Divider()
                         .padding(.horizontal, 16)
@@ -76,7 +76,7 @@ public struct ContributorsView: View {
             }
         }
     }
-
+    
     // MARK: - Contributors List
     private var contributorsList: some View {
         VStack(spacing: 0) {
@@ -87,7 +87,7 @@ public struct ContributorsView: View {
                 .padding(.horizontal)
                 .padding(.bottom, 8)
                 .frame(maxWidth: .infinity, alignment: .leading)
-
+            
             // top contributors
             if !viewModel.topContributors.isEmpty {
                 ForEach(
@@ -103,19 +103,19 @@ public struct ContributorsView: View {
                         )
                     )
                     .id("top-\(contributor.id)")
-
+                    
                     if index < viewModel.topContributors.count - 1 {
                         Divider()
                             .padding(.horizontal, 16)
                     }
                 }
-
+                
                 if !viewModel.otherContributors.isEmpty {
                     Divider()
                         .padding(.horizontal, 16)
                 }
             }
-
+            
             // Other contributors
             ForEach(
                 Array(viewModel.otherContributors.enumerated()),
@@ -130,7 +130,7 @@ public struct ContributorsView: View {
                     )
                 )
                 .id("other-\(contributor.id)")
-
+                
                 if index < viewModel.otherContributors.count - 1 {
                     Divider()
                         .padding(.horizontal, 16)
@@ -138,7 +138,7 @@ public struct ContributorsView: View {
             }
         }
     }
-
+    
     // MARK: - Static Contributor Row
     private func staticContributorRow(
         _ contributor: StaticContributor
@@ -153,7 +153,7 @@ public struct ContributorsView: View {
         Task {
             do {
                 let contributorsData: ContributorsData = try await gitHubService.fetchStaticContributors()
-
+                
                 await MainActor.run {
                     staticContributors = contributorsData.contributors.map { contributorData in
                         StaticContributor(
@@ -181,7 +181,7 @@ public struct ContributorsView: View {
             }
         }
     }
-
+    
     // MARK: - Clear Static Contributors Data
     private func clearStaticContributorsData() {
         staticContributors = []
@@ -189,7 +189,7 @@ public struct ContributorsView: View {
         staticContributorsLoadFailed = false
         Logger.shared.info("Static contributors data cleared")
     }
-
+    
     /// Clean all data
     private func clearAllData() {
         clearStaticContributorsData()

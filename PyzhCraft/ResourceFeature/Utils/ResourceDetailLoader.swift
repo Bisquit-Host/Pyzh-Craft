@@ -21,7 +21,7 @@ enum ResourceDetailLoader {
             ))
             return nil
         }
-
+        
         // Detect compatible games
         let compatibleGames = await filterCompatibleGames(
             detail: detail,
@@ -29,10 +29,10 @@ enum ResourceDetailLoader {
             resourceType: resourceType,
             projectId: projectId
         )
-
+        
         return (detail, compatibleGames)
     }
-
+    
     /// Load integration package details
     /// - Parameter projectId: project ID
     /// - Returns: project details, returns nil if loading fails
@@ -44,7 +44,7 @@ enum ResourceDetailLoader {
             ))
             return nil
         }
-
+        
         return detail
     }
 }

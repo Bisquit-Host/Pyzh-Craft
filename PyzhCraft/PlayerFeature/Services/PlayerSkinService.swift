@@ -1,11 +1,11 @@
 import Foundation
 
 enum PlayerSkinService {
-
+    
     // MARK: - Notification System
-
+    
     static let playerUpdatedNotification = Notification.Name("PlayerUpdated")
-
+    
     private static func notifyPlayerUpdated(_ updatedPlayer: Player) {
         NotificationCenter.default.post(
             name: playerUpdatedNotification,
@@ -13,14 +13,14 @@ enum PlayerSkinService {
             userInfo: ["updatedPlayer": updatedPlayer]
         )
     }
-
+    
     // MARK: - Error Handling
     private static func handleError(_ error: Error, operation: String) {
         let globalError = GlobalError.from(error)
         Logger.shared.error("\(operation) failed: \(globalError.chineseMessage)")
         GlobalErrorHandler.shared.handle(globalError)
     }
-
+    
     // MARK: - Common Error Helpers
     private static func validateAccessToken(_ player: Player) throws {
         guard !player.authAccessToken.isEmpty else {
@@ -30,7 +30,7 @@ enum PlayerSkinService {
             )
         }
     }
-
+    
     private static func handleHTTPError(_ http: HTTPURLResponse, operation: String) throws {
         switch http.statusCode {
         case 400:
@@ -67,16 +67,16 @@ enum PlayerSkinService {
             )
         }
     }
-
+    
     struct PublicSkinInfo: Codable, Equatable {
         let skinURL: String?
         let model: SkinModel
         let capeURL: String?
         let fetchedAt: Date
-
+        
         enum SkinModel: String, Codable, CaseIterable { case classic, slim }
     }
-
+    
     /// Update player skin information to data manager
     /// - Parameters:
     ///   - uuid: player UUID
@@ -86,12 +86,12 @@ enum PlayerSkinService {
         do {
             let dataManager = PlayerDataManager()
             let players = try dataManager.loadPlayersThrowing()
-
+            
             guard let player = players.first(where: { $0.id == uuid }) else {
                 Logger.shared.warning("Player not found for UUID: \(uuid)")
                 return false
             }
-
+            
             // Create updated player object
             let updatedProfile = UserProfile(
                 id: player.profile.id,
@@ -100,59 +100,59 @@ enum PlayerSkinService {
                 lastPlayed: player.lastPlayed,
                 isCurrent: player.isCurrent
             )
-
+            
             let updatedCredential = player.credential
-
+            
             let updatedPlayer = Player(profile: updatedProfile, credential: updatedCredential)
-
+            
             // Update data using dataManager
             try dataManager.updatePlayer(updatedPlayer)
-
+            
             // Notify ViewModel to update the current player
             notifyPlayerUpdated(updatedPlayer)
-
+            
             return true
         } catch {
             Logger.shared.error("Failed to update player skin info: \(error.localizedDescription)")
             return false
         }
     }
-
+    
     /// Get the current player's skin information using the Minecraft Services API (more accurate, no caching delays)
     /// - Parameter player: player information
     /// - Returns: Skin information, if the acquisition fails, return nil
     static func fetchCurrentPlayerSkinFromServices(player: Player) async -> PublicSkinInfo? {
         do {
             let profile = try await fetchPlayerProfileThrowing(player: player)
-
+            
             // Extract skin information from Minecraft Services API response
             guard !profile.skins.isEmpty else {
                 Logger.shared.warning("Player has no skin information")
                 return nil
             }
-
+            
             // Find the currently active skin
             let activeSkin = profile.skins.first { $0.state == "ACTIVE" } ?? profile.skins.first
-
+            
             guard let skin = activeSkin else {
                 Logger.shared.warning("No active skin found")
                 return nil
             }
-
+            
             let skinInfo = PublicSkinInfo(
                 skinURL: skin.url,
                 model: skin.variant == "SLIM" ? .slim : .classic,
                 capeURL: nil, // The Minecraft Services API does not provide cloak information directly
                 fetchedAt: Date()
             )
-
+            
             return skinInfo
         } catch {
             Logger.shared.error("Failed to get skin information from Minecraft Services API: \(error.localizedDescription)")
             return nil
         }
     }
-
+    
     // MARK: - Upload Skin (multipart/form-data)
     /// Upload (silent version)
     /// - Parameters:
@@ -177,7 +177,7 @@ enum PlayerSkinService {
             return false
         }
     }
-
+    
     /// Refresh skin information (public method)
     /// - Parameter player: player information
     private static func refreshSkinInfo(player: Player) async {
@@ -185,7 +185,7 @@ enum PlayerSkinService {
             _ = await updatePlayerSkinInfo(uuid: player.id, skinInfo: newSkinInfo)
         }
     }
-
+    
     /// Handle the complete process after skin upload (including data updates and notifications)
     /// - Parameters:
     ///   - imageData: skin image data
@@ -203,7 +203,7 @@ enum PlayerSkinService {
         }
         return success
     }
-
+    
     /// Reset skin and refresh data
     /// - Parameter player: player information
     /// - Returns: Success or not
@@ -214,7 +214,7 @@ enum PlayerSkinService {
         }
         return success
     }
-
+    
     /// Upload (throwing version)
     /// Implemented according to https://zh.minecraft.wiki/w/Mojang_API#upload-skin specification
     static func uploadSkinThrowing(
@@ -223,7 +223,7 @@ enum PlayerSkinService {
         player: Player
     ) async throws {
         try validateAccessToken(player)
-
+        
         // Use string interpolation instead of string concatenation
         let boundary = "Boundary-\(UUID().uuidString)"
         var body = Data()
@@ -255,7 +255,7 @@ enum PlayerSkinService {
         }
         let variantValue = model == .slim ? "SLIM" : "CLASSIC"
         Logger.shared.info("Uploading skin with variant: \(variantValue), data size: \(imageData.count) bytes")
-
+        
         appendField(name: "variant", value: variantValue)
         appendFile(
             name: "file",
@@ -266,7 +266,7 @@ enum PlayerSkinService {
         if let closing = "--\(boundary)--\r\n".data(using: .utf8) {
             body.append(closing)
         }
-
+        
         var request = URLRequest(
             url: URLConfig.API.Authentication.minecraftProfileSkins
         )
@@ -281,7 +281,7 @@ enum PlayerSkinService {
         )
         request.httpBody = body
         request.timeoutInterval = 30
-
+        
         // Use unified API client (needs to handle non-200 status codes)
         let (_, http) = try await APIClient.performRequestWithResponse(request: request)
         switch http.statusCode {
@@ -299,7 +299,7 @@ enum PlayerSkinService {
             try handleHTTPError(http, operation: "skin upload")
         }
     }
-
+    
     // MARK: - Reset Skin (delete active)
     static func resetSkin(player: Player) async -> Bool {
         do {
@@ -310,16 +310,16 @@ enum PlayerSkinService {
             return false
         }
     }
-
+    
     // MARK: - Common Helper Methods
-
+    
     /// Get the currently active cloak ID
     /// - Parameter profile: player profile
     /// - Returns: ID of the activated cloak, or nil if there is none
     static func getActiveCapeId(from profile: MinecraftProfileResponse?) -> String? {
         return profile?.capes?.first { $0.state == "ACTIVE" }?.id
     }
-
+    
     /// Check for skin changes
     /// - Parameters:
     ///   - selectedSkinData: selected skin data
@@ -335,20 +335,20 @@ enum PlayerSkinService {
         if selectedSkinData != nil {
             return true
         }
-
+        
         // If there is no original model information (no existing skin), but the current model is not the default classic, there are changes
         if originalModel == nil && currentModel != .classic {
             return true
         }
-
+        
         // If original model information is available, compare the current model with the original model
         if let original = originalModel {
             return currentModel != original
         }
-
+        
         return false
     }
-
+    
     /// Check for cape changes
     /// - Parameters:
     ///   - selectedCapeId: selected cape ID
@@ -357,13 +357,13 @@ enum PlayerSkinService {
     static func hasCapeChanges(selectedCapeId: String?, currentActiveCapeId: String?) -> Bool {
         selectedCapeId != currentActiveCapeId
     }
-
+    
     // MARK: - Cape Management
     /// Get player profile with capes information (silent version)
     /// - Parameter player: Current online player
     /// - Returns: Profile with cape information or nil if failed
     static func fetchPlayerProfile(player: Player) async
-        -> MinecraftProfileResponse? {
+    -> MinecraftProfileResponse? {
         do {
             return try await fetchPlayerProfileThrowing(player: player)
         } catch {
@@ -371,12 +371,12 @@ enum PlayerSkinService {
             return nil
         }
     }
-
+    
     /// Get player profile with capes information (throwing version)
     static func fetchPlayerProfileThrowing(player: Player) async throws
-        -> MinecraftProfileResponse {
+    -> MinecraftProfileResponse {
         try validateAccessToken(player)
-
+        
         var request = URLRequest(
             url: URLConfig.API.Authentication.minecraftProfile
         )
@@ -385,7 +385,7 @@ enum PlayerSkinService {
             forHTTPHeaderField: "Authorization"
         )
         request.timeoutInterval = 30
-
+        
         // Use unified API client (needs to handle non-200 status codes)
         let (data, http) = try await APIClient.performRequestWithResponse(request: request)
         switch http.statusCode {
@@ -394,7 +394,7 @@ enum PlayerSkinService {
         default:
             try handleHTTPError(http, operation: "profile fetch")
         }
-
+        
         let profile = try JSONDecoder().decode(
             MinecraftProfileResponse.self,
             from: data
@@ -409,7 +409,7 @@ enum PlayerSkinService {
             refreshToken: player.authRefreshToken
         )
     }
-
+    
     /// Show/equip a cape (silent version)
     /// - Parameters:
     ///   - capeId: Cape UUID to equip
@@ -424,15 +424,15 @@ enum PlayerSkinService {
             return false
         }
     }
-
+    
     /// Show/equip a cape (throwing version)
     /// Implemented according to https://zh.minecraft.wiki/w/Mojang_API#show-cape specification
     static func showCapeThrowing(capeId: String, player: Player) async throws {
         try validateAccessToken(player)
-
+        
         let payload = ["capeId": capeId]
         let jsonData = try JSONSerialization.data(withJSONObject: payload)
-
+        
         var request = URLRequest(
             url: URLConfig.API.Authentication.minecraftProfileActiveCape
         )
@@ -444,7 +444,7 @@ enum PlayerSkinService {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = jsonData
         request.timeoutInterval = 30
-
+        
         // Use unified API client (needs to handle non-200 status codes)
         let (_, http) = try await APIClient.performRequestWithResponse(request: request)
         switch http.statusCode {
@@ -477,7 +477,7 @@ enum PlayerSkinService {
             )
         }
     }
-
+    
     /// Hide current cape (silent version)
     /// - Parameter player: Current online player
     /// - Returns: Whether successful
@@ -490,12 +490,12 @@ enum PlayerSkinService {
             return false
         }
     }
-
+    
     /// Hide current cape (throwing version)
     /// Implemented according to https://zh.minecraft.wiki/w/Mojang_API#hide-cape specification
     static func hideCapeThrowing(player: Player) async throws {
         try validateAccessToken(player)
-
+        
         var request = URLRequest(
             url: URLConfig.API.Authentication.minecraftProfileActiveCape
         )
@@ -505,7 +505,7 @@ enum PlayerSkinService {
             forHTTPHeaderField: "Authorization"
         )
         request.timeoutInterval = 30
-
+        
         // Use unified API client (needs to handle non-200 status codes)
         let (_, http) = try await APIClient.performRequestWithResponse(request: request)
         switch http.statusCode {
@@ -523,7 +523,7 @@ enum PlayerSkinService {
             )
         }
     }
-
+    
     static func resetSkinThrowing(player: Player) async throws {
         try validateAccessToken(player)
         var request = URLRequest(

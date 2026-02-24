@@ -5,7 +5,7 @@ import Combine
 public enum InterfaceLayoutStyle: String, CaseIterable {
     case classic,   // classic
          focused  // focus
-
+    
     public var localizedName: LocalizedStringKey {
         switch self {
         case .classic: "Classic"
@@ -16,7 +16,7 @@ public enum InterfaceLayoutStyle: String, CaseIterable {
 
 public enum ThemeMode: String, CaseIterable {
     case light, dark, system
-
+    
     public var localizedName: LocalizedStringKey {
         switch self {
         case .light: "Light"
@@ -24,7 +24,7 @@ public enum ThemeMode: String, CaseIterable {
         case .system: "Follow System"
         }
     }
-
+    
     public var effectiveColorScheme: ColorScheme {
         switch self {
         case .light:
@@ -46,7 +46,7 @@ public enum ThemeMode: String, CaseIterable {
             }
         }
     }
-
+    
     /// Corresponding AppKit skin, used to affect AppKit-based UI (such as Sparkle)
     public var nsAppearance: NSAppearance? {
         switch self {
@@ -59,18 +59,18 @@ public enum ThemeMode: String, CaseIterable {
 
 class GeneralSettingsManager: ObservableObject, WorkingPathProviding {
     static let shared = GeneralSettingsManager()
-
+    
     /// Whether to enable GitHub proxy (enabled by default)
     @AppStorage("enableGitHubProxy")
     var enableGitHubProxy = true {
         didSet { objectWillChange.send() }
     }
-
+    
     @AppStorage("gitProxyURL")
     var gitProxyURL = "https://gh-proxy.com" {
         didSet { objectWillChange.send() }
     }
-
+    
     // MARK: - Apply settings properties
     @AppStorage("concurrentDownloads")
     var concurrentDownloads: Int = 64 {
@@ -81,27 +81,27 @@ class GeneralSettingsManager: ObservableObject, WorkingPathProviding {
             objectWillChange.send()
         }
     }
-
+    
     // New: Launcher working directory
     @AppStorage("launcherWorkingDirectory")
     var launcherWorkingDirectory: String = AppPaths.launcherSupportDirectory.path {
         didSet { objectWillChange.send() }
     }
-
+    
     /// Interface style: Classic (list | content) / Focus (content | list)
     @AppStorage("interfaceLayoutStyle")
     var interfaceLayoutStyle: InterfaceLayoutStyle = .classic {
         didSet { objectWillChange.send() }
     }
-
+    
     private init() {}
-
+    
     /// Current launcher working directory (WorkingPathProviding)
     /// Use default support directory when empty
     var currentWorkingPath: String {
         launcherWorkingDirectory.isEmpty ? AppPaths.launcherSupportDirectory.path : launcherWorkingDirectory
     }
-
+    
     var workingPathWillChange: AnyPublisher<Void, Never> {
         objectWillChange.map { _ in () }.eraseToAnyPublisher()
     }

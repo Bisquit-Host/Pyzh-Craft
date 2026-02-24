@@ -12,7 +12,7 @@ struct LitematicaInfo: Identifiable, Equatable {
     let version: String?
     let regionCount: Int?
     let totalBlocks: Int?
-
+    
     init(
         name: String,
         path: URL,

@@ -5,19 +5,19 @@ import Foundation
 struct AuthCredential: Codable, Equatable {
     /// User ID (corresponds to UserProfile.id)
     let userId: String
-
+    
     /// access token
     var accessToken: String
-
+    
     /// refresh token
     var refreshToken: String
-
+    
     /// Token expiration time
     var expiresAt: Date?
-
+    
     /// Xbox User ID (XUID)
     var xuid: String
-
+    
     /// Initialize authentication credentials
     /// - Parameters:
     ///   - userId: user ID

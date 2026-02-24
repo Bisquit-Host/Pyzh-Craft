@@ -3,7 +3,7 @@ import SwiftUI
 /// Error popup modifier
 struct ErrorAlertModifier: ViewModifier {
     @StateObject private var errorHandler = GlobalErrorHandler.shared
-
+    
     func body(content: Content) -> some View {
         content
             .alert(

@@ -5,13 +5,13 @@ struct SaveInfoView: View {
     let gameId: String
     let gameName: String
     @StateObject private var manager: SaveInfoManager
-
+    
     init(gameId: String, gameName: String) {
         self.gameId = gameId
         self.gameName = gameName
         _manager = StateObject(wrappedValue: SaveInfoManager(gameName: gameName))
     }
-
+    
     var body: some View {
         VStack {
             // World information area (only existing types are displayed)
@@ -22,7 +22,7 @@ struct SaveInfoView: View {
                     gameName: gameName
                 )
             }
-
+            
             // Screenshot information area (only existing types are displayed)
             if manager.hasScreenshotsType {
                 ScreenshotSectionView(
@@ -31,7 +31,7 @@ struct SaveInfoView: View {
                     gameName: gameName
                 )
             }
-
+            
             // Server address area (always shown, even if no server is detected)
             if manager.hasServersType {
                 ServerAddressSectionView(
@@ -44,7 +44,7 @@ struct SaveInfoView: View {
                     }
                 }
             }
-
+            
             // Litematica projected file area (only existing types are shown)
             if manager.hasLitematicaType {
                 LitematicaSectionView(
@@ -53,7 +53,7 @@ struct SaveInfoView: View {
                     gameName: gameName
                 )
             }
-
+            
             // Log information area (only existing types are displayed)
             if manager.hasLogsType {
                 LogSectionView(
@@ -61,7 +61,7 @@ struct SaveInfoView: View {
                     isLoading: manager.isLoadingLogs
                 )
             }
-
+            
             // Show empty status when no information type is available
             if !manager.isLoading && !manager.hasWorldsType && !manager.hasScreenshotsType && !manager.hasServersType && !manager.hasLitematicaType && !manager.hasLogsType {
                 Text("No information available to display")

@@ -5,7 +5,7 @@ enum AppPaths {
     /// Path caching to avoid repeatedly creating the same URL object
     private static let pathCache = NSCache<NSString, NSURL>()
     private static let cacheQueue = DispatchQueue(label: "com.pyzhcraft.apppaths.cache", attributes: .concurrent)
-
+    
     // MARK: - Cached Path Helper
     /// Get the cached URL path, create and cache it if it does not exist
     private static func cachedURL(key: String, factory: () -> URL) -> URL {
@@ -18,11 +18,11 @@ enum AppPaths {
             return url
         }
     }
-
+    
     static var launcherSupportDirectory: URL {
-    // guard let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
-    //     return nil
-    // }
+        // guard let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+        //     return nil
+        // }
         return cachedURL(key: "launcherSupportDirectory") {
             .applicationSupportDirectory.appendingPathComponent(Bundle.main.appName)
         }
@@ -30,12 +30,12 @@ enum AppPaths {
     static var runtimeDirectory: URL {
         launcherSupportDirectory.appendingPathComponent(AppConstants.DirectoryNames.runtime)
     }
-
+    
     /// Path to the Java executable file of the specified version (jre.bundle in the runtime directory)
     static func javaExecutablePath(version: String) -> String {
         runtimeDirectory.appendingPathComponent(version).appendingPathComponent("jre.bundle/Contents/Home/bin/java").path
     }
-
+    
     static var metaDirectory: URL {
         launcherSupportDirectory.appendingPathComponent(AppConstants.DirectoryNames.meta)
     }
@@ -54,47 +54,47 @@ enum AppPaths {
     static var profileRootDirectory: URL {
         let customPath = GeneralSettingsManager.shared.launcherWorkingDirectory
         let workingDirectory = customPath.isEmpty ? launcherSupportDirectory.path : customPath
-
+        
         let baseURL = URL(fileURLWithPath: workingDirectory, isDirectory: true)
         return baseURL.appendingPathComponent(AppConstants.DirectoryNames.profiles, isDirectory: true)
     }
-
+    
     static func profileDirectory(gameName: String) -> URL {
         cachedURL(key: "profileDirectory:\(gameName)") {
             profileRootDirectory.appendingPathComponent(gameName)
         }
     }
-
+    
     static func modsDirectory(gameName: String) -> URL {
         cachedURL(key: "modsDirectory:\(gameName)") {
             profileDirectory(gameName: gameName).appendingPathComponent(AppConstants.DirectoryNames.mods)
         }
     }
-
+    
     static func datapacksDirectory(gameName: String) -> URL {
         cachedURL(key: "datapacksDirectory:\(gameName)") {
             profileDirectory(gameName: gameName).appendingPathComponent(AppConstants.DirectoryNames.datapacks)
         }
     }
-
+    
     static func shaderpacksDirectory(gameName: String) -> URL {
         cachedURL(key: "shaderpacksDirectory:\(gameName)") {
             profileDirectory(gameName: gameName).appendingPathComponent(AppConstants.DirectoryNames.shaderpacks)
         }
     }
-
+    
     static func resourcepacksDirectory(gameName: String) -> URL {
         cachedURL(key: "resourcepacksDirectory:\(gameName)") {
             profileDirectory(gameName: gameName).appendingPathComponent(AppConstants.DirectoryNames.resourcepacks)
         }
     }
-
+    
     static func schematicsDirectory(gameName: String) -> URL {
         cachedURL(key: "schematicsDirectory:\(gameName)") {
             profileDirectory(gameName: gameName).appendingPathComponent(AppConstants.DirectoryNames.schematics, isDirectory: true)
         }
     }
-
+    
     /// Clear the path cache related to the specified game (called when deleting the game)
     /// - Parameter gameName: game name
     static func invalidatePaths(forGameName gameName: String) {
@@ -112,7 +112,7 @@ enum AppPaths {
             }
         }
     }
-
+    
     static let profileSubdirectories = [
         AppConstants.DirectoryNames.shaderpacks,
         AppConstants.DirectoryNames.resourcepacks,
@@ -120,7 +120,7 @@ enum AppPaths {
         AppConstants.DirectoryNames.datapacks,
         AppConstants.DirectoryNames.crashReports,
     ]
-
+    
     /// Log file directory - use the system standard log directory and fall back to the application support directory in case of failure
     static var logsDirectory: URL {
         if let libraryDirectory = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first {
@@ -151,14 +151,14 @@ extension AppPaths {
         Logger.shared.error("Unable to obtain the system cache directory, use the Cache in the application support directory")
         return launcherSupportDirectory.appendingPathComponent("Cache", isDirectory: true)
     }
-
+    
     /// Data directory path
     static var dataDirectory: URL {
         cachedURL(key: "dataDirectory") {
             launcherSupportDirectory.appendingPathComponent(AppConstants.DirectoryNames.data, isDirectory: true)
         }
     }
-
+    
     /// Game version database path
     static var gameVersionDatabase: URL {
         dataDirectory.appendingPathComponent("data.db")

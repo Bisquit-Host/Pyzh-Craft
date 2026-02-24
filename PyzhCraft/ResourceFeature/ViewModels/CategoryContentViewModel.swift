@@ -46,25 +46,25 @@ final class CategoryContentViewModel: ObservableObject {
     @Published private(set) var isLoading = true
     @Published private(set) var error: GlobalError?
     @Published private(set) var loaders: [Loader] = []
-
+    
     // MARK: - Private Properties
     private var lastFetchTime: Date?
     private let project: String
     private var loadTask: Task<Void, Never>?
-
+    
     // MARK: - Initialization
     init(project: String) {
         self.project = project
     }
-
+    
     deinit {
         loadTask?.cancel()
     }
-
+    
     // MARK: - Public Methods
     func loadData() async {
         guard shouldFetchData else { return }
-
+        
         loadTask?.cancel()
         loadTask = Task {
             await fetchData()
@@ -78,32 +78,32 @@ final class CategoryContentViewModel: ObservableObject {
             await fetchData()
         }
     }
-
+    
     func clearCache() {
         loadTask?.cancel()
         lastFetchTime = nil
         resetData()
     }
-
+    
     func setError(_ error: GlobalError?) {
         self.error = error
     }
-
+    
     // MARK: - Private Helpers
     private var shouldFetchData: Bool {
         guard let lastFetch = lastFetchTime else { return true }
         return Date().timeIntervalSince(lastFetch)
-            >= CategoryConstants.cacheTimeout || categories.isEmpty
+        >= CategoryConstants.cacheTimeout || categories.isEmpty
     }
-
+    
     private func fetchData() async {
         isLoading = true
         error = nil
-
+        
         do {
             async let categoriesTask = ModrinthService.fetchCategories()
             async let versionsTask = ModrinthService.fetchGameVersions()
-
+            
             // The loader of light and shadow (shader) is obtained from the API, other project types use a static list
             let loadersTask: Task<[Loader], Never>
             if project == ProjectType.shader {
@@ -117,11 +117,11 @@ final class CategoryContentViewModel: ObservableObject {
                     Self.getStaticLoaders()
                 }
             }
-
+            
             let (categoriesResult, versionsResult, loadersResult) = await (
                 categoriesTask, versionsTask, loadersTask.value
             )
-
+            
             // Verify returned data
             guard !categoriesResult.isEmpty else {
                 throw GlobalError.resource(
@@ -129,14 +129,14 @@ final class CategoryContentViewModel: ObservableObject {
                     level: .notification
                 )
             }
-
+            
             guard !versionsResult.isEmpty else {
                 throw GlobalError.resource(
                     i18nKey: "Game versions not found",
                     level: .notification
                 )
             }
-
+            
             await processFetchedData(
                 categories: categoriesResult,
                 versions: versionsResult,
@@ -145,10 +145,10 @@ final class CategoryContentViewModel: ObservableObject {
         } catch {
             handleError(error)
         }
-
+        
         isLoading = false
     }
-
+    
     /// Get a list of static loaders (without calling the API)
     /// - Returns: four main loaders: fabric, forge, quilt, neoforge
     private static func getStaticLoaders() -> [Loader] {
@@ -175,18 +175,18 @@ final class CategoryContentViewModel: ObservableObject {
             ),
         ]
     }
-
+    
     private func processFetchedData(
         categories: [Category],
         versions: [GameVersion],
         loaders: [Loader]
     ) async {
         let projectType =
-            project == ProjectType.datapack ? ProjectType.mod : project
+        project == ProjectType.datapack ? ProjectType.mod : project
         let filteredCategories = categories.filter {
             $0.project_type == projectType
         }
-
+        
         await MainActor.run {
             self.versions = versions
             self.categories = filteredCategories.filter {
@@ -205,7 +205,7 @@ final class CategoryContentViewModel: ObservableObject {
             self.loaders = loaders
         }
     }
-
+    
     private func handleError(_ error: Error) {
         let globalError = GlobalError.from(error)
         Logger.shared.error("Error loading classification data: \(globalError.chineseMessage)")
@@ -214,7 +214,7 @@ final class CategoryContentViewModel: ObservableObject {
             self.error = globalError
         }
     }
-
+    
     private func resetData() {
         categories.removeAll(keepingCapacity: false)
         features.removeAll(keepingCapacity: false)

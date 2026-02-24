@@ -18,7 +18,7 @@ enum ModrinthConstants {
         static let maxTags = 3
         static let contentSpacing: CGFloat = 8
     }
-
+    
     // MARK: - API Constants
     /// API related constants
     enum API {
@@ -31,7 +31,7 @@ enum ModrinthConstants {
             static let resolutions = "resolutions"
             static let performanceImpact = "performance_impact"
         }
-
+        
         enum FacetValue {
             static let required = "required"
             static let optional = "optional"
@@ -58,19 +58,19 @@ final class ModrinthSearchViewModel: ObservableObject {
     @Published private(set) var isLoadingMore = false
     @Published private(set) var error: GlobalError?
     @Published private(set) var totalHits: Int = 0
-
+    
     // MARK: - Private Properties
     private var searchTask: Task<Void, Never>?
     private let pageSize: Int = 20
     private let cacheManager = ResourceSearchCacheManager.shared
-
+    
     // MARK: - Initialization
     init() {}
-
+    
     deinit {
         searchTask?.cancel()
     }
-
+    
     // MARK: - Public Methods
     // swiftlint:disable:next function_parameter_count
     func search(
@@ -88,7 +88,7 @@ final class ModrinthSearchViewModel: ObservableObject {
     ) async {
         // Cancel any existing search task
         searchTask?.cancel()
-
+        
         searchTask = Task {
             do {
                 // Create cache key
@@ -129,10 +129,10 @@ final class ModrinthSearchViewModel: ObservableObject {
                     isLoading = true
                 }
                 error = nil
-
+                
                 // Check if the task has been canceled
                 try Task.checkCancellation()
-
+                
                 let offset = (page - 1) * pageSize
                 let filterOptions = FilterOptions(
                     resolutions: resolutions,
@@ -146,9 +146,9 @@ final class ModrinthSearchViewModel: ObservableObject {
                     features: features,
                     filterOptions: filterOptions
                 )
-
+                
                 try Task.checkCancellation()
-
+                
                 let result: ModrinthResult
                 if dataSource == .modrinth {
                     // Using the Modrinth service
@@ -170,7 +170,7 @@ final class ModrinthSearchViewModel: ObservableObject {
                         loaders: loaders,
                         query: query
                     )
-
+                    
                     let cfResult = await CurseForgeService.searchProjects(
                         gameId: 432, // Minecraft
                         classId: cfParams.classId,
@@ -186,9 +186,9 @@ final class ModrinthSearchViewModel: ObservableObject {
                     )
                     result = CurseForgeToModrinthAdapter.convertSearchResult(cfResult)
                 }
-
+                
                 try Task.checkCancellation()
-
+                
                 if !Task.isCancelled {
                     // Caching search results
                     cacheManager.cacheResult(
@@ -204,9 +204,9 @@ final class ModrinthSearchViewModel: ObservableObject {
                     }
                     totalHits = result.totalHits
                 }
-
+                
                 try Task.checkCancellation()
-
+                
                 if !Task.isCancelled {
                     if append {
                         isLoadingMore = false
@@ -229,7 +229,7 @@ final class ModrinthSearchViewModel: ObservableObject {
             }
         }
     }
-
+    
     func clearResults() {
         searchTask?.cancel()
         results.removeAll()
@@ -238,7 +238,7 @@ final class ModrinthSearchViewModel: ObservableObject {
         isLoading = false
         isLoadingMore = false
     }
-
+    
     @MainActor
     func beginNewSearch() {
         isLoading = true
@@ -253,12 +253,12 @@ final class ModrinthSearchViewModel: ObservableObject {
         filterOptions: FilterOptions
     ) -> [[String]] {
         var facets: [[String]] = []
-
+        
         // Project type is always required
         facets.append([
             "\(ModrinthConstants.API.FacetType.projectType):\(projectType)"
         ])
-
+        
         // Add versions if any
         if !versions.isEmpty {
             facets.append(
@@ -267,7 +267,7 @@ final class ModrinthSearchViewModel: ObservableObject {
                 }
             )
         }
-
+        
         // Add categories if any
         if !categories.isEmpty {
             facets.append(
@@ -276,7 +276,7 @@ final class ModrinthSearchViewModel: ObservableObject {
                 }
             )
         }
-
+        
         // Handle client_side and server_side based on features selection
         let (clientFacets, serverFacets) = buildEnvironmentFacets(
             features: features
@@ -287,17 +287,17 @@ final class ModrinthSearchViewModel: ObservableObject {
         if !serverFacets.isEmpty {
             facets.append(serverFacets)
         }
-
+        
         // Add resolutions if any (as categories)
         if !filterOptions.resolutions.isEmpty {
             facets.append(filterOptions.resolutions.map { "categories:\($0)" })
         }
-
+        
         // Add performance impact if any (as categories)
         if !filterOptions.performanceImpact.isEmpty {
             facets.append(filterOptions.performanceImpact.map { "categories:\($0)" })
         }
-
+        
         // Add loaders if any (as categories)
         if !filterOptions.loaders.isEmpty && projectType != "resourcepack"
             && projectType != "datapack" {
@@ -307,34 +307,34 @@ final class ModrinthSearchViewModel: ObservableObject {
             }
             facets.append(loadersToUse.map { "categories:\($0)" })
         }
-
+        
         return facets
     }
-
+    
     private func buildEnvironmentFacets(features: [String]) -> (
         clientFacets: [String], serverFacets: [String]
     ) {
         let hasClient = features.contains(AppConstants.EnvironmentTypes.client)
         let hasServer = features.contains(AppConstants.EnvironmentTypes.server)
-
+        
         var clientFacets: [String] = []
         var serverFacets: [String] = []
-
+        
         if hasClient {
             clientFacets.append("client_side:required")
         } else if hasServer {
             clientFacets.append("client_side:optional")
         }
-
+        
         if hasServer {
             serverFacets.append("server_side:required")
         } else if hasClient {
             serverFacets.append("server_side:optional")
         }
-
+        
         return (clientFacets, serverFacets)
     }
-
+    
     /// Get the classId of CurseForge based on the project type
     private func classIdForProjectType(_ projectType: String) -> Int? {
         switch projectType.lowercased() {
@@ -353,7 +353,7 @@ final class ModrinthSearchViewModel: ObservableObject {
             return nil
         }
     }
-
+    
     /// CurseForge search parameter structure
     private struct CurseForgeSearchParams {
         let classId: Int?
@@ -362,7 +362,7 @@ final class ModrinthSearchViewModel: ObservableObject {
         let searchFilter: String?
         let modLoaderTypes: [Int]?
     }
-
+    
     /// Convert Modrinth search parameters to CurseForge search parameters
     /// - Parameters:
     ///   - projectType: project type
@@ -383,7 +383,7 @@ final class ModrinthSearchViewModel: ObservableObject {
     ) -> CurseForgeSearchParams {
         // Convert item type to classId
         let classId = classIdForProjectType(projectType)
-
+        
         // Convert a list of game versions (CurseForge API limit: up to 4 versions)
         let gameVersions: [String]?
         if !versions.isEmpty {
@@ -391,7 +391,7 @@ final class ModrinthSearchViewModel: ObservableObject {
         } else {
             gameVersions = nil
         }
-
+        
         // Convert categories (CurseForge uses categoryIds, mapped from Modrinth category names)
         // For resourcepack, the behavior classification + resolution classification need to be mapped together
         // API limit: Maximum 10 category IDs
@@ -403,7 +403,7 @@ final class ModrinthSearchViewModel: ObservableObject {
         } else {
             allCategoryNames = categories
         }
-
+        
         if !allCategoryNames.isEmpty {
             let mappedIds = ModrinthToCurseForgeCategoryMapper.mapToCurseForgeCategoryIds(
                 modrinthCategoryNames: allCategoryNames,
@@ -413,13 +413,13 @@ final class ModrinthSearchViewModel: ObservableObject {
         } else {
             categoryIds = nil
         }
-
+        
         // Convert loader list to modLoaderTypes
         // ModLoaderType: 1=Forge, 4=Fabric, 5=Quilt, 6=NeoForge
         // API limit: maximum 5 loader types
-
+        
         let modLoaderTypes: [Int]?
-
+        
         if projectType == "resourcepack" || projectType == "shaderpack" || projectType == "datapack" {
             modLoaderTypes = nil
         } else {
@@ -436,10 +436,10 @@ final class ModrinthSearchViewModel: ObservableObject {
                 modLoaderTypes = nil
             }
         }
-
+        
         // Search keywords (pass the original query directly, CurseForgeService is responsible for normalizing the spaces into "+")
         let searchFilter = query.isEmpty ? nil : query
-
+        
         return CurseForgeSearchParams(
             classId: classId,
             categoryIds: categoryIds,

@@ -5,7 +5,7 @@ struct OverflowButton<Content: View>: View {
     let count: Int
     @Binding var isPresented: Bool
     let popoverContent: () -> Content
-
+    
     init(
         count: Int,
         isPresented: Binding<Bool>,
@@ -15,7 +15,7 @@ struct OverflowButton<Content: View>: View {
         self._isPresented = isPresented
         self.popoverContent = popoverContent
     }
-
+    
     var body: some View {
         Button {
             isPresented = true

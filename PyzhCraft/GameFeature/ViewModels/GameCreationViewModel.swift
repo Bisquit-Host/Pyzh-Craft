@@ -13,26 +13,26 @@ class GameCreationViewModel: BaseGameFormViewModel {
     @Published var selectedLoaderVersion = ""
     @Published var availableLoaderVersions: [String] = []
     @Published var availableVersions: [String] = []
-
+    
     // MARK: - Private Properties
     private var pendingIconData: Data?
     private var pendingIconURL: URL?
     private var didInit = false
-
+    
     // MARK: - Environment Objects (to be set from view)
     private var gameRepository: GameRepository?
     private var playerListViewModel: PlayerListViewModel?
-
+    
     // MARK: - Initialization
     override init(configuration: GameFormConfiguration) {
         super.init(configuration: configuration)
     }
-
+    
     // MARK: - Setup Methods
     func setup(gameRepository: GameRepository, playerListViewModel: PlayerListViewModel) {
         self.gameRepository = gameRepository
         self.playerListViewModel = playerListViewModel
-
+        
         if !didInit {
             didInit = true
             Task {
@@ -41,23 +41,23 @@ class GameCreationViewModel: BaseGameFormViewModel {
         }
         updateParentState()
     }
-
+    
     // MARK: - Override Methods
     override func performConfirmAction() async {
         startDownloadTask {
             await self.saveGame()
         }
     }
-
+    
     override func handleCancel() {
         if isDownloading {
             // Stop download task
             downloadTask?.cancel()
             downloadTask = nil
-
+            
             // Cancel download status
             gameSetupService.downloadState.cancel()
-
+            
             // Perform post-cancellation cleanup
             Task {
                 await performCancelCleanup()
@@ -66,7 +66,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
             configuration.actions.onCancel()
         }
     }
-
+    
     override func performCancelCleanup() async {
         // If you cancel while downloading, you need to delete the created game folder
         let gameName = gameNameValidator.gameName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -77,12 +77,12 @@ class GameCreationViewModel: BaseGameFormViewModel {
                 guard let gameRepository = gameRepository else { return false }
                 return gameRepository.games.contains { $0.gameName == gameName }
             }
-
+            
             if !isGameSaved {
                 // The game is not saved, indicating that the operation is cancelled. You can safely delete the folder
                 do {
                     let profileDir = AppPaths.profileDirectory(gameName: gameName)
-
+                    
                     // Check if directory exists
                     if FileManager.default.fileExists(atPath: profileDir.path) {
                         try FileManager.default.removeItem(at: profileDir)
@@ -97,23 +97,23 @@ class GameCreationViewModel: BaseGameFormViewModel {
                 Logger.shared.info("Game saved successfully, skipping folder deletion: \(gameName)")
             }
         }
-
+        
         // Reset download status and close window
         await MainActor.run {
             gameSetupService.downloadState.reset()
             configuration.actions.onCancel()
         }
     }
-
+    
     override func computeIsDownloading() -> Bool {
         gameSetupService.downloadState.isDownloading
     }
-
+    
     override func computeIsFormValid() -> Bool {
         let isLoaderVersionValid = selectedModLoader == "vanilla" || !selectedLoaderVersion.isEmpty
         return gameNameValidator.isFormValid && isLoaderVersionValid
     }
-
+    
     // MARK: - Version Management
     /// Initial version selector
     func initializeVersionPicker() async {
@@ -124,7 +124,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
         )
         await updateAvailableVersions(compatibleVersions)
     }
-
+    
     /// Update available versions and set default selections
     func updateAvailableVersions(_ versions: [String]) async {
         self.availableVersions = versions
@@ -132,7 +132,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
         if !versions.contains(self.selectedGameVersion) && !versions.isEmpty {
             self.selectedGameVersion = versions.first ?? ""
         }
-
+        
         // Get the time information of the currently selected version
         if !versions.isEmpty {
             let targetVersion = versions.contains(self.selectedGameVersion) ? self.selectedGameVersion : (versions.first ?? "")
@@ -140,7 +140,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
             self.versionTime = timeString
         }
     }
-
+    
     /// Handling mod loader changes
     func handleModLoaderChange(_ newLoader: String) {
         Task {
@@ -150,7 +150,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
                 includeSnapshots: includeSnapshots
             )
             await updateAvailableVersions(compatibleVersions)
-
+            
             // Update loader version list
             if newLoader != "vanilla" && !selectedGameVersion.isEmpty {
                 await updateLoaderVersions(for: newLoader, gameVersion: selectedGameVersion)
@@ -162,14 +162,14 @@ class GameCreationViewModel: BaseGameFormViewModel {
             }
         }
     }
-
+    
     /// Handle game version changes
     func handleGameVersionChange(_ newGameVersion: String) {
         Task {
             await updateLoaderVersions(for: selectedModLoader, gameVersion: newGameVersion)
         }
     }
-
+    
     /// Update loader version list
     private func updateLoaderVersions(for loader: String, gameVersion: String) async {
         guard loader != "vanilla" && !gameVersion.isEmpty else {
@@ -177,9 +177,9 @@ class GameCreationViewModel: BaseGameFormViewModel {
             selectedLoaderVersion = ""
             return
         }
-
+        
         var versions: [String] = []
-
+        
         switch loader.lowercased() {
         case "fabric":
             let fabricVersions = await FabricLoaderService.fetchAllLoaderVersions(for: gameVersion)
@@ -206,7 +206,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
         default:
             versions = []
         }
-
+        
         availableLoaderVersions = versions
         // If the currently selected version is not in the list, select the first version
         if !versions.contains(selectedLoaderVersion) && !versions.isEmpty {
@@ -215,7 +215,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
             selectedLoaderVersion = ""
         }
     }
-
+    
     // MARK: - Image Handling
     func handleImagePickerResult(_ result: Result<[URL], Error>) {
         switch result {
@@ -256,7 +256,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
                     handleFileReadError(error, context: "图片文件")
                 }
             }
-
+            
         case .failure(let error):
             let globalError = GlobalError.from(error)
             handleNonCriticalError(
@@ -265,13 +265,13 @@ class GameCreationViewModel: BaseGameFormViewModel {
             )
         }
     }
-
+    
     func handleImageDrop(_ providers: [NSItemProvider]) -> Bool {
         guard let provider = providers.first else {
             Logger.shared.error("Image drag and drop failed: No provider")
             return false
         }
-
+        
         if provider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
             provider.loadDataRepresentation(
                 forTypeIdentifier: UTType.image.identifier
@@ -286,7 +286,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
                     }
                     return
                 }
-
+                
                 if let data = data {
                     Task { @MainActor in
                         let result: URL? = await Task.detached(priority: .userInitiated) {
@@ -314,7 +314,7 @@ class GameCreationViewModel: BaseGameFormViewModel {
         Logger.shared.warning("Image drag and drop failed: Unsupported type")
         return false
     }
-
+    
     // MARK: - Game Save Methods
     private func saveGame() async {
         guard let gameRepository = gameRepository,
@@ -322,10 +322,10 @@ class GameCreationViewModel: BaseGameFormViewModel {
             Logger.shared.error("GameRepository or PlayerListViewModel is not set")
             return
         }
-
+        
         // For non-vanilla loaders, saving is not allowed if no version is selected
         let loaderVersion = selectedModLoader == "vanilla" ? selectedModLoader : selectedLoaderVersion
-
+        
         await gameSetupService.saveGame(
             gameName: gameNameValidator.gameName,
             gameIcon: gameIcon,
@@ -347,12 +347,12 @@ class GameCreationViewModel: BaseGameFormViewModel {
             }
         )
     }
-
+    
     // MARK: - Computed Properties for UI Updates
     var shouldShowProgress: Bool {
         gameSetupService.downloadState.isDownloading
     }
-
+    
     var pendingIconURLForDisplay: URL? {
         pendingIconURL
     }

@@ -4,16 +4,16 @@ import SwiftUI
 @MainActor
 class WindowManager {
     static let shared = WindowManager()
-
+    
     private var openWindowAction: ((String) -> Void)?
-
+    
     private init() {}
-
+    
     /// Set the window opening action (called by WindowOpener)
     func setOpenWindowAction(_ action: @escaping (String) -> Void) {
         self.openWindowAction = action
     }
-
+    
     /// Find the window with the specified ID
     private func findWindow(id: WindowID) -> NSWindow? {
         let windows = NSApplication.shared.windows
@@ -26,7 +26,7 @@ class WindowManager {
         }
         return nil
     }
-
+    
     /// Open the window with the specified ID (Window itself is a singleton and will automatically activate existing windows)
     func openWindow(id: WindowID) {
         if let openWindow = openWindowAction {
@@ -41,7 +41,7 @@ class WindowManager {
             )
         }
     }
-
+    
     /// Close the window with the specified ID
     func closeWindow(id: WindowID) {
         if let window = findWindow(id: id) {
@@ -54,7 +54,7 @@ class WindowManager {
 struct WindowOpener: ViewModifier {
     @Environment(\.openWindow)
     private var openWindow
-
+    
     func body(content: Content) -> some View {
         content
             .onAppear {

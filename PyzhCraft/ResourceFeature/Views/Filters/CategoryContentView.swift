@@ -15,7 +15,7 @@ struct CategoryContentView: View {
     let gameVersion: String?
     let gameLoader: String?
     let dataSource: DataSource
-
+    
     // MARK: - Initialization
     init(
         project: String,
@@ -46,7 +46,7 @@ struct CategoryContentView: View {
             wrappedValue: CategoryDataCacheManager.shared.getViewModel(for: project)
         )
     }
-
+    
     // MARK: - Body
     var body: some View {
         VStack {
@@ -65,7 +65,7 @@ struct CategoryContentView: View {
             setupDefaultSelections()
         }
     }
-
+    
     // MARK: - Setup Methods
     private func setupDefaultSelections() {
         if let gameVersion = gameVersion {
@@ -79,7 +79,7 @@ struct CategoryContentView: View {
             }
         }
     }
-
+    
     // MARK: - Error Handling
     private func loadDataWithErrorHandling() async {
         do {
@@ -93,7 +93,7 @@ struct CategoryContentView: View {
             }
         }
     }
-
+    
     private func loadDataThrowing() async throws {
         guard !project.isEmpty else {
             throw GlobalError.validation(
@@ -101,10 +101,10 @@ struct CategoryContentView: View {
                 level: .notification
             )
         }
-
+        
         await viewModel.loadData()
     }
-
+    
     // MARK: - Section Views
     private var categorySection: some View {
         CategorySectionView(
@@ -116,7 +116,7 @@ struct CategoryContentView: View {
             isLoading: viewModel.isLoading
         )
     }
-
+    
     private var versionSection: some View {
         CategorySectionView(
             title: "Versions",
@@ -128,7 +128,7 @@ struct CategoryContentView: View {
             isVersionSection: true
         )
     }
-
+    
     private var loaderSection: some View {
         CategorySectionView(
             title: "Loader",
@@ -139,7 +139,7 @@ struct CategoryContentView: View {
             isLoading: viewModel.isLoading
         )
     }
-
+    
     private var projectSpecificSections: some View {
         Group {
             switch project {
@@ -160,7 +160,7 @@ struct CategoryContentView: View {
             }
         }
     }
-
+    
     private var environmentSection: some View {
         CategorySectionView(
             title: "Environment",
@@ -169,7 +169,7 @@ struct CategoryContentView: View {
             isLoading: viewModel.isLoading
         )
     }
-
+    
     private var resourcePackSections: some View {
         Group {
             CategorySectionView(
@@ -190,9 +190,9 @@ struct CategoryContentView: View {
             )
         }
     }
-
+    
     private var shaderSections: some View {
-
+        
         Group {
             // The CurseForge data source does not support performance requirements filtering and this section is not displayed under the CF tag
             if dataSource == .modrinth {
@@ -215,14 +215,14 @@ struct CategoryContentView: View {
             }
         }
     }
-
+    
     // MARK: - Computed Properties
     private var filteredLoaders: [Loader] {
         viewModel.loaders.filter {
             $0.supported_project_types.contains(project)
         }
     }
-
+    
     private var environmentItems: [FilterItem] {
         [
             FilterItem(id: AppConstants.EnvironmentTypes.client, name: String(localized: "Client")),

@@ -4,18 +4,18 @@ import Foundation
 /// Use SQLite database to store mod.json data (hash -> JSON BLOB)
 class ModCacheManager {
     static let shared = ModCacheManager()
-
+    
     private let modCacheDB: ModCacheDatabase
     private let queue = DispatchQueue(label: "ModCacheManager.queue")
     private var isInitialized = false
-
+    
     private init() {
         let dbPath = AppPaths.gameVersionDatabase.path
         self.modCacheDB = ModCacheDatabase(dbPath: dbPath)
     }
-
+    
     // MARK: - Initialization
-
+    
     /// Initialize database connection
     /// - Throws: GlobalError when the operation fails
     private func ensureInitialized() throws {
@@ -23,14 +23,14 @@ class ModCacheManager {
             // Make sure the database directory exists
             let dataDir = AppPaths.dataDirectory
             try? FileManager.default.createDirectory(at: dataDir, withIntermediateDirectories: true)
-
+            
             try modCacheDB.open()
             isInitialized = true
         }
     }
-
+    
     // MARK: - Public API
-
+    
     /// - Parameters:
     ///   - hash: the hash value of the mod file
     ///   - jsonData: Data of JSON data (original JSON bytes)
@@ -41,7 +41,7 @@ class ModCacheManager {
             try modCacheDB.saveModCache(hash: hash, jsonData: jsonData)
         }
     }
-
+    
     /// - Parameters:
     ///   - hash: the hash value of the mod file
     ///   - jsonData: Data of JSON data (original JSON bytes)
@@ -52,7 +52,7 @@ class ModCacheManager {
             GlobalErrorHandler.shared.handle(error)
         }
     }
-
+    
     /// Get mod cache value
     /// - Parameter hash: the hash value of the mod file
     /// - Returns: Data of JSON data (original JSON bytes), or nil if it does not exist
@@ -67,7 +67,7 @@ class ModCacheManager {
             }
         }
     }
-
+    
     /// Get all mod cache data
     /// - Returns: hash -> dictionary of JSON Data
     func getAll() -> [String: Data] {
@@ -81,7 +81,7 @@ class ModCacheManager {
             }
         }
     }
-
+    
     /// Remove mod cache items
     /// - Parameter hash: the hash value of the mod file
     /// - Throws: GlobalError when the operation fails
@@ -91,7 +91,7 @@ class ModCacheManager {
             try modCacheDB.deleteModCache(hash: hash)
         }
     }
-
+    
     /// Remove mod cache items (silent version)
     /// - Parameter hash: the hash value of the mod file
     func removeSilently(hash: String) {
@@ -101,7 +101,7 @@ class ModCacheManager {
             GlobalErrorHandler.shared.handle(error)
         }
     }
-
+    
     /// Remove mod cache items in batches
     /// - Parameter hashes: array of hashes to be deleted
     /// - Throws: GlobalError when the operation fails
@@ -111,7 +111,7 @@ class ModCacheManager {
             try modCacheDB.deleteModCaches(hashes: hashes)
         }
     }
-
+    
     /// Remove mod cache items in batches (silent version)
     /// - Parameter hashes: array of hashes to be deleted
     func removeSilently(hashes: [String]) {
@@ -121,7 +121,7 @@ class ModCacheManager {
             GlobalErrorHandler.shared.handle(error)
         }
     }
-
+    
     /// Clear all mod caches
     /// - Throws: GlobalError when the operation fails
     func clear() throws {
@@ -130,7 +130,7 @@ class ModCacheManager {
             try modCacheDB.clearAllModCaches()
         }
     }
-
+    
     /// Clear all mod caches (silent version)
     func clearSilently() {
         do {
@@ -139,7 +139,7 @@ class ModCacheManager {
             GlobalErrorHandler.shared.handle(error)
         }
     }
-
+    
     /// - Parameter hash: the hash value of the mod file
     /// - Returns: Does it exist?
     func has(hash: String) -> Bool {
@@ -153,7 +153,7 @@ class ModCacheManager {
             }
         }
     }
-
+    
     /// - Parameter data: hash -> dictionary of JSON Data
     /// - Throws: GlobalError when the operation fails
     func setAll(_ data: [String: Data]) throws {
@@ -162,7 +162,7 @@ class ModCacheManager {
             try modCacheDB.saveModCaches(data)
         }
     }
-
+    
     /// - Parameter data: hash -> dictionary of JSON Data
     func setAllSilently(_ data: [String: Data]) {
         do {

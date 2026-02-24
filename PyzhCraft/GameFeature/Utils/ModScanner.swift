@@ -3,9 +3,9 @@ import Foundation
 
 class ModScanner {
     static let shared = ModScanner()
-
+    
     private init() {}
-
+    
     /// Main entrance: Get ModrinthProjectDetail (silent version)
     func getModrinthProjectDetail(
         for fileURL: URL,
@@ -27,7 +27,7 @@ class ModScanner {
             }
         }
     }
-
+    
     /// Main entrance: Get ModrinthProjectDetail (throws exception version)
     func getModrinthProjectDetailThrowing(
         for fileURL: URL
@@ -38,21 +38,21 @@ class ModScanner {
                 level: .silent
             )
         }
-
+        
         if let cached = getModCacheFromDatabase(hash: hash) {
             // Update file name to current actual file name (may have been renamed to .disabled)
             var updatedCached = cached
             updatedCached.fileName = fileURL.lastPathComponent
             return updatedCached
         }
-
+        
         // Query by file hash using fetchModrinthDetail
         let detail = await withCheckedContinuation { continuation in
             ModrinthService.fetchModrinthDetail(by: hash) { detail in
                 continuation.resume(returning: detail)
             }
         }
-
+        
         if let detail = detail {
             // Set local file name
             var detailWithFileName = detail
@@ -62,8 +62,8 @@ class ModScanner {
         } else {
             // Try local parsing
             let (modid, version) =
-                try ModMetadataParser.parseModMetadataThrowing(fileURL: fileURL)
-
+            try ModMetadataParser.parseModMetadataThrowing(fileURL: fileURL)
+            
             // If the CF query fails or modid is not parsed, it will fall back to the local logic
             if let modid = modid, let version = version {
                 // Create a back-up object using the parsed metadata
@@ -84,14 +84,14 @@ class ModScanner {
             }
         }
     }
-
+    
     // MARK: - Mod Cache (Database)
-
+    
     private func getModCacheFromDatabase(hash: String) -> ModrinthProjectDetail? {
         guard let jsonData = ModCacheManager.shared.get(hash: hash) else {
             return nil
         }
-
+        
         do {
             return try JSONDecoder().decode(ModrinthProjectDetail.self, from: jsonData)
         } catch {
@@ -99,7 +99,7 @@ class ModScanner {
             return nil
         }
     }
-
+    
     func saveToCache(hash: String, detail: ModrinthProjectDetail) {
         do {
             let jsonData = try JSONEncoder().encode(detail)
@@ -112,19 +112,19 @@ class ModScanner {
             ))
         }
     }
-
+    
     // MARK: - Hash
-
+    
     static func sha1Hash(of url: URL) -> String? {
         SHA1Calculator.sha1Silent(ofFileAt: url)
     }
-
+    
     static func sha1HashThrowing(of url: URL) throws -> String? {
         try SHA1Calculator.sha1(ofFileAt: url)
     }
-
+    
     // MARK: - Fallback Methods
-
+    
     /// A closer look at the public field structure of ModrinthProjectDetail
     private struct CommonFallbackFields {
         let description: String
@@ -149,7 +149,7 @@ class ModScanner {
         let loaders: [String]
         let type: String?
     }
-
+    
     /// Create public fields of the base ModrinthProjectDetail
     private func createBaseFallbackDetail(fileURL: URL) -> (fileName: String, baseFileName: String) {
         let fileName = fileURL.lastPathComponent
@@ -159,7 +159,7 @@ class ModScanner {
         )
         return (fileName, baseFileName)
     }
-
+    
     /// Create a public part of ModrinthProjectDetail
     private func createCommonFallbackFields(fileName: String, baseFileName: String) -> CommonFallbackFields {
         return CommonFallbackFields(
@@ -186,7 +186,7 @@ class ModScanner {
             type: nil
         )
     }
-
+    
     /// Use the parsed metadata to create a backend ModrinthProjectDetail
     private func createFallbackDetail(
         fileURL: URL,
@@ -195,7 +195,7 @@ class ModScanner {
     ) -> ModrinthProjectDetail {
         let (fileName, baseFileName) = createBaseFallbackDetail(fileURL: fileURL)
         let common = createCommonFallbackFields(fileName: fileName, baseFileName: baseFileName)
-
+        
         return ModrinthProjectDetail(
             slug: modid,
             title: baseFileName,
@@ -225,14 +225,14 @@ class ModScanner {
             fileName: fileName
         )
     }
-
+    
     /// Use file names to create the most basic template ModrinthProjectDetail
     private func createFallbackDetailFromFileName(
         fileURL: URL
     ) -> ModrinthProjectDetail {
         let (fileName, baseFileName) = createBaseFallbackDetail(fileURL: fileURL)
         let common = createCommonFallbackFields(fileName: fileName, baseFileName: baseFileName)
-
+        
         return ModrinthProjectDetail(
             slug: baseFileName.lowercased().replacingOccurrences(
                 of: " ",
@@ -269,7 +269,7 @@ class ModScanner {
 
 extension ModScanner {
     // MARK: - public helper method
-
+    
     /// Read directory and filter jar/zip files (throws exception version)
     private func readJarZipFiles(from dir: URL) throws -> [URL] {
         guard FileManager.default.fileExists(atPath: dir.path) else {
@@ -278,7 +278,7 @@ extension ModScanner {
                 level: .silent
             )
         }
-
+        
         let files: [URL]
         do {
             files = try FileManager.default.contentsOfDirectory(
@@ -291,18 +291,18 @@ extension ModScanner {
                 level: .silent
             )
         }
-
+        
         return files.filter {
             ["jar", "zip", "disable"].contains($0.pathExtension.lowercased())
         }
     }
-
+    
     /// Read the directory and filter jar/zip files (silent version, returns an empty array when the directory does not exist)
     private func readJarZipFilesSilent(from dir: URL) -> [URL] {
         guard FileManager.default.fileExists(atPath: dir.path) else {
             return []
         }
-
+        
         do {
             let files = try FileManager.default.contentsOfDirectory(
                 at: dir,
@@ -315,7 +315,7 @@ extension ModScanner {
             return []
         }
     }
-
+    
     /// Check if the mod is installed
     private func checkModInstalledCore(
         hash: String,
@@ -324,7 +324,7 @@ extension ModScanner {
         let cachedMods = await ModInstallationCache.shared.getAllModsInstalled(for: gameName)
         return cachedMods.contains(hash)
     }
-
+    
     /// Get all jar/zip files in the directory and their hash and cache details (silent version)
     public func localModDetails(in dir: URL) -> [(
         file: URL, hash: String, detail: ModrinthProjectDetail?
@@ -338,7 +338,7 @@ extension ModScanner {
             return []
         }
     }
-
+    
     /// Get all jar/zip files in the directory and their hash and cache details (throws exception version)
     public func localModDetailsThrowing(in dir: URL) throws -> [(
         file: URL, hash: String, detail: ModrinthProjectDetail?
@@ -347,7 +347,7 @@ extension ModScanner {
         return jarFiles.compactMap { fileURL in
             if let hash = ModScanner.sha1Hash(of: fileURL) {
                 var detail = getModCacheFromDatabase(hash: hash)
-
+                
                 // If it is not found in the cache, use the cover-up strategy to create basic information
                 if detail == nil {
                     detail = createFallbackDetailFromFileName(fileURL: fileURL)
@@ -359,13 +359,13 @@ extension ModScanner {
                     // Update file name to current actual file name (may have been renamed to .disabled)
                     detail?.fileName = fileURL.lastPathComponent
                 }
-
+                
                 return (file: fileURL, hash: hash, detail: detail)
             }
             return nil
         }
     }
-
+    
     /// Asynchronous scan: only get all detailId (silent version)
     /// Execute in background thread, only read from cache, do not create fallback
     public func scanAllDetailIds(
@@ -384,7 +384,7 @@ extension ModScanner {
             }
         }
     }
-
+    
     // Return Set to improve lookup performance (O(1))
     public func scanAllDetailIdsThrowing(in dir: URL) async throws -> Set<String> {
         // If it is the mods directory, the cache will be returned first
@@ -398,37 +398,37 @@ extension ModScanner {
                 }
             }
         }
-
+        
         // Perform file system operations on a background thread
         return try await Task.detached(priority: .userInitiated) {
             let jarFiles = try self.readJarZipFiles(from: dir)
-
+            
             // Use TaskGroup to concurrently calculate hash and read cache
             let concurrentCount = GeneralSettingsManager.shared.concurrentDownloads
             let semaphore = AsyncSemaphore(value: concurrentCount)
-
+            
             return await withTaskGroup(of: String?.self) { group in
                 for fileURL in jarFiles {
                     group.addTask {
                         await semaphore.wait()
                         defer { Task { await semaphore.signal() } }
-
+                        
                         guard let hash = ModScanner.sha1Hash(of: fileURL) else {
                             return nil
                         }
-
+                        
                         // Return hash directly without using slug
                         return hash
                     }
                 }
-
+                
                 var hashes: Set<String> = []
                 for await hash in group {
                     if let hash = hash {
                         hashes.insert(hash)
                     }
                 }
-
+                
                 // If it is the mods directory, automatically cache the results
                 if self.isModsDirectory(dir) {
                     if let gameName = self.extractGameName(from: dir) {
@@ -438,21 +438,21 @@ extension ModScanner {
                         )
                     }
                 }
-
+                
                 return hashes
             }
         }.value
     }
-
+    
     public func scanGameModsDirectory(game: GameVersionInfo) async {
         let modsDir = AppPaths.modsDirectory(gameName: game.gameName)
-
+        
         // Check if directory exists
         guard FileManager.default.fileExists(atPath: modsDir.path) else {
             Logger.shared.debug("The mods directory of game \(game.gameName) does not exist, skipping scanning")
             return
         }
-
+        
         do {
             let detailIds = try await scanAllDetailIdsThrowing(in: modsDir)
             Logger.shared.debug("Game \(game.gameName) scan completed, found \(detailIds.count) mods")
@@ -462,16 +462,16 @@ extension ModScanner {
             // No error notifications are shown because this is a background scan
         }
     }
-
+    
     public func scanGameModsDirectorySync(game: GameVersionInfo) {
         let modsDir = AppPaths.modsDirectory(gameName: game.gameName)
-
+        
         // Check if directory exists
         guard FileManager.default.fileExists(atPath: modsDir.path) else {
             Logger.shared.debug("The mods directory of game \(game.gameName) does not exist, skipping scanning")
             return
         }
-
+        
         // Use Task to wait synchronously for asynchronous operations to complete
         let semaphore = DispatchSemaphore(value: 0)
         Task {
@@ -487,17 +487,17 @@ extension ModScanner {
         }
         semaphore.wait()
     }
-
+    
     private func isModsDirectory(_ dir: URL) -> Bool {
         dir.lastPathComponent.lowercased() == "mods"
     }
-
+    
     // mods directory structure: profileRootDirectory/gameName/mods
     private func extractGameName(from modsDir: URL) -> String? {
         let parentDir = modsDir.deletingLastPathComponent()
         return parentDir.lastPathComponent
     }
-
+    
     /// Synchronization: Check cache only (checked by file hash)
     func isModInstalledSync(hash: String, in modsDir: URL) -> Bool {
         do {
@@ -512,7 +512,7 @@ extension ModScanner {
             return false
         }
     }
-
+    
     /// Synchronization: only check cache (throws exception version)
     func isModInstalledSyncThrowing(
         hash: String,
@@ -521,20 +521,20 @@ extension ModScanner {
         guard let gameName = extractGameName(from: modsDir) else {
             return false
         }
-
+        
         // Use DispatchSemaphore to wait for asynchronous results in a synchronous function
         let semaphore = DispatchSemaphore(value: 0)
         var result = false
-
+        
         Task {
             result = await checkModInstalledCore(hash: hash, gameName: gameName)
             semaphore.signal()
         }
-
+        
         semaphore.wait()
         return result
     }
-
+    
     /// Asynchronous: only check cache (silent version)
     func isModInstalled(
         hash: String,
@@ -558,7 +558,7 @@ extension ModScanner {
             }
         }
     }
-
+    
     /// Asynchronous: only check cache (throw exception version)
     func isModInstalledThrowing(
         hash: String,
@@ -567,10 +567,10 @@ extension ModScanner {
         guard let gameName = extractGameName(from: modsDir) else {
             return false
         }
-
+        
         return await checkModInstalledCore(hash: hash, gameName: gameName)
     }
-
+    
     /// Scan directory and return all identified ModrinthProjectDetail (silent version)
     func scanResourceDirectory(
         _ dir: URL,
@@ -588,7 +588,7 @@ extension ModScanner {
             }
         }
     }
-
+    
     /// Scan the directory and return all identified ModrinthProjectDetail (throws exception version)
     func scanResourceDirectoryThrowing(
         _ dir: URL
@@ -597,24 +597,24 @@ extension ModScanner {
         if jarFiles.isEmpty {
             return []
         }
-
+        
         // Create a semaphore to control the number of concurrencies
         let concurrentCount = GeneralSettingsManager.shared.concurrentDownloads
         let semaphore = AsyncSemaphore(value: concurrentCount)
-
+        
         // Scan files concurrently using TaskGroup
         let results = await withTaskGroup(of: ModrinthProjectDetail?.self) { group in
             for fileURL in jarFiles {
                 group.addTask {
                     await semaphore.wait()
                     defer { Task { await semaphore.signal() } }
-
+                    
                     return try? await self.getModrinthProjectDetailThrowing(
                         for: fileURL
                     )
                 }
             }
-
+            
             // Collect results
             var results: [ModrinthProjectDetail] = []
             for await result in group {
@@ -624,12 +624,12 @@ extension ModScanner {
             }
             return results
         }
-
+        
         return results
     }
-
+    
     // MARK: - Page scanning
-
+    
     /// Calculate paging range
     private func calculatePageRange(
         totalCount: Int,
@@ -639,19 +639,19 @@ extension ModScanner {
         guard totalCount > 0 else {
             return nil
         }
-
+        
         let safePage = max(page, 1)
         let safePageSize = max(pageSize, 1)
         let startIndex = (safePage - 1) * safePageSize
         let endIndex = min(startIndex + safePageSize, totalCount)
-
+        
         guard startIndex < totalCount else {
             return nil
         }
-
+        
         return (startIndex, endIndex, endIndex < totalCount)
     }
-
+    
     /// Concurrently scan the file list and return details
     private func scanFilesConcurrently(
         fileURLs: [URL],
@@ -662,13 +662,13 @@ extension ModScanner {
                 group.addTask {
                     await semaphore.wait()
                     defer { Task { await semaphore.signal() } }
-
+                    
                     return try? await self.getModrinthProjectDetailThrowing(
                         for: fileURL
                     )
                 }
             }
-
+            
             var results: [ModrinthProjectDetail] = []
             for await result in group {
                 if let detail = result {
@@ -678,7 +678,7 @@ extension ModScanner {
             return results
         }
     }
-
+    
     /// Get a list of all jar/zip files in the directory (no parsing details, fast)
     func getAllResourceFiles(_ dir: URL) -> [URL] {
         do {
@@ -690,17 +690,17 @@ extension ModScanner {
             return []
         }
     }
-
+    
     /// Get the list of all jar/zip files in the directory (throws exception version)
     func getAllResourceFilesThrowing(_ dir: URL) throws -> [URL] {
         // Returns an empty array if the directory does not exist (no exception is thrown as this is the normal case)
         guard FileManager.default.fileExists(atPath: dir.path) else {
             return []
         }
-
+        
         return try readJarZipFiles(from: dir)
     }
-
+    
     /// Scan the directory in pages and parse only the files on the current page (silent version)
     func scanResourceDirectoryPage(
         _ dir: URL,
@@ -724,7 +724,7 @@ extension ModScanner {
             }
         }
     }
-
+    
     /// Paging scanning based on the file list, only parsing the files of the current page (silent version)
     func scanResourceFilesPage(
         fileURLs: [URL],
@@ -748,7 +748,7 @@ extension ModScanner {
             }
         }
     }
-
+    
     /// Paging scanning based on the file list, only parsing the files of the current page (throws an exception version)
     func scanResourceFilesPageThrowing(
         fileURLs: [URL],
@@ -762,15 +762,15 @@ extension ModScanner {
         ) else {
             return ([], false)
         }
-
+        
         let pageFiles = Array(fileURLs[pageRange.startIndex..<pageRange.endIndex])
         let concurrentCount = GeneralSettingsManager.shared.concurrentDownloads
         let semaphore = AsyncSemaphore(value: concurrentCount)
         let results = await scanFilesConcurrently(fileURLs: pageFiles, semaphore: semaphore)
-
+        
         return (results, pageRange.hasMore)
     }
-
+    
     /// Paging scans the directory and only parses the files on the current page (throws an exception version)
     func scanResourceDirectoryPageThrowing(
         _ dir: URL,
@@ -790,11 +790,11 @@ extension ModScanner {
 extension ModScanner {
     actor ModInstallationCache {
         static let shared = ModInstallationCache()
-
+        
         private var cache: [String: Set<String>] = [:]
-
+        
         private init() {}
-
+        
         func addHash(_ hash: String, to gameName: String) {
             if var cached = cache[gameName] {
                 cached.insert(hash)
@@ -804,47 +804,47 @@ extension ModScanner {
                 cache[gameName] = [hash]
             }
         }
-
+        
         func removeHash(_ hash: String, from gameName: String) {
             if var cached = cache[gameName] {
                 cached.remove(hash)
                 cache[gameName] = cached
             }
         }
-
+        
         func getAllModsInstalled(for gameName: String) -> Set<String> {
             cache[gameName] ?? Set<String>()
         }
-
+        
         func hasCache(for gameName: String) -> Bool {
             cache[gameName] != nil
         }
-
+        
         func setAllModsInstalled(for gameName: String, hashes: Set<String>) {
             cache[gameName] = hashes
         }
-
+        
         func removeGame(gameName: String) {
             cache.removeValue(forKey: gameName)
         }
     }
-
+    
     func addModHash(_ hash: String, to gameName: String) {
         Task {
             await ModInstallationCache.shared.addHash(hash, to: gameName)
         }
     }
-
+    
     func removeModHash(_ hash: String, from gameName: String) {
         Task {
             await ModInstallationCache.shared.removeHash(hash, from: gameName)
         }
     }
-
+    
     func getAllModsInstalled(for gameName: String) async -> Set<String> {
         await ModInstallationCache.shared.getAllModsInstalled(for: gameName)
     }
-
+    
     func clearModCache(for gameName: String) async {
         await ModInstallationCache.shared.removeGame(gameName: gameName)
     }

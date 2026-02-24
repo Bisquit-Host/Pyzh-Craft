@@ -13,7 +13,7 @@ final class SaveInfoManager: ObservableObject {
         let version: String?
         let seed: Int64?
     }
-
+    
     // MARK: - Published Properties
     let gameName: String
     @Published private(set) var worlds: [WorldInfo] = []
@@ -22,73 +22,73 @@ final class SaveInfoManager: ObservableObject {
     @Published private(set) var litematicaFiles: [LitematicaInfo] = []
     @Published private(set) var logs: [LogInfo] = []
     @Published private(set) var isLoading = true
-
+    
     // Loading status of various types
     @Published private(set) var isLoadingWorlds = false
     @Published private(set) var isLoadingScreenshots = false
     @Published private(set) var isLoadingServers = false
     @Published private(set) var isLoadingLitematica = false
     @Published private(set) var isLoadingLogs = false
-
+    
     // Whether each type exists (whether the directory or resource exists)
     @Published private(set) var hasWorldsType = false
     @Published private(set) var hasScreenshotsType = false
     @Published private(set) var hasServersType = false
     @Published private(set) var hasLitematicaType = false
     @Published private(set) var hasLogsType = false
-
+    
     // MARK: - Private Properties
     private var loadTask: Task<Void, Never>?
-
+    
     // MARK: - Initialization
     init(gameName: String) {
         self.gameName = gameName
     }
-
+    
     deinit {
         loadTask?.cancel()
     }
-
+    
     // MARK: - Paths
     /// Get the game archive directory (read from the profile directory)
     private var savesDirectory: URL? {
         let savesPath = AppPaths.profileDirectory(gameName: gameName)
             .appendingPathComponent(AppConstants.DirectoryNames.saves, isDirectory: true)
-
+        
         // If the directory does not exist, return nil (skip)
         guard FileManager.default.fileExists(atPath: savesPath.path) else {
             return nil
         }
-
+        
         return savesPath
     }
-
+    
     /// Get the game screenshot directory (read from the profile directory)
     private var screenshotsDirectory: URL? {
         let screenshotsPath = AppPaths.profileDirectory(gameName: gameName)
             .appendingPathComponent(AppConstants.DirectoryNames.screenshots, isDirectory: true)
-
+        
         // If the directory does not exist, return nil (skip)
         guard FileManager.default.fileExists(atPath: screenshotsPath.path) else {
             return nil
         }
-
+        
         return screenshotsPath
     }
-
+    
     /// Get the game log directory (read from the profile directory)
     private var logsDirectory: URL? {
         let logsPath = AppPaths.profileDirectory(gameName: gameName)
             .appendingPathComponent(AppConstants.DirectoryNames.logs, isDirectory: true)
-
+        
         // If the directory does not exist, return nil (skip)
         guard FileManager.default.fileExists(atPath: logsPath.path) else {
             return nil
         }
-
+        
         return logsPath
     }
-
+    
     // MARK: - Public Methods
     func loadData() async {
         loadTask?.cancel()
@@ -96,12 +96,12 @@ final class SaveInfoManager: ObservableObject {
             await fetchData()
         }
     }
-
+    
     func clearCache() {
         loadTask?.cancel()
         resetData()
     }
-
+    
     // MARK: - Private Methods
     /// Check whether each type exists (executed in the background to avoid the main thread FileManager)
     private func checkTypesAvailability() async {
@@ -114,7 +114,7 @@ final class SaveInfoManager: ObservableObject {
             let logsPath = profileDir.appendingPathComponent(AppConstants.DirectoryNames.logs, isDirectory: true)
             let serversDatURL = profileDir.appendingPathComponent("servers.dat")
             let schematicsDir = AppPaths.schematicsDirectory(gameName: name)
-
+            
             // Check if the world directory exists and contains a world subdirectory
             var hasWorlds = false
             if fm.fileExists(atPath: savesPath.path) {
@@ -133,7 +133,7 @@ final class SaveInfoManager: ObservableObject {
                     hasWorlds = false
                 }
             }
-
+            
             // Check whether the screenshot directory exists and contains image files
             var hasScreenshots = false
             if fm.fileExists(atPath: screenshotsPath.path) {
@@ -153,7 +153,7 @@ final class SaveInfoManager: ObservableObject {
                     hasScreenshots = false
                 }
             }
-
+            
             // Check if the Litematica directory exists and contains .litematic files
             var hasLitematicaFiles = false
             if fm.fileExists(atPath: schematicsDir.path) {
@@ -172,7 +172,7 @@ final class SaveInfoManager: ObservableObject {
                     hasLitematicaFiles = false
                 }
             }
-
+            
             // Check if the log directory exists and contains .log files
             var hasLogs = false
             if fm.fileExists(atPath: logsPath.path) {
@@ -191,7 +191,7 @@ final class SaveInfoManager: ObservableObject {
                     hasLogs = false
                 }
             }
-
+            
             return (
                 hasWorlds,
                 hasScreenshots,
@@ -206,12 +206,12 @@ final class SaveInfoManager: ObservableObject {
         hasLitematicaType = litematica
         hasLogsType = logs
     }
-
+    
     private func fetchData() async {
         await checkTypesAvailability()
-
+        
         isLoading = true
-
+        
         await withTaskGroup(of: Void.self) { group in
             // Only load existing types
             if hasWorldsType {
@@ -219,41 +219,41 @@ final class SaveInfoManager: ObservableObject {
                     await self?.loadWorlds()
                 }
             }
-
+            
             if hasScreenshotsType {
                 group.addTask { [weak self] in
                     await self?.loadScreenshots()
                 }
             }
-
+            
             if hasServersType {
                 group.addTask { [weak self] in
                     await self?.loadServers()
                 }
             }
-
+            
             if hasLitematicaType {
                 group.addTask { [weak self] in
                     await self?.loadLitematicaFiles()
                 }
             }
-
+            
             if hasLogsType {
                 group.addTask { [weak self] in
                     await self?.loadLogs()
                 }
             }
         }
-
+        
         isLoading = false
     }
-
+    
     // MARK: - Helper (Worlds)
     /// Load world information (directory and file I/O are performed in the background)
     private func loadWorlds() async {
         isLoadingWorlds = true
         defer { isLoadingWorlds = false }
-
+        
         guard savesDirectory != nil else {
             worlds = []
             return
@@ -264,12 +264,12 @@ final class SaveInfoManager: ObservableObject {
         }.value
         worlds = result
     }
-
+    
     /// Load screenshot information (directory and file I/O are performed in the background)
     private func loadScreenshots() async {
         isLoadingScreenshots = true
         defer { isLoadingScreenshots = false }
-
+        
         guard screenshotsDirectory != nil else {
             screenshots = []
             return
@@ -280,12 +280,12 @@ final class SaveInfoManager: ObservableObject {
         }.value
         screenshots = result
     }
-
+    
     /// Load server address information (only read from servers.dat)
     private func loadServers() async {
         isLoadingServers = true
         defer { isLoadingServers = false }
-
+        
         do {
             servers = try await ServerAddressService.shared.loadServerAddresses(for: gameName)
         } catch {
@@ -294,12 +294,12 @@ final class SaveInfoManager: ObservableObject {
             servers = []
         }
     }
-
+    
     /// Load Litematica projection file information
     private func loadLitematicaFiles() async {
         isLoadingLitematica = true
         defer { isLoadingLitematica = false }
-
+        
         do {
             litematicaFiles = try await LitematicaService.shared.loadLitematicaFiles(for: gameName)
         } catch {
@@ -308,12 +308,12 @@ final class SaveInfoManager: ObservableObject {
             litematicaFiles = []
         }
     }
-
+    
     /// Load log file information (directory and file I/O are performed in the background)
     private func loadLogs() async {
         isLoadingLogs = true
         defer { isLoadingLogs = false }
-
+        
         guard logsDirectory != nil else {
             logs = []
             return
@@ -324,7 +324,7 @@ final class SaveInfoManager: ObservableObject {
         }.value
         logs = result
     }
-
+    
     private func resetData() {
         worlds.removeAll(keepingCapacity: false)
         screenshots.removeAll(keepingCapacity: false)
@@ -332,14 +332,14 @@ final class SaveInfoManager: ObservableObject {
         litematicaFiles.removeAll(keepingCapacity: false)
         logs.removeAll(keepingCapacity: false)
         isLoading = false
-
+        
         // Reset the loading status of each type
         isLoadingWorlds = false
         isLoadingScreenshots = false
         isLoadingServers = false
         isLoadingLitematica = false
         isLoadingLogs = false
-
+        
         // Reset type existence status
         hasWorldsType = false
         hasScreenshotsType = false
@@ -347,7 +347,7 @@ final class SaveInfoManager: ObservableObject {
         hasLitematicaType = false
         hasLogsType = false
     }
-
+    
     // MARK: - Background loading static methods (avoid main thread FileManager / Data(contentsOf:))
     nonisolated private static func loadWorldsFromDirectory(gameName: String) -> [WorldInfo] {
         let savesPath = AppPaths.profileDirectory(gameName: gameName)
@@ -386,7 +386,7 @@ final class SaveInfoManager: ObservableObject {
                         // LastPlayed is the millisecond timestamp
                         lastPlayed = Date(timeIntervalSince1970: TimeInterval(ts) / 1000.0)
                     }
-
+                    
                     // Use readInt64 uniformly, compatible with the numerical types of old versions and 26+ new version archives
                     let gameMode: String? = {
                         if let v = WorldNBTMapper.readInt64(dataTag["GameType"]) {
@@ -394,7 +394,7 @@ final class SaveInfoManager: ObservableObject {
                         }
                         return nil
                     }()
-
+                    
                     let difficulty: String? = {
                         if let v = WorldNBTMapper.readInt64(dataTag["Difficulty"]) {
                             return WorldNBTMapper.mapDifficulty(Int(v))
@@ -406,7 +406,7 @@ final class SaveInfoManager: ObservableObject {
                         }
                         return nil
                     }()
-
+                    
                     let version: String? = (dataTag["Version"] as? [String: Any])?["Name"] as? String
                     // Extreme mode/Whether cheating is allowed (the field location is different in different versions)
                     let hardcore: Bool = {
@@ -416,10 +416,10 @@ final class SaveInfoManager: ObservableObject {
                         return WorldNBTMapper.readBoolFlag(dataTag["hardcore"])
                     }()
                     let cheats: Bool = WorldNBTMapper.readBoolFlag(dataTag["allowCommands"])
-
+                    
                     // There are differences in the seed field between the old and new versions: the old version uses RandomSeed for level.dat, and the new version splits it into world_gen_settings.dat
                     let seed: Int64? = WorldNBTMapper.readSeed(from: dataTag, worldPath: worldPath)
-
+                    
                     loadedWorlds.append(
                         WorldInfo(
                             name: worldName,
@@ -445,7 +445,7 @@ final class SaveInfoManager: ObservableObject {
             return []
         }
     }
-
+    
     nonisolated private static func loadScreenshotsFromDirectory(gameName: String) -> [ScreenshotInfo] {
         let screenshotsPath = AppPaths.profileDirectory(gameName: gameName)
             .appendingPathComponent(AppConstants.DirectoryNames.screenshots, isDirectory: true)
@@ -474,7 +474,7 @@ final class SaveInfoManager: ObservableObject {
             return []
         }
     }
-
+    
     nonisolated private static func loadLogsFromDirectory(gameName: String) -> [LogInfo] {
         let logsPath = AppPaths.profileDirectory(gameName: gameName)
             .appendingPathComponent(AppConstants.DirectoryNames.logs, isDirectory: true)

@@ -4,7 +4,7 @@ import CommonCrypto
 enum DownloadManager {
     enum ResourceType: String {
         case mod, datapack, shader, resourcepack
-
+        
         var folderName: String {
             switch self {
             case .mod: AppConstants.DirectoryNames.mods
@@ -13,7 +13,7 @@ enum DownloadManager {
             case .resourcepack: AppConstants.DirectoryNames.resourcepacks
             }
         }
-
+        
         init?(from string: String) {
             // Optimization: Use caseInsensitiveCompare to avoid creating temporary lowercase strings
             let lowercased = string.lowercased()
@@ -26,7 +26,7 @@ enum DownloadManager {
             }
         }
     }
-
+    
     /// Download resource file
     /// - Parameters:
     ///   - game: game information
@@ -42,7 +42,7 @@ enum DownloadManager {
                 level: .notification
             )
         }
-
+        
         guard let type = ResourceType(from: resourceType) else {
             throw GlobalError(
                 type: .resource,
@@ -50,7 +50,7 @@ enum DownloadManager {
                 level: .notification
             )
         }
-
+        
         let resourceDir: URL? = {
             switch type {
             case .mod:
@@ -73,25 +73,25 @@ enum DownloadManager {
                 return AppPaths.resourcepacksDirectory(gameName: game.gameName)
             }
         }()
-
+        
         guard let resourceDirUnwrapped = resourceDir else {
             throw GlobalError.resource(
                 i18nKey: "Directory Not Found",
                 level: .notification
             )
         }
-
+        
         let destURL = resourceDirUnwrapped.appendingPathComponent(url.lastPathComponent)
         // Optimization: Pass the created URL directly to avoid repeated creation in downloadFile
         return try await downloadFile(url: url, destinationURL: destURL, expectedSha1: expectedSha1)
     }
-
+    
     // Constant string to avoid repeated creation
     private static let githubPrefix = "https://github.com/"
     private static let rawGithubPrefix = "https://raw.githubusercontent.com/"
     private static let githubHost = "github.com"
     private static let rawGithubHost = "raw.githubusercontent.com"
-
+    
     /// Universally download files to the specified path (without splicing any directory structure)
     /// - Parameters:
     ///   - urlString: download address (string form)
@@ -116,7 +116,7 @@ enum DownloadManager {
         }
         return try await downloadFile(url: url, destinationURL: destinationURL, expectedSha1: expectedSha1)
     }
-
+    
     /// Universal download file to specified path (internal method, accepts URL object)
     /// - Parameters:
     ///   - url: download address (URL object)
@@ -141,16 +141,16 @@ enum DownloadManager {
                 let absoluteString = url.absoluteString
                 needsProxy = absoluteString.hasPrefix(githubPrefix) || absoluteString.hasPrefix(rawGithubPrefix)
             }
-
+            
             if needsProxy {
                 return URLConfig.applyGitProxyIfNeeded(url)
             } else {
                 return url
             }
         }
-
+        
         let fileManager = FileManager.default
-
+        
         do {
             try fileManager.createDirectory(at: destinationURL.deletingLastPathComponent(), withIntermediateDirectories: true)
         } catch {
@@ -159,10 +159,10 @@ enum DownloadManager {
                 level: .notification
             )
         }
-
+        
         // Check if SHA1 verification is required
         let shouldCheckSha1 = (expectedSha1?.isEmpty == false)
-
+        
         // if the file already exists
         let destinationPath = destinationURL.path
         if fileManager.fileExists(atPath: destinationPath) {
@@ -184,7 +184,7 @@ enum DownloadManager {
                 return destinationURL
             }
         }
-
+        
         // Download files to a temporary location (asynchronous operation outside autoreleasepool)
         do {
             let (tempFileURL, response) = try await URLSession.shared.download(from: finalURL)
@@ -192,7 +192,7 @@ enum DownloadManager {
                 // Make sure temporary files are cleaned up
                 try? fileManager.removeItem(at: tempFileURL)
             }
-
+            
             // Optimization: Check status codes directly and reduce intermediate variables
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 throw GlobalError.download(
@@ -200,7 +200,7 @@ enum DownloadManager {
                     level: .notification
                 )
             }
-
+            
             // SHA1 verification (optimized: use autoreleasepool)
             if shouldCheckSha1, let expectedSha1 = expectedSha1 {
                 try autoreleasepool {
@@ -213,7 +213,7 @@ enum DownloadManager {
                     }
                 }
             }
-
+            
             // Move atomically to final position
             if fileManager.fileExists(atPath: destinationURL.path) {
                 // Try to replace directly
@@ -221,7 +221,7 @@ enum DownloadManager {
             } else {
                 try fileManager.moveItem(at: tempFileURL, to: destinationURL)
             }
-
+            
             return destinationURL
         } catch {
             // Convert error to GlobalError
@@ -240,7 +240,7 @@ enum DownloadManager {
             }
         }
     }
-
+    
     /// Calculate the SHA1 hash of a file
     /// - Parameter url: file path
     /// - Returns: SHA1 hash string

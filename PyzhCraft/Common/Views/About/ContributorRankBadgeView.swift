@@ -3,15 +3,15 @@ import SwiftUI
 /// Contributor ranking badge view
 struct ContributorRankBadgeView: View {
     let rank: Int
-
+    
     var body: some View {
         let (color, icon) = rankBadgeStyle(rank)
-
+        
         return ZStack {
             Circle()
                 .fill(color.gradient)
                 .frame(width: 20, height: 20)
-
+            
             if let icon = icon {
                 Image(systemName: icon)
                     .font(.system(size: 8, weight: .bold))
@@ -23,7 +23,7 @@ struct ContributorRankBadgeView: View {
             }
         }
     }
-
+    
     private func rankBadgeStyle(_ rank: Int) -> (Color, String?) {
         switch rank {
         case 1:

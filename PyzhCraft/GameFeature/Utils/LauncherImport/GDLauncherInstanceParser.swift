@@ -3,15 +3,15 @@ import Foundation
 /// GDLauncher instance parser
 struct GDLauncherInstanceParser: LauncherInstanceParser {
     let launcherType: ImportLauncherType = .gdLauncher
-
+    
     func isValidInstance(at instancePath: URL) -> Bool {
         let instanceJsonPath = instancePath.appendingPathComponent("instance.json")
         let fileManager = FileManager.default
-
+        
         guard fileManager.fileExists(atPath: instanceJsonPath.path) else {
             return false
         }
-
+        
         // Verify that the JSON file can be parsed
         do {
             _ = try parseInstanceJson(at: instanceJsonPath)
@@ -20,26 +20,26 @@ struct GDLauncherInstanceParser: LauncherInstanceParser {
             return false
         }
     }
-
+    
     func parseInstance(at instancePath: URL, basePath: URL) throws -> ImportInstanceInfo? {
         let instanceJsonPath = instancePath.appendingPathComponent("instance.json")
         let instanceConfig = try parseInstanceJson(at: instanceJsonPath)
-
+        
         // Extract game version
         let gameVersion = instanceConfig.gameConfiguration.version.release
-
+        
         // Extract Mod loader information (take the first modloader)
         var modLoader = "vanilla"
         var modLoaderVersion = ""
-
+        
         if let firstModLoader = instanceConfig.gameConfiguration.version.modloaders.first {
             modLoader = firstModLoader.type.lowercased()
             modLoaderVersion = firstModLoader.version
         }
-
+        
         // Extract game name
         let gameName = instanceConfig.name
-
+        
         // Extract icon path
         var gameIconPath: URL?
         if let iconName = instanceConfig.icon {
@@ -49,7 +49,7 @@ struct GDLauncherInstanceParser: LauncherInstanceParser {
                 gameIconPath = iconPath
             }
         }
-
+        
         return ImportInstanceInfo(
             gameName: gameName,
             gameVersion: gameVersion,
@@ -61,9 +61,9 @@ struct GDLauncherInstanceParser: LauncherInstanceParser {
             launcherType: launcherType
         )
     }
-
+    
     // MARK: - Private Methods
-
+    
     /// Parse instance.json file
     private func parseInstanceJson(at path: URL) throws -> GDLauncherInstanceConfig {
         let data = try Data(contentsOf: path)
@@ -76,7 +76,7 @@ private struct GDLauncherInstanceConfig: Codable {
     let name: String
     let icon: String?
     let gameConfiguration: GDLauncherGameConfiguration
-
+    
     enum CodingKeys: String, CodingKey {
         case name, icon, gameConfiguration = "game_configuration"
     }

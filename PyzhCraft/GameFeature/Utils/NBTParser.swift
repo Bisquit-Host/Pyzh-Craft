@@ -23,16 +23,16 @@ class NBTParser {
     private var data: Data
     private var offset: Int = 0
     private var outputData = Data()
-
+    
     init(data: Data) {
         self.data = data
     }
-
+    
     /// Create an NBT parser for writing
     private init() {
         self.data = Data()
     }
-
+    
     /// Parse NBT data (supports GZIP compression)
     /// - Returns: parsed dictionary
     /// - Throws: Parsing errors
@@ -43,7 +43,7 @@ class NBTParser {
             data = try decompressGzip(data: data)
             offset = 0
         }
-
+        
         // Read the root tag type (should be TAG_Compound)
         guard !data.isEmpty else {
             throw GlobalError(
@@ -52,7 +52,7 @@ class NBTParser {
                 level: .notification
             )
         }
-
+        
         let tagType = NBTType(rawValue: data[offset]) ?? .end
         guard tagType == .compound else {
             throw GlobalError(
@@ -61,16 +61,16 @@ class NBTParser {
                 level: .notification
             )
         }
-
+        
         offset += 1
-
+        
         // Read tag name (root tag name may be empty)
         _ = try readString()
-
+        
         // Read Compound content
         return try readCompound() as [String: Any]
     }
-
+    
     /// Read string
     private func readString() throws -> String {
         guard offset + 2 <= data.count else {
@@ -80,7 +80,7 @@ class NBTParser {
                 level: .notification
             )
         }
-
+        
         let length = Int(readShort())
         guard offset + length <= data.count else {
             throw GlobalError(
@@ -89,13 +89,13 @@ class NBTParser {
                 level: .notification
             )
         }
-
+        
         let stringData = data.subdata(in: offset..<(offset + length))
         offset += length
-
+        
         return String(data: stringData, encoding: .utf8) ?? ""
     }
-
+    
     /// Read short integer (2 bytes, big endian)
     private func readShort() -> UInt16 {
         guard offset + 2 <= data.count else { return 0 }
@@ -103,7 +103,7 @@ class NBTParser {
         offset += 2
         return value
     }
-
+    
     /// Read integer (4 bytes, big endian)
     private func readInt() -> Int32 {
         guard offset + 4 <= data.count else { return 0 }
@@ -114,7 +114,7 @@ class NBTParser {
         offset += 4
         return value
     }
-
+    
     /// Read bytes
     private func readByte() -> UInt8 {
         guard offset < data.count else { return 0 }
@@ -122,27 +122,27 @@ class NBTParser {
         offset += 1
         return value
     }
-
+    
     /// Read the Compound tag
     private func readCompound() throws -> [String: Any] {
         var result: [String: Any] = [:]
-
+        
         while offset < data.count {
             let tagType = NBTType(rawValue: data[offset]) ?? .end
             offset += 1
-
+            
             if tagType == .end {
                 break
             }
-
+            
             let name = try readString()
             let value = try readTagValue(type: tagType)
             result[name] = value
         }
-
+        
         return result
     }
-
+    
     /// Read tag value
     private func readTagValue(type: NBTType) throws -> Any {
         switch type {
@@ -194,7 +194,7 @@ class NBTParser {
             )
         }
     }
-
+    
     /// Read long integer (8 bytes, big endian)
     private func readLong() -> Int64 {
         guard offset + 8 <= data.count else { return 0 }
@@ -205,21 +205,21 @@ class NBTParser {
         offset += 8
         return value
     }
-
+    
     /// Read floating point number (4 bytes, IEEE 754)
     private func readFloat() -> Float {
         guard offset + 4 <= data.count else { return 0 }
         let intValue = readInt()
         return Float(bitPattern: UInt32(bitPattern: intValue))
     }
-
+    
     /// Read double-precision floating point number (8 bytes, IEEE 754)
     private func readDouble() -> Double {
         guard offset + 8 <= data.count else { return 0 }
         let longValue = readLong()
         return Double(bitPattern: UInt64(bitPattern: longValue))
     }
-
+    
     /// Read list
     private func readList() throws -> [Any] {
         guard offset < data.count else {
@@ -229,21 +229,21 @@ class NBTParser {
                 level: .notification
             )
         }
-
+        
         let listType = NBTType(rawValue: data[offset]) ?? .end
         offset += 1
-
+        
         let length = Int(readInt())
         var result: [Any] = []
-
+        
         for _ in 0..<length {
             let value = try readTagValue(type: listType)
             result.append(value)
         }
-
+        
         return result
     }
-
+    
     /// Decompress GZIP data (using system commands)
     private func decompressGzip(data: Data) throws -> Data {
         guard !data.isEmpty else {
@@ -253,30 +253,30 @@ class NBTParser {
                 level: .notification
             )
         }
-
+        
         // Create temporary files to store compressed data
         let tempDir = FileManager.default.temporaryDirectory
         let tempInputFile = tempDir.appendingPathComponent(UUID().uuidString + ".gz")
         let tempOutputFile = tempDir.appendingPathComponent(UUID().uuidString)
-
+        
         defer {
             // Clean temporary files
             try? FileManager.default.removeItem(at: tempInputFile)
             try? FileManager.default.removeItem(at: tempOutputFile)
         }
-
+        
         // Write compressed data to temporary file
         try data.write(to: tempInputFile)
-
+        
         // Unzip using the system gzip command
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/gunzip")
         process.arguments = ["-c", tempInputFile.path]
-
+        
         let pipe = Pipe()
         process.standardOutput = pipe
         process.standardError = Pipe()
-
+        
         do {
             try process.run()
         } catch {
@@ -286,12 +286,12 @@ class NBTParser {
                 level: .notification
             )
         }
-
+        
         // Read decompressed data
         let fileHandle = pipe.fileHandleForReading
         let decompressedData = fileHandle.readDataToEndOfFile()
         process.waitUntilExit()
-
+        
         guard process.terminationStatus == 0 else {
             throw GlobalError(
                 type: .fileSystem,
@@ -299,7 +299,7 @@ class NBTParser {
                 level: .notification
             )
         }
-
+        
         guard !decompressedData.isEmpty else {
             throw GlobalError(
                 type: .fileSystem,
@@ -307,12 +307,12 @@ class NBTParser {
                 level: .notification
             )
         }
-
+        
         return decompressedData
     }
-
+    
     // MARK: - NBT writing method
-
+    
     /// Encode dictionary data into NBT format (supports GZIP compression)
     /// - Parameters:
     ///   - data: dictionary data to be encoded
@@ -322,35 +322,35 @@ class NBTParser {
     static func encode(_ data: [String: Any], compress: Bool = true) throws -> Data {
         let parser = NBTParser()
         parser.outputData = Data()
-
+        
         // Write root tag type (TAG_Compound)
         parser.writeByte(NBTType.compound.rawValue)
-
+        
         // Write root tag name (empty string)
         parser.writeString("")
-
+        
         // Write Compound content
         try parser.writeCompound(data)
-
+        
         // If compression is enabled, use gzip compression
         if compress {
             return try parser.compressGzip(data: parser.outputData)
         }
-
+        
         return parser.outputData
     }
-
+    
     /// write bytes
     private func writeByte(_ value: UInt8) {
         outputData.append(value)
     }
-
+    
     /// Write short integer (2 bytes, big endian)
     private func writeShort(_ value: UInt16) {
         outputData.append(UInt8((value >> 8) & 0xFF))
         outputData.append(UInt8(value & 0xFF))
     }
-
+    
     /// Write integer (4 bytes, big endian)
     private func writeInt(_ value: Int32) {
         outputData.append(UInt8((value >> 24) & 0xFF))
@@ -358,7 +358,7 @@ class NBTParser {
         outputData.append(UInt8((value >> 8) & 0xFF))
         outputData.append(UInt8(value & 0xFF))
     }
-
+    
     /// Write long (8 bytes, big endian)
     private func writeLong(_ value: Int64) {
         outputData.append(UInt8((value >> 56) & 0xFF))
@@ -370,7 +370,7 @@ class NBTParser {
         outputData.append(UInt8((value >> 8) & 0xFF))
         outputData.append(UInt8(value & 0xFF))
     }
-
+    
     /// write string
     private func writeString(_ value: String) {
         let stringData = value.data(using: .utf8) ?? Data()
@@ -378,7 +378,7 @@ class NBTParser {
         writeShort(length)
         outputData.append(stringData)
     }
-
+    
     /// Write floating point number (4 bytes, IEEE 754)
     private func writeFloat(_ value: Float) {
         let bitPattern = value.bitPattern
@@ -386,7 +386,7 @@ class NBTParser {
         let intValue = Int32(bitPattern: bitPattern)
         writeInt(intValue)
     }
-
+    
     /// Write a double-precision floating point number (8 bytes, IEEE 754)
     private func writeDouble(_ value: Double) {
         let bitPattern = value.bitPattern
@@ -394,7 +394,7 @@ class NBTParser {
         let longValue = Int64(bitPattern: bitPattern)
         writeLong(longValue)
     }
-
+    
     /// Write Compound tag
     private func writeCompound(_ compound: [String: Any]) throws {
         for (name, value) in compound {
@@ -406,7 +406,7 @@ class NBTParser {
         // Write End tag
         writeByte(NBTType.end.rawValue)
     }
-
+    
     /// Write tag value
     private func writeTagValue(type: NBTType, value: Any) throws {
         switch type {
@@ -541,7 +541,7 @@ class NBTParser {
             break
         }
     }
-
+    
     /// write list
     private func writeList(_ value: Any) throws {
         guard let array = value as? [Any], !array.isEmpty else {
@@ -550,17 +550,17 @@ class NBTParser {
             writeInt(0)
             return
         }
-
+        
         // Infer list element type
         let elementType = try inferNBTType(from: array[0])
         writeByte(elementType.rawValue)
         writeInt(Int32(array.count))
-
+        
         for item in array {
             try writeTagValue(type: elementType, value: item)
         }
     }
-
+    
     /// Infer NBT type from value
     private func inferNBTType(from value: Any) throws -> NBTType {
         switch value {
@@ -593,7 +593,7 @@ class NBTParser {
             return .string
         }
     }
-
+    
     /// Compress GZIP data (using system commands)
     private func compressGzip(data: Data) throws -> Data {
         guard !data.isEmpty else {
@@ -603,30 +603,30 @@ class NBTParser {
                 level: .notification
             )
         }
-
+        
         // Create temporary files to store uncompressed data
         let tempDir = FileManager.default.temporaryDirectory
         let tempInputFile = tempDir.appendingPathComponent(UUID().uuidString)
         let tempOutputFile = tempDir.appendingPathComponent(UUID().uuidString + ".gz")
-
+        
         defer {
             // Clean temporary files
             try? FileManager.default.removeItem(at: tempInputFile)
             try? FileManager.default.removeItem(at: tempOutputFile)
         }
-
+        
         // Write uncompressed data to temporary file
         try data.write(to: tempInputFile)
-
+        
         // Compress using the system gzip command
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/gzip")
         process.arguments = ["-c", tempInputFile.path]
-
+        
         let pipe = Pipe()
         process.standardOutput = pipe
         process.standardError = Pipe()
-
+        
         do {
             try process.run()
         } catch {
@@ -636,12 +636,12 @@ class NBTParser {
                 level: .notification
             )
         }
-
+        
         // Read compressed data
         let fileHandle = pipe.fileHandleForReading
         let compressedData = fileHandle.readDataToEndOfFile()
         process.waitUntilExit()
-
+        
         guard process.terminationStatus == 0 else {
             throw GlobalError(
                 type: .fileSystem,
@@ -649,7 +649,7 @@ class NBTParser {
                 level: .notification
             )
         }
-
+        
         guard !compressedData.isEmpty else {
             throw GlobalError(
                 type: .fileSystem,
@@ -657,7 +657,7 @@ class NBTParser {
                 level: .notification
             )
         }
-
+        
         return compressedData
     }
 }

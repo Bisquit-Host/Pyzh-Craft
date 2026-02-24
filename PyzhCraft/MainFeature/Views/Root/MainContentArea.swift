@@ -4,14 +4,14 @@ import SwiftUI
 /// When filterState/detailState changes, only this view and its subtree are rebuilt, MainView is not rebuilt
 struct MainContentArea: View {
     let interfaceLayoutStyle: InterfaceLayoutStyle
-
+    
     @State private var columnVisibility = NavigationSplitViewVisibility.all
     @StateObject private var filterState = ResourceFilterState()
     @StateObject private var detailState = ResourceDetailState()
     @EnvironmentObject var gameRepository: GameRepository
     @Environment(\.appLogger)
     private var logger
-
+    
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             SidebarView()
@@ -40,22 +40,22 @@ struct MainContentArea: View {
             scanAllGamesModsDirectory()
         }
     }
-
+    
     @ViewBuilder private var middleColumnDetailView: some View {
         DetailView()
             .toolbar {
                 DetailToolbarView()
             }
     }
-
+    
     @ViewBuilder private var middleColumnContentView: some View {
         ContentView()
             .toolbar { ContentToolbarView() }
             .navigationSplitViewColumnWidth(min: 235, ideal: 235, max: 280)
     }
-
+    
     // MARK: - Sidebar Item Change Handlers
-
+    
     private func handleSidebarItemChange(
         from oldValue: SidebarItem,
         to newValue: SidebarItem
@@ -71,7 +71,7 @@ struct MainContentArea: View {
             resetToResourceDefaults()
         }
     }
-
+    
     private func handleResourceToGameTransition(gameId: String) {
         if detailState.gameId != nil, detailState.selectedProjectId == nil {
             filterState.clearSearchText()
@@ -80,7 +80,7 @@ struct MainContentArea: View {
             filterState.clearSearchText()
             detailState.gameType = false
         }
-
+        
         let game = gameRepository.getGame(by: gameId)
         if let loader = game?.modLoader.lowercased() {
             let currentType = detailState.gameResourcesType.lowercased()
@@ -94,19 +94,19 @@ struct MainContentArea: View {
                 }
             }
         }
-
+        
         detailState.gameId = gameId
         detailState.selectedProjectId = nil
         SelectedGameManager.shared.setSelectedGame(gameId)
     }
-
+    
     private func handleGameToGameTransition(
         from oldId: String,
         to newId: String
     ) {
         filterState.clearSearchText()
         detailState.gameType = false
-
+        
         let game = gameRepository.getGame(by: newId)
         if let loader = game?.modLoader.lowercased() {
             detailState.gameResourcesType = (loader == "vanilla") ? "datapack" : "mod"
@@ -114,7 +114,7 @@ struct MainContentArea: View {
         detailState.gameId = newId
         SelectedGameManager.shared.setSelectedGame(newId)
     }
-
+    
     private func resetToResourceDefaults() {
         if case .resource = detailState.selectedItem {
             if detailState.gameId == nil {
@@ -122,17 +122,17 @@ struct MainContentArea: View {
             }
         }
         SelectedGameManager.shared.clearSelection()
-
+        
         if !detailState.gameType && detailState.selectedProjectId == nil {
             detailState.gameType = true
         }
         filterState.sortIndex = AppConstants.modrinthIndex
-
+        
         if case .resource(let resourceType) = detailState.selectedItem {
             detailState.gameResourcesType = resourceType.rawValue
         }
         filterState.clearFiltersAndPagination()
-
+        
         if detailState.gameId == nil && detailState.selectedProjectId != nil {
             detailState.selectedProjectId = nil
         }
@@ -147,7 +147,7 @@ struct MainContentArea: View {
             detailState.selectedProjectId = nil
         }
     }
-
+    
     private func scanAllGamesModsDirectory() {
         Task {
             let games = gameRepository.games

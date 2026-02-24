@@ -10,7 +10,7 @@ enum CurseForgeToModrinthAdapter {
         // date parser
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-
+        
         // parse date
         var publishedDate = Date()
         var updatedDate = Date()
@@ -20,7 +20,7 @@ enum CurseForgeToModrinthAdapter {
         if let dateModified = cf.dateModified {
             updatedDate = dateFormatter.date(from: dateModified) ?? Date()
         }
-
+        
         // Extract game version (from latestFilesIndexes)
         var gameVersions: [String] = []
         var allVersionsFromIndexes: [String] = []
@@ -28,7 +28,7 @@ enum CurseForgeToModrinthAdapter {
             allVersionsFromIndexes = Array(Set(indexes.map { $0.gameVersion }))
             gameVersions = CommonUtil.sortMinecraftVersions(allVersionsFromIndexes)
         }
-
+        
         // Extract loader (from latestFilesIndexes)
         var loaders: [String] = []
         if let indexes = cf.latestFilesIndexes {
@@ -48,7 +48,7 @@ enum CurseForgeToModrinthAdapter {
                 }
             }
         }
-
+        
         // Handle loaders based on project type
         let projectType = cf.projectType
         if loaders.isEmpty {
@@ -60,28 +60,28 @@ enum CurseForgeToModrinthAdapter {
                 loaders = ["datapack"]
             }
         }
-
+        
         // Extract a list of version IDs
         var versions: [String] = []
         if let files = cf.latestFiles {
             versions = files.map { String($0.id) }
         }
-
+        
         // Extract classification
         let categories = cf.categories.map { $0.slug }
-
+        
         // Extract icon URL
         let iconUrl = cf.logo?.url ?? cf.logo?.thumbnailUrl
-
+        
         // Create a license (CurseForge usually does not have explicit license information)
         let license = License(id: "unknown", name: "Unknown", url: nil)
-
+        
         // Use the "cf-" prefix to identify the CurseForge project to avoid confusion with the Modrinth project
         // Use the HTML content returned by the description interface as the body, and extract the plain text as the description
         // If description is empty, fall back to summary
         let bodyContent = description.isEmpty ? (cf.body ?? cf.summary) : description
         let descriptionText = description.isEmpty ? cf.summary : extractPlainText(from: description)
-
+        
         return ModrinthProjectDetail(
             slug: cf.slug ?? "curseforge-\(cf.id)",
             title: cf.name,
@@ -111,7 +111,7 @@ enum CurseForgeToModrinthAdapter {
             fileName: nil
         )
     }
-
+    
     /// Convert CurseForge file details to Modrinth version format
     /// - Parameters:
     ///   - cfFile: CurseForge file details
@@ -121,19 +121,19 @@ enum CurseForgeToModrinthAdapter {
         // date parser
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-
+        
         // Parse release date
         var publishedDate = Date()
         if !cfFile.fileDate.isEmpty {
             publishedDate = dateFormatter.date(from: cfFile.fileDate) ?? Date()
         }
-
+        
         // Version types are uniformly regarded as release to avoid unnecessary distinctions
         let versionType = "release"
-
+        
         // File level does not infer loader, keep empty array
         let loaders: [String] = []
-
+        
         // Conversion dependencies
         var dependencies: [ModrinthVersionDependency] = []
         if let cfDeps = cfFile.dependencies {
@@ -150,7 +150,7 @@ enum CurseForgeToModrinthAdapter {
                 default:
                     dependencyType = "optional"
                 }
-
+                
                 return ModrinthVersionDependency(
                     projectId: String(dep.modId),
                     versionId: nil,
@@ -158,13 +158,13 @@ enum CurseForgeToModrinthAdapter {
                 )
             }
         }
-
+        
         // Convert files
         let downloadUrl = cfFile.downloadUrl ?? URLConfig.API.CurseForge.fallbackDownloadUrl(
             fileId: cfFile.id,
             fileName: cfFile.fileName
         ).absoluteString
-
+        
         var files: [ModrinthVersionFile] = []
         // Extract hash value: use hashes array first, if not, use hash field
         let hashes: ModrinthVersionFileHashes
@@ -190,7 +190,7 @@ enum CurseForgeToModrinthAdapter {
             // If neither, use empty hash
             hashes = ModrinthVersionFileHashes(sha512: "", sha1: "")
         }
-
+        
         files.append(
             ModrinthVersionFile(
                 hashes: hashes,
@@ -201,10 +201,10 @@ enum CurseForgeToModrinthAdapter {
                 fileType: nil
             )
         )
-
+        
         // Make sure the projectId is prefixed with "cf-" if it isn't already
         let normalizedProjectId = projectId.hasPrefix("cf-") ? projectId : "cf-\(projectId.replacingOccurrences(of: "cf-", with: ""))"
-
+        
         return ModrinthProjectDetailVersion(
             gameVersions: cfFile.gameVersions,
             loaders: loaders,
@@ -225,7 +225,7 @@ enum CurseForgeToModrinthAdapter {
             dependencies: dependencies
         )
     }
-
+    
     /// Convert CurseForge search results to Modrinth format
     /// - Parameter cfResult: CurseForge search results
     /// - Returns: Search results in Modrinth format
@@ -245,13 +245,13 @@ enum CurseForgeToModrinthAdapter {
             } else {
                 projectType = "mod"
             }
-
+            
             // Extract a list of version IDs
             var versions: [String] = []
             if let files = cfMod.latestFiles {
                 versions = files.map { String($0.id) }
             }
-
+            
             // Use the "cf-" prefix to identify the CurseForge project to avoid confusion with the Modrinth project
             return ModrinthProject(
                 projectId: "cf-\(cfMod.id)",
@@ -272,12 +272,12 @@ enum CurseForgeToModrinthAdapter {
                 fileName: nil
             )
         }
-
+        
         let pagination = cfResult.pagination
         let offset = pagination?.index ?? 0
         let limit = pagination?.pageSize ?? 20
         let totalHits = pagination?.totalCount ?? hits.count
-
+        
         return ModrinthResult(
             hits: hits,
             offset: offset,
@@ -285,7 +285,7 @@ enum CurseForgeToModrinthAdapter {
             totalHits: totalHits
         )
     }
-
+    
     /// Extract plain text from HTML content as a short description
     /// - Parameter html: HTML string
     /// - Returns: Extracted plain text (limited length)
@@ -295,7 +295,7 @@ enum CurseForgeToModrinthAdapter {
             .replacingOccurrences(of: "<[^>]+>", with: " ", options: .regularExpression)
             .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
             .trimmingCharacters(in: .whitespacesAndNewlines)
-
+        
         // Limit the length to avoid overly long descriptions
         if text.count > 200 {
             return String(text.prefix(200)) + "..."

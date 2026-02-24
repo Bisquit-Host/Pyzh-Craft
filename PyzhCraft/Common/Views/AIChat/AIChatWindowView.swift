@@ -12,16 +12,16 @@ struct AIChatWindowView: View {
     @FocusState private var isInputFocused: Bool
     @State private var selectedGameId: String?
     @State private var showFilePicker = false
-
+    
     // Cache avatar view to avoid reloading every time message is updated
     @State private var cachedAIAvatar: AnyView?
     @State private var cachedUserAvatar: AnyView?
-
+    
     // MARK: - Constants
     private enum Constants {
         static let avatarSize: CGFloat = 32
     }
-
+    
     var body: some View {
         VStack(spacing: 0) {
             // Message list
@@ -32,9 +32,9 @@ struct AIChatWindowView: View {
                 cachedUserAvatar: cachedUserAvatar,
                 aiAvatarURL: aiSettings.aiAvatarURL
             )
-
+            
             Divider()
-
+            
             // Preview of attachments to be sent
             if !attachmentManager.pendingAttachments.isEmpty {
                 AIChatAttachmentPreviewView(
@@ -43,7 +43,7 @@ struct AIChatWindowView: View {
                     attachmentManager.removeAttachment(at: index)
                 }
             }
-
+            
             // input area
             AIChatInputAreaView(
                 inputText: $inputText,
@@ -98,36 +98,36 @@ struct AIChatWindowView: View {
             clearAllData()
         }
     }
-
+    
     // MARK: - Computed Properties
-
+    
     private var selectedGame: GameVersionInfo? {
         guard let selectedGameId = selectedGameId else { return nil }
         return gameRepository.games.first { $0.id == selectedGameId }
     }
-
+    
     private var canSend: Bool {
         !chatState.isSending && (!inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !attachmentManager.pendingAttachments.isEmpty)
     }
-
+    
     // MARK: - Methods
-
+    
     /// Initialize avatar cache
     private func initializeAvatarCache() {
         // Initialize AI avatar (using URL from settings)
         updateAIAvatarCache()
-
+        
         // Initialize user avatar
         updateUserAvatarCache()
     }
-
+    
     /// Update AI avatar cache
     private func updateAIAvatarCache() {
         cachedAIAvatar = AnyView(
             AIAvatarView(size: Constants.avatarSize, url: aiSettings.aiAvatarURL)
         )
     }
-
+    
     /// Update user avatar cache
     private func updateUserAvatarCache() {
         if let player = playerListViewModel.currentPlayer {
@@ -146,13 +146,13 @@ struct AIChatWindowView: View {
             )
         }
     }
-
+    
     /// Clear avatar cache
     private func clearAvatarCache() {
         cachedAIAvatar = nil
         cachedUserAvatar = nil
     }
-
+    
     /// Clear all data on the page
     private func clearAllData() {
         // Clear avatar cache
@@ -165,20 +165,20 @@ struct AIChatWindowView: View {
         // Clear selected games
         selectedGameId = nil
     }
-
+    
     private func sendMessage() {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard canSend else { return }
-
+        
         let attachments = attachmentManager.pendingAttachments
         inputText = ""
         attachmentManager.clearAll()
-
+        
         Task {
             await AIChatManager.shared.sendMessage(text, attachments: attachments, chatState: chatState)
         }
     }
-
+    
     /// Process file selection results
     private func handleFileSelection(_ result: Result<[URL], Error>) {
         switch result {

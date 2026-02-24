@@ -6,33 +6,33 @@ import Foundation
 struct Player: Identifiable, Equatable {
     /// User basic information
     var profile: UserProfile
-
+    
     /// Authentication credentials (available only for online accounts)
     var credential: AuthCredential?
-
+    
     // MARK: - Computed Properties
-
+    
     /// Player unique identifier
     var id: String { profile.id }
-
+    
     /// player name
     var name: String { profile.name }
-
+    
     /// Player avatar path or URL
     var avatarName: String { profile.avatar }
-
+    
     /// last play time
     var lastPlayed: Date {
         get { profile.lastPlayed }
         set { profile.lastPlayed = newValue }
     }
-
+    
     /// Is it the currently selected player?
     var isCurrent: Bool {
         get { profile.isCurrent }
         set { profile.isCurrent = newValue }
     }
-
+    
     /// Is it an online account?
     /// Prioritizes authentication credentials; when credentials have not yet been loaded from the Keychain,
     /// Approximately determine whether it is a genuine account by whether the avatar is a remote URL (http/https)
@@ -42,19 +42,19 @@ struct Player: Identifiable, Equatable {
         }
         return profile.avatar.hasPrefix("http://") || profile.avatar.hasPrefix("https://")
     }
-
+    
     /// access token
     var authAccessToken: String { credential?.accessToken ?? "" }
-
+    
     /// refresh token
     var authRefreshToken: String { credential?.refreshToken ?? "" }
-
+    
     /// Xbox User ID
     var authXuid: String { credential?.xuid ?? "" }
-
+    
     /// Token expiration time
     var expiresAt: Date? { credential?.expiresAt }
-
+    
     /// Initialize player information
     /// - Parameters:
     ///   - profile: basic user information
@@ -63,7 +63,7 @@ struct Player: Identifiable, Equatable {
         self.profile = profile
         self.credential = credential
     }
-
+    
     /// Initialize player information (convenience method)
     /// - Parameters:
     ///   - name: player name
@@ -88,7 +88,7 @@ struct Player: Identifiable, Equatable {
         } else {
             playerId = try PlayerUtils.generateOfflineUUID(for: name)
         }
-
+        
         // Confirm avatar
         let avatarName: String
         if let providedAvatar = avatar {
@@ -100,7 +100,7 @@ struct Player: Identifiable, Equatable {
             // Use default avatar for offline accounts
             avatarName = PlayerUtils.avatarName(for: playerId) ?? "steve"
         }
-
+        
         let profile = UserProfile(
             id: playerId,
             name: name,
@@ -108,7 +108,7 @@ struct Player: Identifiable, Equatable {
             lastPlayed: lastPlayed,
             isCurrent: isCurrent
         )
-
+        
         self.profile = profile
         self.credential = credential
     }

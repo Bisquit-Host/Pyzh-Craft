@@ -4,18 +4,18 @@ import Sparkle
 /// Sparkle update service
 class SparkleUpdateService: NSObject, ObservableObject, SPUUpdaterDelegate {
     static let shared = SparkleUpdateService()
-
+    
     private var updater: SPUUpdater?
-
+    
     @Published var isCheckingForUpdates = false
     @Published var updateAvailable = false
     @Published var currentVersion = ""
     @Published var latestVersion = ""
     @Published var updateDescription = ""
-
+    
     // Configuration options
     private let startupCheckDelay: TimeInterval = 2.0 // Delay check time after startup (seconds)
-
+    
     override private init() {
         super.init()
         currentVersion = Bundle.main.appVersion
@@ -25,19 +25,19 @@ class SparkleUpdateService: NSObject, ObservableObject, SPUUpdaterDelegate {
             self?.checkForUpdatesSilently()
         }
     }
-
+    
     /// Set up the Sparkle updater
     private func setupUpdater() {
         let hostBundle = Bundle.main
         let driver = SPUStandardUserDriver(hostBundle: hostBundle, delegate: nil)
-
+        
         do {
             updater = SPUUpdater(hostBundle: hostBundle, applicationBundle: hostBundle, userDriver: driver, delegate: self)
-
+            
             setSparkleLanguage()
-
+            
             try updater?.start()
-
+            
             // Add these configurations to ensure the "Prompt me later" feature works properly
             updater?.automaticallyChecksForUpdates = true
             updater?.updateCheckInterval = 24 * 60 * 60 // Check once every 24 hours
@@ -46,35 +46,35 @@ class SparkleUpdateService: NSObject, ObservableObject, SPUUpdaterDelegate {
             Logger.shared.error("Failed to initialize updater: \(error.localizedDescription)")
         }
     }
-
+    
     /// Set Sparkle’s language
     private func setSparkleLanguage() {
         let selectedLanguage = LanguageManager.shared.selectedLanguage
         UserDefaults.standard.set([selectedLanguage], forKey: "AppleLanguages")
     }
-
+    
     /// Public method: Set Sparkle’s language
     /// - Parameter language: language code
     func updateSparkleLanguage(_ language: String) {
         UserDefaults.standard.set([language], forKey: "AppleLanguages")
     }
-
+    
     // MARK: - SPUUpdaterDelegate
-
+    
     /// Provide feed URL - select the corresponding appcast file based on system architecture
     func feedURLString(for updater: SPUUpdater) -> String? {
         let architecture = getSystemArchitecture()
         let appcastURL = URLConfig.API.GitHub.appcastURL(architecture: architecture)
         return appcastURL.absoluteString
     }
-
+    
     /// Update check completed (no updates)
     func updaterDidNotFindUpdate(_ updater: SPUUpdater) {
         Logger.shared.info("Check completed, no new version found")
         isCheckingForUpdates = false
         updateAvailable = false
     }
-
+    
     /// Update check completed (there are updates)
     func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) {
         Logger.shared.info("New version found: \(item.versionString)")
@@ -83,37 +83,37 @@ class SparkleUpdateService: NSObject, ObservableObject, SPUUpdaterDelegate {
         latestVersion = item.versionString
         updateDescription = item.itemDescription ?? ""
     }
-
+    
     /// Update check failed
     func updater(_ updater: SPUUpdater, didFailToCheckForUpdatesWithError error: Error) {
         Logger.shared.error("Update check failed: \(error.localizedDescription)")
         isCheckingForUpdates = false
         updateAvailable = false
     }
-
+    
     /// Update session starts
     func updater(_ updater: SPUUpdater, willInstallUpdate item: SUAppcastItem) {
         Logger.shared.info("Start installing updates: \(item.versionString)")
         isCheckingForUpdates = false
     }
-
+    
     /// Update session ends
     func updater(_ updater: SPUUpdater, didFinishLoading appcast: SUAppcast) {
         Logger.shared.info("Update list loading completed")
     }
-
+    
     /// Get system architecture
     private func getSystemArchitecture() -> String {
         Architecture.current.sparkleArch
     }
-
+    
     // MARK: - Public Methods
-
+    
     /// Get the current system architecture
     func getCurrentArchitecture() -> String {
         getSystemArchitecture()
     }
-
+    
     /// Check updater status
     func getUpdaterStatus() -> (isInitialized: Bool, sessionInProgress: Bool, isChecking: Bool) {
         guard let updater = updater else {
@@ -121,42 +121,42 @@ class SparkleUpdateService: NSObject, ObservableObject, SPUUpdaterDelegate {
         }
         return (isInitialized: true, sessionInProgress: updater.sessionInProgress, isChecking: isCheckingForUpdates)
     }
-
+    
     /// Manually check for updates (shows Sparkle standard UI)
     func checkForUpdatesWithUI() {
         guard let updater = updater else {
             Logger.shared.error("Updater has not been initialized yet")
             return
         }
-
+        
         // Check if an update session is in progress
         if updater.sessionInProgress {
             Logger.shared.warning("Update session in progress, skipping repeated update checks")
             return
         }
-
+        
         // Set check status
         isCheckingForUpdates = true
-
+        
         updater.checkForUpdates()
     }
-
+    
     /// Check for updates silently (no UI)
     func checkForUpdatesSilently() {
         guard let updater = updater else {
             Logger.shared.error("Updater has not been initialized yet")
             return
         }
-
+        
         // Check if an update session is in progress
         if updater.sessionInProgress {
             Logger.shared.warning("Update session in progress, skipping repeated update checks")
             return
         }
-
+        
         // Set check status
         isCheckingForUpdates = true
-
+        
         updater.checkForUpdatesInBackground()
     }
 }
@@ -165,7 +165,7 @@ class SparkleUpdateService: NSObject, ObservableObject, SPUUpdaterDelegate {
 extension SparkleUpdateService {
     func updater(_ updater: SPUUpdater, willDownloadUpdate item: SUAppcastItem, with request: NSMutableURLRequest) {
         guard let originalURL = request.url else { return }
-
+        
         let proxiedURL = URLConfig.applyGitProxyIfNeeded(originalURL)
         if proxiedURL != originalURL {
             Logger.shared.info("Update download link has been rewritten: \(originalURL.absoluteString) -> \(proxiedURL.absoluteString)")

@@ -13,25 +13,25 @@ public struct ContentToolbarView: ToolbarContent {
     @State private var isLoadingSkin = false
     @State private var preloadedSkinInfo: PlayerSkinService.PublicSkinInfo?
     @State private var preloadedProfile: MinecraftProfileResponse?
-
+    
     // MARK: - Startup Info State
     @State private var showStartupInfo = false
     @State private var hasAnnouncement = false
     @State private var announcementData: AnnouncementData?
     @State private var hasCheckedAnnouncement = false
-
+    
     // MARK: - Computed Properties
-
+    
     /// Current player (calculated attribute to avoid repeated access)
     private var currentPlayer: Player? {
         playerListViewModel.currentPlayer
     }
-
+    
     /// Whether it is an online account (calculated attribute)
     private var isCurrentPlayerOnline: Bool {
         currentPlayer?.isOnlineAccount ?? false
     }
-
+    
     public var body: some ToolbarContent {
         ToolbarItemGroup(placement: .primaryAction) {
             Button {
@@ -85,7 +85,7 @@ public struct ContentToolbarView: ToolbarContent {
                     onCancel: {
                         playerName = ""
                         isPlayerNameValid = false
-
+                        
                         showingAddPlayerSheet = false
                         // Delay cleaning of authentication status to avoid affecting the dialog box closing animation
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
@@ -97,17 +97,17 @@ public struct ContentToolbarView: ToolbarContent {
                         Logger.shared.debug("Genuine login successful, user: \(profile.name)")
                         // Add genuine players
                         _ = playerListViewModel.addOnlinePlayer(profile: profile)
-
+                        
                         // Set up a genuine account and add a mark
                         PremiumAccountFlagManager.shared.setPremiumAccountAdded()
-
+                        
                         showingAddPlayerSheet = false
                         // Delay cleaning of authentication status so users can see the success status
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                             MinecraftAuthService.shared.clearAuthenticationData()
                         }
                     },
-
+                    
                     playerListViewModel: playerListViewModel
                 )
             }
@@ -118,7 +118,7 @@ public struct ContentToolbarView: ToolbarContent {
                     dismissButton: .default(Text("Confirm"))
                 )
             }
-
+            
             // Skin management button - only displayed on online accounts
             if isCurrentPlayerOnline {
                 Button {
@@ -147,7 +147,7 @@ public struct ContentToolbarView: ToolbarContent {
                     }
                 }
             }
-
+            
             // Launch information button - only shown if there is an announcement
             if hasAnnouncement, let announcement = announcementData {
                 Button {
@@ -163,24 +163,24 @@ public struct ContentToolbarView: ToolbarContent {
             }
         }
     }
-
+    
     // MARK: - Private Methods
-
+    
     /// Open the skin manager (load data first, then display the sheet)
     private func openSkinManager() async {
         guard let player = currentPlayer else { return }
-
+        
         await MainActor.run {
             isLoadingSkin = true
         }
-
+        
         // If it is an offline account, use it directly without refreshing the token
         guard player.isOnlineAccount else {
             // Preload skin data
             async let skinInfo = PlayerSkinService.fetchCurrentPlayerSkinFromServices(player: player)
             async let profile = PlayerSkinService.fetchPlayerProfile(player: player)
             let (loadedSkinInfo, loadedProfile) = await (skinInfo, profile)
-
+            
             await MainActor.run {
                 preloadedSkinInfo = loadedSkinInfo
                 preloadedProfile = loadedProfile
@@ -189,9 +189,9 @@ public struct ContentToolbarView: ToolbarContent {
             }
             return
         }
-
+        
         Logger.shared.info("Verify player \(player.name)'s Token before opening the skin manager")
-
+        
         // Load authentication credentials on demand from Keychain (only for current player, avoid reading all accounts at once)
         var playerWithCredential = player
         if playerWithCredential.credential == nil {
@@ -200,13 +200,13 @@ public struct ContentToolbarView: ToolbarContent {
                 playerWithCredential.credential = credential
             }
         }
-
+        
         // Verify using the loaded/updated player object and try to refresh the token
         let authService = MinecraftAuthService.shared
         let validatedPlayer: Player
         do {
             validatedPlayer = try await authService.validateAndRefreshPlayerTokenThrowing(for: playerWithCredential)
-
+            
             // If the Token is updated, it needs to be saved to PlayerDataManager
             if validatedPlayer.authAccessToken != player.authAccessToken {
                 Logger.shared.info("Player \(player.name)'s Token has been updated and saved to the data manager")
@@ -227,12 +227,12 @@ public struct ContentToolbarView: ToolbarContent {
             // When token refresh fails, still try to use the original token to load skin data
             validatedPlayer = playerWithCredential
         }
-
+        
         // Preload skin data (using authenticated player object)
         async let skinInfo = PlayerSkinService.fetchCurrentPlayerSkinFromServices(player: validatedPlayer)
         async let profile = PlayerSkinService.fetchPlayerProfile(player: validatedPlayer)
         let (loadedSkinInfo, loadedProfile) = await (skinInfo, profile)
-
+        
         await MainActor.run {
             preloadedSkinInfo = loadedSkinInfo
             preloadedProfile = loadedProfile
@@ -240,21 +240,21 @@ public struct ContentToolbarView: ToolbarContent {
             showEditSkin = true
         }
     }
-
+    
     /// Check if there is an announcement
     /// Only called once at startup
     private func checkAnnouncement() async {
         let version = Bundle.main.appVersion
         let language = LanguageManager.shared.selectedLanguage.isEmpty
-            ? LanguageManager.getDefaultLanguage()
-            : LanguageManager.shared.selectedLanguage
-
+        ? LanguageManager.getDefaultLanguage()
+        : LanguageManager.shared.selectedLanguage
+        
         do {
             let data = try await GitHubService.shared.fetchAnnouncement(
                 version: version,
                 language: language
             )
-
+            
             await MainActor.run {
                 if let data = data {
                     self.hasAnnouncement = true

@@ -5,13 +5,13 @@ enum AppConstants {
     static let modLoaders = ["vanilla", "fabric", "forge", "neoforge", "quilt"]
     static let modrinthIndex = "relevance"
     static let modrinthIndexFileName = "modrinth.index.json"
-
+    
     // Use Microsoft first-party launcher client ID so Azure app registration is not required
     // From prismarine-auth Titles.MinecraftJava
     static let minecraftClientId = "00000000402b5328"
     // Scope used by live.com device code flow for Xbox authentication
     static let minecraftScope = "service::user.auth.xboxlive.com::MBI_SSL"
-
+    
     // CurseForge API Key - will be replaced when building
     static let curseForgeAPIKey: String? = {
         let encrypted = "$(CURSEFORGE_API_KEY)"
@@ -19,9 +19,9 @@ enum AppConstants {
     }()
     // Cache resource type
     static let cacheResourceTypes = [DirectoryNames.libraries, DirectoryNames.natives, DirectoryNames.assets, DirectoryNames.versions]
-
+    
     static let logTag = Bundle.main.identifier + ".logger"
-
+    
     // MARK: - Directory Names
     /// Minecraft directory name constants
     enum DirectoryNames {
@@ -44,7 +44,7 @@ enum AppConstants {
         static let cache = "cache"
         static let data = "data"
     }
-
+    
     // MARK: - File Extensions
     /// File extension constants (without dot)
     enum FileExtensions {
@@ -54,14 +54,14 @@ enum AppConstants {
         static let json = "json"
         static let log = "log"
     }
-
+    
     // MARK: - Environment Types
     /// environment type constant
     enum EnvironmentTypes {
         static let client = "client"
         static let server = "server"
     }
-
+    
     // MARK: - Processor Placeholders
     /// Processor placeholder constant
     enum ProcessorPlaceholders {
@@ -71,13 +71,13 @@ enum AppConstants {
         static let libraryDir = "{LIBRARY_DIR}"
         static let workingDir = "{WORKING_DIR}"
     }
-
+    
     // MARK: - UserDefaults Keys
     /// UserDefaults storage key constants
     enum UserDefaultsKeys {
         static let savedGames = "savedGames"
     }
-
+    
     // MARK: - Database Tables
     /// Database table name constants
     enum DatabaseTables {
@@ -91,11 +91,11 @@ extension Bundle {
     var appVersion: String {
         infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
     }
-
+    
     var buildNumber: String {
         infoDictionary?["CFBundleVersion"] as? String ?? "beta"
     }
-
+    
     var fullVersion: String {
         "\(appVersion)-\(buildNumber)"
     }
@@ -105,11 +105,11 @@ extension Bundle {
     var copyright: String {
         infoDictionary?["NSHumanReadableCopyright"] as? String ?? "Copyright © 2025 \(appName)"
     }
-
+    
     var identifier: String {
         infoDictionary?["CFBundleIdentifier"] as? String ?? "com.su.code.PyzhCraft"
     }
-
+    
     var appCategory: String {
         infoDictionary?["LSApplicationCategoryType"] as? String ?? "public.app-category.games"
     }

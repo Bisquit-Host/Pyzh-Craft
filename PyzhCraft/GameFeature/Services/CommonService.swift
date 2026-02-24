@@ -1,7 +1,7 @@
 import Foundation
 
 enum CommonService {
-
+    
     /// Get the adapted version list (silent version) according to the mod loader
     /// - Parameter loader: loader type
     /// - Returns: List of compatible versions
@@ -23,7 +23,7 @@ enum CommonService {
             return []
         }
     }
-
+    
     /// Get the adapted version list according to mod loader (throws exception version)
     /// - Parameter loader: loader type
     /// - Returns: List of compatible versions
@@ -36,7 +36,7 @@ enum CommonService {
         switch loader.lowercased() {
         case "fabric", "forge", "quilt", "neoforge":
             let loaderType =
-                loader.lowercased() == "neoforge" ? "neo" : loader.lowercased()
+            loader.lowercased() == "neoforge" ? "neo" : loader.lowercased()
             let loaderVersions = try await fetchAllVersionThrowing(
                 type: loaderType
             )
@@ -73,7 +73,7 @@ enum CommonService {
         }
         return result
     }
-
+    
     // Common classpath generation for forge and neoforge
     static func generateClasspath(
         from loader: ModrinthLoader,
@@ -92,7 +92,7 @@ enum CommonService {
         }
         return jarPaths.joined(separator: ":")
     }
-
+    
     /// Get all loader versions (silent versions) for the specified loader type and Minecraft version
     /// - Parameters:
     ///   - type: loader type
@@ -114,7 +114,7 @@ enum CommonService {
             return nil
         }
     }
-
+    
     /// Get all loader versions for the specified loader type and Minecraft version (throws exception version)
     /// - Parameters:
     ///   - type: loader type
@@ -126,10 +126,10 @@ enum CommonService {
         minecraftVersion: String
     ) async throws -> LoaderVersion {
         let manifest = try await fetchAllVersionThrowing(type: type)
-
+        
         // Filter out results with id equal to current minecraftVersion
         let filteredVersions = manifest.filter { $0.id == minecraftVersion }
-
+        
         // Returns the first matching version, or throws an error if there is none
         guard let firstVersion = filteredVersions.first else {
             throw GlobalError.resource(
@@ -137,10 +137,10 @@ enum CommonService {
                 level: .notification
             )
         }
-
+        
         return firstVersion
     }
-
+    
     /// Get all versions of the specified loader type (throws exception version)
     /// - Parameter type: loader type
     /// - Returns: version list
@@ -152,14 +152,14 @@ enum CommonService {
         let manifestURL = URLConfig.API.Modrinth.loaderManifest(loader: type)
         // Use a unified API client
         let manifestData = try await APIClient.get(url: manifestURL)
-
+        
         // parse version list
         do {
             let result = try JSONDecoder().decode(
                 ModrinthLoaderVersion.self,
                 from: manifestData
             )
-
+            
             // For NeoForge, there is no stable filtering as all versions are beta
             if type == "neo" {
                 return result.gameVersions
@@ -174,7 +174,7 @@ enum CommonService {
             )
         }
     }
-
+    
     /// Convert Maven coordinates to file paths (classifier and @ symbols are supported)
     /// - Parameter coordinate: Maven coordinates
     /// - Returns: file path
@@ -183,19 +183,19 @@ enum CommonService {
         if coordinate.contains("@") {
             return convertMavenCoordinateWithAtSymbol(coordinate)
         }
-
+        
         // For standard Maven coordinates, use the CommonService method
         if let relativePath = mavenCoordinateToRelativePath(coordinate) {
-
+            
             return AppPaths.librariesDirectory.appendingPathComponent(
                 relativePath
             ).path
         }
-
+        
         // If the CommonService method fails, possibly in a non-standard format, the original value is returned
         return coordinate
     }
-
+    
     /// Common logic for parsing Maven coordinates containing @ symbols
     /// - Parameter coordinate: Maven coordinates
     /// - Returns: relative path
@@ -204,15 +204,15 @@ enum CommonService {
     ) -> String {
         let parts = coordinate.components(separatedBy: ":")
         guard parts.count >= 3 else { return coordinate }
-
+        
         let groupId = parts[0]
         let artifactId = parts[1]
-
+        
         // Process version part, may contain @ symbol
         var version = parts[2]
         var classifier = ""
         var classifierName = ""
-
+        
         // Check if version part contains @ symbol
         if version.contains("@") {
             let versionParts = version.components(separatedBy: "@")
@@ -236,18 +236,18 @@ enum CommonService {
                 classifier = classifierPart
             }
         }
-
+        
         // Build file name
         // Use string interpolation to construct file names to avoid multiple string concatenations
         let classifierSuffix = classifierName.isEmpty ? "" : "-\(classifierName)"
         let extensionSuffix = classifier.isEmpty ? ".\(AppConstants.FileExtensions.jar)" : ".\(classifier)"
         let fileName = "\(artifactId)-\(version)\(classifierSuffix)\(extensionSuffix)"
-
+        
         // Build relative path
         let groupPath = groupId.replacingOccurrences(of: ".", with: "/")
         return "\(groupPath)/\(artifactId)/\(version)/\(fileName)"
     }
-
+    
     /// Handle Maven coordinates containing @ symbol
     /// - Parameter coordinate: Maven coordinates
     /// - Returns: file path
@@ -255,7 +255,7 @@ enum CommonService {
         _ coordinate: String
     ) -> String {
         let relativePath = parseMavenCoordinateWithAtSymbol(coordinate)
-
+        
         return AppPaths.librariesDirectory.appendingPathComponent(relativePath)
             .path
     }
@@ -265,13 +265,13 @@ enum CommonService {
     static func mavenCoordinateToRelativePath(_ coordinate: String) -> String? {
         let parts = coordinate.split(separator: ":")
         guard parts.count >= 3 else { return nil }
-
+        
         let group = parts[0].replacingOccurrences(of: ".", with: "/")
         let artifact = parts[1]
-
+        
         var version = ""
         var classifier: String?
-
+        
         if parts.count == 3 {
             // group:artifact:version
             version = String(parts[2])
@@ -284,15 +284,15 @@ enum CommonService {
             version = String(parts[4])
             classifier = String(parts[3])
         }
-
+        
         if let classifier = classifier {
             return
-                "\(group)/\(artifact)/\(version)/\(artifact)-\(version)-\(classifier).jar"
+            "\(group)/\(artifact)/\(version)/\(artifact)-\(version)-\(classifier).jar"
         } else {
             return "\(group)/\(artifact)/\(version)/\(artifact)-\(version).jar"
         }
     }
-
+    
     /// Maven coordinates to relative path (supports special formats)
     /// - Parameter coordinate: Maven coordinate
     /// - Returns: relative path
@@ -301,16 +301,16 @@ enum CommonService {
         if coordinate.contains("@") {
             return convertMavenCoordinateWithAtSymbolForURL(coordinate)
         }
-
+        
         // For standard Maven coordinates, use the standard method
         if let relativePath = mavenCoordinateToRelativePath(coordinate) {
             return relativePath
         }
-
+        
         // If the standard method fails, possibly in a non-standard format, the original value is returned
         return coordinate
     }
-
+    
     /// Handling Maven coordinates containing @ symbols (for URL building)
     /// - Parameter coordinate: Maven coordinates
     /// - Returns: relative path
@@ -319,7 +319,7 @@ enum CommonService {
     ) -> String {
         parseMavenCoordinateWithAtSymbol(coordinate)
     }
-
+    
     /// Maven coordinates to FabricMC Maven warehouse URL
     /// - Parameter coordinate: Maven coordinate
     /// - Returns: Maven repository URL
@@ -328,7 +328,7 @@ enum CommonService {
         let relativePath = mavenCoordinateToRelativePathForURL(lib.name)
         return lib.url?.appendingPathComponent(relativePath)
     }
-
+    
     /// Maven coordinates to default Minecraft library URL
     /// - Parameter coordinate: Maven coordinate
     /// - Returns: Minecraft library URL
@@ -337,7 +337,7 @@ enum CommonService {
         let relativePath = mavenCoordinateToRelativePathForURL(coordinate)
         return url.appendingPathComponent(relativePath)
     }
-
+    
     /// Maven coordinates to default path (for local file paths)
     /// - Parameter coordinate: Maven coordinate
     /// - Returns: local file path
@@ -361,7 +361,7 @@ enum CommonService {
         }
         return jarPaths.joined(separator: ":")
     }
-
+    
     /// Handling game version placeholders in ModrinthLoader
     /// - Parameters:
     ///   - loader: raw loader data
@@ -372,17 +372,17 @@ enum CommonService {
         gameVersion: String
     ) -> ModrinthLoader {
         var processedLoader = loader
-
+        
         // Handling URL placeholders in libraries
         processedLoader.libraries = loader.libraries.map { library in
             var processedLibrary = library
-
+            
             // Handle placeholders in name field
             processedLibrary.name = library.name.replacingOccurrences(
                 of: "${modrinth.gameVersion}",
                 with: gameVersion
             )
-
+            
             return processedLibrary
         }
         return processedLoader

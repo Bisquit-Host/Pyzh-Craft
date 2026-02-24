@@ -8,11 +8,11 @@ struct CategorySectionView: View {
     @Binding var selectedItems: [String]
     let isLoading: Bool
     var isVersionSection = false
-
+    
     // MARK: - Body
     var body: some View {
         let (visibleItems, overflowItems) = computeVisibleAndOverflowItems()
-
+        
         return GenericSectionView(
             title: title,
             items: items,
@@ -32,8 +32,8 @@ struct CategorySectionView: View {
                     ) { itemId in
                         toggleSelection(for: itemId)
                     }
-                    .frame(maxHeight: SectionViewConstants.defaultPopoverMaxHeight)
-                    .frame(width: SectionViewConstants.defaultPopoverWidth)
+                        .frame(maxHeight: SectionViewConstants.defaultPopoverMaxHeight)
+                        .frame(width: SectionViewConstants.defaultPopoverWidth)
                 )
             } : nil,
             clearAction: {
@@ -46,7 +46,7 @@ struct CategorySectionView: View {
             customOverflowItems: overflowItems
         )
     }
-
+    
     // MARK: - Helper Methods
     private func computeVisibleAndOverflowItems() -> ([FilterItem], [FilterItem]) {
         return items.computeVisibleAndOverflowItemsByRows(
@@ -54,15 +54,15 @@ struct CategorySectionView: View {
             maxWidth: SectionViewConstants.defaultMaxWidth
         ) { item in
             CGFloat(item.name.count) * SectionViewConstants.defaultEstimatedCharWidth
-                + SectionViewConstants.defaultChipPadding
+            + SectionViewConstants.defaultChipPadding
         }
     }
-
+    
     // MARK: - Actions
     private func clearSelection() {
         selectedItems.removeAll()
     }
-
+    
     private func toggleSelection(for id: String) {
         if selectedItems.contains(id) {
             selectedItems.removeAll { $0 == id }

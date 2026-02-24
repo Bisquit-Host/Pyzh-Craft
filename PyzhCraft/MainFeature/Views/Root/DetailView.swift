@@ -4,7 +4,7 @@ struct DetailView: View {
     @EnvironmentObject var filterState: ResourceFilterState
     @EnvironmentObject var detailState: ResourceDetailState
     @EnvironmentObject var gameRepository: GameRepository
-
+    
     @ViewBuilder var body: some View {
         switch detailState.selectedItem {
         case .game(let gameId):
@@ -14,7 +14,7 @@ struct DetailView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
-
+    
     @ViewBuilder
     private func gameDetailView(gameId: String) -> some View {
         if let gameInfo = gameRepository.getGame(by: gameId) {
@@ -36,7 +36,7 @@ struct DetailView: View {
             )
         }
     }
-
+    
     @ViewBuilder
     private func resourceDetailView(type: ResourceType) -> some View {
         if detailState.selectedProjectId != nil {

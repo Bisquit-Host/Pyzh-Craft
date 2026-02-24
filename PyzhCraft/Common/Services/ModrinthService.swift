@@ -7,11 +7,11 @@ private extension JSONDecoder {
         self.dateDecodingStrategy = .custom { decoder in
             let container = try decoder.singleValueContainer()
             let dateStr = try container.decode(String.self)
-
+            
             let formatter = ISO8601DateFormatter()
             formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
             formatter.timeZone = TimeZone(secondsFromGMT: 0)
-
+            
             if let date = formatter.date(from: dateStr) {
                 return date
             }
@@ -24,41 +24,41 @@ private extension JSONDecoder {
 }
 
 enum ModrinthService {
-
+    
     static func fetchVersionInfo(from version: String) async throws -> MinecraftVersionManifest {
         let cacheKey = "version_info_\(version)"
-
+        
         // Check cache
         if let cachedVersionInfo: MinecraftVersionManifest = AppCacheManager.shared.get(namespace: "version_info", key: cacheKey, as: MinecraftVersionManifest.self) {
             return cachedVersionInfo
         }
-
+        
         // Get version information from API
         let versionInfo = try await fetchVersionInfoThrowing(from: version)
-
+        
         // Cache the entire version information
         AppCacheManager.shared.setSilently(
             namespace: "version_info",
             key: cacheKey,
             value: versionInfo
         )
-
+        
         return versionInfo
     }
-
+    
     static func queryVersionTime(from version: String) async -> String {
         let cacheKey = "version_time_\(version)"
-
+        
         // Check cache
         if let cachedTime: String = AppCacheManager.shared.get(namespace: "version_time", key: cacheKey, as: String.self) {
             return cachedTime
         }
-
+        
         do {
             // Use cached version information to avoid repeated API calls
             let versionInfo = try await Self.fetchVersionInfo(from: version)
             let formattedTime = CommonUtil.formatRelativeTime(versionInfo.releaseTime)
-
+            
             // Cache version time information
             AppCacheManager.shared.setSilently(
                 namespace: "version_time",
@@ -70,13 +70,13 @@ enum ModrinthService {
             return ""
         }
     }
-
+    
     static func fetchVersionInfoThrowing(from version: String) async throws -> MinecraftVersionManifest {
         let url = URLConfig.API.Modrinth.versionInfo(version: version)
-
+        
         // Use a unified API client
         let data = try await APIClient.get(url: url)
-
+        
         do {
             let decoder = JSONDecoder()
             decoder.configureForModrinth()
@@ -94,7 +94,7 @@ enum ModrinthService {
             }
         }
     }
-
+    
     static func searchProjects(
         facets: [[String]]? = nil,
         offset: Int = 0,
@@ -116,7 +116,7 @@ enum ModrinthService {
             return ModrinthResult(hits: [], offset: offset, limit: limit, totalHits: 0)
         }
     }
-
+    
     static func searchProjectsThrowing(
         facets: [[String]]? = nil,
         index: String,
@@ -166,14 +166,14 @@ enum ModrinthService {
         }
         // Use a unified API client
         let data = try await APIClient.get(url: url)
-
+        
         let decoder = JSONDecoder()
         decoder.configureForModrinth()
         let result = try decoder.decode(ModrinthResult.self, from: data)
-
+        
         return result
     }
-
+    
     static func fetchLoaders() async -> [Loader] {
         do {
             return try await fetchLoadersThrowing()
@@ -184,14 +184,14 @@ enum ModrinthService {
             return []
         }
     }
-
+    
     static func fetchLoadersThrowing() async throws -> [Loader] {
         // Use a unified API client
         let data = try await APIClient.get(url: URLConfig.API.Modrinth.loaderTag)
         let result = try JSONDecoder().decode([Loader].self, from: data)
         return result
     }
-
+    
     static func fetchCategories() async -> [Category] {
         do {
             return try await fetchCategoriesThrowing()
@@ -202,14 +202,14 @@ enum ModrinthService {
             return []
         }
     }
-
+    
     static func fetchCategoriesThrowing() async throws -> [Category] {
         // Use a unified API client
         let data = try await APIClient.get(url: URLConfig.API.Modrinth.categoryTag)
         let result = try JSONDecoder().decode([Category].self, from: data)
         return result
     }
-
+    
     static func fetchGameVersions(includeSnapshots: Bool = false) async -> [GameVersion] {
         do {
             return try await fetchGameVersionsThrowing(includeSnapshots: includeSnapshots)
@@ -220,7 +220,7 @@ enum ModrinthService {
             return []
         }
     }
-
+    
     static func fetchGameVersionsThrowing(
         includeSnapshots: Bool = false
     ) async throws -> [GameVersion] {
@@ -230,13 +230,13 @@ enum ModrinthService {
         // By default, only official versions are returned. If includeSnapshots is true, all versions are returned
         return includeSnapshots ? result : result.filter { $0.version_type == "release" }
     }
-
+    
     static func fetchProjectDetails(id: String) async -> ModrinthProjectDetail? {
         // Check if it is a CurseForge project (ID starts with "cf-")
         if id.hasPrefix("cf-") {
             return await CurseForgeService.fetchProjectDetailsAsModrinth(id: id)
         }
-
+        
         // Using the Modrinth service
         do {
             return try await fetchProjectDetailsThrowing(id: id)
@@ -247,38 +247,38 @@ enum ModrinthService {
             return nil
         }
     }
-
+    
     static func fetchProjectDetailsThrowing(id: String) async throws -> ModrinthProjectDetail {
         // Check if it is a CurseForge project (ID starts with "cf-")
         if id.hasPrefix("cf-") {
             return try await CurseForgeService.fetchProjectDetailsAsModrinthThrowing(id: id)
         }
-
+        
         // Using the Modrinth service
         let url = URLConfig.API.Modrinth.project(id: id)
-
+        
         // Use a unified API client
         let data = try await APIClient.get(url: url)
-
+        
         let decoder = JSONDecoder()
         decoder.configureForModrinth()
         var detail = try decoder.decode(ModrinthProjectDetail.self, from: data)
-
+        
         // Only keep the official version of the game with pure numbers (including dots), such as 1.20.4
         let releaseGameVersions = detail.gameVersions.filter {
             $0.range(of: #"^\d+(\.\d+)*$"#, options: .regularExpression) != nil
         }
         detail.gameVersions = CommonUtil.sortMinecraftVersions(releaseGameVersions)
-
+        
         return detail
     }
-
+    
     static func fetchProjectVersions(id: String) async -> [ModrinthProjectDetailVersion] {
         // Check if it is a CurseForge project (ID starts with "cf-")
         if id.hasPrefix("cf-") {
             return await CurseForgeService.fetchProjectVersionsAsModrinth(id: id)
         }
-
+        
         do {
             return try await fetchProjectVersionsThrowing(id: id)
         } catch {
@@ -288,62 +288,62 @@ enum ModrinthService {
             return []
         }
     }
-
+    
     static func fetchProjectVersionsThrowing(id: String) async throws -> [ModrinthProjectDetailVersion] {
         // Check if it is a CurseForge project (ID starts with "cf-")
         if id.hasPrefix("cf-") {
             return try await CurseForgeService.fetchProjectVersionsAsModrinthThrowing(id: id)
         }
-
+        
         let url = URLConfig.API.Modrinth.version(id: id)
-
+        
         // Use a unified API client
         let data = try await APIClient.get(url: url)
-
+        
         let decoder = JSONDecoder()
         decoder.configureForModrinth()
         return try decoder.decode([ModrinthProjectDetailVersion].self, from: data)
     }
-
+    
     static func fetchProjectVersionsFilter(
-            id: String,
-            selectedVersions: [String],
-            selectedLoaders: [String],
-            type: String
-        ) async throws -> [ModrinthProjectDetailVersion] {
-            // Check if it is a CurseForge project (ID starts with "cf-")
-            if id.hasPrefix("cf-") {
-                return try await CurseForgeService.fetchProjectVersionsFilterAsModrinth(
-                    id: id,
-                    selectedVersions: selectedVersions,
-                    selectedLoaders: selectedLoaders,
-                    type: type
-                )
-            }
-
-            let versions = try await fetchProjectVersionsThrowing(id: id)
-            var loaders = selectedLoaders
-            if type == "datapack" {
-                loaders = ["datapack"]
-            } else if type == "resourcepack" {
-                loaders = ["minecraft"]
-            }
-            return versions.filter { version in
-                // Both version and loader matching must be met
-                let versionMatch = selectedVersions.isEmpty || !Set(version.gameVersions).isDisjoint(with: selectedVersions)
-
-                // For shader and resourcepack, loader matching is not checked
-                let loaderMatch: Bool
-                if type == "shader" || type == "resourcepack" {
-                    loaderMatch = true
-                } else {
-                    loaderMatch = loaders.isEmpty || !Set(version.loaders).isDisjoint(with: loaders)
-                }
-
-                return versionMatch && loaderMatch
-            }
+        id: String,
+        selectedVersions: [String],
+        selectedLoaders: [String],
+        type: String
+    ) async throws -> [ModrinthProjectDetailVersion] {
+        // Check if it is a CurseForge project (ID starts with "cf-")
+        if id.hasPrefix("cf-") {
+            return try await CurseForgeService.fetchProjectVersionsFilterAsModrinth(
+                id: id,
+                selectedVersions: selectedVersions,
+                selectedLoaders: selectedLoaders,
+                type: type
+            )
         }
-
+        
+        let versions = try await fetchProjectVersionsThrowing(id: id)
+        var loaders = selectedLoaders
+        if type == "datapack" {
+            loaders = ["datapack"]
+        } else if type == "resourcepack" {
+            loaders = ["minecraft"]
+        }
+        return versions.filter { version in
+            // Both version and loader matching must be met
+            let versionMatch = selectedVersions.isEmpty || !Set(version.gameVersions).isDisjoint(with: selectedVersions)
+            
+            // For shader and resourcepack, loader matching is not checked
+            let loaderMatch: Bool
+            if type == "shader" || type == "resourcepack" {
+                loaderMatch = true
+            } else {
+                loaderMatch = loaders.isEmpty || !Set(version.loaders).isDisjoint(with: loaders)
+            }
+            
+            return versionMatch && loaderMatch
+        }
+    }
+    
     static func fetchProjectDependencies(
         type: String,
         cachePath: URL,
@@ -366,7 +366,7 @@ enum ModrinthService {
             return ModrinthProjectDependency(projects: [])
         }
     }
-
+    
     static func fetchProjectDependenciesThrowing(
         type: String,
         cachePath: URL,
@@ -384,7 +384,7 @@ enum ModrinthService {
                 selectedLoaders: selectedLoaders
             )
         }
-
+        
         // 1. Get all filtered versions
         let versions = try await fetchProjectVersionsFilter(
             id: id,
@@ -396,26 +396,26 @@ enum ModrinthService {
         guard let firstVersion = versions.first else {
             return ModrinthProjectDependency(projects: [])
         }
-
+        
         // 2. Concurrently obtain compatible versions of all dependent projects (use batch processing to limit the number of concurrencies)
         let requiredDeps = firstVersion.dependencies.filter { $0.dependencyType == "required" && $0.projectId != nil }
         let maxConcurrentTasks = 10 // Limit the maximum number of concurrent tasks
         var allDependencyVersions: [ModrinthProjectDetailVersion] = []
-
+        
         // Process dependencies in batches, with a maximum of maxConcurrentTasks per batch
         var currentIndex = 0
         while currentIndex < requiredDeps.count {
             let endIndex = min(currentIndex + maxConcurrentTasks, requiredDeps.count)
             let batch = Array(requiredDeps[currentIndex..<endIndex])
             currentIndex = endIndex
-
+            
             let batchResults: [ModrinthProjectDetailVersion] = await withTaskGroup(of: ModrinthProjectDetailVersion?.self) { group in
                 for dep in batch {
                     guard let projectId = dep.projectId else { continue }
                     group.addTask {
                         do {
                             let depVersion: ModrinthProjectDetailVersion
-
+                            
                             if let versionId = dep.versionId {
                                 // If there is a versionId, directly obtain the specified version
                                 depVersion = try await fetchProjectVersionThrowing(id: versionId)
@@ -433,7 +433,7 @@ enum ModrinthService {
                                 }
                                 depVersion = firstDepVersion
                             }
-
+                            
                             return depVersion
                         } catch {
                             let globalError = GlobalError.from(error)
@@ -442,20 +442,20 @@ enum ModrinthService {
                         }
                     }
                 }
-
+                
                 var results: [ModrinthProjectDetailVersion] = []
                 for await result in group {
                     if let version = result {
                         results.append(version)
                     }
                 }
-
+                
                 return results
             }
-
+            
             allDependencyVersions.append(contentsOf: batchResults)
         }
-
+        
         // 3. Use hash to check whether it is installed and filter out missing dependencies
         let missingDependencyVersions = allDependencyVersions.filter { version in
             // Get the hash of the main file
@@ -465,26 +465,26 @@ enum ModrinthService {
             // Use hash to check if it is installed
             return !ModScanner.shared.isModInstalledSync(hash: primaryFile.hashes.sha1, in: cachePath)
         }
-
+        
         return ModrinthProjectDependency(projects: missingDependencyVersions)
     }
-
+    
     static func fetchProjectVersionThrowing(id: String) async throws -> ModrinthProjectDetailVersion {
         let url = URLConfig.API.Modrinth.versionId(versionId: id)
-
+        
         // Use a unified API client
         let data = try await APIClient.get(url: url)
-
+        
         let decoder = JSONDecoder()
         decoder.configureForModrinth()
         return try decoder.decode(ModrinthProjectDetailVersion.self, from: data)
     }
-
+    
     // Filter master file
     static func filterPrimaryFiles(from files: [ModrinthVersionFile]?) -> ModrinthVersionFile? {
         return files?.first { $0.primary == true }
     }
-
+    
     static func fetchModrinthDetail(by hash: String, completion: @escaping (ModrinthProjectDetail?) -> Void) {
         let url = URLConfig.API.Modrinth.versionFile(hash: hash)
         let task = URLSession.shared.dataTask(with: url) { data, _, _ in
@@ -492,15 +492,15 @@ enum ModrinthService {
                 completion(nil)
                 return
             }
-
+            
             let decoder = JSONDecoder()
             decoder.configureForModrinth()
-
+            
             guard let version = try? decoder.decode(ModrinthProjectDetailVersion.self, from: data) else {
                 completion(nil)
                 return
             }
-
+            
             Task {
                 do {
                     let detail = try await Self.fetchProjectDetailsThrowing(id: version.projectId)

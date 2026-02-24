@@ -15,14 +15,14 @@ struct MinecraftVersionManifest: Codable {
     let releaseTime: String
     let time: String
     let type: String
-
+    
     enum CodingKeys: String, CodingKey {
         case arguments, assetIndex, assets, downloads, id, javaVersion, libraries, logging, mainClass, minimumLauncherVersion, releaseTime, time, type, complianceLevel
     }
-
+    
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-
+        
         arguments = try container.decode(Arguments.self, forKey: .arguments)
         assetIndex = try container.decode(AssetIndex.self, forKey: .assetIndex)
         assets = try container.decode(String.self, forKey: .assets)
@@ -43,10 +43,10 @@ struct MinecraftVersionManifest: Codable {
 struct Arguments: Codable {
     let game: [String]?
     let jvm: [String]?
-
+    
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-
+        
         // Handle the game parameter, which may not exist
         if container.contains(.game) {
             let gameArgs = try container.decode([ArgumentValue].self, forKey: .game)
@@ -59,7 +59,7 @@ struct Arguments: Codable {
         } else {
             game = nil
         }
-
+        
         // Handle jvm parameters, which may not exist
         if container.contains(.jvm) {
             let jvmArgs = try container.decode([ArgumentValue].self, forKey: .jvm)
@@ -73,7 +73,7 @@ struct Arguments: Codable {
             jvm = nil
         }
     }
-
+    
     enum CodingKeys: String, CodingKey {
         case game, jvm
     }
@@ -137,10 +137,10 @@ struct Features: Codable {
     let is_quick_play_singleplayer: Bool
     let is_quick_play_multiplayer: Bool
     let is_quick_play_realms: Bool
-
+    
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-
+        
         // Handle both missing keys and null values
         is_demo_user = (try? container.decodeIfPresent(Bool.self, forKey: .is_demo_user)) ?? false
         has_custom_resolution = (try? container.decodeIfPresent(Bool.self, forKey: .has_custom_resolution)) ?? false
@@ -149,7 +149,7 @@ struct Features: Codable {
         is_quick_play_multiplayer = (try? container.decodeIfPresent(Bool.self, forKey: .is_quick_play_multiplayer)) ?? false
         is_quick_play_realms = (try? container.decodeIfPresent(Bool.self, forKey: .is_quick_play_realms)) ?? false
     }
-
+    
     enum CodingKeys: String, CodingKey {
         case is_demo_user, has_custom_resolution, has_quick_plays_support
         case is_quick_play_singleplayer, is_quick_play_multiplayer, is_quick_play_realms
@@ -192,13 +192,13 @@ struct Library: Codable {
     let url: URL?
     let includeInClasspath: Bool
     let downloadable: Bool
-
+    
     enum CodingKeys: String, CodingKey {
         case downloads, name, rules, natives, extract, url
         case includeInClasspath = "include_in_classpath"
         case downloadable
     }
-
+    
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         downloads = try container.decode(LibraryDownloads.self, forKey: .downloads)
@@ -215,11 +215,11 @@ struct Library: Codable {
 struct LibraryDownloads: Codable {
     var artifact: LibraryArtifact
     let classifiers: [String: LibraryArtifact]?  // For native libraries
-
-        // Handle potential missing keys during decoding
-        enum CodingKeys: String, CodingKey {
-            case artifact, classifiers
-        }
+    
+    // Handle potential missing keys during decoding
+    enum CodingKeys: String, CodingKey {
+        case artifact, classifiers
+    }
 }
 
 struct LibraryArtifact: Codable {
@@ -227,7 +227,7 @@ struct LibraryArtifact: Codable {
     let sha1: String
     let size: Int
     var url: URL?
-
+    
     // Custom initializer for creating instances directly
     init(path: String?, sha1: String, size: Int, url: URL?) {
         self.path = path
@@ -235,15 +235,15 @@ struct LibraryArtifact: Codable {
         self.size = size
         self.url = url
     }
-
+    
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-
+        
         // path field may not exist (especially for LWJGL native library)
         path = try container.decodeIfPresent(String.self, forKey: .path)
         sha1 = try container.decode(String.self, forKey: .sha1)
         size = try container.decode(Int.self, forKey: .size)
-
+        
         // Handles URLs, allowing empty strings
         let urlString = try container.decode(String.self, forKey: .url)
         if urlString.isEmpty {
@@ -252,7 +252,7 @@ struct LibraryArtifact: Codable {
             url = URL(string: urlString)
         }
     }
-
+    
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(path, forKey: .path)
@@ -260,7 +260,7 @@ struct LibraryArtifact: Codable {
         try container.encode(size, forKey: .size)
         try container.encode(url?.absoluteString ?? "", forKey: .url)
     }
-
+    
     enum CodingKeys: String, CodingKey {
         case path, sha1, size, url
     }
@@ -320,7 +320,7 @@ struct DownloadedAssetIndex {
 
 struct AssetIndexData: Codable {
     let objects: [String: AssetObject]
-
+    
     struct AssetObject: Codable {
         let hash: String
         let size: Int

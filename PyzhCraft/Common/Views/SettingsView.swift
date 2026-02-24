@@ -11,9 +11,9 @@ enum SettingsTab: Int {
 /// Apply settings
 public struct SettingsView: View {
     @State private var selectedTab: SettingsTab = .general
-
+    
     public init() {}
-
+    
     public var body: some View {
         TabView(selection: $selectedTab) {
             GeneralSettingsView()
@@ -38,11 +38,11 @@ public struct SettingsView: View {
 
 struct CustomLabeledContentStyle: LabeledContentStyle {
     let alignment: VerticalAlignment
-
+    
     init(alignment: VerticalAlignment = .center) {
         self.alignment = alignment
     }
-
+    
     // Preserve system layout
     func makeBody(configuration: Configuration) -> some View {
         HStack(alignment: alignment) {
@@ -57,7 +57,7 @@ struct CustomLabeledContentStyle: LabeledContentStyle {
             // Right content
             configuration.content
                 .foregroundColor(.secondary)
-            .multilineTextAlignment(.leading)  // Text left aligned
+                .multilineTextAlignment(.leading)  // Text left aligned
                 .frame(maxWidth: .infinity, alignment: .leading)  // Container left aligned
         }
         .padding(.vertical, 4)
@@ -67,7 +67,7 @@ struct CustomLabeledContentStyle: LabeledContentStyle {
 // Use extensions to avoid breaking layout
 extension LabeledContentStyle where Self == CustomLabeledContentStyle {
     static var custom: Self { .init() }
-
+    
     static func custom(alignment: VerticalAlignment) -> Self {
         .init(alignment: alignment)
     }

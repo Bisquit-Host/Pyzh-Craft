@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Resource/game details and navigation related status (observable)
 public final class ResourceDetailState: ObservableObject {
-
+    
     @Published public var selectedItem: SidebarItem
     @Published public var gameType: Bool  // false = local, true = server
     @Published public var gameId: String?
@@ -15,7 +15,7 @@ public final class ResourceDetailState: ObservableObject {
         }
     }
     @Published public var loadedProjectDetail: ModrinthProjectDetail?
-
+    
     public init(
         selectedItem: SidebarItem = .resource(.mod),
         gameType: Bool = true,
@@ -31,32 +31,32 @@ public final class ResourceDetailState: ObservableObject {
         self.selectedProjectId = selectedProjectId
         self.loadedProjectDetail = loadedProjectDetail
     }
-
+    
     // MARK: - Convenience method
-
+    
     public func selectGame(id: String?) {
         gameId = id
     }
-
+    
     public func selectResource(type: String) {
         gameResourcesType = type
     }
-
+    
     /// Clear the project/game selected state (used to switch back to the list, etc.)
     public func clearSelection() {
         selectedProjectId = nil
         loadedProjectDetail = nil
     }
-
+    
     // MARK: - Bindings (for use by subviews, GameActionManager, etc.)
-
+    
     public var selectedItemBinding: Binding<SidebarItem> {
         Binding(get: { [weak self] in self?.selectedItem ?? .resource(.mod) }, set: { [weak self] value in
             guard let self else { return }
             DispatchQueue.main.async { self.selectedItem = value }
         })
     }
-
+    
     /// Used for APIs that require Optional such as List(selection:)
     public var selectedItemOptionalBinding: Binding<SidebarItem?> {
         Binding(get: { [weak self] in self?.selectedItem }, set: { [weak self] value in

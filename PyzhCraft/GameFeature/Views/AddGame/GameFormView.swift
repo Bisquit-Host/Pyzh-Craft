@@ -6,7 +6,7 @@ enum GameFormMode {
     case creation
     case modPackImport(file: URL, shouldProcess: Bool)
     case launcherImport
-
+    
     var isImportMode: Bool {
         switch self {
         case .creation:
@@ -23,12 +23,12 @@ struct GameFormView: View {
     @EnvironmentObject var playerListViewModel: PlayerListViewModel
     @Environment(\.dismiss)
     private var dismiss
-
+    
     // MARK: - File Picker Type
     enum FilePickerType {
         case modPack, gameIcon
     }
-
+    
     // MARK: - State
     @State private var isDownloading = false
     @State private var isFormValid = false
@@ -40,13 +40,13 @@ struct GameFormView: View {
     @State private var isModPackParsed = false
     @State private var imagePickerHandler: ((Result<[URL], Error>) -> Void)?
     @State private var showImportPicker = false
-
+    
     // MARK: - Body
     @ViewBuilder var body: some View {
         let content = CommonSheetView(
             header: { headerView },
             body: {
-
+                
                 VStack {
                     switch mode {
                     case .creation:
@@ -101,7 +101,7 @@ struct GameFormView: View {
             },
             footer: { footerView }
         )
-
+        
         // When in "Import Launcher" mode, avoid hanging another fileImporter in the parent view
         // Make the subview's fileImporter work properly
         if case .launcherImport = mode {
@@ -133,7 +133,7 @@ struct GameFormView: View {
                 }
         }
     }
-
+    
     // MARK: - View Components
     private var headerView: some View {
         VStack(spacing: 12) {
@@ -145,7 +145,7 @@ struct GameFormView: View {
             }
         }
     }
-
+    
     private var currentModeTitle: LocalizedStringKey {
         switch mode {
         case .creation:
@@ -156,7 +156,7 @@ struct GameFormView: View {
             return LocalizedStringKey("Import Launcher")
         }
     }
-
+    
     private var importModePicker: some View {
         Menu {
             Button {
@@ -164,7 +164,7 @@ struct GameFormView: View {
             } label: {
                 Label("New", systemImage: "square.and.pencil")
             }
-
+            
             Button {
                 // First switch to non-launcherImport mode
                 if case .launcherImport = mode {
@@ -178,7 +178,7 @@ struct GameFormView: View {
             } label: {
                 Label("Import Modpack", systemImage: "square.and.arrow.up")
             }
-
+            
             Button {
                 mode = .launcherImport
             } label: {
@@ -190,7 +190,7 @@ struct GameFormView: View {
         .fixedSize()
         .help("Import Modpack")
     }
-
+    
     private var footerView: some View {
         HStack {
             cancelButton
@@ -198,7 +198,7 @@ struct GameFormView: View {
             confirmButton
         }
     }
-
+    
     private var cancelButton: some View {
         Button {
             if isDownloading {
@@ -211,13 +211,13 @@ struct GameFormView: View {
         } label: {
             Text(
                 isDownloading
-                    ? LocalizedStringKey("Stop")
-                    : LocalizedStringKey("Cancel")
+                ? LocalizedStringKey("Stop")
+                : LocalizedStringKey("Cancel")
             )
         }
         .keyboardShortcut(.cancelAction)
     }
-
+    
     private var confirmButton: some View {
         Button {
             triggerConfirm = true
@@ -244,14 +244,14 @@ struct GameFormView: View {
         .keyboardShortcut(.defaultAction)
         .disabled(!isFormValid || isDownloading)
     }
-
+    
     // MARK: - Helper Methods
-
+    
     private func handleModPackFileSelection(_ result: Result<[URL], Error>) {
         switch result {
         case .success(let urls):
             guard let url = urls.first else { return }
-
+            
             guard url.startAccessingSecurityScopedResource() else {
                 let globalError = GlobalError.fileSystem(
                     i18nKey: "File Access Failed",
@@ -260,7 +260,7 @@ struct GameFormView: View {
                 GlobalErrorHandler.shared.handle(globalError)
                 return
             }
-
+            
             let urlForBackground = url
             Task {
                 let tempFileResult: Result<URL, Error> = await Task.detached(priority: .userInitiated) {
@@ -280,7 +280,7 @@ struct GameFormView: View {
                     }
                 }.value
                 urlForBackground.stopAccessingSecurityScopedResource()
-
+                
                 await MainActor.run {
                     switch tempFileResult {
                     case .success(let tempFile):
@@ -291,7 +291,7 @@ struct GameFormView: View {
                     }
                 }
             }
-
+            
         case .failure(let error):
             let globalError = GlobalError.from(error)
             GlobalErrorHandler.shared.handle(globalError)

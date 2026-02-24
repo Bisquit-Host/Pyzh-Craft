@@ -11,9 +11,9 @@ struct ScreenshotSectionView: View {
     let screenshots: [ScreenshotInfo]
     let isLoading: Bool
     let gameName: String
-
+    
     @State private var selectedScreenshot: ScreenshotInfo?
-
+    
     // MARK: - Body
     var body: some View {
         GenericSectionView(
@@ -28,7 +28,7 @@ struct ScreenshotSectionView: View {
             ScreenshotDetailView(screenshot: screenshot, gameName: gameName)
         }
     }
-
+    
     // MARK: - Chip Builder
     private func screenshotChip(for screenshot: ScreenshotInfo) -> some View {
         FilterChip(
@@ -47,9 +47,9 @@ struct ScreenshotSectionView: View {
 struct ScreenshotThumbnail: View {
     let screenshot: ScreenshotInfo
     let action: () -> Void
-
+    
     @State private var image: NSImage?
-
+    
     var body: some View {
         Button(action: action) {
             Group {
@@ -77,7 +77,7 @@ struct ScreenshotThumbnail: View {
             loadImage()
         }
     }
-
+    
     private func loadImage() {
         DispatchQueue.global(qos: .userInitiated).async {
             if let nsImage = NSImage(contentsOf: screenshot.path) {
@@ -95,7 +95,7 @@ struct ScreenshotDetailView: View {
     let gameName: String
     @Environment(\.dismiss)
     private var dismiss
-
+    
     var body: some View {
         CommonSheetView(
             header: { headerView },
@@ -104,7 +104,7 @@ struct ScreenshotDetailView: View {
         )
         .frame(minWidth: 600, minHeight: 400)
     }
-
+    
     private var headerView: some View {
         HStack {
             Text(screenshot.name)
@@ -118,14 +118,14 @@ struct ScreenshotDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-
+    
     private var bodyView: some View {
         ScrollView {
             ScreenshotImageView(path: screenshot.path)
                 .frame(maxWidth: .infinity)
         }
     }
-
+    
     private var footerView: some View {
         HStack {
             if let createdDate = screenshot.createdDate {
@@ -137,7 +137,7 @@ struct ScreenshotDetailView: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
             }
-
+            
             Spacer()
             Button("Close") {
                 dismiss()
@@ -153,7 +153,7 @@ struct ScreenshotImageView: View {
     @State private var image: NSImage?
     @State private var isLoading = true
     @State private var loadFailed = false
-
+    
     var body: some View {
         Group {
             if isLoading {
@@ -176,7 +176,7 @@ struct ScreenshotImageView: View {
             loadImage()
         }
     }
-
+    
     private func loadImage() {
         DispatchQueue.global(qos: .userInitiated).async {
             if let nsImage = NSImage(contentsOf: path) {

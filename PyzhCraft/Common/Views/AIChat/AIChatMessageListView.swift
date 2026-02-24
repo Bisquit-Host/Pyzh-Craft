@@ -7,12 +7,12 @@ struct AIChatMessageListView: View {
     let cachedAIAvatar: AnyView?
     let cachedUserAvatar: AnyView?
     let aiAvatarURL: String
-
+    
     // Status used for anti-shaking and avoiding loop updates
     @State private var lastContentLength: Int = 0
     @State private var scrollTask: Task<Void, Never>?
     @State private var periodicScrollTask: Task<Void, Never>?
-
+    
     private enum Constants {
         static let avatarSize: CGFloat = 32
         static let messageSpacing: CGFloat = 16
@@ -21,7 +21,7 @@ struct AIChatMessageListView: View {
         static let scrollAnimationDuration: TimeInterval = 0.3
         static let scrollThrottleInterval: TimeInterval = 0.2 // Anti-shake interval
     }
-
+    
     var body: some View {
         GeometryReader { geometry in
             ScrollViewReader { proxy in
@@ -37,7 +37,7 @@ struct AIChatMessageListView: View {
                     } else {
                         LazyVStack(alignment: .leading, spacing: 12) {
                             messageListView
-
+                            
                             // Show "Thinking" only if sending is in progress and the last AI message was empty
                             if chatState.isSending,
                                let lastMessage = chatState.messages.last,
@@ -87,9 +87,9 @@ struct AIChatMessageListView: View {
             }
         }
     }
-
+    
     // MARK: - View Components
-
+    
     private var welcomeView: some View {
         VStack(spacing: 16) {
             if let player = currentPlayer {
@@ -106,7 +106,7 @@ struct AIChatMessageListView: View {
         .frame(maxWidth: .infinity)
         .padding()
     }
-
+    
     private var messageListView: some View {
         ForEach(chatState.messages) { message in
             // Skip empty AI messages being sent (loading indicator will be shown)
@@ -122,7 +122,7 @@ struct AIChatMessageListView: View {
             }
         }
     }
-
+    
     private var loadingIndicatorView: some View {
         HStack(alignment: .firstTextBaseline, spacing: Constants.messageSpacing) {
             // Using cached avatar view
@@ -131,28 +131,29 @@ struct AIChatMessageListView: View {
             } else {
                 AIAvatarView(size: Constants.avatarSize, url: aiAvatarURL)
             }
-
+            
             HStack(spacing: 6) {
                 ProgressView()
                     .scaleEffect(0.6)
                     .controlSize(.small)
+                
                 Text("Thinking...")
                     .font(.system(size: 12))
                     .foregroundStyle(.secondary)
             }
-
+            
             Spacer(minLength: 40)
         }
         .padding(.vertical, Constants.messageVerticalPadding)
     }
-
+    
     // MARK: - Methods
-
+    
     /// Scheduling scroll to bottom (with anti-shake)
     private func scheduleScroll(proxy: ScrollViewProxy) {
         // Cancel previous task
         scrollTask?.cancel()
-
+        
         // Create a new anti-shake task
         scrollTask = Task { @MainActor in
             try? await Task.sleep(nanoseconds: UInt64(Constants.scrollThrottleInterval * 1_000_000_000))
@@ -160,11 +161,11 @@ struct AIChatMessageListView: View {
             scrollToBottom(proxy: proxy)
         }
     }
-
+    
     /// Start periodic rolling checks (for streaming updates)
     private func startPeriodicScrollCheck(proxy: ScrollViewProxy) {
         stopPeriodicScrollCheck()
-
+        
         periodicScrollTask = Task { @MainActor in
             while !Task.isCancelled && chatState.isSending {
                 // Check if the content is updated
@@ -173,19 +174,19 @@ struct AIChatMessageListView: View {
                     lastContentLength = lastMessage.content.count
                     scrollToBottom(proxy: proxy)
                 }
-
+                
                 // Check every 0.3 seconds
                 try? await Task.sleep(nanoseconds: 300_000_000)
             }
         }
     }
-
+    
     /// Stop periodic rolling checks
     private func stopPeriodicScrollCheck() {
         periodicScrollTask?.cancel()
         periodicScrollTask = nil
     }
-
+    
     private func scrollToBottom(proxy: ScrollViewProxy) {
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: UInt64(Constants.scrollDelay * 1_000_000_000))

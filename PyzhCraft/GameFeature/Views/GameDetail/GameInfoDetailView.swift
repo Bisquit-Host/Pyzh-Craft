@@ -7,7 +7,7 @@ import UniformTypeIdentifiers
 // MARK: - Views
 struct GameInfoDetailView: View {
     let game: GameVersionInfo
-
+    
     @Binding var query: String
     @Binding var dataSource: DataSource
     @Binding var selectedVersions: [String]
@@ -24,17 +24,17 @@ struct GameInfoDetailView: View {
     @Binding var localResourceFilter: LocalResourceFilter
     @StateObject private var cacheManager = CacheManager()
     @State private var localRefreshToken = UUID()
-
+    
     // Scan results: detailId Set, used for fast search (O(1))
     @State private var scannedResources: Set<String> = []
-
+    
     // Use stable headers to avoid rebuilds caused by cacheInfo updates
     @State private var remoteHeader: AnyView?
     @State private var localHeader: AnyView?
-
+    
     // File picker status
     @State private var showIconFilePicker = false
-
+    
     var body: some View {
         return Group {
             if gameType {
@@ -112,7 +112,7 @@ struct GameInfoDetailView: View {
             handleIconFileSelection(result)
         }
     }
-
+    
     // MARK: - Refresh logic
     /// Perform refresh operation (called when the game name changes or gameType changes and the game name remains unchanged)
     private func performRefresh() {
@@ -126,19 +126,19 @@ struct GameInfoDetailView: View {
         resetScanState()
         scanAllResources()
     }
-
+    
     private func triggerLocalRefresh() {
         // Only update refresh token when viewing locally
         guard !gameType else { return }
         localRefreshToken = UUID()
     }
-
+    
     // MARK: - Update Header
     /// Update the header view without rebuilding the entire GameRemoteResourceView
     private func updateHeaders() {
         // Try to get the latest game information from gameRepository, if not found use the passed in game
         let currentGame = gameRepository.games.first { $0.id == game.id } ?? game
-
+        
         remoteHeader = AnyView(
             GameHeaderListRow(
                 game: currentGame,
@@ -166,7 +166,7 @@ struct GameInfoDetailView: View {
             )
         )
     }
-
+    
     // MARK: - clear data
     /// Clear all data on the page
     private func clearAllData() {
@@ -179,13 +179,13 @@ struct GameInfoDetailView: View {
         // Reset scan results
         scannedResources = []
     }
-
+    
     // MARK: - Reset scan status
     /// Reset scan status and prepare to scan again
     private func resetScanState() {
         scannedResources = []
     }
-
+    
     // MARK: - Scan all resources
     /// Asynchronously scan all resources and collect detailId (without blocking view rendering)
     private func scanAllResources() {
@@ -194,7 +194,7 @@ struct GameInfoDetailView: View {
             scannedResources = []
             return
         }
-
+        
         guard let resourceDir = AppPaths.resourceDirectory(
             for: query,
             gameName: game.gameName
@@ -202,21 +202,21 @@ struct GameInfoDetailView: View {
             scannedResources = []
             return
         }
-
+        
         // Check if the directory exists and is accessible
         guard FileManager.default.fileExists(atPath: resourceDir.path) else {
             // The directory does not exist, return directly
             scannedResources = []
             return
         }
-
+        
         // Use Task to create asynchronous tasks to ensure that view rendering is not blocked
         // All time-consuming operations are performed on the background thread and only return to the main thread when the status is updated
         Task {
             do {
                 // Call the new asynchronous interface and only get the detailId (return Set directly)
                 let detailIds = try await ModScanner.shared.scanAllDetailIdsThrowing(in: resourceDir)
-
+                
                 // Return to main thread update status
                 await MainActor.run {
                     scannedResources = detailIds
@@ -225,7 +225,7 @@ struct GameInfoDetailView: View {
                 let globalError = GlobalError.from(error)
                 Logger.shared.error("Failed to scan all resources: \(globalError.chineseMessage)")
                 GlobalErrorHandler.shared.handle(globalError)
-
+                
                 // Return to main thread update status
                 await MainActor.run {
                     scannedResources = []
@@ -233,7 +233,7 @@ struct GameInfoDetailView: View {
             }
         }
     }
-
+    
     // MARK: - Handles icon file selection
     /// Process user-selected icon files
     private func handleIconFileSelection(_ result: Result<[URL], Error>) {
@@ -247,7 +247,7 @@ struct GameInfoDetailView: View {
                 GlobalErrorHandler.shared.handle(globalError)
                 return
             }
-
+            
             guard url.startAccessingSecurityScopedResource() else {
                 let globalError = GlobalError.fileSystem(
                     i18nKey: "File Access Failed",
@@ -257,7 +257,7 @@ struct GameInfoDetailView: View {
                 return
             }
             defer { url.stopAccessingSecurityScopedResource() }
-
+            
             let gameName = game.gameName
             Task {
                 do {
@@ -272,7 +272,7 @@ struct GameInfoDetailView: View {
                         )
                         try imageData.write(to: iconURL)
                     }.value
-
+                    
                     await MainActor.run {
                         IconRefreshNotifier.shared.notifyRefresh(for: gameName)
                         updateHeaders()

@@ -13,7 +13,7 @@ protocol ModLoaderHandler {
         gameInfo: GameVersionInfo,
         onProgressUpdate: @escaping (String, Int, Int) -> Void
     ) async throws -> (loaderVersion: String, classpath: String, mainClass: String)
-
+    
     /// Set the specified version of the loader (silent version)
     /// - Parameters:
     ///   - gameVersion: game version

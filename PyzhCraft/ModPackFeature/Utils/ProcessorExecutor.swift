@@ -3,7 +3,7 @@ import ZIPFoundation
 
 /// Forge/NeoForge Processor executor
 enum ProcessorExecutor {
-
+    
     /// Execute a single processor
     /// - Parameters:
     ///   - processor: processor configuration
@@ -23,17 +23,17 @@ enum ProcessorExecutor {
             processor.jar,
             librariesDir: librariesDir
         )
-
+        
         // 2. Build classpath
         let classpath = try buildClasspath(
             processor.classpath,
             jarPath: jarPath,
             librariesDir: librariesDir
         )
-
+        
         // 3. Get the main class
         let mainClass = try getMainClassFromJar(jarPath: jarPath)
-
+        
         // 4. Build Java commands
         let command = buildJavaCommand(
             classpath: classpath,
@@ -43,18 +43,18 @@ enum ProcessorExecutor {
             librariesDir: librariesDir,
             data: data
         )
-
+        
         // 5. Execute Java commands
         try await executeJavaCommand(command, javaPath: javaPath, workingDir: librariesDir)
-
+        
         // 6. Process output files
         if let outputs = processor.outputs {
             try await processOutputs(outputs, workingDir: librariesDir)
         }
     }
-
+    
     // MARK: - Private Helper Methods
-
+    
     private static func validateAndGetJarPath(
         _ jar: String?,
         librariesDir: URL
@@ -65,7 +65,7 @@ enum ProcessorExecutor {
                 level: .notification
             )
         }
-
+        
         guard
             let relativePath = CommonService.mavenCoordinateToRelativePath(jar)
         else {
@@ -74,7 +74,7 @@ enum ProcessorExecutor {
                 level: .notification
             )
         }
-
+        
         let jarPath = librariesDir.appendingPathComponent(relativePath)
         guard FileManager.default.fileExists(atPath: jarPath.path) else {
             throw GlobalError.resource(
@@ -82,24 +82,24 @@ enum ProcessorExecutor {
                 level: .notification
             )
         }
-
+        
         return jarPath
     }
-
+    
     private static func buildClasspath(
         _ processorClasspath: [String]?,
         jarPath: URL,
         librariesDir: URL
     ) throws -> [String] {
         var classpath: [String] = []
-
+        
         if let processorClasspath = processorClasspath {
             for cp in processorClasspath {
                 let cpPath =
-                    cp.contains(":")
-                    ? try getMavenPath(cp, librariesDir: librariesDir)
-                    : librariesDir.appendingPathComponent(cp)
-
+                cp.contains(":")
+                ? try getMavenPath(cp, librariesDir: librariesDir)
+                : librariesDir.appendingPathComponent(cp)
+                
                 if FileManager.default.fileExists(atPath: cpPath.path) {
                     classpath.append(cpPath.path)
                 } else {
@@ -107,19 +107,19 @@ enum ProcessorExecutor {
                 }
             }
         }
-
+        
         classpath.append(jarPath.path)
-
+        
         return classpath
     }
-
+    
     private static func getMavenPath(
         _ coordinate: String,
         librariesDir: URL
     ) throws -> URL {
         // Use methods that support the @ symbol to handle Maven coordinates
         let relativePath: String
-
+        
         if coordinate.contains("@") {
             // For coordinates containing the @ symbol (such as org.ow2.asm:asm:9.3@jar), special handling is used
             relativePath = CommonService.parseMavenCoordinateWithAtSymbol(
@@ -139,10 +139,10 @@ enum ProcessorExecutor {
             }
             relativePath = path
         }
-
+        
         return librariesDir.appendingPathComponent(relativePath)
     }
-
+    
     private static func buildJavaCommand(
         classpath: [String],
         mainClass: String,
@@ -153,7 +153,7 @@ enum ProcessorExecutor {
     ) -> [String] {
         var command = ["-cp", classpath.joined(separator: ":")]
         command.append(mainClass)
-
+        
         if let args = args {
             let processedArgs: [String] = args.compactMap { arg in
                 guard let extractedValue = CommonFileManager.extractClientValue(from: arg) else {
@@ -169,10 +169,10 @@ enum ProcessorExecutor {
             }
             command.append(contentsOf: processedArgs)
         }
-
+        
         return command
     }
-
+    
     private static func processPlaceholders(
         _ arg: String,
         gameVersion: String,
@@ -183,10 +183,10 @@ enum ProcessorExecutor {
         guard arg.contains("{") else {
             return arg
         }
-
+        
         // Use NSMutableString to avoid creating lots of temporary strings in loops
         let processedArg = NSMutableString(string: arg)
-
+        
         // Basic placeholder replacement
         let basicReplacements = [
             AppConstants.ProcessorPlaceholders.side: AppConstants.EnvironmentTypes.client,
@@ -195,7 +195,7 @@ enum ProcessorExecutor {
             AppConstants.ProcessorPlaceholders.libraryDir: librariesDir.path,
             AppConstants.ProcessorPlaceholders.workingDir: librariesDir.path,
         ]
-
+        
         for (placeholder, value) in basicReplacements where processedArg.range(of: placeholder).location != NSNotFound {
             // First check whether it contains placeholders to avoid unnecessary replacement operations
             processedArg.replaceOccurrences(
@@ -205,7 +205,7 @@ enum ProcessorExecutor {
                 range: NSRange(location: 0, length: processedArg.length)
             )
         }
-
+        
         // Handling placeholder replacement for data fields
         if let data = data {
             for (key, value) in data {
@@ -213,12 +213,12 @@ enum ProcessorExecutor {
                 // First check whether it contains placeholders to avoid unnecessary processing
                 if processedArg.range(of: placeholder).location != NSNotFound {
                     let replacementValue =
-                        value.contains(":") && !value.hasPrefix("/")
+                    value.contains(":") && !value.hasPrefix("/")
                     ? (
                         CommonFileManager.extractClientValue(from: value).map {
                             librariesDir.appendingPathComponent($0).path
                         } ?? value) : value
-
+                    
                     processedArg.replaceOccurrences(
                         of: placeholder,
                         with: replacementValue,
@@ -228,10 +228,10 @@ enum ProcessorExecutor {
                 }
             }
         }
-
+        
         return processedArg as String
     }
-
+    
     private static func executeJavaCommand(
         _ command: [String],
         javaPath: String,
@@ -241,30 +241,30 @@ enum ProcessorExecutor {
         process.executableURL = URL(fileURLWithPath: javaPath)
         process.arguments = command
         process.currentDirectoryURL = workingDir
-
+        
         // Set environment variables
         var environment = ProcessInfo.processInfo.environment
         environment["LIBRARY_DIR"] = workingDir.path
         process.environment = environment
-
+        
         // capture output
         let outputPipe = Pipe()
         let errorPipe = Pipe()
         process.standardOutput = outputPipe
         process.standardError = errorPipe
-
+        
         do {
             try process.run()
-
+            
             // Read output in real time
             setupOutputHandlers(outputPipe: outputPipe, errorPipe: errorPipe)
-
+            
             process.waitUntilExit()
-
+            
             // Clean up handlers
             outputPipe.fileHandleForReading.readabilityHandler = nil
             errorPipe.fileHandleForReading.readabilityHandler = nil
-
+            
             if process.terminationStatus != 0 {
                 throw GlobalError.download(
                     i18nKey: "Processor Execution Failed (Exit Code: \(process.terminationStatus))",
@@ -278,7 +278,7 @@ enum ProcessorExecutor {
             )
         }
     }
-
+    
     private static func setupOutputHandlers(outputPipe: Pipe, errorPipe: Pipe) {
         outputPipe.fileHandleForReading.readabilityHandler = { handle in
             let data = handle.availableData
@@ -286,7 +286,7 @@ enum ProcessorExecutor {
                 // Output data has been read to prevent pipe blocking
             }
         }
-
+        
         errorPipe.fileHandleForReading.readabilityHandler = { handle in
             let data = handle.availableData
             if !data.isEmpty, String(data: data, encoding: .utf8) != nil {
@@ -294,30 +294,30 @@ enum ProcessorExecutor {
             }
         }
     }
-
+    
     private static func processOutputs(
         _ outputs: [String: String],
         workingDir: URL
     ) async throws {
         let fileManager = FileManager.default
-
+        
         for (source, destination) in outputs {
             let sourceURL = workingDir.appendingPathComponent(source)
             let destURL = workingDir.appendingPathComponent(destination)
-
+            
             // Make sure the target directory exists
             try fileManager.createDirectory(
                 at: destURL.deletingLastPathComponent(),
                 withIntermediateDirectories: true
             )
-
+            
             // Move or copy files
             if fileManager.fileExists(atPath: sourceURL.path) {
                 try fileManager.moveItem(at: sourceURL, to: destURL)
             }
         }
     }
-
+    
     private static func getMainClassFromJar(jarPath: URL) throws -> String {
         let archive: Archive
         do {
@@ -328,19 +328,19 @@ enum ProcessorExecutor {
                 level: .notification
             )
         }
-
+        
         guard let manifestEntry = archive["META-INF/MANIFEST.MF"] else {
             throw GlobalError.download(
                 i18nKey: "Failed to get main class from processor JAR file: \(jarPath.path)",
                 level: .notification
             )
         }
-
+        
         var manifestData = Data()
         _ = try archive.extract(manifestEntry) { data in
             manifestData.append(data)
         }
-
+        
         guard let manifestContent = String(data: manifestData, encoding: .utf8)
         else {
             throw GlobalError.download(
@@ -348,7 +348,7 @@ enum ProcessorExecutor {
                 level: .notification
             )
         }
-
+        
         // Parse MANIFEST.MF to find Main-Class
         let lines = manifestContent.components(separatedBy: .newlines)
         for line in lines {
@@ -359,7 +359,7 @@ enum ProcessorExecutor {
                 return mainClass
             }
         }
-
+        
         throw GlobalError.download(
             i18nKey: "Failed to get main class from processor JAR file: \(jarPath.path)",
             level: .notification

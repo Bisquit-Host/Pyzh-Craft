@@ -5,79 +5,79 @@ import SwiftUI
 @MainActor
 class ModPackExportViewModel: ObservableObject {
     // MARK: - Export State
-
+    
     /// Export status enum
     enum ExportState: Equatable {
         case idle              // Idle state, display form
         case exporting         // Exporting, showing progress
         case completed         // Export completed, waiting to save, display progress (100%)
     }
-
+    
     // MARK: - Published Properties
-
+    
     /// export status
     @Published var exportState: ExportState = .idle
-
+    
     /// Export progress information
     @Published var exportProgress = ModPackExporter.ExportProgress()
-
+    
     /// Integrated package name
     @Published var modPackName = ""
-
+    
     /// Integrated package version
     @Published var modPackVersion = "1.0.0"
-
+    
     /// Integration package description
     @Published var summary = ""
-
+    
     /// Export error message
     @Published var exportError: String?
-
+    
     /// Temporary file path. When there is a value, it means that the packaging is completed and the save dialog box needs to be displayed
     @Published var tempExportPath: URL?
-
+    
     /// Error message when saving file
     @Published var saveError: String?
-
+    
     // MARK: - Private Properties
-
+    
     /// Export tasks
     private var exportTask: Task<Void, Never>?
-
+    
     /// Whether the save dialog box has been displayed (to prevent repeated display)
     private var hasShownSaveDialog = false
-
+    
     // MARK: - Computed Properties
-
+    
     /// Is exporting
     var isExporting: Bool {
         exportState == .exporting
     }
-
+    
     /// Whether the save dialog should be shown
     var shouldShowSaveDialog: Bool {
         tempExportPath != nil && !hasShownSaveDialog
     }
-
+    
     // MARK: - Export Actions
-
+    
     func startExport(gameInfo: GameVersionInfo) {
         guard exportState == .idle else { return }
-
+        
         if modPackName.isEmpty {
             modPackName = gameInfo.gameName
         }
-
+        
         exportState = .exporting
         exportProgress = ModPackExporter.ExportProgress()
         exportError = nil
         tempExportPath = nil
         hasShownSaveDialog = false
         saveError = nil
-
+        
         let tempPath = FileManager.default.temporaryDirectory
             .appendingPathComponent("\(modPackName).mrpack")
-
+        
         exportTask = Task {
             let result = await ModPackExporter.exportModPack(
                 gameInfo: gameInfo,
@@ -90,7 +90,7 @@ class ModPackExportViewModel: ObservableObject {
                     self.exportProgress = progress
                 }
             }
-
+            
             await MainActor.run {
                 if result.success {
                     self.exportState = .completed
@@ -106,7 +106,7 @@ class ModPackExportViewModel: ObservableObject {
             }
         }
     }
-
+    
     /// Cancel export task
     func cancelExport() {
         exportTask?.cancel()
@@ -117,14 +117,14 @@ class ModPackExportViewModel: ObservableObject {
         hasShownSaveDialog = false
         saveError = nil
     }
-
+    
     // MARK: - Save Dialog Actions
-
+    
     /// Mark save dialog is shown (to prevent repeated display)
     func markSaveDialogShown() {
         hasShownSaveDialog = true
     }
-
+    
     func handleSaveSuccess() {
         cleanupTempFile()
         hasShownSaveDialog = false
@@ -132,13 +132,13 @@ class ModPackExportViewModel: ObservableObject {
         exportState = .idle
         exportProgress = ModPackExporter.ExportProgress()
     }
-
+    
     func handleSaveFailure(error: String) {
         saveError = error
         cleanupTempFile()
         hasShownSaveDialog = false
     }
-
+    
     func cleanupAllData() {
         exportTask?.cancel()
         exportTask = nil
@@ -154,9 +154,9 @@ class ModPackExportViewModel: ObservableObject {
         modPackVersion = "1.0.0"
         summary = ""
     }
-
+    
     // MARK: - Private Helper Methods
-
+    
     private func cleanupTempFile() {
         guard let tempPath = tempExportPath else { return }
         do {
@@ -169,7 +169,7 @@ class ModPackExportViewModel: ObservableObject {
         }
         tempExportPath = nil
     }
-
+    
     private func cleanupTempDirectories() {
         let exportDir = FileManager.default.temporaryDirectory
             .appendingPathComponent("modpack_export")

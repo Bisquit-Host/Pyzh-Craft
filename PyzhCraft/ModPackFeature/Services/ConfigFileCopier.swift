@@ -3,7 +3,7 @@ import Foundation
 /// Configuration file duplicator
 /// Responsible for copying game configuration files to the overrides directory (excludes archive directories and resource directories)
 enum ConfigFileCopier {
-
+    
     /// Directories that need to be excluded (these are already processed elsewhere or should not be copied)
     private static let excludedDirectories: Set<String> = [
         AppConstants.DirectoryNames.mods,
@@ -14,26 +14,26 @@ enum ConfigFileCopier {
         AppConstants.DirectoryNames.crashReports,
         AppConstants.DirectoryNames.logs,
     ]
-
+    
     /// Count the number of configuration files that need to be copied
     /// - Parameter gameInfo: game information
     /// - Returns: total number of files
     static func countFiles(gameInfo: GameVersionInfo) throws -> Int {
         let profileDir = AppPaths.profileDirectory(gameName: gameInfo.gameName)
         var count = 0
-
+        
         // Get all directories and files
         let contents = try FileManager.default.contentsOfDirectory(
             at: profileDir,
             includingPropertiesForKeys: [.isDirectoryKey, .isRegularFileKey],
             options: [.skipsHiddenFiles]
         )
-
+        
         for item in contents {
             let resourceValues = try? item.resourceValues(forKeys: [.isDirectoryKey, .isRegularFileKey])
             let isDirectory = resourceValues?.isDirectory ?? false
             let isRegularFile = resourceValues?.isRegularFile ?? false
-
+            
             if isDirectory {
                 let dirName = item.lastPathComponent
                 // Exclude unnecessary directories
@@ -57,10 +57,10 @@ enum ConfigFileCopier {
                 count += 1
             }
         }
-
+        
         return count
     }
-
+    
     /// Copy the configuration file to the overrides directory
     /// - Parameters:
     ///   - gameInfo: game information
@@ -73,30 +73,30 @@ enum ConfigFileCopier {
     ) async throws {
         let profileDir = AppPaths.profileDirectory(gameName: gameInfo.gameName)
         var filesCopied = 0
-
+        
         // Get all directories and files
         let contents = try FileManager.default.contentsOfDirectory(
             at: profileDir,
             includingPropertiesForKeys: [.isDirectoryKey, .isRegularFileKey],
             options: [.skipsHiddenFiles]
         )
-
+        
         for item in contents {
             let resourceValues = try? item.resourceValues(forKeys: [.isDirectoryKey, .isRegularFileKey])
             let isDirectory = resourceValues?.isDirectory ?? false
             let isRegularFile = resourceValues?.isRegularFile ?? false
-
+            
             if isDirectory {
                 let dirName = item.lastPathComponent
                 // Exclude unnecessary directories
                 if excludedDirectories.contains(dirName) {
                     continue
                 }
-
+                
                 // copy entire directory
                 let destDir = overridesDir.appendingPathComponent(dirName)
                 try? FileManager.default.removeItem(at: destDir)
-
+                
                 // Recursively copy all files in a directory
                 let enumerator = FileManager.default.enumerator(
                     at: item,

@@ -3,15 +3,15 @@ import Foundation
 /// XMCL instance parser
 struct XMCLInstanceParser: LauncherInstanceParser {
     let launcherType: ImportLauncherType = .xmcl
-
+    
     func isValidInstance(at instancePath: URL) -> Bool {
         let instanceJsonPath = instancePath.appendingPathComponent("instance.json")
         let fileManager = FileManager.default
-
+        
         guard fileManager.fileExists(atPath: instanceJsonPath.path) else {
             return false
         }
-
+        
         // Verify that the JSON file can be parsed
         do {
             _ = try parseInstanceJson(at: instanceJsonPath)
@@ -20,20 +20,20 @@ struct XMCLInstanceParser: LauncherInstanceParser {
             return false
         }
     }
-
+    
     func parseInstance(at instancePath: URL, basePath: URL) throws -> ImportInstanceInfo? {
         let instanceJsonPath = instancePath.appendingPathComponent("instance.json")
         let instance = try parseInstanceJson(at: instanceJsonPath)
-
+        
         // Extract game version
         let gameVersion = instance.runtime.minecraft
-
+        
         // Extract Mod Loader Information
         let (modLoader, modLoaderVersion) = extractModLoader(from: instance)
-
+        
         // Extract game name
         let gameName = instance.name.isEmpty ? "XMCL-\(instancePath.lastPathComponent)" : instance.name
-
+        
         return ImportInstanceInfo(
             gameName: gameName,
             gameVersion: gameVersion,
@@ -45,19 +45,19 @@ struct XMCLInstanceParser: LauncherInstanceParser {
             launcherType: launcherType
         )
     }
-
+    
     // MARK: - Private Methods
-
+    
     /// Parse instance.json file
     private func parseInstanceJson(at path: URL) throws -> XMCLInstance {
         let data = try Data(contentsOf: path)
         return try JSONDecoder().decode(XMCLInstance.self, from: data)
     }
-
+    
     /// Extract Mod Loader information
     private func extractModLoader(from instance: XMCLInstance) -> (loader: String, version: String) {
         let runtime = instance.runtime
-
+        
         // Check by priority: Forge -> NeoForged -> Fabric -> Quilt -> Vanilla
         if !runtime.forge.isEmpty {
             return ("forge", runtime.forge)

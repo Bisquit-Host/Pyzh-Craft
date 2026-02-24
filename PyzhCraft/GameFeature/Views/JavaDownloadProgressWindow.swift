@@ -4,7 +4,7 @@ struct JavaDownloadProgressWindow: View {
     @ObservedObject var downloadState: JavaDownloadState
     @Environment(\.dismiss)
     private var dismiss
-
+    
     var body: some View {
         // Download list
         VStack {
@@ -56,7 +56,7 @@ struct JavaDownloadProgressWindow: View {
             clearAllData()
         }
     }
-
+    
     /// Clean all data
     private func clearAllData() {
         // Clean data when window is closed
@@ -71,11 +71,11 @@ struct DownloadItemView: View {
     let status: DownloadStatus
     let onCancel: () -> Void
     let downloadState: JavaDownloadState?
-
+    
     private var progressText: String {
         (downloadState?.progress ?? 0).formatted(.percent.precision(.fractionLength(0)))
     }
-
+    
     var body: some View {
         HStack(spacing: 12) {
             // icon
@@ -84,7 +84,7 @@ struct DownloadItemView: View {
                     .font(.system(size: 24))
                     .foregroundColor(iconColor)
             }
-
+            
             // content
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
@@ -98,7 +98,7 @@ struct DownloadItemView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
-
+                
                 // Progress bar and progress information (only displayed when downloading is in progress)
                 if case .downloading(let progress) = status {
                     VStack(alignment: .leading, spacing: 2) {
@@ -108,7 +108,7 @@ struct DownloadItemView: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-
+            
             // Action button (Cancel/Retry)
             Button(action: onCancel) {
                 Image(systemName: buttonIcon)
@@ -118,7 +118,7 @@ struct DownloadItemView: View {
         }
         .padding(.vertical, 8)
     }
-
+    
     private var iconColor: Color {
         switch status {
         case .downloading: .accentColor
@@ -126,7 +126,7 @@ struct DownloadItemView: View {
         default: .accentColor
         }
     }
-
+    
     private var iconBackgroundColor: Color {
         switch status {
         case .downloading: .blue.opacity(0.1)
@@ -134,7 +134,7 @@ struct DownloadItemView: View {
         default: .accentColor
         }
     }
-
+    
     private var buttonIcon: String {
         switch status {
         case .downloading: "xmark.circle.fill"  // cancel icon
@@ -142,7 +142,7 @@ struct DownloadItemView: View {
         case .completed, .cancelled: "xmark.circle.fill"  // Default close icon
         }
     }
-
+    
     private var buttonColor: Color {
         switch status {
         case .downloading: .secondary  // Use secondary color for cancel button

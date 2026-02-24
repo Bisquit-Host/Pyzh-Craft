@@ -90,19 +90,13 @@ public struct GameSettingsView: View {
             
             LabeledContent("Game Resources") {
                 HStack {
-                    Label(
-                        "\(cacheManager.cacheInfo.fileCount)",
-                        systemImage: "text.document"
-                    )
-                    .font(.callout)
+                    Label("\(cacheManager.cacheInfo.fileCount)", systemImage: "text.document")
+                        .font(.callout)
                     
                     Divider().frame(height: 16)
                     
-                    Label(
-                        cacheManager.cacheInfo.formattedSize,
-                        systemImage: "externaldrive"
-                    )
-                    .font(.callout)
+                    Label(cacheManager.cacheInfo.formattedSize, systemImage: "externaldrive")
+                        .font(.callout)
                 }
                 .foregroundStyle(.primary)
             }

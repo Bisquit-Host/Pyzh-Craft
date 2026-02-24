@@ -23,15 +23,15 @@ enum GameNameGenerator {
         includeTimestamp: Bool = true
     ) -> String {
         let baseName = "\(projectTitle ?? "ModPack")-\(gameVersion)"
-
+        
         if includeTimestamp {
             let timestamp = DateFormatter.timestampFormatter.string(from: Date())
             return "\(baseName)-\(timestamp)"
         }
-
+        
         return baseName
     }
-
+    
     /// Generate default game name for ModPack import
     /// - Parameters:
     ///   - modPackName: integration package name
@@ -44,15 +44,15 @@ enum GameNameGenerator {
         includeTimestamp: Bool = true
     ) -> String {
         let baseName = "\(modPackName)-\(modPackVersion)"
-
+        
         if includeTimestamp {
             let timestamp = DateFormatter.timestampFormatter.string(from: Date())
             return "\(baseName)-\(timestamp)"
         }
-
+        
         return baseName
     }
-
+    
     /// Generate default game name for normal game creation
     /// - Parameters:
     ///   - gameVersion: game version

@@ -5,9 +5,9 @@ import Foundation
 @MainActor
 class LitematicaService {
     static let shared = LitematicaService()
-
+    
     private init() {}
-
+    
     /// Read the Litematica projection file list from the game directory
     /// - Parameter gameName: game name
     /// - Returns: Litematica projection file list
@@ -25,7 +25,7 @@ class LitematicaService {
             )
         }
     }
-
+    
     /// Parse metadata of Litematica files (for list display)
     /// - Parameter filePath: file path
     /// - Returns: metadata information
@@ -34,7 +34,7 @@ class LitematicaService {
             try parseLitematicaMetadataSync(filePath: filePath)
         }.value
     }
-
+    
     /// Read complete Litematica projection metadata
     /// - Parameter filePath: file path
     /// - Returns: complete metadata information

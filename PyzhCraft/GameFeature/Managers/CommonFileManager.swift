@@ -7,25 +7,25 @@ class CommonFileManager {
     private let fileManager = FileManager.default
     private let retryCount = 3
     private let retryDelay: TimeInterval = 2
-
+    
     init(librariesDir: URL) {
         self.librariesDir = librariesDir
         let config = URLSessionConfiguration.ephemeral
         config.httpMaximumConnectionsPerHost =
-            GeneralSettingsManager.shared.concurrentDownloads
+        GeneralSettingsManager.shared.concurrentDownloads
         config.requestCachePolicy = .reloadIgnoringLocalCacheData
         self.session = URLSession(configuration: config)
     }
-
+    
     actor Counter {
         private var value = 0
-
+        
         func increment() -> Int {
             value += 1
             return value
         }
     }
-
+    
     /// Download the Forge JAR file (silent version)
     /// - Parameter libraries: list of library files to download
     func downloadForgeJars(libraries: [ModrinthLoaderLibrary]) async {
@@ -37,14 +37,14 @@ class CommonFileManager {
             GlobalErrorHandler.shared.handle(globalError)
         }
     }
-
+    
     /// Download the Forge JAR file (throws exception version)
     /// - Parameter libraries: list of library files to download
     /// - Throws: GlobalError when download fails
     func downloadForgeJarsThrowing(libraries: [ModrinthLoaderLibrary]) async throws {
         let tasks = libraries.compactMap { lib -> JarDownloadTask? in
             guard lib.downloadable else { return nil }
-
+            
             // Prefer using LibraryDownloads.artifact
             if let downloads = lib.downloads, let artifactUrl = downloads.artifact.url, let artifactPath = downloads.artifact.path {
                 return JarDownloadTask(
@@ -54,7 +54,7 @@ class CommonFileManager {
                     expectedSha1: downloads.artifact.sha1.isEmpty ? nil : downloads.artifact.sha1
                 )
             }
-
+            
             guard let url = CommonService.mavenCoordinateToURL(lib: lib) else { return nil }
             return JarDownloadTask(
                 name: lib.name,
@@ -63,7 +63,7 @@ class CommonFileManager {
                 expectedSha1: nil
             )
         }
-
+        
         do {
             try await BatchJarDownloader.download(
                 tasks: tasks,
@@ -79,7 +79,7 @@ class CommonFileManager {
             )
         }
     }
-
+    
     /// Download the FabricJAR file (silent version)
     /// - Parameter libraries: list of library files to download
     func downloadFabricJars(libraries: [ModrinthLoaderLibrary]) async {
@@ -91,7 +91,7 @@ class CommonFileManager {
             GlobalErrorHandler.shared.handle(globalError)
         }
     }
-
+    
     /// Download the FabricJAR file (throws exception version)
     /// - Parameter libraries: list of library files to download
     /// - Throws: GlobalError when download fails
@@ -106,7 +106,7 @@ class CommonFileManager {
                 expectedSha1: ""
             )
         }
-
+        
         do {
             try await BatchJarDownloader.download(
                 tasks: tasks,
@@ -122,7 +122,7 @@ class CommonFileManager {
             )
         }
     }
-
+    
     /// Execute processors
     /// - Parameters:
     ///   - processors: processor list
@@ -138,45 +138,45 @@ class CommonFileManager {
             guard let sides = processor.sides else { return true } // If sides is not specified, it will be executed by default
             return sides.contains(AppConstants.EnvironmentTypes.client)
         }
-
+        
         guard !clientProcessors.isEmpty else {
             Logger.shared.info("The client-side processor was not found and execution was skipped")
             return
         }
-
+        
         Logger.shared.info("Find \(clientProcessors.count) client processors and start execution")
-
+        
         // Use the original data field from version.json and add the necessary environment variables
         var processorData: [String: String] = [:]
-
+        
         // Add basic environment variables
         processorData["SIDE"] = AppConstants.EnvironmentTypes.client
         processorData["MINECRAFT_VERSION"] = gameVersion
         processorData["LIBRARY_DIR"] = librariesDir.path
-
+        
         // Add Minecraft JAR path
         let minecraftJarPath = AppPaths.versionsDirectory.appendingPathComponent(gameVersion).appendingPathComponent("\(gameVersion).jar")
         processorData["MINECRAFT_JAR"] = minecraftJarPath.path
-
+        
         // Add instance path (profile directory)
         if let gameName = gameName {
             processorData["ROOT"] = AppPaths.profileDirectory(gameName: gameName).path
         }
-
+        
         // Parse the data field in version.json
         if let data = data {
             for (key, sidedEntry) in data {
                 processorData[key] = Self.extractClientValue(from: sidedEntry.client) ?? sidedEntry.client
             }
         }
-
+        
         // Obtain the corresponding Java version through gameVersion and only obtain it once to avoid repeated requests and verification in each processor
         let versionInfo = try await ModrinthService.fetchVersionInfo(from: gameVersion)
         let javaPath = await JavaManager.shared.ensureJavaExists(
             version: versionInfo.javaVersion.component,
             requiredMajorVersion: versionInfo.javaVersion.majorVersion
         )
-
+        
         for (index, processor) in clientProcessors.enumerated() {
             do {
                 let processorName = processor.jar ?? String(localized: "Unknown")
@@ -203,7 +203,7 @@ class CommonFileManager {
             }
         }
     }
-
+    
     /// Execute a single processor
     /// - Parameters:
     ///   - processor: processor
@@ -222,7 +222,7 @@ class CommonFileManager {
             data: data
         )
     }
-
+    
     /// Extract client-side data from the data field value
     /// - Parameter value: the value of the data field
     /// - Returns: client-side data, if it cannot be parsed, return nil
@@ -231,7 +231,7 @@ class CommonFileManager {
         if value.contains(":") && !value.hasPrefix("[") && !value.hasPrefix("{") {
             return CommonService.convertMavenCoordinateToPath(value)
         }
-
+        
         // If it is in array format, directly extract the content and convert it to a path
         if value.hasPrefix("[") && value.hasSuffix("]") {
             let content = String(value.dropFirst().dropLast())

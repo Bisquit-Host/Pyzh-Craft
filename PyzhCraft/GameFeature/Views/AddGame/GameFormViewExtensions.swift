@@ -9,7 +9,7 @@ extension View {
         triggerCancel: Binding<Bool>
     ) -> some View {
         self
-            // Optimization: only update when the value actually changes, reducing unnecessary view updates
+        // Optimization: only update when the value actually changes, reducing unnecessary view updates
             .onChange(of: viewModel.gameNameValidator.gameName) { oldValue, newValue in
                 if oldValue != newValue {
                     viewModel.updateParentState()
@@ -50,7 +50,7 @@ extension BaseGameFormViewModel {
         )
         handleNonCriticalError(globalError, message: "error.file.access.failed")
     }
-
+    
     /// Unified file read error handling
     func handleFileReadError(_ error: Error, context: String) {
         let globalError = GlobalError.fileSystem(

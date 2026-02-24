@@ -8,10 +8,10 @@ struct VersionGroupedView: View {
     @Binding var selectedItems: [String]
     let onItemTap: (String) -> Void
     var isMultiSelect = true  // Whether to support multiple selection, the default is true
-
+    
     // Optional binding for radio mode
     @Binding var selectedItem: String?
-
+    
     // MARK: - Initializers
     /// Multiple selection mode initialization
     init(items: [FilterItem], selectedItems: Binding<[String]>, onItemTap: @escaping (String) -> Void) {
@@ -21,7 +21,7 @@ struct VersionGroupedView: View {
         self.isMultiSelect = true
         self._selectedItem = .constant(nil)
     }
-
+    
     /// Radio mode initialization
     init(items: [FilterItem], selectedItem: Binding<String?>, onItemTap: @escaping (String) -> Void) {
         self.items = items
@@ -30,19 +30,19 @@ struct VersionGroupedView: View {
         self.isMultiSelect = false
         self._selectedItems = .constant([])
     }
-
+    
     // MARK: - Constants
     private enum Constants {
         static let groupSpacing: CGFloat = 8
         static let itemSpacing: CGFloat = 4
         static let groupTitlePadding: CGFloat = 4
     }
-
+    
     // MARK: - Body
     var body: some View {
         let groups = groupVersions(items)
         let sortedKeys = sortVersionKeys(groups.keys)
-
+        
         ScrollView {
             VStack(alignment: .leading, spacing: Constants.groupSpacing) {
                 ForEach(sortedKeys, id: \.self) {
@@ -53,7 +53,7 @@ struct VersionGroupedView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
-
+    
     // MARK: - Private Views
     @ViewBuilder
     private func versionGroupView(key: String, items: [FilterItem]) -> some View {
@@ -63,7 +63,7 @@ struct VersionGroupedView: View {
                 .font(.headline.bold())
                 .foregroundColor(.primary)
                 .padding(.top, Constants.groupTitlePadding)
-
+            
             // version item
             FlowLayout {
                 ForEach(items) { item in
@@ -78,7 +78,7 @@ struct VersionGroupedView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
-
+    
     // MARK: - Helper Methods
     /// Determine whether the item is selected
     private func isSelected(_ itemId: String) -> Bool {
@@ -88,7 +88,7 @@ struct VersionGroupedView: View {
             selectedItem == itemId
         }
     }
-
+    
     /// Group version items by major version number
     private func groupVersions(_ items: [FilterItem]) -> [String: [FilterItem]] {
         Dictionary(grouping: items) { item in
@@ -100,7 +100,7 @@ struct VersionGroupedView: View {
             }
         }
     }
-
+    
     /// Sort version keys (latest version first)
     private func sortVersionKeys(_ keys: Dictionary<String, [FilterItem]>.Keys) -> [String] {
         keys.sorted { key1, key2 in

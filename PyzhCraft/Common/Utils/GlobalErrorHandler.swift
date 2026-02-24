@@ -58,11 +58,11 @@ enum GlobalError: Error, LocalizedError, Identifiable {
         i18nKey: LocalizedStringKey,
         level: ErrorLevel = .silent
     )
-
+    
     var id: String {
         "\(typeIdentifier)_\(i18nKeyString)_\(level.rawValue)"
     }
-
+    
     private var typeIdentifier: String {
         switch self {
         case .network: "network"
@@ -78,12 +78,12 @@ enum GlobalError: Error, LocalizedError, Identifiable {
         case .unknown: "unknown"
         }
     }
-
+    
     /// Chinese error description
     var chineseMessage: String {
         localizedDescription
     }
-
+    
     /// International key
     var i18nKey: LocalizedStringKey {
         switch self {
@@ -100,12 +100,12 @@ enum GlobalError: Error, LocalizedError, Identifiable {
         case let .unknown(key, _): key
         }
     }
-
+    
     /// International key as raw string
     var i18nKeyString: String {
         i18nKey.rawKey
     }
-
+    
     /// error level
     var level: ErrorLevel {
         switch self {
@@ -122,7 +122,7 @@ enum GlobalError: Error, LocalizedError, Identifiable {
         case let .unknown(_, level): level
         }
     }
-
+    
     /// Localized error description (using internationalization key)
     var errorDescription: String? {
         LanguageManager.shared.bundle.localizedString(
@@ -131,7 +131,7 @@ enum GlobalError: Error, LocalizedError, Identifiable {
             table: nil
         )
     }
-
+    
     /// Localized description derived from the localization key
     var localizedDescription: String {
         LanguageManager.shared.bundle.localizedString(
@@ -140,7 +140,7 @@ enum GlobalError: Error, LocalizedError, Identifiable {
             table: nil
         )
     }
-
+    
     /// Get notification title (using internationalization key)
     var notificationTitle: LocalizedStringKey {
         switch self {
@@ -161,15 +161,15 @@ enum GlobalError: Error, LocalizedError, Identifiable {
 
 enum GlobalErrorType: String, CaseIterable {
     case network, fileSystem, authentication, validation, download, installation, gameLaunch, resource, player, configuration, unknown
-
+    
     var defaultLevel: ErrorLevel {
         switch self {
         case .network, .fileSystem, .validation, .download, .installation, .resource, .player, .configuration:
-            .notification
+                .notification
         case .authentication, .gameLaunch:
-            .popup
+                .popup
         case .unknown:
-            .silent
+                .silent
         }
     }
 }
@@ -179,7 +179,7 @@ enum GlobalErrorType: String, CaseIterable {
 extension GlobalError {
     init(type: GlobalErrorType, i18nKey: LocalizedStringKey, level: ErrorLevel? = nil) {
         let resolvedLevel = level ?? type.defaultLevel
-
+        
         switch type {
         case .network:
             self = .network(i18nKey: i18nKey, level: resolvedLevel)
@@ -205,17 +205,17 @@ extension GlobalError {
             self = .unknown(i18nKey: i18nKey, level: resolvedLevel)
         }
     }
-
+    
     init(type: GlobalErrorType, i18nKey: String, level: ErrorLevel? = nil) {
         self.init(type: type, i18nKey: LocalizedStringKey(i18nKey), level: level)
     }
-
+    
     /// Convert from other error types to global errors
     static func from(_ error: Error) -> GlobalError {
         switch error {
         case let globalError as GlobalError:
             return globalError
-
+            
         default:
             if let urlError = error as? URLError {
                 // If it is a cancellation error, use the silent level and do not display notifications
@@ -225,7 +225,7 @@ extension GlobalError {
                     level: level
                 )
             }
-
+            
             // Check if it is a file system error
             let nsError = error as NSError
             
@@ -235,7 +235,7 @@ extension GlobalError {
                     level: .notification
                 )
             }
-
+            
             return GlobalError(
                 type: .unknown,
                 i18nKey: "Unknown error",
@@ -249,19 +249,19 @@ extension GlobalError {
 
 class GlobalErrorHandler: ObservableObject {
     static let shared = GlobalErrorHandler()
-
+    
     @Published var currentError: GlobalError?
     @Published var errorHistory: [GlobalError] = []
-
+    
     private let maxHistoryCount = 100
-
+    
     private init() {}
-
+    
     func handle(_ error: Error) {
         let globalError = GlobalError.from(error)
         handle(globalError)
     }
-
+    
     func handle(_ globalError: GlobalError) {
         DispatchQueue.main.async {
             self.currentError = globalError
@@ -270,13 +270,13 @@ class GlobalErrorHandler: ObservableObject {
             self.handleErrorByLevel(globalError)
         }
     }
-
+    
     /// Handle errors based on error level
     private func handleErrorByLevel(_ error: GlobalError) {
         switch error.level {
         case .popup:
             Logger.shared.error("[GlobalError-Popup] \(error.chineseMessage)")
-
+            
         case .notification:
             // Send notification
             let notificationTitleKey = error.notificationTitle.rawKey
@@ -288,41 +288,41 @@ class GlobalErrorHandler: ObservableObject {
                 ),
                 body: error.localizedDescription
             )
-
+            
         case .silent:
             // Silent processing, only logging
             Logger.shared.error("[GlobalError-Silent] \(error.chineseMessage)")
-
+            
         case .disabled:
             // do nothing
             break
         }
     }
-
+    
     /// Clear current errors
     func clearCurrentError() {
         DispatchQueue.main.async {
             self.currentError = nil
         }
     }
-
+    
     /// Clear error history
     func clearHistory() {
         DispatchQueue.main.async {
             self.errorHistory.removeAll()
         }
     }
-
+    
     /// Add error to history
     private func addToHistory(_ error: GlobalError) {
         errorHistory.append(error)
-
+        
         // Limit the number of history records
         if errorHistory.count > maxHistoryCount {
             errorHistory.removeFirst()
         }
     }
-
+    
     /// Clean memory when app exits
     func cleanup() {
         DispatchQueue.main.async {
@@ -330,7 +330,7 @@ class GlobalErrorHandler: ObservableObject {
             self.errorHistory.removeAll(keepingCapacity: false)
         }
     }
-
+    
     /// Record errors to log
     private func logError(_ error: GlobalError) {
         Logger.shared.error("[GlobalError] \(error.chineseMessage) | Key: \(error.i18nKeyString) | Level: \(error.level.rawValue)")
@@ -341,7 +341,7 @@ class GlobalErrorHandler: ObservableObject {
 
 struct GlobalErrorHandlerModifier: ViewModifier {
     @StateObject private var errorHandler = GlobalErrorHandler.shared
-
+    
     func body(content: Content) -> some View {
         content
             .onReceive(errorHandler.$currentError) { error in
@@ -367,43 +367,43 @@ extension GlobalErrorHandler {
     static func network(i18nKey: LocalizedStringKey, level: ErrorLevel = .notification) -> GlobalError {
         .network(i18nKey: i18nKey, level: level)
     }
-
+    
     static func fileSystem(i18nKey: LocalizedStringKey, level: ErrorLevel = .notification) -> GlobalError {
         .fileSystem(i18nKey: i18nKey, level: level)
     }
-
+    
     static func authentication(i18nKey: LocalizedStringKey, level: ErrorLevel = .popup) -> GlobalError {
         .authentication(i18nKey: i18nKey, level: level)
     }
-
+    
     static func validation(i18nKey: LocalizedStringKey, level: ErrorLevel = .notification) -> GlobalError {
         .validation(i18nKey: i18nKey, level: level)
     }
-
+    
     static func download(i18nKey: LocalizedStringKey, level: ErrorLevel = .notification) -> GlobalError {
         .download(i18nKey: i18nKey, level: level)
     }
-
+    
     static func installation(i18nKey: LocalizedStringKey, level: ErrorLevel = .notification) -> GlobalError {
         .installation(i18nKey: i18nKey, level: level)
     }
-
+    
     static func gameLaunch(i18nKey: LocalizedStringKey, level: ErrorLevel = .popup) -> GlobalError {
         .gameLaunch(i18nKey: i18nKey, level: level)
     }
-
+    
     static func resource(i18nKey: LocalizedStringKey, level: ErrorLevel = .notification) -> GlobalError {
         .resource(i18nKey: i18nKey, level: level)
     }
-
+    
     static func player(i18nKey: LocalizedStringKey, level: ErrorLevel = .notification) -> GlobalError {
         .player(i18nKey: i18nKey, level: level)
     }
-
+    
     static func configuration(i18nKey: LocalizedStringKey, level: ErrorLevel = .notification) -> GlobalError {
         .configuration(i18nKey: i18nKey, level: level)
     }
-
+    
     static func unknown(i18nKey: LocalizedStringKey, level: ErrorLevel = .silent) -> GlobalError {
         .unknown(i18nKey: i18nKey, level: level)
     }

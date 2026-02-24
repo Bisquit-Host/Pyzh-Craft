@@ -7,10 +7,10 @@ struct GameHeaderListRow: View {
     let query: String
     let onImport: () -> Void
     var onIconTap: (() -> Void)?
-
+    
     @State private var refreshTrigger = UUID()
     @State private var cancellable: AnyCancellable?
-
+    
     var body: some View {
         HStack {
             gameIcon
@@ -23,6 +23,7 @@ struct GameHeaderListRow: View {
                         .lineLimit(1)
                         .frame(minWidth: 0, maxWidth: 200)
                         .fixedSize(horizontal: true, vertical: false)
+                    
                     HStack {
                         Label("\(cacheInfo.fileCount)", systemImage: "text.document")
                         Divider().frame(height: 16)
@@ -32,7 +33,7 @@ struct GameHeaderListRow: View {
                     .font(.headline)
                     .padding(.leading, 6)
                 }
-
+                
                 HStack(spacing: 8) {
                     Label(game.gameVersion, systemImage: "gamecontroller.fill")
                         .font(.subheadline)
@@ -40,8 +41,8 @@ struct GameHeaderListRow: View {
                     Divider().frame(height: 14)
                     Label(
                         game.modVersion.isEmpty
-                            ? game.modLoader
-                            : "\(game.modLoader)-\(game.modVersion)",
+                        ? game.modLoader
+                        : "\(game.modLoader)-\(game.modVersion)",
                         systemImage: "puzzlepiece.extension.fill"
                     )
                     .font(.subheadline)
@@ -67,12 +68,12 @@ struct GameHeaderListRow: View {
             EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 8)
         )
     }
-
+    
     /// Icon file URL (the path is fixed; refresh only relies on notifications to trigger .id reconstruction)
     private var iconURL: URL {
         profileDir.appendingPathComponent(game.gameIcon)
     }
-
+    
     private var gameIcon: some View {
         Group {
             if FileManager.default.fileExists(atPath: profileDir.appendingPathComponent(game.gameIcon).path) {
@@ -114,11 +115,11 @@ struct GameHeaderListRow: View {
             cancellable?.cancel()
         }
     }
-
+    
     private var profileDir: URL {
         AppPaths.profileDirectory(gameName: game.gameName)
     }
-
+    
     private var defaultIcon: some View {
         Image(nsImage: NSImage(named: "AppIcon") ?? NSImage())
             .resizable()
@@ -126,14 +127,14 @@ struct GameHeaderListRow: View {
             .frame(width: 80, height: 80)
             .cornerRadius(16)
     }
-
+    
     @ViewBuilder
     private func styledIcon(_ image: Image, size: Int) -> some View {
         let padding: CGFloat = CGFloat(size) * 0.125 // padding is 12.5% ​​of size (10 at 80)
         let innerSize = CGFloat(size) - padding * 2
         let innerCornerRadius = innerSize * 0.2 // The inner fillet is 20% of the inner size
         let outerCornerRadius = CGFloat(size) * 0.2 // The outer fillet is 20% of the outer size
-
+        
         image
             .resizable()
             .interpolation(.none)
@@ -144,7 +145,7 @@ struct GameHeaderListRow: View {
             .frame(width: CGFloat(size), height: CGFloat(size))
             .clipShape(RoundedRectangle(cornerRadius: outerCornerRadius, style: .continuous))
     }
-
+    
     private var importButton: some View {
         LocalResourceInstaller.ImportButton(
             query: query,

@@ -3,7 +3,7 @@ import Foundation
 /// Unified library filtering tool class
 /// Unify download and classpath built library filtering logic
 enum LibraryFilter {
-
+    
     /// Determine whether the library is allowed (based on platform rules)
     /// - Parameters:
     ///   - library: library to check
@@ -14,7 +14,7 @@ enum LibraryFilter {
         guard let rules = library.rules, !rules.isEmpty else { return true }
         return MacRuleEvaluator.isAllowed(rules, minecraftVersion: minecraftVersion)
     }
-
+    
     /// Determine whether the library should be downloaded
     /// - Parameters:
     ///   - library: library to check
@@ -24,7 +24,7 @@ enum LibraryFilter {
         guard library.downloadable else { return false }
         return isLibraryAllowed(library, minecraftVersion: minecraftVersion)
     }
-
+    
     /// Determine whether the library should be included in the classpath
     /// - Parameters:
     ///   - library: library to check

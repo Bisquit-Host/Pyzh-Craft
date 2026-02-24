@@ -10,7 +10,7 @@ class JavaDownloadState: ObservableObject {
     @Published var version = ""
     @Published var errorMessage = ""
     @Published var hasError = false
-
+    
     func reset() {
         isDownloading = false
         progress = 0
@@ -20,7 +20,7 @@ class JavaDownloadState: ObservableObject {
         errorMessage = ""
         hasError = false
     }
-
+    
     func startDownload(version: String) {
         self.version = version
         self.isDownloading = true
@@ -29,16 +29,16 @@ class JavaDownloadState: ObservableObject {
         self.hasError = false
         self.errorMessage = ""
     }
-
+    
     func cancel() {
         isCancelled = true
     }
-
+    
     func updateProgress(fileName: String, progress: Double) {
         currentFile = fileName
         self.progress = progress
     }
-
+    
     func setError(_ message: String) {
         hasError = true
         errorMessage = message

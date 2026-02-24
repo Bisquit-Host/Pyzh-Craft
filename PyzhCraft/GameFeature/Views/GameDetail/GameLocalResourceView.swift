@@ -19,15 +19,15 @@ struct GameLocalResourceView: View {
     @State private var allFiles: [URL] = [] // List of all files
     @State private var searchTimer: Timer? // Search for anti-shake timer
     @Binding var localFilter: LocalResourceFilter
-
+    
     private static let pageSize: Int = 20
     private var pageSize: Int { Self.pageSize }
-
+    
     // List of currently displayed resources (infinite scroll)
     private var displayedResources: [ModrinthProjectDetail] {
         scannedResources
     }
-
+    
     /// List of files actually used for scanning under the current filter
     private var filesToScan: [URL] {
         switch localFilter {
@@ -38,7 +38,7 @@ struct GameLocalResourceView: View {
             return allFiles.filter { $0.lastPathComponent.hasSuffix(".disable") }
         }
     }
-
+    
     var body: some View {
         List {
             if let header {
@@ -125,7 +125,7 @@ struct GameLocalResourceView: View {
             }
         }
     }
-
+    
     // MARK: - List contents
     @ViewBuilder private var listContent: some View {
         if let error {
@@ -176,7 +176,7 @@ struct GameLocalResourceView: View {
             }
         }
     }
-
+    
     private var loadingMoreIndicator: some View {
         VStack(spacing: 12) {
             ProgressView()
@@ -185,11 +185,11 @@ struct GameLocalResourceView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(16)
     }
-
+    
     private var showsLoadingOverlay: Bool {
         isLoadingResources && scannedResources.isEmpty && error == nil
     }
-
+    
     // MARK: - Loading in pages
     private func resetPagination() {
         currentPage = 1
@@ -199,7 +199,7 @@ struct GameLocalResourceView: View {
         error = nil
         scannedResources = []
     }
-
+    
     // MARK: - clear data
     /// Clear all data on the page
     private func clearAllData() {
@@ -217,7 +217,7 @@ struct GameLocalResourceView: View {
         resourceDirectory = nil
         allFiles = []
     }
-
+    
     // MARK: - Search related
     /// Anti-shake search
     private func debounceSearch() {
@@ -233,7 +233,7 @@ struct GameLocalResourceView: View {
             }
         }
     }
-
+    
     /// Filter resource details based on title and projectType
     private func filterResourcesByTitle(_ details: [ModrinthProjectDetail]) -> [ModrinthProjectDetail] {
         // Filter resource types by query
@@ -249,20 +249,20 @@ struct GameLocalResourceView: View {
                 return detail.projectType.lowercased() == queryLower
             }
         }
-
+        
         // Filter by search text
         let searchLower = searchText.lowercased()
             .trimmingCharacters(in: .whitespacesAndNewlines)
-
+        
         if searchLower.isEmpty {
             return filteredByType
         }
-
+        
         return filteredByType.filter { detail in
             detail.title.lowercased().contains(searchLower)
         }
     }
-
+    
     // MARK: - Resource directory initialization
     /// Initialize resource directory path
     private func initializeResourceDirectory() {
@@ -279,12 +279,12 @@ struct GameLocalResourceView: View {
                 return
             }
         }
-
+        
         resourceDirectory = AppPaths.resourceDirectory(
             for: query,
             gameName: game.gameName
         )
-
+        
         if resourceDirectory == nil {
             let globalError = GlobalError.configuration(
                 i18nKey: "Resource Directory Not Found",
@@ -295,7 +295,7 @@ struct GameLocalResourceView: View {
             error = globalError
         }
     }
-
+    
     // MARK: - file list
     private func refreshAllFiles() {
         // Modpacks don't have a local directory to scan
@@ -303,22 +303,22 @@ struct GameLocalResourceView: View {
             allFiles = []
             return
         }
-
+        
         if resourceDirectory == nil {
             initializeResourceDirectory()
         }
-
+        
         guard let resourceDir = resourceDirectory else {
             allFiles = []
             return
         }
-
+        
         allFiles = ModScanner.shared.getAllResourceFiles(resourceDir)
     }
-
+    
     private func loadPage(page: Int, append: Bool) {
         guard !isLoadingResources, !isLoadingMore else { return }
-
+        
         // Modpacks don't have a local directory to scan, skip scanning
         if query.lowercased() == "modpack" {
             scannedResources = []
@@ -327,10 +327,10 @@ struct GameLocalResourceView: View {
             hasMoreResults = false
             return
         }
-
+        
         // Select the actual set of files to scan based on the current filter
         let sourceFiles = filesToScan
-
+        
         if sourceFiles.isEmpty {
             scannedResources = []
             isLoadingResources = false
@@ -338,16 +338,16 @@ struct GameLocalResourceView: View {
             hasMoreResults = false
             return
         }
-
+        
         if append {
             isLoadingMore = true
         } else {
             isLoadingResources = true
         }
         error = nil
-
+        
         let isSearching = !searchText.isEmpty
-
+        
         // Always use the file list under the current filter for paging scanning, and then filter based on title in the results
         ModScanner.shared.scanResourceFilesPage(
             fileURLs: sourceFiles,
@@ -357,7 +357,7 @@ struct GameLocalResourceView: View {
             DispatchQueue.main.async {
                 // Filter results based on title
                 let filteredDetails = self.filterResourcesByTitle(details)
-
+                
                 if append {
                     // Append mode: only add matching results and remove duplicates
                     // Get the existing id collection for deduplication
@@ -369,7 +369,7 @@ struct GameLocalResourceView: View {
                     // Replacement mode: directly use the filtered results
                     scannedResources = filteredDetails
                 }
-
+                
                 // In search mode: If there are more pages, the next page will be automatically loaded until all files are searched
                 if isSearching && hasMore {
                     // Reset the loading status first, then continue loading the next page
@@ -388,7 +388,7 @@ struct GameLocalResourceView: View {
             }
         }
     }
-
+    
     private func loadNextPageIfNeeded(currentItem mod: ModrinthProject) {
         guard hasMoreResults, !isLoadingResources, !isLoadingMore else {
             return
@@ -398,7 +398,7 @@ struct GameLocalResourceView: View {
                 $0.id == mod.projectId
             })
         else { return }
-
+        
         // Load next page when scrolling near the end of loaded list
         let thresholdIndex = max(scannedResources.count - 5, 0)
         if index >= thresholdIndex {
@@ -407,7 +407,7 @@ struct GameLocalResourceView: View {
             loadPage(page: nextPage, append: true)
         }
     }
-
+    
     // MARK: - Refresh resources
     /// Refresh the resource list (called after deleting the resource)
     private func refreshResources() {
@@ -417,7 +417,7 @@ struct GameLocalResourceView: View {
         resetPagination()
         loadPage(page: 1, append: false)
     }
-
+    
     /// Processing after local resource enable/disable status changes
     /// - Parameters:
     ///   - project: the corresponding ModrinthProject (converted from detail, its fileName is the old value before switching)
@@ -433,8 +433,8 @@ struct GameLocalResourceView: View {
             newFileName = oldFileName + ".disable"
         } else {
             newFileName = oldFileName.hasSuffix(".disable")
-                ? String(oldFileName.dropLast(".disable".count))
-                : oldFileName
+            ? String(oldFileName.dropLast(".disable".count))
+            : oldFileName
         }
         if let i = scannedResources.firstIndex(where: { $0.id == project.projectId }) {
             var d = scannedResources[i]
@@ -455,7 +455,7 @@ struct GameLocalResourceView: View {
             scannedResources.removeAll { $0.id == project.projectId }
         }
     }
-
+    
     /// Partial refresh after successful update: only update the hash and list items of the current entry, no global scan
     /// - Parameters:
     ///   - projectId: project id
@@ -483,7 +483,7 @@ struct GameLocalResourceView: View {
             allFiles[j] = dir.appendingPathComponent(newFileName)
         }
     }
-
+    
     /// Toggle resource enable/disable status
     private func toggleResourceState(_ mod: ModrinthProject) {
         guard let resourceDir = resourceDirectory ?? AppPaths.resourceDirectory(
@@ -493,16 +493,16 @@ struct GameLocalResourceView: View {
             Logger.shared.error("Failed to switch resource enablement status: Resource directory does not exist")
             return
         }
-
+        
         guard let fileName = mod.fileName else {
             Logger.shared.error("Failed to switch resource enabled state: missing filename")
             return
         }
-
+        
         let fileManager = FileManager.default
         let currentURL = resourceDir.appendingPathComponent(fileName)
         let targetFileName: String
-
+        
         let isDisabled = fileName.hasSuffix(".disable")
         if isDisabled {
             guard fileName.hasSuffix(".disable") else {
@@ -513,9 +513,9 @@ struct GameLocalResourceView: View {
         } else {
             targetFileName = fileName + ".disable"
         }
-
+        
         let targetURL = resourceDir.appendingPathComponent(targetFileName)
-
+        
         do {
             try fileManager.moveItem(at: currentURL, to: targetURL)
         } catch {

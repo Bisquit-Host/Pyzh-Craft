@@ -5,7 +5,7 @@ import OSLog
 // MARK: - Notification Center Delegate
 
 final class NotificationCenterDelegate: NSObject, UNUserNotificationCenterDelegate {
-
+    
     /// App receives notification when it is in the foreground and decides how to display it
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
@@ -18,7 +18,7 @@ final class NotificationCenterDelegate: NSObject, UNUserNotificationCenterDelega
 }
 
 enum NotificationManager {
-
+    
     /// Send notification
     /// - Parameters:
     ///   - title: notification title
@@ -29,19 +29,19 @@ enum NotificationManager {
         content.title = title
         content.body = body
         content.sound = .default
-
+        
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-
+        
         let semaphore = DispatchSemaphore(value: 0)
         var notificationError: Error?
-
+        
         UNUserNotificationCenter.current().add(request) { error in
             notificationError = error
             semaphore.signal()
         }
-
+        
         semaphore.wait()
-
+        
         if let error = notificationError {
             Logger.shared.error("Error adding notification request: \(error.localizedDescription)")
             throw GlobalError.resource(
@@ -50,7 +50,7 @@ enum NotificationManager {
             )
         }
     }
-
+    
     /// Send notification (silent version, logs errors but does not throw exceptions on failure)
     /// - Parameters:
     ///   - title: notification title
@@ -64,14 +64,14 @@ enum NotificationManager {
             GlobalErrorHandler.shared.handle(globalError)
         }
     }
-
+    
     /// Request notification permission
     /// - Throws: GlobalError when the operation fails
     static func requestAuthorization() async throws {
         do {
             let granted = try await UNUserNotificationCenter.current()
                 .requestAuthorization(options: [.alert, .sound, .badge])
-
+            
             if granted {
                 Logger.shared.info("Notification permission granted")
             } else {
@@ -93,7 +93,7 @@ enum NotificationManager {
             }
         }
     }
-
+    
     /// Request notification permission (silent version, logs an error but does not throw an exception on failure)
     static func requestAuthorizationIfNeeded() async {
         do {
@@ -104,12 +104,12 @@ enum NotificationManager {
             GlobalErrorHandler.shared.handle(globalError)
         }
     }
-
+    
     /// - Returns: permission status
     static func checkAuthorizationStatus() async -> UNAuthorizationStatus {
         await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
     }
-
+    
     /// Check if you have notification permission
     /// - Returns: Do you have permission?
     static func hasAuthorization() async -> Bool {

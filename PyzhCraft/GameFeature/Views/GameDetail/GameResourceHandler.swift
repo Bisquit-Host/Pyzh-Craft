@@ -21,9 +21,9 @@ enum GameResourceHandler {
             }
         }
     }
-
+    
     // MARK: - file deletion
-
+    
     /// Delete files (silent version)
     static func performDelete(fileURL: URL) {
         do {
@@ -34,7 +34,7 @@ enum GameResourceHandler {
             GlobalErrorHandler.shared.handle(globalError)
         }
     }
-
+    
     /// Delete file (throws exception version)
     static func performDeleteThrowing(fileURL: URL) throws {
         guard FileManager.default.fileExists(atPath: fileURL.path) else {
@@ -43,7 +43,7 @@ enum GameResourceHandler {
                 level: .notification
             )
         }
-
+        
         // If it is a mod file, obtain the hash before deleting it so that it can be removed from the cache
         var hash: String?
         var gameName: String?
@@ -53,10 +53,10 @@ enum GameResourceHandler {
             // Get the hash of the file
             hash = ModScanner.sha1Hash(of: fileURL)
         }
-
+        
         do {
             try FileManager.default.removeItem(at: fileURL)
-
+            
             // After the deletion is successful, if it is a mod, it will be removed from the cache
             if let hash = hash, let gameName = gameName {
                 ModScanner.shared.removeModHash(hash, from: gameName)
@@ -68,14 +68,14 @@ enum GameResourceHandler {
             )
         }
     }
-
+    
     /// Determine whether the directory is a mods directory
     /// - Parameter dir: directory URL
     /// - Returns: whether it is the mods directory
     private static func isModsDirectory(_ dir: URL) -> Bool {
         dir.lastPathComponent.lowercased() == "mods"
     }
-
+    
     /// Extract game name from mods directory path
     /// - Parameter modsDir: mods directory URL
     /// - Returns: game name, returns nil if it cannot be extracted
@@ -84,9 +84,9 @@ enum GameResourceHandler {
         let parentDir = modsDir.deletingLastPathComponent()
         return parentDir.lastPathComponent
     }
-
+    
     // MARK: - Download method
-
+    
     @MainActor
     static func downloadWithDependencies(
         project: ModrinthProject,
@@ -109,7 +109,7 @@ enum GameResourceHandler {
             GlobalErrorHandler.shared.handle(globalError)
         }
     }
-
+    
     @MainActor
     static func downloadWithDependenciesThrowing(
         project: ModrinthProject,
@@ -123,10 +123,10 @@ enum GameResourceHandler {
                 level: .notification
             )
         }
-
+        
         var actuallyDownloaded: [ModrinthProjectDetail] = []
         var visited: Set<String> = []
-
+        
         await ModrinthDependencyDownloader.downloadAllDependenciesRecursive(
             for: project.projectId,
             gameInfo: gameInfo,
@@ -136,7 +136,7 @@ enum GameResourceHandler {
             visited: &visited
         )
     }
-
+    
     @MainActor
     static func downloadSingleResource(
         project: ModrinthProject,
@@ -159,7 +159,7 @@ enum GameResourceHandler {
             GlobalErrorHandler.shared.handle(globalError)
         }
     }
-
+    
     @MainActor
     static func downloadSingleResourceThrowing(
         project: ModrinthProject,
@@ -173,7 +173,7 @@ enum GameResourceHandler {
                 level: .notification
             )
         }
-
+        
         _ = await ModrinthDependencyDownloader.downloadMainResourceOnly(
             mainProjectId: project.projectId,
             gameInfo: gameInfo,
@@ -182,7 +182,7 @@ enum GameResourceHandler {
             filterLoader: query != "shader"
         )
     }
-
+    
     @MainActor
     static func prepareManualDependencies(
         project: ModrinthProject,
@@ -207,7 +207,7 @@ enum GameResourceHandler {
             return false
         }
     }
-
+    
     @MainActor
     static func prepareManualDependenciesThrowing(
         project: ModrinthProject,
@@ -220,22 +220,22 @@ enum GameResourceHandler {
                 level: .notification
             )
         }
-
+        
         depVM.isLoadingDependencies = true
-
+        
         let missing = await ModrinthDependencyDownloader.getMissingDependencies(
             for: project.projectId,
             gameInfo: gameInfo
         )
-
+        
         if missing.isEmpty {
             depVM.isLoadingDependencies = false
             return false
         }
-
+        
         var versionDict: [String: [ModrinthProjectDetailVersion]] = [:]
         var selectedVersionDict: [String: String] = [:]
-
+        
         // Use server-side filtering method, consistent with global resource installation logic
         // Preset game versions and loaders
         for dep in missing {
@@ -247,7 +247,7 @@ enum GameResourceHandler {
                     selectedLoaders: [gameInfo.modLoader],
                     type: "mod"
                 )
-
+                
                 versionDict[dep.id] = filteredVersions
                 // Like global resource installation, the first version is automatically selected
                 if let firstVersion = filteredVersions.first {
@@ -261,7 +261,7 @@ enum GameResourceHandler {
                 versionDict[dep.id] = []
             }
         }
-
+        
         depVM.missingDependencies = missing
         depVM.dependencyVersions = versionDict
         depVM.selectedDependencyVersion = selectedVersionDict
@@ -269,7 +269,7 @@ enum GameResourceHandler {
         depVM.resetDownloadStates()
         return true
     }
-
+    
     @MainActor
     static func downloadAllDependenciesAndMain(
         project: ModrinthProject,
@@ -296,7 +296,7 @@ enum GameResourceHandler {
             depVM.overallDownloadState = .failed
         }
     }
-
+    
     @MainActor
     static func downloadAllDependenciesAndMainThrowing(
         project: ModrinthProject,
@@ -311,30 +311,30 @@ enum GameResourceHandler {
                 level: .notification
             )
         }
-
+        
         let dependencies = depVM.missingDependencies
         let selectedVersions = depVM.selectedDependencyVersion
         let dependencyVersions = depVM.dependencyVersions
-
+        
         let allSucceeded =
-            await ModrinthDependencyDownloader.downloadManualDependenciesAndMain(
-                dependencies: dependencies,
-                selectedVersions: selectedVersions,
-                dependencyVersions: dependencyVersions,
-                mainProjectId: project.projectId,
-                mainProjectVersionId: nil,  // Use the latest version
-                gameInfo: gameInfo,
-                query: query,
-                gameRepository: gameRepository,
-                onDependencyDownloadStart: { depId in
-                    depVM.dependencyDownloadStates[depId] = .downloading
-                },
-                onDependencyDownloadFinish: { depId, success in
-                    depVM.dependencyDownloadStates[depId] =
-                        success ? .success : .failed
-                }
-            )
-
+        await ModrinthDependencyDownloader.downloadManualDependenciesAndMain(
+            dependencies: dependencies,
+            selectedVersions: selectedVersions,
+            dependencyVersions: dependencyVersions,
+            mainProjectId: project.projectId,
+            mainProjectVersionId: nil,  // Use the latest version
+            gameInfo: gameInfo,
+            query: query,
+            gameRepository: gameRepository,
+            onDependencyDownloadStart: { depId in
+                depVM.dependencyDownloadStates[depId] = .downloading
+            },
+            onDependencyDownloadFinish: { depId, success in
+                depVM.dependencyDownloadStates[depId] =
+                success ? .success : .failed
+            }
+        )
+        
         if !allSucceeded {
             throw GlobalError.download(
                 i18nKey: "Dependencies Failed",
@@ -342,7 +342,7 @@ enum GameResourceHandler {
             )
         }
     }
-
+    
     @MainActor
     static func downloadMainResourceAfterDependencies(
         project: ModrinthProject,
@@ -367,7 +367,7 @@ enum GameResourceHandler {
             GlobalErrorHandler.shared.handle(globalError)
         }
     }
-
+    
     @MainActor
     static func downloadMainResourceAfterDependenciesThrowing(
         project: ModrinthProject,
@@ -381,15 +381,15 @@ enum GameResourceHandler {
                 level: .notification
             )
         }
-
+        
         let (success, _, _) =
-            await ModrinthDependencyDownloader.downloadMainResourceOnly(
-                mainProjectId: project.projectId,
-                gameInfo: gameInfo,
-                query: query,
-                gameRepository: gameRepository
-            )
-
+        await ModrinthDependencyDownloader.downloadMainResourceOnly(
+            mainProjectId: project.projectId,
+            gameInfo: gameInfo,
+            query: query,
+            gameRepository: gameRepository
+        )
+        
         if !success {
             throw GlobalError.download(
                 i18nKey: "Main Resource Failed",
@@ -397,7 +397,7 @@ enum GameResourceHandler {
             )
         }
     }
-
+    
     @MainActor
     static func retryDownloadDependency(
         dep: ModrinthProjectDetail,
@@ -421,7 +421,7 @@ enum GameResourceHandler {
             depVM.dependencyDownloadStates[dep.id] = .failed
         }
     }
-
+    
     @MainActor
     static func retryDownloadDependencyThrowing(
         dep: ModrinthProjectDetail,
@@ -436,7 +436,7 @@ enum GameResourceHandler {
                 level: .notification
             )
         }
-
+        
         guard let versionId = depVM.selectedDependencyVersion[dep.id] else {
             throw GlobalError(
                 type: .resource,
@@ -444,7 +444,7 @@ enum GameResourceHandler {
                 level: .notification
             )
         }
-
+        
         guard let versions = depVM.dependencyVersions[dep.id] else {
             throw GlobalError(
                 type: .resource,
@@ -452,7 +452,7 @@ enum GameResourceHandler {
                 level: .notification
             )
         }
-
+        
         guard let version = versions.first(where: { $0.id == versionId }) else {
             throw GlobalError(
                 type: .resource,
@@ -460,7 +460,7 @@ enum GameResourceHandler {
                 level: .notification
             )
         }
-
+        
         guard
             let primaryFile = ModrinthService.filterPrimaryFiles(
                 from: version.files
@@ -471,9 +471,9 @@ enum GameResourceHandler {
                 level: .notification
             )
         }
-
+        
         depVM.dependencyDownloadStates[dep.id] = .downloading
-
+        
         do {
             let fileURL = try await DownloadManager.downloadResource(
                 for: gameInfo,
@@ -481,11 +481,11 @@ enum GameResourceHandler {
                 resourceType: dep.projectType,
                 expectedSha1: primaryFile.hashes.sha1
             )
-
+            
             var resourceToAdd = dep
             resourceToAdd.fileName = primaryFile.filename
             resourceToAdd.type = query
-
+            
             // If it is a mod, add it to the installation cache
             if query.lowercased() == "mod" {
                 // Get the hash of the downloaded file
@@ -496,7 +496,7 @@ enum GameResourceHandler {
                     )
                 }
             }
-
+            
             depVM.dependencyDownloadStates[dep.id] = .success
         } catch {
             throw GlobalError.download(

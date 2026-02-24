@@ -4,7 +4,7 @@ import SwiftUI
 /// Only responsible for language list and bundle
 public class LanguageManager {
     private static let appleLanguagesKey = "AppleLanguages"
-
+    
     /// The currently selected language (take the first one in the AppleLanguages ​​array)
     public var selectedLanguage: String {
         get {
@@ -21,17 +21,17 @@ public class LanguageManager {
             }
         }
     }
-
+    
     /// Singleton instance
     public static let shared = LanguageManager()
-
+    
     private init() {
         // If it is the first startup (selectedLanguage is empty), the default language is set according to the system language
         if selectedLanguage.isEmpty {
             selectedLanguage = Self.getDefaultLanguage()
         }
     }
-
+    
     /// Supported language list
     public let languages: [(String, String)] = [
         ("🇨🇳 简体中文", "zh-Hans"),
@@ -57,7 +57,7 @@ public class LanguageManager {
         ("🇹🇷 Türkçe", "tr"),
         ("🇻🇳 Tiếng Việt", "vi"),
     ]
-
+    
     /// Get the Bundle of the current language
     public var bundle: Bundle {
         if let path = Bundle.main.path(forResource: selectedLanguage, ofType: "lproj"),
@@ -66,15 +66,15 @@ public class LanguageManager {
         }
         return .main
     }
-
+    
     public static func getDefaultLanguage() -> String {
-
+        
         let preferredLanguages = Locale.preferredLanguages
-
+        
         for preferredLanguage in preferredLanguages {
             // Handle language code matching
             let languageCode = preferredLanguage.prefix(2).lowercased()
-
+            
             switch languageCode {
             case "zh":
                 // Chinese: Simplified Chinese first, then Traditional Chinese
@@ -110,7 +110,7 @@ public class LanguageManager {
                 continue
             }
         }
-
+        
         // If the system language is not supported, English will be used by default
         return "en"
     }

@@ -15,7 +15,7 @@ struct GlobalResourceSheet: View {
     @State private var isDownloadingAll = false
     @State private var isDownloadingMainOnly = false
     @State private var mainVersionId = ""
-
+    
     var body: some View {
         CommonSheetView(
             header: {
@@ -52,7 +52,7 @@ struct GlobalResourceSheet: View {
                                     mainVersionId: $mainVersionId
                                 ) { version in
                                     if resourceType == "mod",
-                                        let v = version {
+                                       let v = version {
                                         loadDependencies(for: v, game: game)
                                     } else {
                                         dependencyState = DependencyState()
@@ -98,7 +98,7 @@ struct GlobalResourceSheet: View {
             mainVersionId = ""
         }
     }
-
+    
     private func loadDependencies(
         for version: ModrinthProjectDetailVersion,
         game: GameVersionInfo
@@ -117,7 +117,7 @@ struct GlobalResourceSheet: View {
             }
         }
     }
-
+    
     private func loadDependenciesThrowing(
         for version: ModrinthProjectDetailVersion,
         game: GameVersionInfo
@@ -128,25 +128,25 @@ struct GlobalResourceSheet: View {
                 level: .notification
             )
         }
-
+        
         // Get missing dependencies (with version information)
         let missingWithVersions =
-            await ModrinthDependencyDownloader
+        await ModrinthDependencyDownloader
             .getMissingDependenciesWithVersions(
                 for: project.projectId,
                 gameInfo: game
             )
-
+        
         var depVersions: [String: [ModrinthProjectDetailVersion]] = [:]
         var depSelected: [String: ModrinthProjectDetailVersion?] = [:]
         var dependencies: [ModrinthProjectDetail] = []
-
+        
         for (detail, versions) in missingWithVersions {
             dependencies.append(detail)
             depVersions[detail.id] = versions
             depSelected[detail.id] = versions.first
         }
-
+        
         _ = await MainActor.run {
             dependencyState = DependencyState(
                 dependencies: dependencies,

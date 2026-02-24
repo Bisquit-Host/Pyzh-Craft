@@ -15,7 +15,7 @@ struct AddOrDeleteResourceButton: View {
         .idle
     @State private var isUpdateButtonLoading = false  // Update the loading state of the button
     @State private var showDeleteAlert = false
-
+    
     @State private var activeAlert: ResourceButtonAlertType?
     @State private var showGlobalResourceSheet = false
     @State private var showModPackDownloadSheet = false  // New: Integrated package download sheet
@@ -61,9 +61,9 @@ struct AddOrDeleteResourceButton: View {
         self.onResourceUpdated = onResourceUpdated
         self.onToggleDisableState = onToggleDisableState
     }
-
+    
     var body: some View {
-
+        
         HStack(spacing: 8) {
             // Update button (only displayed in local mode and when there is an update)
             if type == false && addButtonState == .update {
@@ -81,7 +81,7 @@ struct AddOrDeleteResourceButton: View {
                 .controlSize(.small)
                 .disabled(addButtonState == .loading || isUpdateButtonLoading)
             }
-
+            
             // Disable/enable button (only displayed for local resources)
             if type == false {
                 Toggle("", isOn: Binding(
@@ -92,7 +92,7 @@ struct AddOrDeleteResourceButton: View {
                 .labelsHidden()
                 .controlSize(.mini)
             }
-
+            
             // install/remove button
             Button(action: handleButtonAction) {
                 buttonLabel
@@ -103,7 +103,7 @@ struct AddOrDeleteResourceButton: View {
             .controlSize(.small)
             .disabled(
                 addButtonState == .loading
-                    || (addButtonState == .installed && type)
+                || (addButtonState == .installed && type)
             )  // type = true (server mode) disables deletion
             .onAppear {
                 if type == false {
@@ -136,7 +136,7 @@ struct AddOrDeleteResourceButton: View {
                     deleteFile()
                 }
                 .keyboardShortcut(.defaultAction)  // Bind the Enter key
-
+                
                 Button("Cancel", role: .cancel) {}
             } message: {
                 Text("Are you sure you want to delete \"\(project.title)\"? Deletion may cause game launch failure")
@@ -226,7 +226,7 @@ struct AddOrDeleteResourceButton: View {
                             // Download successful, mark and update status
                             hasDownloadedInSheet = true
                             addToScannedDetailIds(hash: newHash)
-
+                            
                             let wasUpdate = (oldFileNameForUpdate != nil)
                             let oldF = oldFileNameForUpdate
                             // If it is an update operation, delete the old file first (isUpdate: true does not trigger onResourceChanged)
@@ -257,7 +257,7 @@ struct AddOrDeleteResourceButton: View {
             alertType.alert
         }
     }
-
+    
     // MARK: - UI Components
     private var buttonLabel: some View {
         switch addButtonState {
@@ -273,8 +273,8 @@ struct AddOrDeleteResourceButton: View {
             AnyView(
                 Text(
                     (!type
-                        ? LocalizedStringKey("Delete")
-                        : LocalizedStringKey("Installed"))
+                     ? LocalizedStringKey("Delete")
+                     : LocalizedStringKey("Installed"))
                 )
             )
         case .update:
@@ -282,20 +282,20 @@ struct AddOrDeleteResourceButton: View {
             AnyView(Text("Delete"))
         }
     }
-
+    
     // Delete files based on file name
     private func deleteFile() {
         // Delete using project.fileName
         deleteFile(fileName: project.fileName)
     }
-
+    
     // Delete files based on specified file name
     // - Parameter isUpdate: If true, it means it comes from the update process (deleting old files) and onResourceChanged is not called
     private func deleteFile(fileName: String?, isUpdate: Bool = false) {
         // Check if query is a valid resource type
         let validResourceTypes = ["mod", "datapack", "shader", "resourcepack"]
         let queryLowercased = query.lowercased()
-
+        
         // If query is a modpack or an invalid resource type, show an error
         if queryLowercased == "modpack" || !validResourceTypes.contains(queryLowercased) {
             let globalError = GlobalError.configuration(
@@ -306,12 +306,12 @@ struct AddOrDeleteResourceButton: View {
             GlobalErrorHandler.shared.handle(globalError)
             return
         }
-
+        
         guard let gameInfo = gameInfo,
-            let resourceDir = AppPaths.resourceDirectory(
+              let resourceDir = AppPaths.resourceDirectory(
                 for: query,
                 gameName: gameInfo.gameName
-            )
+              )
         else {
             let globalError = GlobalError.configuration(
                 i18nKey: "Delete File Failed",
@@ -321,7 +321,7 @@ struct AddOrDeleteResourceButton: View {
             GlobalErrorHandler.shared.handle(globalError)
             return
         }
-
+        
         // Delete using the fileName passed in
         guard let fileName = fileName else {
             let globalError = GlobalError(
@@ -333,14 +333,14 @@ struct AddOrDeleteResourceButton: View {
             GlobalErrorHandler.shared.handle(globalError)
             return
         }
-
+        
         let fileURL = resourceDir.appendingPathComponent(fileName)
         GameResourceHandler.performDelete(fileURL: fileURL)
         if !isUpdate {
             onResourceChanged?()
         }
     }
-
+    
     // MARK: - Actions
     /// Handling update button clicks
     @MainActor
@@ -355,7 +355,7 @@ struct AddOrDeleteResourceButton: View {
             }
         }
     }
-
+    
     @MainActor
     private func handleButtonAction() {
         if case .game = selectedItem {
@@ -363,13 +363,13 @@ struct AddOrDeleteResourceButton: View {
             case .idle:
                 // New: Special handling of modpacks
                 if query == "modpack" {
-                            addButtonState = .loading
-                            Task {
-                                await loadModPackDetailBeforeOpeningSheet()
-                            }
+                    addButtonState = .loading
+                    Task {
+                        await loadModPackDetailBeforeOpeningSheet()
+                    }
                     return
                 }
-
+                
                 addButtonState = .loading
                 Task {
                     // Load project details and open the game resource installation sheet (reuse global resource installation logic)
@@ -400,7 +400,7 @@ struct AddOrDeleteResourceButton: View {
                         }
                         return
                     }
-
+                    
                     // Other resources: The game needs to exist before you can click it
                     if gameRepository.games.isEmpty {
                         activeAlert = .noGame
@@ -416,7 +416,7 @@ struct AddOrDeleteResourceButton: View {
                         return
                     }
                 }
-
+                
                 addButtonState = .loading
                 Task {
                     // Open the GlobalResourceSheet to select the game to install
@@ -432,16 +432,16 @@ struct AddOrDeleteResourceButton: View {
             }
         }
     }
-
+    
     private func updateButtonState() {
         if type == false {
             addButtonState = .installed
             return
         }
-
+        
         let validResourceTypes = ["mod", "datapack", "shader", "resourcepack"]
         let queryLowercased = query.lowercased()
-
+        
         // modpack currently does not support installation status detection
         guard queryLowercased != "modpack",
               validResourceTypes.contains(queryLowercased)
@@ -449,16 +449,16 @@ struct AddOrDeleteResourceButton: View {
             addButtonState = .idle
             return
         }
-
+        
         // Only when the game is selected and in server mode, try to determine the installed status through hash
         guard case .game = selectedItem else {
             addButtonState = .idle
             return
         }
-
+        
         // Set loading state before detection starts
         addButtonState = .loading
-
+        
         Task {
             let installed = await ResourceInstallationChecker.checkInstalledStateForServerMode(
                 project: project,
@@ -473,7 +473,7 @@ struct AddOrDeleteResourceButton: View {
             }
         }
     }
-
+    
     // New: Load projectDetail (normal resources) before opening sheet
     private func loadProjectDetailBeforeOpeningSheet() async {
         defer {
@@ -481,7 +481,7 @@ struct AddOrDeleteResourceButton: View {
                 addButtonState = .idle
             }
         }
-
+        
         guard let result = await ResourceDetailLoader.loadProjectDetail(
             projectId: project.projectId,
             gameRepository: gameRepository,
@@ -489,14 +489,14 @@ struct AddOrDeleteResourceButton: View {
         ) else {
             return
         }
-
+        
         await MainActor.run {
             preloadedDetail = result.detail
             preloadedCompatibleGames = result.compatibleGames
             showGlobalResourceSheet = true
         }
     }
-
+    
     // New: Load projectDetail before opening integration package sheet
     private func loadModPackDetailBeforeOpeningSheet() async {
         defer {
@@ -504,19 +504,19 @@ struct AddOrDeleteResourceButton: View {
                 addButtonState = .idle
             }
         }
-
+        
         guard let detail = await ResourceDetailLoader.loadModPackDetail(
             projectId: project.projectId
         ) else {
             return
         }
-
+        
         await MainActor.run {
             preloadedDetail = detail
             showModPackDownloadSheet = true
         }
     }
-
+    
     // New: Load project details before opening the game resource installation sheet (reuse global resource installation logic)
     private func loadGameResourceInstallDetailBeforeOpeningSheet() async {
         guard gameInfo != nil else {
@@ -525,7 +525,7 @@ struct AddOrDeleteResourceButton: View {
             }
             return
         }
-
+        
         defer {
             Task { @MainActor in
                 // Reset the loading state of the update button
@@ -537,12 +537,12 @@ struct AddOrDeleteResourceButton: View {
                 }
             }
         }
-
+        
         // Reset download flag
         await MainActor.run {
             hasDownloadedInSheet = false
         }
-
+        
         // Load project details (uses the same logic as global resource installation)
         guard let result = await ResourceDetailLoader.loadProjectDetail(
             projectId: project.projectId,
@@ -551,12 +551,12 @@ struct AddOrDeleteResourceButton: View {
         ) else {
             return
         }
-
+        
         // Set preloadedDetail first
         await MainActor.run {
             preloadedDetail = result.detail
         }
-
+        
         // Wait for the main thread cycle before displaying the sheet
         await MainActor.run {
             // Display sheet only if preloadedDetail is not nil
@@ -565,7 +565,7 @@ struct AddOrDeleteResourceButton: View {
             }
         }
     }
-
+    
     // New: Detect if there is a new version (only in local mode)
     private func checkForUpdate() {
         guard let gameInfo = gameInfo,
@@ -575,14 +575,14 @@ struct AddOrDeleteResourceButton: View {
         else {
             return
         }
-
+        
         Task {
             let result = await ModUpdateChecker.checkForUpdate(
                 project: project,
                 gameInfo: gameInfo,
                 resourceType: query
             )
-
+            
             await MainActor.run {
                 if result.hasUpdate {
                     addButtonState = .update
@@ -592,7 +592,7 @@ struct AddOrDeleteResourceButton: View {
             }
         }
     }
-
+    
     // New: Update scannedDetailIds after installation is complete (using hash)
     private func addToScannedDetailIds(hash: String? = nil) {
         // If there is a hash, use the hash; otherwise, do not add it yet
@@ -601,7 +601,7 @@ struct AddOrDeleteResourceButton: View {
             scannedDetailIds.insert(hash)
         }
     }
-
+    
     private func updateDisableState() {
         // Use currentFileName if it exists, otherwise use project.fileName
         let fileName = currentFileName ?? project.fileName
@@ -609,25 +609,25 @@ struct AddOrDeleteResourceButton: View {
         // Synchronously update the state exposed to the parent view
         isResourceDisabled = isDisabled
     }
-
+    
     private func toggleDisableState() {
         guard let gameInfo = gameInfo,
-            let resourceDir = AppPaths.resourceDirectory(
+              let resourceDir = AppPaths.resourceDirectory(
                 for: query,
                 gameName: gameInfo.gameName
-            )
+              )
         else {
             Logger.shared.error("Failed to switch resource enablement status: Resource directory does not exist")
             return
         }
-
+        
         // Use currentFileName if it exists, otherwise use project.fileName
         let fileName = currentFileName ?? project.fileName
         guard let fileName = fileName else {
             Logger.shared.error("Failed to switch resource enabled state: missing filename")
             return
         }
-
+        
         do {
             let newFileName = try ResourceEnableDisableManager.toggleDisableState(
                 fileName: fileName,
@@ -638,7 +638,7 @@ struct AddOrDeleteResourceButton: View {
             isDisabled = ResourceEnableDisableManager.isDisabled(fileName: newFileName)
             // Synchronously update the state exposed to the parent view
             isResourceDisabled = isDisabled
-
+            
             // Notify external local resources that their enabled/disabled status has changed
             onToggleDisableState?(isDisabled)
         } catch {

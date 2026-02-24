@@ -20,9 +20,9 @@ private enum Constants {
 
 // MARK: - MinecraftFileManager
 class MinecraftFileManager {
-
+    
     // MARK: - Properties
-
+    
     private let fileManager = FileManager.default
     private let session: URLSession
     private let coreFilesCount = NSLockingCounter()
@@ -33,37 +33,37 @@ class MinecraftFileManager {
         label: "com.launcher.download",
         qos: .userInitiated
     )
-
+    
     var onProgressUpdate: ((String, Int, Int, DownloadType) -> Void)?
-
+    
     enum DownloadType {
         case core, resources
     }
-
+    
     // MARK: - Initialization
     init() {
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = Constants.downloadTimeout
         config.timeoutIntervalForResource = Constants.downloadTimeout
         config.httpMaximumConnectionsPerHost =
-            GeneralSettingsManager.shared.concurrentDownloads
+        GeneralSettingsManager.shared.concurrentDownloads
         config.requestCachePolicy = .reloadIgnoringLocalCacheData
         self.session = URLSession(configuration: config)
     }
-
+    
     // MARK: - Public Methods
-
+    
     /// Clean game folder (when download fails or cancels)
     /// - Parameter gameName: game name
     /// - Throws: GlobalError when the operation fails
     func cleanupGameDirectories(gameName: String) throws {
         let profileDirectory = AppPaths.profileDirectory(gameName: gameName)
-
+        
         // Check if the game folder exists
         guard fileManager.fileExists(atPath: profileDirectory.path) else {
             return
         }
-
+        
         do {
             try fileManager.removeItem(at: profileDirectory)
         } catch {
@@ -73,7 +73,7 @@ class MinecraftFileManager {
             )
         }
     }
-
+    
     /// Download version file (silent version)
     /// - Parameters:
     ///   - manifest: Minecraft version list
@@ -98,7 +98,7 @@ class MinecraftFileManager {
             return false
         }
     }
-
+    
     /// Download version file (throws exception version)
     /// - Parameters:
     ///   - manifest: Minecraft version list
@@ -109,7 +109,7 @@ class MinecraftFileManager {
         gameName: String
     ) async throws {
         try createDirectories(manifestId: manifest.id, gameName: gameName)
-
+        
         // Use bounded task groups to limit concurrency
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask { [weak self] in
@@ -118,56 +118,56 @@ class MinecraftFileManager {
             group.addTask { [weak self] in
                 try await self?.downloadAssets(manifest: manifest)
             }
-
+            
             try await group.waitForAll()
         }
     }
-
+    
     // MARK: - Private Methods
     private func calculateTotalFiles(_ manifest: MinecraftVersionManifest) -> Int {
         let applicableLibraries = manifest.libraries.filter { shouldDownloadLibrary($0, minecraftVersion: manifest.id) }
-
+        
         // Count the number of native libraries that will actually be downloaded (consistent with the download logic)
         let nativeLibraries = applicableLibraries.compactMap { (library: Library) -> Library? in
             // Check if there is a native library classifier and it is available for the current platform
             guard let classifiers = library.downloads.classifiers,
                   let natives = library.natives else { return nil }
-
+            
             // Find the native library classifier corresponding to the current platform
             let osKey = natives.keys.first { isNativeClassifier($0, minecraftVersion: manifest.id) }
             guard let platformKey = osKey,
                   let classifierKey = natives[platformKey],
                   classifiers[classifierKey] != nil else { return nil }
-
+            
             return library // Returns the library that will actually download the native library
         }.count
-
+        
         return 1 + applicableLibraries.count + nativeLibraries + 2  // Client JAR + Libraries + Native Libraries + Asset Index + Logging Config
     }
-
+    
     /// Check whether the classifier is a native library of the current platform
     private func isNativeClassifier(_ key: String, minecraftVersion: String? = nil) -> Bool {
         MacRuleEvaluator.isPlatformIdentifierSupported(key, minecraftVersion: minecraftVersion)
     }
-
+    
     private func createDirectories(
         manifestId: String,
         gameName: String
     ) throws {
         let profileDirectory = AppPaths.profileDirectory(gameName: gameName)
         let directoriesToCreate =
-            Constants.metaSubdirectories.map {
-                AppPaths.metaDirectory.appendingPathComponent($0)
-            } + [
-                AppPaths.metaDirectory.appendingPathComponent(AppConstants.DirectoryNames.versions)
-                    .appendingPathComponent(manifestId),
-                profileDirectory,
-            ]
+        Constants.metaSubdirectories.map {
+            AppPaths.metaDirectory.appendingPathComponent($0)
+        } + [
+            AppPaths.metaDirectory.appendingPathComponent(AppConstants.DirectoryNames.versions)
+                .appendingPathComponent(manifestId),
+            profileDirectory,
+        ]
         let profileSubfolders = AppPaths.profileSubdirectories.map {
             profileDirectory.appendingPathComponent($0)
         }
         let allDirectories = directoriesToCreate + profileSubfolders
-
+        
         for directory in allDirectories where !fileManager.fileExists(atPath: directory.path) {
             do {
                 try fileManager.createDirectory(
@@ -182,10 +182,10 @@ class MinecraftFileManager {
             }
         }
     }
-
+    
     private func downloadCoreFiles(manifest: MinecraftVersionManifest) async throws {
         coreTotalFiles = calculateTotalFiles(manifest)
-
+        
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask { [weak self] in
                 try await self?.downloadClientJar(manifest: manifest)
@@ -196,11 +196,11 @@ class MinecraftFileManager {
             group.addTask { [weak self] in
                 try await self?.downloadLoggingConfig(manifest: manifest)
             }
-
+            
             try await group.waitForAll()
         }
     }
-
+    
     private func downloadClientJar(
         manifest: MinecraftVersionManifest
     ) async throws {
@@ -210,7 +210,7 @@ class MinecraftFileManager {
         let destinationURL = versionDir.appendingPathComponent(
             "\(manifest.id).jar"
         )
-
+        
         do {
             _ = try await DownloadManager.downloadFile(
                 urlString: manifest.downloads.client.url.absoluteString,
@@ -233,29 +233,29 @@ class MinecraftFileManager {
             }
         }
     }
-
+    
     private func downloadLibraries(
         manifest: MinecraftVersionManifest
     ) async throws {
         let osxLibraries = manifest.libraries.filter {
             shouldDownloadLibrary($0, minecraftVersion: manifest.id)
         }
-
+        
         // Create a semaphore to control the number of concurrencies
         let semaphore = AsyncSemaphore(
             value: GeneralSettingsManager.shared.concurrentDownloads
         )
-
+        
         // Get metaDirectory in advance to avoid repeated access in loops
         let metaDirectory = AppPaths.metaDirectory
         let minecraftVersion = manifest.id
-
+        
         try await withThrowingTaskGroup(of: Void.self) { group in
             for library in osxLibraries {
                 group.addTask { [weak self] in
                     await semaphore.wait()
                     defer { Task { await semaphore.signal() } }
-
+                    
                     try await self?.downloadLibrary(
                         library,
                         metaDirectory: metaDirectory,
@@ -266,7 +266,7 @@ class MinecraftFileManager {
             try await group.waitForAll()
         }
     }
-
+    
     private func downloadLibrary(
         _ library: Library,
         metaDirectory: URL,
@@ -276,7 +276,7 @@ class MinecraftFileManager {
         guard shouldDownloadLibrary(library, minecraftVersion: minecraftVersion) else {
             return
         }
-
+        
         // If path is nil, use Maven coordinates to generate the path
         let destinationURL: URL
         if let existingPath = library.downloads.artifact.path {
@@ -294,14 +294,14 @@ class MinecraftFileManager {
             let fullPath = CommonService.convertMavenCoordinateToPath(library.name)
             destinationURL = URL(fileURLWithPath: fullPath)
         }
-
+        
         guard let artifactURL = library.downloads.artifact.url else {
             throw GlobalError.download(
                 i18nKey: "Missing library URL",
                 level: .notification
             )
         }
-
+        
         do {
             // Get the URL string in advance to avoid repeated visits
             let urlString = artifactURL.absoluteString
@@ -324,7 +324,7 @@ class MinecraftFileManager {
             }
         }
     }
-
+    
     private func downloadNativeLibrary(
         library: Library,
         classifiers: [String: LibraryArtifact],
@@ -333,14 +333,14 @@ class MinecraftFileManager {
     ) async throws {
         // Find the native library classifier corresponding to the current platform
         guard let natives = library.natives else { return }
-
+        
         let osKey = natives.keys.first { isNativeClassifier($0, minecraftVersion: minecraftVersion) }
         guard let platformKey = osKey,
               let classifierKey = natives[platformKey],
               let nativeArtifact = classifiers[classifierKey] else {
             return
         }
-
+        
         // Generate target path - download the native library to the natives directory
         let destinationURL: URL
         if let existingPath = nativeArtifact.path {
@@ -356,14 +356,14 @@ class MinecraftFileManager {
             destinationURL = metaDirectory.appendingPathComponent(AppConstants.DirectoryNames.natives)
                 .appendingPathComponent(relativePath)
         }
-
+        
         guard let nativeURL = nativeArtifact.url else {
             throw GlobalError.download(
                 i18nKey: "Missing native URL",
                 level: .notification
             )
         }
-
+        
         do {
             // DownloadManager.downloadFile already contains file existence and verification logic
             _ = try await DownloadManager.downloadFile(
@@ -371,7 +371,7 @@ class MinecraftFileManager {
                 destinationURL: destinationURL,
                 expectedSha1: nativeArtifact.sha1
             )
-
+            
             // Use library name to avoid formatting strings creating temporary objects
             incrementCompletedFilesCount(
                 fileName: library.name,
@@ -389,25 +389,25 @@ class MinecraftFileManager {
             }
         }
     }
-
+    
     private func downloadAssets(
         manifest: MinecraftVersionManifest
     ) async throws {
         let assetIndex = try await downloadAssetIndex(manifest: manifest)
         resourceTotalFiles = assetIndex.objects.count
-
+        
         try await downloadAllAssets(assetIndex: assetIndex)
     }
-
+    
     private func downloadAssetIndex(
         manifest: MinecraftVersionManifest
     ) async throws -> DownloadedAssetIndex {
-
+        
         let destinationURL = AppPaths.metaDirectory.appendingPathComponent(
             "assets/indexes"
         )
-        .appendingPathComponent("\(manifest.assetIndex.id).json")
-
+            .appendingPathComponent("\(manifest.assetIndex.id).json")
+        
         do {
             _ = try await DownloadManager.downloadFile(
                 urlString: manifest.assetIndex.url.absoluteString,
@@ -442,7 +442,7 @@ class MinecraftFileManager {
             }
         }
     }
-
+    
     private func downloadLoggingConfig(
         manifest: MinecraftVersionManifest
     ) async throws {
@@ -450,10 +450,10 @@ class MinecraftFileManager {
         let versionDir = AppPaths.metaDirectory.appendingPathComponent(
             AppConstants.DirectoryNames.versions
         )
-        .appendingPathComponent(manifest.id)
-
+            .appendingPathComponent(manifest.id)
+        
         let destinationURL = versionDir.appendingPathComponent(loggingFile.id)
-
+        
         do {
             _ = try await DownloadManager.downloadFile(
                 urlString: loggingFile.url.absoluteString,
@@ -476,7 +476,7 @@ class MinecraftFileManager {
             }
         }
     }
-
+    
     private func downloadAndSaveFile(
         from url: URL,
         to destinationURL: URL,
@@ -491,10 +491,10 @@ class MinecraftFileManager {
                 destinationURL: destinationURL,
                 expectedSha1: sha1
             )
-
+            
             incrementCompletedFilesCount(
                 fileName: fileNameForNotification
-                    ?? destinationURL.lastPathComponent,
+                ?? destinationURL.lastPathComponent,
                 type: type
             )
         } catch {
@@ -509,7 +509,7 @@ class MinecraftFileManager {
             }
         }
     }
-
+    
     private func verifyExistingFile(
         at url: URL,
         expectedSha1: String
@@ -517,18 +517,18 @@ class MinecraftFileManager {
         let fileSha1 = try await calculateFileSHA1(at: url)
         return fileSha1 == expectedSha1
     }
-
+    
     private func calculateFileSHA1(at url: URL) async throws -> String {
         try SHA1Calculator.sha1(ofFileAt: url)
     }
-
+    
     private func incrementCompletedFilesCount(
         fileName: String,
         type: DownloadType
     ) {
         let currentCount: Int
         let total: Int
-
+        
         switch type {
         case .core:
             currentCount = coreFilesCount.increment()
@@ -537,24 +537,24 @@ class MinecraftFileManager {
             currentCount = resourceFilesCount.increment()
             total = resourceTotalFiles
         }
-
+        
         onProgressUpdate?(fileName, currentCount, total, type)
     }
-
+    
     private func downloadAllAssets(
         assetIndex: DownloadedAssetIndex
     ) async throws {
-
+        
         let objectsDirectory = AppPaths.metaDirectory.appendingPathComponent(
             "assets/objects"
         )
         let assets = Array(assetIndex.objects)
-
+        
         // Create a semaphore to control the number of concurrencies
         let semaphore = AsyncSemaphore(
             value: GeneralSettingsManager.shared.concurrentDownloads
         )
-
+        
         // Process assets in chunks to balance memory usage and performance
         for chunk in stride(
             from: 0,
@@ -563,13 +563,13 @@ class MinecraftFileManager {
         ) {
             let end = min(chunk + Constants.assetChunkSize, assets.count)
             let currentChunk = assets[chunk..<end]
-
+            
             try await withThrowingTaskGroup(of: Void.self) { group in
                 for (path, asset) in currentChunk {
                     group.addTask { [weak self] in
                         await semaphore.wait()
                         defer { Task { await semaphore.signal() } }
-
+                        
                         try await self?.downloadAsset(
                             asset: asset,
                             path: path,
@@ -581,7 +581,7 @@ class MinecraftFileManager {
             }
         }
     }
-
+    
     private func downloadAsset(
         asset: AssetIndexData.AssetObject,
         path: String,
@@ -591,7 +591,7 @@ class MinecraftFileManager {
         let hashPrefix = String(asset.hash.prefix(2))
         let assetDirectory = objectsDirectory.appendingPathComponent(hashPrefix)
         let destinationURL = assetDirectory.appendingPathComponent(asset.hash)
-
+        
         do {
             // Pre-build URL strings to avoid duplicate creation in loops
             let urlString = "https://resources.download.minecraft.net/\(hashPrefix)/\(asset.hash)"
@@ -628,14 +628,14 @@ class MinecraftFileManager {
 final class NSLockingCounter {
     private var count = 0
     private let lock = NSLock()
-
+    
     func increment() -> Int {
         lock.lock()
         defer { lock.unlock() }
         count += 1
         return count
     }
-
+    
     func reset() {
         lock.lock()
         defer { lock.unlock() }
@@ -665,7 +665,7 @@ extension MinecraftFileManager {
             fileName: library.name,
             type: .core
         )
-
+        
         // Handle native libraries
         if let classifiers = library.downloads.classifiers {
             do {
@@ -680,12 +680,12 @@ extension MinecraftFileManager {
             }
         }
     }
-
+    
     /// Determine whether the library should be downloaded
     private func shouldDownloadLibrary(_ library: Library, minecraftVersion: String? = nil) -> Bool {
         LibraryFilter.shouldDownloadLibrary(library, minecraftVersion: minecraftVersion)
     }
-
+    
     /// Determine whether the library is allowed to be loaded under macOS (osx) (preserving backward compatibility)
     func isLibraryAllowedOnOSX(_ rules: [Rule]?) -> Bool {
         guard let rules = rules, !rules.isEmpty else { return true }

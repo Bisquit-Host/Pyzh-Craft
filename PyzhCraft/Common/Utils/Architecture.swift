@@ -3,16 +3,16 @@ import Foundation
 /// Unified architecture auxiliary tools to centrally handle compile-time architecture branches
 enum Architecture {
     case arm64, x86_64
-
+    
     /// Current compilation architecture
     static let current: Architecture = {
-        #if arch(arm64)
+#if arch(arm64)
         return .arm64
-        #else
+#else
         return .x86_64
-        #endif
+#endif
     }()
-
+    
     /// Java related schema strings
     var javaArch: String {
         switch self {
@@ -20,7 +20,7 @@ enum Architecture {
         case .x86_64: "x86_64"
         }
     }
-
+    
     /// Sparkle / Common Schema Strings
     var sparkleArch: String {
         switch self {
@@ -28,7 +28,7 @@ enum Architecture {
         case .x86_64: "x86_64"
         }
     }
-
+    
     /// Platform ID for Java Runtime API
     var macPlatformId: String {
         switch self {
@@ -36,7 +36,7 @@ enum Architecture {
         case .x86_64: "mac-os"
         }
     }
-
+    
     /// List of macOS identifiers for the current architecture (by priority)
     /// - Parameter isLowVersion: Whether it is a low version (Minecraft < 1.19)
     func macOSIdentifiers(isLowVersion: Bool) -> [String] {

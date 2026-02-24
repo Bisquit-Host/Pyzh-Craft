@@ -4,7 +4,7 @@ import SwiftUI
 struct CommonSheetGameBody: View {
     let compatibleGames: [GameVersionInfo]
     @Binding var selectedGame: GameVersionInfo?
-
+    
     var body: some View {
         Picker(
             "Select Game",
@@ -15,10 +15,10 @@ struct CommonSheetGameBody: View {
             )
             ForEach(compatibleGames, id: \.id) { game in
                 (Text("\(game.gameName)-")
-                    + Text("\(game.gameVersion)-").foregroundStyle(.secondary)
-                    + Text("\(game.modLoader)-")
-                    + Text("\(game.modVersion)").foregroundStyle(.secondary))
-                    .tag(Optional(game))
+                 + Text("\(game.gameVersion)-").foregroundStyle(.secondary)
+                 + Text("\(game.modLoader)-")
+                 + Text("\(game.modVersion)").foregroundStyle(.secondary))
+                .tag(Optional(game))
             }
         }
         .pickerStyle(.menu)

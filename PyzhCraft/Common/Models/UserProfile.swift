@@ -5,19 +5,19 @@ import Foundation
 struct UserProfile: Identifiable, Codable, Equatable {
     /// user unique identifier
     let id: String
-
+    
     /// Username
     let name: String
-
+    
     /// Avatar name or path
     let avatar: String
-
+    
     /// last play time
     var lastPlayed: Date
-
+    
     /// Is it the currently selected user?
     var isCurrent: Bool
-
+    
     /// Initialize basic user information
     /// - Parameters:
     ///   - id: user’s unique identifier

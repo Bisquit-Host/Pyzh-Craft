@@ -4,12 +4,12 @@ import SwiftUI
 /// Player Tools
 enum PlayerUtils {
     // MARK: - Constants
-
+    
     private static let names = ["alex", "ari", "efe", "kai", "makena", "noor", "steve", "sunny", "zuri"]
     private static let offlinePrefix = "OfflinePlayer:"
-
+    
     // MARK: - UUID Generation
-
+    
     static func generateOfflineUUID(for username: String) throws -> String {
         guard !username.isEmpty else {
             throw GlobalError.player(
@@ -17,14 +17,14 @@ enum PlayerUtils {
                 level: .notification
             )
         }
-
+        
         guard let data = (offlinePrefix + username).data(using: .utf8) else {
             throw GlobalError.validation(
                 i18nKey: "Username Encode Failed",
                 level: .notification
             )
         }
-
+        
         var bytes = [UInt8](Insecure.MD5.hash(data: data))
         bytes[6] = (bytes[6] & 0x0F) | 0x30 // Version 3
         bytes[8] = (bytes[8] & 0x3F) | 0x80 // RFC 4122
@@ -33,9 +33,9 @@ enum PlayerUtils {
         Logger.shared.debug("Generate offline UUID - Username: \(username), UUID: \(uuidString)")
         return uuidString
     }
-
+    
     // MARK: - Avatar Name Generation
-
+    
     static func avatarName(for uuid: String) -> String? {
         guard let index = nameIndex(for: uuid) else {
             Logger.shared.warning("Unable to get avatar name - invalid UUID: \(uuid)")
@@ -43,7 +43,7 @@ enum PlayerUtils {
         }
         return names[index]
     }
-
+    
     private static func nameIndex(for uuid: String) -> Int? {
         let cleanUUID = uuid.replacingOccurrences(of: "-", with: "")
         guard cleanUUID.count >= 32 else { return nil }

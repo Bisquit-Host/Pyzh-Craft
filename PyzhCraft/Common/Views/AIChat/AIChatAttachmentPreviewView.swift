@@ -4,7 +4,7 @@ import SwiftUI
 struct AIChatAttachmentPreviewView: View {
     let attachments: [MessageAttachmentType]
     let onRemove: (Int) -> Void
-
+    
     var body: some View {
         VStack(spacing: 0) {
             ScrollView(.horizontal, showsIndicators: false) {
@@ -18,6 +18,7 @@ struct AIChatAttachmentPreviewView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
             }
+            
             Divider()
         }
     }

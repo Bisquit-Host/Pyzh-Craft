@@ -16,7 +16,7 @@ enum ModPackArchiver {
         if FileManager.default.fileExists(atPath: outputPath.path) {
             try FileManager.default.removeItem(at: outputPath)
         }
-
+        
         // Create ZIP archive
         let archive: Archive
         do {
@@ -27,7 +27,7 @@ enum ModPackArchiver {
                 level: .notification
             )
         }
-
+        
         // Add modrinth.index.json to the zip root directory
         let indexPath = tempDir.appendingPathComponent(AppConstants.modrinthIndexFileName)
         if FileManager.default.fileExists(atPath: indexPath.path) {
@@ -43,7 +43,7 @@ enum ModPackArchiver {
                 return indexData.subdata(in: start..<end)
             }
         }
-
+        
         // Add the overrides folder and all its contents to the zip root
         let overridesDir = tempDir.appendingPathComponent("overrides")
         if FileManager.default.fileExists(atPath: overridesDir.path) {
@@ -52,34 +52,34 @@ enum ModPackArchiver {
                 includingPropertiesForKeys: [.isRegularFileKey],
                 options: [.skipsHiddenFiles]
             )
-
+            
             // Normalize overridesDir path (make sure it ends with /)
             let overridesDirPath = (overridesDir.path as NSString).standardizingPath
             let overridesDirPathWithSlash = overridesDirPath.hasSuffix("/")
-                ? overridesDirPath
-                : overridesDirPath + "/"
-
+            ? overridesDirPath
+            : overridesDirPath + "/"
+            
             while let fileURL = overridesEnumerator?.nextObject() as? URL {
                 if let isRegularFile = try? fileURL.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile,
                    isRegularFile {
                     // Calculate relative path (relative to overridesDir), add overrides/ prefix
                     // Use standardized paths to avoid problems caused by paths containing words like "private"
                     let filePath = (fileURL.path as NSString).standardizingPath
-
+                    
                     // Make sure the file path starts with the overridesDir path
                     guard filePath.hasPrefix(overridesDirPathWithSlash) else {
                         Logger.shared.warning("File path is not in overrides directory: \(filePath)")
                         continue
                     }
-
+                    
                     // Extract relative path part
                     let relativeToOverrides = String(filePath.dropFirst(overridesDirPathWithSlash.count))
                     // Path in build ZIP (starting with overrides/)
                     let relativePath = "overrides/\(relativeToOverrides)"
-
+                    
                     let fileData = try Data(contentsOf: fileURL)
                     let fileSize = Int64(fileData.count)
-
+                    
                     try archive.addEntry(
                         with: relativePath,
                         type: .file,

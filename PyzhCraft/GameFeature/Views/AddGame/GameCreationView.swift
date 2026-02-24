@@ -22,13 +22,13 @@ struct GameCreationView: View {
     @EnvironmentObject var playerListViewModel: PlayerListViewModel
     @Environment(\.dismiss)
     private var dismiss
-
+    
     // Bindings from parent
     private let triggerConfirm: Binding<Bool>
     private let triggerCancel: Binding<Bool>
     private let onRequestImagePicker: () -> Void
     private let onSetImagePickerHandler: (@escaping (Result<[URL], Error>) -> Void) -> Void
-
+    
     // MARK: - Initializer
     init(
         isDownloading: Binding<Bool>,
@@ -54,39 +54,39 @@ struct GameCreationView: View {
         )
         self._viewModel = StateObject(wrappedValue: GameCreationViewModel(configuration: configuration))
     }
-
+    
     // MARK: - Body
     var body: some View {
         formContentView
-        .onAppear {
-            viewModel.setup(gameRepository: gameRepository, playerListViewModel: playerListViewModel)
-            onSetImagePickerHandler(viewModel.handleImagePickerResult)
-        }
-        .gameFormStateListeners(viewModel: viewModel, triggerConfirm: triggerConfirm, triggerCancel: triggerCancel)
-        .onChange(of: viewModel.selectedLoaderVersion) { oldValue, newValue in
-            // Optimization: only update when the value actually changes
-            if oldValue != newValue {
-                viewModel.updateParentState()
+            .onAppear {
+                viewModel.setup(gameRepository: gameRepository, playerListViewModel: playerListViewModel)
+                onSetImagePickerHandler(viewModel.handleImagePickerResult)
             }
-        }
-        .onChange(of: viewModel.selectedModLoader) { oldValue, newLoader in
-            // Optimization: only handle when the value actually changes
-            if oldValue != newLoader {
-                viewModel.handleModLoaderChange(newLoader)
+            .gameFormStateListeners(viewModel: viewModel, triggerConfirm: triggerConfirm, triggerCancel: triggerCancel)
+            .onChange(of: viewModel.selectedLoaderVersion) { oldValue, newValue in
+                // Optimization: only update when the value actually changes
+                if oldValue != newValue {
+                    viewModel.updateParentState()
+                }
             }
-        }
-        .onChange(of: viewModel.selectedGameVersion) { oldValue, newVersion in
-            // Optimization: only handle when the value actually changes
-            if oldValue != newVersion {
-                viewModel.handleGameVersionChange(newVersion)
+            .onChange(of: viewModel.selectedModLoader) { oldValue, newLoader in
+                // Optimization: only handle when the value actually changes
+                if oldValue != newLoader {
+                    viewModel.handleModLoaderChange(newLoader)
+                }
             }
-        }
-        .onDisappear {
-            // Clear all data after closing the page
-            clearAllData()
-        }
+            .onChange(of: viewModel.selectedGameVersion) { oldValue, newVersion in
+                // Optimization: only handle when the value actually changes
+                if oldValue != newVersion {
+                    viewModel.handleGameVersionChange(newVersion)
+                }
+            }
+            .onDisappear {
+                // Clear all data after closing the page
+                clearAllData()
+            }
     }
-
+    
     // MARK: - clear data
     /// Clear all data on the page
     private func clearAllData() {
@@ -97,9 +97,9 @@ struct GameCreationView: View {
         // The data of ViewModel will be re-initialized the next time it is opened. Here we mainly clean up temporary files
         // Does not reset ViewModel state, may be using
     }
-
+    
     // MARK: - View Components
-
+    
     private var formContentView: some View {
         VStack {
             gameIconAndVersionSection
@@ -107,13 +107,13 @@ struct GameCreationView: View {
                 loaderVersionPicker
             }
             gameNameSection
-
+            
             if viewModel.shouldShowProgress {
                 downloadProgressSection
             }
         }
     }
-
+    
     private var gameIconAndVersionSection: some View {
         FormSection {
             HStack(alignment: .top, spacing: Constants.formSpacing) {
@@ -123,14 +123,14 @@ struct GameCreationView: View {
             }
         }
     }
-
+    
     private var gameIconView: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Icon")
                 .font(.subheadline)
                 .foregroundColor(.primary)
-
-                iconContainer
+            
+            iconContainer
                 .onTapGesture {
                     if !viewModel.gameSetupService.downloadState.isDownloading {
                         onRequestImagePicker()
@@ -146,7 +146,7 @@ struct GameCreationView: View {
         }
         .disabled(viewModel.gameSetupService.downloadState.isDownloading)
     }
-
+    
     private var iconContainer: some View {
         ZStack {
             if let url = viewModel.pendingIconURLForDisplay {
@@ -194,14 +194,14 @@ struct GameCreationView: View {
         }
         .frame(width: Constants.iconSize, height: Constants.iconSize)
     }
-
+    
     private var gameVersionAndLoaderView: some View {
         VStack(alignment: .leading, spacing: Constants.formSpacing) {
             modLoaderPicker
             versionPicker
         }
     }
-
+    
     private var versionPicker: some View {
         CustomVersionPicker(
             selected: $viewModel.selectedGameVersion,
@@ -212,7 +212,7 @@ struct GameCreationView: View {
         }
         .disabled(viewModel.gameSetupService.downloadState.isDownloading)
     }
-
+    
     private var modLoaderPicker: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Mod Loader")
@@ -229,7 +229,7 @@ struct GameCreationView: View {
             .disabled(viewModel.gameSetupService.downloadState.isDownloading)
         }
     }
-
+    
     private var loaderVersionPicker: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Loader Version")
@@ -246,7 +246,7 @@ struct GameCreationView: View {
             .disabled(viewModel.gameSetupService.downloadState.isDownloading || viewModel.availableLoaderVersions.isEmpty)
         }
     }
-
+    
     private var gameNameSection: some View {
         FormSection {
             GameNameInputView(
@@ -263,7 +263,7 @@ struct GameCreationView: View {
             )
         }
     }
-
+    
     private var downloadProgressSection: some View {
         DownloadProgressSection(
             gameSetupService: viewModel.gameSetupService,

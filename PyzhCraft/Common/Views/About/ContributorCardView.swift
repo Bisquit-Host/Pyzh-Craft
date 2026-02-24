@@ -6,7 +6,7 @@ struct ContributorCardView: View {
     let isTopContributor: Bool
     let rank: Int
     let contributionsText: String
-
+    
     var body: some View {
         Group {
             if let url = URL(string: contributor.htmlUrl) {
@@ -18,12 +18,12 @@ struct ContributorCardView: View {
             }
         }
     }
-
+    
     private var contributorContent: some View {
         HStack(spacing: 12) {
             // avatar
             ContributorAvatarView(avatarUrl: contributor.avatarUrl)
-
+            
             // information
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
@@ -36,25 +36,25 @@ struct ContributorCardView: View {
                             )
                         )
                         .foregroundColor(.primary)
-
+                    
                     if isTopContributor {
                         ContributorRankBadgeView(rank: rank)
                     }
                 }
-
+                
                 HStack(spacing: 4) {
                     // Code tags (uniformly marked as code contributors)
                     ContributionTagView(contribution: .code)
-
+                    
                     // Number of contributions
                     Text(contributionsText)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
             }
-
+            
             Spacer()
-
+            
             // arrow
             Image("github-mark")
                 .renderingMode(.template)

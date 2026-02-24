@@ -6,10 +6,10 @@ struct DependencySheetView: View {
     @Binding var isDownloadingMainResourceOnly: Bool
     let projectDetail: ModrinthProjectDetail
     @State private var error: GlobalError?
-
+    
     let onDownloadAll: () async -> Void
     let onDownloadMainOnly: () async -> Void
-
+    
     var body: some View {
         CommonSheetView(
             header: {
@@ -25,7 +25,7 @@ struct DependencySheetView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         ForEach(viewModel.missingDependencies, id: \.id) { dep in
                             let versions =
-                                viewModel.dependencyVersions[dep.id] ?? []
+                            viewModel.dependencyVersions[dep.id] ?? []
                             if !versions.isEmpty {
                                 VStack(alignment: .leading) {
                                     HStack(alignment: .center) {
@@ -41,7 +41,7 @@ struct DependencySheetView: View {
                                                     .selectedDependencyVersion[
                                                         dep.id
                                                     ]
-                                                    ?? (versions.first?.id ?? "")
+                                                ?? (versions.first?.id ?? "")
                                             },
                                             set: {
                                                 viewModel
@@ -78,11 +78,11 @@ struct DependencySheetView: View {
                             viewModel.showDependenciesSheet = false
                         }
                         Spacer()
-
+                        
                         let hasDownloading = viewModel.missingDependencies
                             .contains {
                                 viewModel.dependencyDownloadStates[$0.id]
-                                    == .downloading
+                                == .downloading
                             }
                         Button {
                             Task {
@@ -97,7 +97,7 @@ struct DependencySheetView: View {
                         }
                         .disabled(
                             isDownloadingAllDependencies
-                                || isDownloadingMainResourceOnly
+                            || isDownloadingMainResourceOnly
                         )
                         switch viewModel.overallDownloadState {
                         case .idle:
@@ -118,7 +118,7 @@ struct DependencySheetView: View {
                             .disabled(
                                 isDownloadingAllDependencies || hasDownloading
                             )
-
+                            
                         case .failed:
                             Button {
                                 isDownloadingAllDependencies = true
@@ -136,9 +136,9 @@ struct DependencySheetView: View {
                             .keyboardShortcut(.defaultAction)
                             .disabled(
                                 isDownloadingAllDependencies || hasDownloading
-                                    || !viewModel.allDependenciesDownloaded
+                                || !viewModel.allDependenciesDownloaded
                             )
-
+                            
                         case .retrying:
                             EmptyView()
                         }
@@ -163,7 +163,7 @@ struct DependencySheetView: View {
             }
         }
     }
-
+    
     private func handleDownloadError(_ error: Error) {
         let globalError = GlobalError.from(error)
         Logger.shared.error("Dependency download error: \(globalError.chineseMessage)")

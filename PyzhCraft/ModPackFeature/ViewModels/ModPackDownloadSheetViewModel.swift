@@ -15,10 +15,10 @@ class ModPackDownloadSheetViewModel: ObservableObject {
     @Published var isLoadingModPackVersions = false
     @Published var isLoadingProjectDetails = true
     @Published var lastParsedIndexInfo: ModrinthIndexInfo?
-
+    
     // Integration package installation progress status
     @Published var modPackInstallState = ModPackInstallState()
-
+    
     // Integration package file download progress status
     @Published var modPackDownloadProgress: Int64 = 0  // Number of bytes downloaded
     @Published var modPackTotalSize: Int64 = 0  // Total file size
@@ -28,29 +28,29 @@ class ModPackDownloadSheetViewModel: ObservableObject {
     func clearParsedIndexInfo() {
         lastParsedIndexInfo = nil
     }
-
+    
     /// Clean up all integration package import related data and temporary files
     func cleanupAllData() {
         // Clean index data
         clearParsedIndexInfo()
-
+        
         // Clean project details data
         projectDetail = nil
         availableGameVersions = []
         filteredModPackVersions = []
         allModPackVersions = []
-
+        
         // Clean installation status
         modPackInstallState.reset()
-
+        
         // Clean download progress
         modPackDownloadProgress = 0
         modPackTotalSize = 0
-
+        
         // Clean temporary files
         cleanupTempFiles()
     }
-
+    
     /// Clean up temporary files (modpack_download and modpack_extraction directories) and execute them in the background to avoid blocking the main thread
     func cleanupTempFiles() {
         Task.detached(priority: .utility) {
@@ -76,50 +76,50 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             }
         }
     }
-
+    
     private var allModPackVersions: [ModrinthProjectDetailVersion] = []
     private var gameRepository: GameRepository?
-
+    
     func setGameRepository(_ repository: GameRepository) {
         self.gameRepository = repository
     }
-
+    
     /// Apply preloaded project details to avoid repeated loading within the sheet
     func applyPreloadedDetail(_ detail: ModrinthProjectDetail) {
         projectDetail = detail
         availableGameVersions = CommonUtil.sortMinecraftVersions(detail.gameVersions)
         isLoadingProjectDetails = false
     }
-
+    
     // MARK: - Data Loading
     func loadProjectDetails(projectId: String) async {
         isLoadingProjectDetails = true
-
+        
         do {
             projectDetail =
-                try await ModrinthService.fetchProjectDetailsThrowing(
-                    id: projectId
-                )
+            try await ModrinthService.fetchProjectDetailsThrowing(
+                id: projectId
+            )
             let gameVersions = projectDetail?.gameVersions ?? []
             availableGameVersions = CommonUtil.sortMinecraftVersions(gameVersions)
         } catch {
             let globalError = GlobalError.from(error)
             GlobalErrorHandler.shared.handle(globalError)
         }
-
+        
         isLoadingProjectDetails = false
     }
-
+    
     func loadModPackVersions(for gameVersion: String) async {
         guard let projectDetail = projectDetail else { return }
-
+        
         isLoadingModPackVersions = true
-
+        
         do {
             allModPackVersions =
-                try await ModrinthService.fetchProjectVersionsThrowing(
-                    id: projectDetail.id
-                )
+            try await ModrinthService.fetchProjectVersionsThrowing(
+                id: projectDetail.id
+            )
             filteredModPackVersions = allModPackVersions
                 .filter { version in
                     version.gameVersions.contains(gameVersion)
@@ -132,12 +132,12 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             let globalError = GlobalError.from(error)
             GlobalErrorHandler.shared.handle(globalError)
         }
-
+        
         isLoadingModPackVersions = false
     }
-
+    
     // MARK: - File Operations
-
+    
     func downloadModPackFile(
         file: ModrinthVersionFile,
         projectDetail: ModrinthProjectDetail
@@ -146,11 +146,11 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             // Create temporary directory
             let tempDir = try createTempDirectory(for: "modpack_download")
             let savePath = tempDir.appendingPathComponent(file.filename)
-
+            
             // Reset download progress
             modPackDownloadProgress = 0
             modPackTotalSize = 0
-
+            
             // Use a download method that supports progress callbacks
             do {
                 _ = try await downloadFileWithProgress(
@@ -186,7 +186,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                 level: .notification
             )
         }
-
+        
         // Apply proxy (if required)
         let finalURL: URL = {
             if let host = url.host,
@@ -195,14 +195,14 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             }
             return url
         }()
-
+        
         // Create target directory
         let fileManager = FileManager.default
         try fileManager.createDirectory(
             at: destinationURL.deletingLastPathComponent(),
             withIntermediateDirectories: true
         )
-
+        
         // Check if the file already exists
         if fileManager.fileExists(atPath: destinationURL.path) {
             if let expectedSha1 = expectedSha1, !expectedSha1.isEmpty {
@@ -226,11 +226,11 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                 return destinationURL
             }
         }
-
+        
         // Get file size
         let fileSize = try await getFileSize(from: finalURL)
         modPackTotalSize = fileSize
-
+        
         // Create a progress tracker
         let progressCallback: (Int64, Int64) -> Void = { [weak self] downloadedBytes, totalBytes in
             Task { @MainActor in
@@ -244,7 +244,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             totalSize: fileSize,
             progressCallback: progressCallback
         )
-
+        
         // Create URLSession
         let config = URLSessionConfiguration.default
         let session = URLSession(
@@ -252,7 +252,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             delegate: progressTracker,
             delegateQueue: nil
         )
-
+        
         // Download file
         return try await withCheckedThrowingContinuation { continuation in
             progressTracker.completionHandler = { result in
@@ -269,7 +269,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                                 )
                             }
                         }
-
+                        
                         // Move files to destination
                         if fileManager.fileExists(atPath: destinationURL.path) {
                             try fileManager.replaceItem(
@@ -282,7 +282,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                         } else {
                             try fileManager.moveItem(at: tempURL, to: destinationURL)
                         }
-
+                        
                         continuation.resume(returning: destinationURL)
                     } catch {
                         continuation.resume(throwing: error)
@@ -291,19 +291,19 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                     continuation.resume(throwing: error)
                 }
             }
-
+            
             let downloadTask = session.downloadTask(with: finalURL)
             downloadTask.resume()
         }
     }
-
+    
     /// Get remote file size
     private func getFileSize(from url: URL) async throws -> Int64 {
         var request = URLRequest(url: url)
         request.httpMethod = "HEAD"
-
+        
         let (_, response) = try await URLSession.shared.data(for: request)
-
+        
         guard let httpResponse = response as? HTTPURLResponse,
               httpResponse.statusCode == 200 else {
             throw GlobalError.download(
@@ -311,7 +311,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                 level: .notification
             )
         }
-
+        
         guard let contentLength = httpResponse.value(forHTTPHeaderField: "Content-Length"),
               let fileSize = Int64(contentLength) else {
             throw GlobalError.download(
@@ -319,7 +319,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                 level: .notification
             )
         }
-
+        
         return fileSize
     }
     func downloadGameIcon(
@@ -331,20 +331,20 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             guard let iconUrl = projectDetail.iconUrl else {
                 return nil
             }
-
+            
             // Get game directory
             let gameDirectory = AppPaths.profileDirectory(gameName: gameName)
-
+            
             // Make sure the game directory exists
             try FileManager.default.createDirectory(
                 at: gameDirectory,
                 withIntermediateDirectories: true
             )
-
+            
             // Determine icon file name and path
             let iconFileName = "default_game_icon.png"
             let iconPath = gameDirectory.appendingPathComponent(iconFileName)
-
+            
             // Use DownloadManager to download icon files (error handling and temporary file cleaning included)
             do {
                 _ = try await DownloadManager.downloadFile(
@@ -368,11 +368,11 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             return nil
         }
     }
-
+    
     func extractModPack(modPackPath: URL) async -> URL? {
         do {
             let fileExtension = modPackPath.pathExtension.lowercased()
-
+            
             // Check file format
             guard fileExtension == "zip" || fileExtension == "mrpack" else {
                 handleDownloadError(
@@ -381,7 +381,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                 )
                 return nil
             }
-
+            
             // Check if the source file exists
             let modPackPathString = modPackPath.path
             guard FileManager.default.fileExists(atPath: modPackPathString)
@@ -392,24 +392,24 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                 )
                 return nil
             }
-
+            
             // Get source file size
             let sourceAttributes = try FileManager.default.attributesOfItem(
                 atPath: modPackPathString
             )
             let sourceSize = sourceAttributes[.size] as? Int64 ?? 0
-
+            
             guard sourceSize > 0 else {
                 handleDownloadError("整合包文件为空", "Modpack is empty")
                 return nil
             }
-
+            
             // Create a temporary decompression directory
             let tempDir = try createTempDirectory(for: "modpack_extraction")
-
+            
             // Unzip files using ZIPFoundation
             try FileManager.default.unzipItem(at: modPackPath, to: tempDir)
-
+            
             // Keep only critical logs
             return tempDir
         } catch {
@@ -420,20 +420,20 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             return nil
         }
     }
-
+    
     func parseModrinthIndex(extractedPath: URL) async -> ModrinthIndexInfo? {
-            // Parse Modrinth format first
+        // Parse Modrinth format first
         if let modrinthInfo = await parseModrinthIndexInternal(extractedPath: extractedPath) {
             return modrinthInfo
         }
-
+        
         // If it is not Modrinth format, try to parse CurseForge format
         if let modrinthInfo = await CurseForgeManifestParser.parseManifest(extractedPath: extractedPath) {
             // Set lastParsedIndexInfo to show mod loader progress bar
             lastParsedIndexInfo = modrinthInfo
             return modrinthInfo
         }
-
+        
         // None of the formats are supported
         handleDownloadError(
             "不支持的整合包格式，请使用 Modrinth (.mrpack) 或 CurseForge (.zip) 格式的整合包",
@@ -441,7 +441,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
         )
         return nil
     }
-
+    
     private func parseModrinthIndexInternal(extractedPath: URL) async -> ModrinthIndexInfo? {
         let indexPath = extractedPath.appendingPathComponent(AppConstants.modrinthIndexFileName)
         do {
@@ -454,7 +454,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                 let indexData = try Data(contentsOf: indexPath)
                 return try JSONDecoder().decode(ModrinthIndex.self, from: indexData)
             }.value
-
+            
             guard let modPackIndex = modPackIndex else { return nil }
             let loaderInfo = determineLoaderInfo(from: modPackIndex.dependencies)
             let indexInfo = ModrinthIndexInfo(
@@ -479,21 +479,21 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             return nil
         }
     }
-
+    
     // MARK: - Helper Methods
-
+    
     private func createTempDirectory(for purpose: String) throws -> URL {
         let tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent(purpose)
             .appendingPathComponent(UUID().uuidString)
-
+        
         try FileManager.default.createDirectory(
             at: tempDir,
             withIntermediateDirectories: true
         )
         return tempDir
     }
-
+    
     private func validateFileSize(
         tempFileURL: URL,
         httpResponse: HTTPURLResponse
@@ -503,7 +503,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                 atPath: tempFileURL.path
             )
             let actualSize = fileAttributes[.size] as? Int64 ?? 0
-
+            
             if let expectedSize = httpResponse.value(
                 forHTTPHeaderField: "Content-Length"
             ), let expectedSizeInt = Int64(expectedSize), actualSize != expectedSizeInt {
@@ -522,7 +522,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             return false
         }
     }
-
+    
     private func validateFileIntegrity(
         tempFileURL: URL,
         expectedSha1: String
@@ -545,7 +545,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
             return false
         }
     }
-
+    
     private func handleDownloadError(_ message: String, _ i18nKey: String) {
         let globalError = GlobalError(
             type: .resource,
@@ -554,7 +554,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
         )
         GlobalErrorHandler.shared.handle(globalError)
     }
-
+    
     private func determineLoaderInfo(
         from dependencies: ModrinthIndexDependencies
     ) -> (type: String, version: String) {
@@ -569,7 +569,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
         } else if let neoforgeVersion = dependencies.neoforgeLoader {
             return ("neoforge", neoforgeVersion)
         }
-
+        
         // Check format without -loader suffix
         if let forgeVersion = dependencies.forge {
             return ("forge", forgeVersion)
@@ -580,7 +580,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
         } else if let neoforgeVersion = dependencies.neoforge {
             return ("neoforge", neoforgeVersion)
         }
-
+        
         // Returns to vanilla by default
         return ("vanilla", "unknown")
     }
@@ -594,7 +594,7 @@ struct ModrinthIndex: Codable {
     let summary: String?
     let files: [ModrinthIndexFile]
     let dependencies: ModrinthIndexDependencies
-
+    
     enum CodingKeys: String, CodingKey {
         case formatVersion, game, versionId, name, summary, files, dependencies
     }
@@ -610,12 +610,12 @@ struct ModrinthIndexFileHashes: Codable {
     let sha512: String?
     /// Other hash types (less commonly used, lazy storage)
     let other: [String: String]?
-
+    
     /// Created from dictionary (for JSON decoding)
     init(from dict: [String: String]) {
         self.sha1 = dict["sha1"]
         self.sha512 = dict["sha512"]
-
+        
         // Only store non-standard hashes
         var otherDict: [String: String] = [:]
         for (key, value) in dict {
@@ -625,19 +625,19 @@ struct ModrinthIndexFileHashes: Codable {
         }
         self.other = otherDict.isEmpty ? nil : otherDict
     }
-
+    
     /// Custom decoding, decoding from JSON dictionary
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let dict = try container.decode([String: String].self)
         self.init(from: dict)
     }
-
+    
     /// Encoded into dictionary format (for JSON encoding)
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         var dict: [String: String] = [:]
-
+        
         if let sha1 = sha1 {
             dict["sha1"] = sha1
         }
@@ -647,10 +647,10 @@ struct ModrinthIndexFileHashes: Codable {
         if let other = other {
             dict.merge(other) { _, new in new }
         }
-
+        
         try container.encode(dict)
     }
-
+    
     /// Dictionary access compatibility (backward compatibility)
     subscript(key: String) -> String? {
         switch key {
@@ -671,11 +671,11 @@ struct ModrinthIndexFile: Codable {
     // CurseForge-specific fields, used to delay obtaining file details
     let curseForgeProjectId: Int?
     let curseForgeFileId: Int?
-
+    
     enum CodingKeys: String, CodingKey {
         case path, hashes, downloads, fileSize, env, source, curseForgeProjectId, curseForgeFileId
     }
-
+    
     // Provide a default initializer for compatibility
     init(
         path: String,
@@ -696,7 +696,7 @@ struct ModrinthIndexFile: Codable {
         self.curseForgeProjectId = curseForgeProjectId
         self.curseForgeFileId = curseForgeFileId
     }
-
+    
     // Initializers compatible with older versions of dictionary formats
     init(
         path: String,
@@ -740,7 +740,7 @@ struct ModrinthIndexDependencies: Codable {
     let quilt: String?
     let neoforge: String?
     let dependencies: [ModrinthIndexProjectDependency]?
-
+    
     enum CodingKeys: String, CodingKey {
         case minecraft,
              forgeLoader = "forge-loader",
@@ -755,7 +755,7 @@ struct ModrinthIndexProjectDependency: Codable {
     let projectId: String?
     let versionId: String?
     let dependencyType: String
-
+    
     enum CodingKeys: String, CodingKey {
         case projectId = "project_id",
              versionId = "version_id",
@@ -774,7 +774,7 @@ struct ModrinthIndexInfo {
     let files: [ModrinthIndexFile]
     let dependencies: [ModrinthIndexProjectDependency]
     let source: FileSource
-
+    
     init(
         gameVersion: String,
         loaderType: String,
@@ -813,7 +813,7 @@ class ModPackInstallState: ObservableObject {
     @Published var filesCompleted: Int = 0
     @Published var dependenciesCompleted: Int = 0
     @Published var overridesCompleted: Int = 0
-
+    
     func reset() {
         isInstalling = false
         filesProgress = 0
@@ -829,7 +829,7 @@ class ModPackInstallState: ObservableObject {
         dependenciesCompleted = 0
         overridesCompleted = 0
     }
-
+    
     func startInstallation(
         filesTotal: Int,
         dependenciesTotal: Int,
@@ -852,7 +852,7 @@ class ModPackInstallState: ObservableObject {
         self.dependenciesCompleted = 0
         // Keep completed overrides progress without resetting it
     }
-
+    
     func updateFilesProgress(fileName: String, completed: Int, total: Int) {
         currentFile = fileName
         filesCompleted = completed
@@ -860,7 +860,7 @@ class ModPackInstallState: ObservableObject {
         filesProgress = calculateProgress(completed: completed, total: total)
         objectWillChange.send()
     }
-
+    
     func updateDependenciesProgress(
         dependencyName: String,
         completed: Int,
@@ -875,7 +875,7 @@ class ModPackInstallState: ObservableObject {
         )
         objectWillChange.send()
     }
-
+    
     func updateOverridesProgress(
         overrideName: String,
         completed: Int,
@@ -890,7 +890,7 @@ class ModPackInstallState: ObservableObject {
         )
         objectWillChange.send()
     }
-
+    
     private func calculateProgress(completed: Int, total: Int) -> Double {
         guard total > 0 else { return 0.0 }
         return max(0.0, min(1.0, Double(completed) / Double(total)))
@@ -901,12 +901,12 @@ private class ModPackDownloadProgressTracker: NSObject, URLSessionDownloadDelega
     private let progressCallback: (Int64, Int64) -> Void
     private let totalFileSize: Int64
     var completionHandler: ((Result<URL, Error>) -> Void)?
-
+    
     init(totalSize: Int64, progressCallback: @escaping (Int64, Int64) -> Void) {
         self.totalFileSize = totalSize
         self.progressCallback = progressCallback
     }
-
+    
     func urlSession(
         _ session: URLSession,
         downloadTask: URLSessionDownloadTask,
@@ -921,7 +921,7 @@ private class ModPackDownloadProgressTracker: NSObject, URLSessionDownloadDelega
             }
         }
     }
-
+    
     func urlSession(
         _ session: URLSession,
         downloadTask: URLSessionDownloadTask,
@@ -929,7 +929,7 @@ private class ModPackDownloadProgressTracker: NSObject, URLSessionDownloadDelega
     ) {
         completionHandler?(.success(location))
     }
-
+    
     func urlSession(
         _ session: URLSession,
         task: URLSessionTask,

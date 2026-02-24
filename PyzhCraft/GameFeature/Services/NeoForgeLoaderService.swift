@@ -11,7 +11,7 @@ enum NeoForgeLoaderService {
         }
         return result
     }
-
+    
     /// Get the NeoForge profile of the specified version
     /// - Parameters:
     ///   - minecraftVersion: Minecraft version
@@ -20,26 +20,26 @@ enum NeoForgeLoaderService {
     /// - Throws: GlobalError when the operation fails
     static func fetchSpecificNeoForgeProfile(for minecraftVersion: String, loaderVersion: String) async throws -> ModrinthLoader {
         let cacheKey = "\(minecraftVersion)-\(loaderVersion)"
-
+        
         // 1. Check the global cache
         if let cached = AppCacheManager.shared.get(namespace: "neoforge", key: cacheKey, as: ModrinthLoader.self) {
             return cached
         }
-
+        
         // 2. Directly download version.json of the specified version
         // Use a unified API client
         let url = URLConfig.API.Modrinth.loaderProfile(loader: "neo", version: loaderVersion)
         let data = try await APIClient.get(url: url)
-
+        
         var result = try JSONDecoder().decode(ModrinthLoader.self, from: data)
         result = CommonService.processGameVersionPlaceholders(loader: result, gameVersion: minecraftVersion)
         // 3. Save to cache
         result.version = loaderVersion
         AppCacheManager.shared.setSilently(namespace: "neoforge", key: cacheKey, value: result)
-
+        
         return result
     }
-
+    
     /// Set a specific version of the NeoForge loader (silent version)
     /// - Parameters:
     ///   - gameVersion: game version
@@ -67,7 +67,7 @@ enum NeoForgeLoaderService {
             return nil
         }
     }
-
+    
     /// Set the specified version of the NeoForge loader (throws exception version)
     /// - Parameters:
     ///   - gameVersion: game version
@@ -83,17 +83,17 @@ enum NeoForgeLoaderService {
         onProgressUpdate: @escaping (String, Int, Int) -> Void
     ) async throws -> (loaderVersion: String, classpath: String, mainClass: String) {
         Logger.shared.info("Start setting up the specified version of the NeoForge loader: \(loaderVersion)")
-
+        
         let neoForgeProfile = try await fetchSpecificNeoForgeProfile(for: gameVersion, loaderVersion: loaderVersion)
         let librariesDirectory = AppPaths.librariesDirectory
         let fileManager = CommonFileManager(librariesDir: librariesDirectory)
         fileManager.onProgressUpdate = onProgressUpdate
-
+        
         // Step 1: Download all downloadable=true library files
         let downloadableLibraries = neoForgeProfile.libraries.filter { $0.downloads != nil }
         let totalDownloads = downloadableLibraries.count
         await fileManager.downloadForgeJars(libraries: neoForgeProfile.libraries)
-
+        
         // Step 2: Execute processors (if they exist)
         if let processors = neoForgeProfile.processors, !processors.isEmpty {
             try await fileManager.executeProcessors(
@@ -110,17 +110,17 @@ enum NeoForgeLoaderService {
                 onProgressUpdate(message, completedTasks, totalTasks)
             }
         }
-
+        
         let classpathString = CommonService.generateClasspath(from: neoForgeProfile, librariesDir: librariesDirectory)
         let mainClass = neoForgeProfile.mainClass
-
+        
         guard let version = neoForgeProfile.version else {
             throw GlobalError.resource(
                 i18nKey: "NeoForge missing version",
                 level: .notification
             )
         }
-
+        
         return (loaderVersion: version, classpath: classpathString, mainClass: mainClass)
     }
 }

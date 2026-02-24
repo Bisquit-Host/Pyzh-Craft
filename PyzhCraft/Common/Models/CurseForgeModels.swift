@@ -30,7 +30,7 @@ struct CurseForgeMod: Codable {
     let categories: [CurseForgeCategory]?
     let latestFiles: [CurseForgeModFileDetail]?
     let latestFilesIndexes: [CurseForgeFileIndex]?
-
+    
     enum CodingKeys: String, CodingKey {
         case id, name, summary, slug, authors, logo
         case downloadCount, gamePopularityRank, links, dateCreated, dateModified, dateReleased, gameId, classId, categories, latestFiles, latestFilesIndexes
@@ -72,17 +72,17 @@ struct CurseForgeModDetail: Codable {
     let latestFiles: [CurseForgeModFileDetail]?
     let latestFilesIndexes: [CurseForgeFileIndex]?
     let body: String?
-
+    
     /// Get the corresponding content type enumeration
     var contentType: CurseForgeClassId? {
         CurseForgeClassId(rawValue: classId)
     }
-
+    
     /// Get directory name
     var directoryName: String {
         contentType?.directoryName ?? AppConstants.DirectoryNames.mods
     }
-
+    
     /// Convert to Modrinth item type string
     var projectType: String {
         switch contentType {
@@ -115,7 +115,7 @@ enum CurseForgeClassId: Int, CaseIterable {
     case resourcePacks = 12 // Resource pack
     case shaders = 6552     // light and shadow
     case datapacks = 6945   // packet
-
+    
     var directoryName: String {
         switch self {
         case .mods:
@@ -136,7 +136,7 @@ enum CurseForgeModLoaderType: Int, CaseIterable {
     case fabric = 4
     case quilt = 5
     case neoforge = 6
-
+    
     /// Get the corresponding enumeration value based on the string
     /// - Parameter loaderName: loader name string
     /// - Returns: corresponding enumeration value, if there is no match, return nil
@@ -187,9 +187,9 @@ struct CurseForgeGameVersion: Codable, Identifiable, Hashable {
     let gameVersionTypeId: Int?
     let gameVersionStatus: Int?
     let gameVersionTypeStatus: Int?
-
+    
     var identifier: String { versionString }
-
+    
     var version_type: String {
         // CurseForge does not have a clear version type, it is inferred based on the version number
         if versionString.contains("snapshot") || versionString.contains("pre") || versionString.contains("rc") {
@@ -233,7 +233,7 @@ struct CurseForgeModFileDetail: Codable {
     let projectId: Int?
     let projectName: String?
     let authors: [CurseForgeAuthor]?
-
+    
     /// Extract hash (SHA1) with algo = 1 from hashes array
     var sha1Hash: CurseForgeHash? {
         if let hashes = hashes {
@@ -275,7 +275,7 @@ struct CurseForgeManifest: Codable {
     let author: String?
     let files: [CurseForgeManifestFile]
     let overrides: String?
-
+    
     enum CodingKeys: String, CodingKey {
         case minecraft, manifestType, manifestVersion, name, version, author, files, overrides
     }
@@ -298,7 +298,7 @@ struct CurseForgeManifestFile: Codable {
     let projectID: Int
     let fileID: Int
     let required: Bool
-
+    
     enum CodingKeys: String, CodingKey {
         case projectID, fileID, required
     }

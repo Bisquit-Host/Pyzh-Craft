@@ -44,6 +44,7 @@ struct PlayerInfoSectionView: View {
                     description: Text("Please add a player first")
                 )
             }
-        }.frame(width: 280)
+        }
+        .frame(width: 280)
     }
 }

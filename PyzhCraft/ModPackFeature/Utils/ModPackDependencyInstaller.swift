@@ -3,14 +3,14 @@ import Foundation
 /// The integration package depends on the installation service
 /// Responsible for installing all required dependencies defined in the integration package
 enum ModPackDependencyInstaller {
-
+    
     // MARK: - Download Type
     enum DownloadType {
         case files, dependencies, overrides
     }
-
+    
     // MARK: - Main Installation Method
-
+    
     /// Install all required dependencies for the modpack version
     /// - Parameters:
     ///   - indexInfo: parsed integration package index information
@@ -26,7 +26,7 @@ enum ModPackDependencyInstaller {
     ) async -> Bool {
         // Get resource directory
         let resourceDir = AppPaths.profileDirectory(gameName: gameInfo.gameName)
-
+        
         // Concurrently execute the installation of files and dependencies
         async let filesResult = installModPackFiles(
             files: indexInfo.files,
@@ -34,33 +34,33 @@ enum ModPackDependencyInstaller {
             gameInfo: gameInfo,
             onProgressUpdate: onProgressUpdate
         )
-
+        
         async let dependenciesResult = installModPackDependencies(
             dependencies: indexInfo.dependencies,
             gameInfo: gameInfo,
             resourceDir: resourceDir,
             onProgressUpdate: onProgressUpdate
         )
-
+        
         // Wait for both tasks to complete
         let (filesSuccess, dependenciesSuccess) = await (filesResult, dependenciesResult)
-
+        
         // Check results
         if !filesSuccess {
             Logger.shared.error("Integration package file installation failed")
             return false
         }
-
+        
         if !dependenciesSuccess {
             Logger.shared.error("Integration package dependency installation failed")
             return false
         }
-
+        
         return true
     }
-
+    
     // MARK: - File Installation
-
+    
     /// Install integration package files
     /// - Parameters:
     ///   - files: file list
@@ -76,36 +76,36 @@ enum ModPackDependencyInstaller {
     ) async -> Bool {
         // Filter out the files that need to be downloaded
         let filesToDownload = filterDownloadableFiles(files)
-
+        
         // Notification to start downloading
         onProgressUpdate?(String(localized: "Starting to download modpack files"), 0, filesToDownload.count, .files)
-
+        
         // Create a semaphore to control the number of concurrencies
         let semaphore = AsyncSemaphore(value: GeneralSettingsManager.shared.concurrentDownloads)
-
+        
         // Use a counter to track the number of files completed
         let completedCount = ModPackCounter()
-
+        
         // Use TaskGroup to download files concurrently
         let results = await withTaskGroup(of: (Int, Bool).self) { group in
             for (index, file) in filesToDownload.enumerated() {
                 group.addTask {
                     await semaphore.wait()
                     defer { Task { await semaphore.signal() } }
-
+                    
                     // Optimization: Download files (autoreleasepool has been used internally to optimize)
                     let success = await downloadSingleFile(file: file, resourceDir: resourceDir, gameInfo: gameInfo)
-
+                    
                     // update progress
                     if success {
                         let currentCount = completedCount.increment()
                         onProgressUpdate?(file.path, currentCount, filesToDownload.count, .files)
                     }
-
+                    
                     return (index, success)
                 }
             }
-
+            
             // Collect results
             var results: [(Int, Bool)] = []
             for await result in group {
@@ -113,22 +113,22 @@ enum ModPackDependencyInstaller {
             }
             return results.sorted { $0.0 < $1.0 } // Sort by index
         }
-
+        
         // Check if all downloads are successful
         let successCount = results.filter { $0.1 }.count
         let failedCount = results.count - successCount
-
+        
         if failedCount > 0 {
             Logger.shared.error("\(failedCount) files failed to download")
             return false
         }
-
+        
         // Notification download completed
         onProgressUpdate?(String(localized: "Modpack files download completed"), filesToDownload.count, filesToDownload.count, .files)
-
+        
         return true
     }
-
+    
     /// Filter downloadable files
     /// - Parameter files: file list
     /// - Returns: filtered file list
@@ -141,7 +141,7 @@ enum ModPackDependencyInstaller {
             return true
         }
     }
-
+    
     /// Download a single file
     /// - Parameters:
     ///   - file: file information
@@ -165,7 +165,7 @@ enum ModPackDependencyInstaller {
             return await downloadModrinthFile(file: file, resourceDir: resourceDir)
         }
     }
-
+    
     /// Download CurseForge files (concurrently obtain file details)
     /// - Parameters:
     ///   - projectId: project ID
@@ -177,10 +177,10 @@ enum ModPackDependencyInstaller {
         // Concurrently obtain file details and module details to reduce repeated requests
         async let fileDetailTask = CurseForgeService.fetchFileDetail(projectId: projectId, fileId: fileId)
         async let modDetailTask: CurseForgeModDetail? = try? await CurseForgeService.fetchModDetailThrowing(modId: projectId)
-
+        
         let fileDetail = await fileDetailTask
         let modDetail = await modDetailTask
-
+        
         // Preferred specified file (if details exist)
         if let fileDetail = fileDetail {
             if await downloadCurseForgeFileWithDetail(
@@ -192,7 +192,7 @@ enum ModPackDependencyInstaller {
                 return true
             }
         }
-
+        
         // Main policy failed or download failed, fallback matches by version/loader
         return await downloadCurseForgeFileWithFallback(
             projectId: projectId,
@@ -201,7 +201,7 @@ enum ModPackDependencyInstaller {
             modDetail: modDetail
         )
     }
-
+    
     /// Use alternate strategy to download CurseForge files (exactly match game version and loader)
     /// - Parameters:
     ///   - projectId: project ID
@@ -214,11 +214,11 @@ enum ModPackDependencyInstaller {
             Logger.shared.error("Missing game information, unable to filter files: \(projectId)")
             return false
         }
-
+        
         // Exactly match game version and loader
         let modLoaderTypeValue = CurseForgeModLoaderType.from(gameInfo.modLoader)?.rawValue
         let filteredFiles: [CurseForgeModFileDetail]
-
+        
         if let modDetail = modDetail {
             // Reuse the obtained module details to avoid repeated network requests
             filteredFiles = filterFiles(
@@ -239,12 +239,12 @@ enum ModPackDependencyInstaller {
             }
             filteredFiles = files
         }
-
+        
         guard !filteredFiles.isEmpty else {
             Logger.shared.error("Exact match failed, no compatible file found: \(projectId)")
             return false
         }
-
+        
         if let fileToDownload = filteredFiles.first {
             return await downloadCurseForgeFileWithDetail(
                 fileDetail: fileToDownload,
@@ -253,11 +253,11 @@ enum ModPackDependencyInstaller {
                 modDetail: modDetail
             )
         }
-
+        
         Logger.shared.error("Downloadable file not found: \(projectId)")
         return false
     }
-
+    
     /// Download CurseForge files using file details
     /// - Parameters:
     ///   - fileDetail: file details
@@ -279,7 +279,7 @@ enum ModPackDependencyInstaller {
                 // Use configured alternative download address
                 downloadUrl = URLConfig.API.CurseForge.fallbackDownloadUrl(fileId: fileDetail.id, fileName: fileDetail.fileName).absoluteString
             }
-
+            
             // Determine subdirectories based on file details (give priority to the obtained module details to avoid repeated requests)
             let effectiveModDetail: CurseForgeModDetail
             if let modDetail = modDetail {
@@ -287,23 +287,23 @@ enum ModPackDependencyInstaller {
             } else {
                 effectiveModDetail = try await CurseForgeService.fetchModDetailThrowing(modId: projectId)
             }
-
+            
             let subDirectory = effectiveModDetail.directoryName
             let destinationPath = resourceDir.appendingPathComponent(subDirectory).appendingPathComponent(fileDetail.fileName)
-
+            
             // Make sure the directory exists
             try FileManager.default.createDirectory(
                 at: destinationPath.deletingLastPathComponent(),
                 withIntermediateDirectories: true
             )
-
+            
             // Download file
             let downloadedFile = try await DownloadManager.downloadFile(
                 urlString: downloadUrl,
                 destinationURL: destinationPath,
                 expectedSha1: fileDetail.hash?.value
             )
-
+            
             // Write to Modrinth style cache (using existing CF→Modrinth conversion interface)
             if let hash = ModScanner.sha1Hash(of: downloadedFile) {
                 // Convert CurseForge project details to ModrinthProjectDetail
@@ -314,14 +314,14 @@ enum ModPackDependencyInstaller {
                     ModScanner.shared.saveToCache(hash: hash, detail: detailWithFile)
                 }
             }
-
+            
             return true
         } catch {
             Logger.shared.error("Failed to download CurseForge files: \(fileDetail.fileName)")
             return false
         }
     }
-
+    
     /// Filter files based on acquired module details to avoid additional network requests
     private static func filterFiles(
         from modDetail: CurseForgeModDetail,
@@ -330,7 +330,7 @@ enum ModPackDependencyInstaller {
         modLoaderType: Int?
     ) -> [CurseForgeModFileDetail] {
         var files: [CurseForgeModFileDetail] = []
-
+        
         if let latestFiles = modDetail.latestFiles, !latestFiles.isEmpty {
             files = latestFiles
         } else if let latestFilesIndexes = modDetail.latestFilesIndexes, !latestFilesIndexes.isEmpty {
@@ -338,7 +338,7 @@ enum ModPackDependencyInstaller {
             for index in latestFilesIndexes {
                 fileIndexMap[index.fileId, default: []].append(index)
             }
-
+            
             for (fileId, indexes) in fileIndexMap {
                 guard let firstIndex = indexes.first else { continue }
                 let gameVersions = indexes.map { $0.gameVersion }
@@ -346,7 +346,7 @@ enum ModPackDependencyInstaller {
                     fileId: fileId,
                     fileName: firstIndex.filename
                 ).absoluteString
-
+                
                 let fileDetail = CurseForgeModFileDetail(
                     id: fileId,
                     displayName: firstIndex.filename,
@@ -368,12 +368,12 @@ enum ModPackDependencyInstaller {
                 files.append(fileDetail)
             }
         }
-
+        
         // gameVersion filter
         if let gameVersion = gameVersion {
             files = files.filter { $0.gameVersions.contains(gameVersion) }
         }
-
+        
         // modLoaderType filtering (depends on latestFilesIndexes information)
         if let modLoaderType = modLoaderType,
            let latestFilesIndexes = modDetail.latestFilesIndexes {
@@ -384,10 +384,10 @@ enum ModPackDependencyInstaller {
             )
             files = files.filter { matchingIds.contains($0.id) }
         }
-
+        
         return files
     }
-
+    
     /// Download Modrinth files
     /// - Parameters:
     ///   - file: file information
@@ -398,21 +398,21 @@ enum ModPackDependencyInstaller {
             Logger.shared.error("No download link available for file: \(file.path)")
             return false
         }
-
+        
         do {
             // Optimization: Pre-calculate the target path to avoid repeated creation
             // Use autoreleasepool to wrap the synchronization part and release temporary objects in time
             let destinationPath = autoreleasepool {
                 resourceDir.appendingPathComponent(file.path)
             }
-
+            
             // DownloadManager.downloadFile already contains autoreleasepool
             let downloadedFile = try await DownloadManager.downloadFile(
                 urlString: urlString,
                 destinationURL: destinationPath,
                 expectedSha1: file.hashes["sha1"]
             )
-
+            
             // Save to cache
             if let hash = ModScanner.sha1Hash(of: downloadedFile) {
                 // Use fetchModrinthDetail to get real project details
@@ -423,7 +423,7 @@ enum ModPackDependencyInstaller {
                             var detailWithFile = detail
                             detailWithFile.fileName = (file.path as NSString).lastPathComponent
                             detailWithFile.type = "mod"
-
+                            
                             // cache
                             ModScanner.shared.saveToCache(hash: hash, detail: detailWithFile)
                         }
@@ -431,16 +431,16 @@ enum ModPackDependencyInstaller {
                     }
                 }
             }
-
+            
             return true
         } catch {
             Logger.shared.error("Failed to download file: \(file.path)")
             return false
         }
     }
-
+    
     // MARK: - Dependency Installation
-
+    
     /// Install integration package dependencies
     /// - Parameters:
     ///   - dependencies: dependency list
@@ -456,23 +456,23 @@ enum ModPackDependencyInstaller {
     ) async -> Bool {
         // Filter out required dependencies
         let requiredDependencies = dependencies.filter { $0.dependencyType == "required" }
-
+        
         // Notification to start downloading
         onProgressUpdate?(String(localized: "Starting to install modpack dependencies"), 0, requiredDependencies.count, .dependencies)
-
+        
         // Create a semaphore to control the number of concurrencies
         let semaphore = AsyncSemaphore(value: GeneralSettingsManager.shared.concurrentDownloads)
-
+        
         // Use counters to track the number of completed dependencies
         let completedCount = ModPackCounter()
-
+        
         // Use TaskGroup to install dependencies concurrently
         let results = await withTaskGroup(of: (Int, Bool).self) { group in
             for (index, dep) in requiredDependencies.enumerated() {
                 group.addTask {
                     await semaphore.wait()
                     defer { Task { await semaphore.signal() } }
-
+                    
                     // Check if you need to skip
                     if await shouldSkipDependency(dep: dep, gameInfo: gameInfo, resourceDir: resourceDir) {
                         // Skip also update progress
@@ -480,21 +480,21 @@ enum ModPackDependencyInstaller {
                         onProgressUpdate?(String(localized: "Skipping already installed dependency"), currentCount, requiredDependencies.count, .dependencies)
                         return (index, true) // Skip as success
                     }
-
+                    
                     // Install dependencies
                     let success = await installDependency(dep: dep, gameInfo: gameInfo, resourceDir: resourceDir)
-
+                    
                     // update progress
                     if success {
                         let currentCount = completedCount.increment()
                         let dependencyName = dep.projectId ?? "未知依赖"
                         onProgressUpdate?(dependencyName, currentCount, requiredDependencies.count, .dependencies)
                     }
-
+                    
                     return (index, success)
                 }
             }
-
+            
             // Collect results
             var results: [(Int, Bool)] = []
             for await result in group {
@@ -502,22 +502,22 @@ enum ModPackDependencyInstaller {
             }
             return results.sorted { $0.0 < $1.0 } // Sort by index
         }
-
+        
         // Check if all installations were successful
         let successCount = results.filter { $0.1 }.count
         let failedCount = results.count - successCount
-
+        
         if failedCount > 0 {
             Logger.shared.error("\(failedCount) dependencies failed to install")
             return false
         }
-
+        
         // Notification that installation is complete
         onProgressUpdate?(String(localized: "Modpack dependencies installation completed"), requiredDependencies.count, requiredDependencies.count, .dependencies)
-
+        
         return true
     }
-
+    
     /// Check if dependencies need to be skipped
     /// - Parameters:
     ///   - dep: dependency information
@@ -533,7 +533,7 @@ enum ModPackDependencyInstaller {
         if dep.projectId == "P7dR8mSH" && gameInfo.modLoader.lowercased() == "quilt" {
             return true
         }
-
+        
         // Check if it is installed (using hash)
         if let projectId = dep.projectId {
             // Get project version information to get file hash
@@ -561,12 +561,12 @@ enum ModPackDependencyInstaller {
                 }
             }
         }
-
+        
         return false
     }
-
+    
     // MARK: - Overrides Installation
-
+    
     /// Install the overrides folder contents
     /// - Parameters:
     ///   - extractedPath: the path after decompression
@@ -580,7 +580,7 @@ enum ModPackDependencyInstaller {
     ) async -> Bool {
         // Check Modrinth format overrides first
         var overridesPath = extractedPath.appendingPathComponent("overrides")
-
+        
         // If not present, check the CurseForge format overrides folder
         if !FileManager.default.fileExists(atPath: overridesPath.path) {
             // CurseForge formats may use different overrides pathnames
@@ -589,7 +589,7 @@ enum ModPackDependencyInstaller {
                 "Override",
                 "override",
             ]
-
+            
             var foundPath: URL?
             for pathName in possiblePaths {
                 let testPath = extractedPath.appendingPathComponent(pathName)
@@ -598,7 +598,7 @@ enum ModPackDependencyInstaller {
                     break
                 }
             }
-
+            
             if let found = foundPath {
                 overridesPath = found
             } else {
@@ -606,17 +606,17 @@ enum ModPackDependencyInstaller {
                 return true
             }
         }
-
+        
         do {
             // Count the total number of files first so you can be notified of progress when you start
             let allFiles = try InstanceFileCopier.getAllFiles(in: overridesPath)
             let totalFiles = allFiles.count
-
+            
             // If there are no files to be merged, success will be returned directly (no progress bar will be displayed)
             guard totalFiles > 0 else {
                 return true
             }
-
+            
             // Use a unified method of merging folders
             try await InstanceFileCopier.copyDirectory(
                 from: overridesPath,
@@ -626,16 +626,16 @@ enum ModPackDependencyInstaller {
                 // Pass progress updates to the unified progress callback interface
                 onProgressUpdate?(fileName, completed, total, .overrides)
             }
-
+            
             return true
         } catch {
             Logger.shared.error("Failed to process overrides folder: \(error.localizedDescription)")
             return false
         }
     }
-
+    
     // MARK: - Private Methods
-
+    
     /// Install a single dependency
     /// - Parameters:
     ///   - dep: dependency information
@@ -651,7 +651,7 @@ enum ModPackDependencyInstaller {
             Logger.shared.error("Dependency is missing project ID")
             return false
         }
-
+        
         // Modrinth format: use original logic
         if let versionId = dep.versionId {
             // If a version ID is specified, use that version directly
@@ -670,7 +670,7 @@ enum ModPackDependencyInstaller {
             )
         }
     }
-
+    
     /// Install project from specified version
     /// - Parameters:
     ///   - projectId: project ID
@@ -687,17 +687,17 @@ enum ModPackDependencyInstaller {
         do {
             // Get version details
             let version = try await ModrinthService.fetchProjectVersionThrowing(id: versionId)
-
+            
             // Check version compatibility
             guard version.gameVersions.contains(gameInfo.gameVersion) &&
-                  version.loaders.contains(gameInfo.modLoader) else {
+                    version.loaders.contains(gameInfo.modLoader) else {
                 Logger.shared.error("Incompatible version: \(versionId)")
                 return false
             }
-
+            
             // Get project details
             let projectDetail = try await ModrinthService.fetchProjectDetailsThrowing(id: projectId)
-
+            
             // Download and install
             return await downloadAndInstallVersion(
                 version: version,
@@ -710,7 +710,7 @@ enum ModPackDependencyInstaller {
             return false
         }
     }
-
+    
     /// Install the project from the latest compatible version
     /// - Parameters:
     ///   - projectId: project ID
@@ -725,23 +725,23 @@ enum ModPackDependencyInstaller {
         do {
             // Get project details
             let projectDetail = try await ModrinthService.fetchProjectDetailsThrowing(id: projectId)
-
+            
             // Get all versions
             let versions = try await ModrinthService.fetchProjectVersionsThrowing(id: projectId)
-
+            
             // Sort by release date to find the latest compatible version
             let sortedVersions = versions.sorted { $0.datePublished > $1.datePublished }
-
+            
             let latestCompatibleVersion = sortedVersions.first { version in
                 version.gameVersions.contains(gameInfo.gameVersion) &&
                 version.loaders.contains(gameInfo.modLoader)
             }
-
+            
             guard let latestVersion = latestCompatibleVersion else {
                 Logger.shared.error("No compatible version found: \(projectId)")
                 return false
             }
-
+            
             // Download and install
             return await downloadAndInstallVersion(
                 version: latestVersion,
@@ -754,7 +754,7 @@ enum ModPackDependencyInstaller {
             return false
         }
     }
-
+    
     /// Download and install version
     /// - Parameters:
     ///   - version: version information
@@ -774,7 +774,7 @@ enum ModPackDependencyInstaller {
                 Logger.shared.error("Master file not found: \(version.id)")
                 return false
             }
-
+            
             // Download file
             let downloadedFile = try await DownloadManager.downloadResource(
                 for: gameInfo,
@@ -782,7 +782,7 @@ enum ModPackDependencyInstaller {
                 resourceType: "mod",
                 expectedSha1: primaryFile.hashes.sha1
             )
-
+            
             // Save to cache
             if let hash = ModScanner.sha1Hash(of: downloadedFile) {
                 // Create a cache using the project details passed in
@@ -791,7 +791,7 @@ enum ModPackDependencyInstaller {
                 detailWithFile.type = "mod"
                 ModScanner.shared.saveToCache(hash: hash, detail: detailWithFile)
             }
-
+            
             return true
         } catch {
             Logger.shared.error("Failed to download dependencies")
@@ -804,14 +804,14 @@ enum ModPackDependencyInstaller {
 final class ModPackCounter {
     private var count = 0
     private let lock = NSLock()
-
+    
     func increment() -> Int {
         lock.lock()
         defer { lock.unlock() }
         count += 1
         return count
     }
-
+    
     func reset() {
         lock.lock()
         defer { lock.unlock() }

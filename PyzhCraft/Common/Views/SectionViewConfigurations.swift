@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Section View Configuration Protocol
 protocol SectionViewConfiguration {
     associatedtype Item: Identifiable
-
+    
     var title: LocalizedStringKey { get }
     var items: [Item] { get }
     var isLoading: Bool { get }
@@ -14,13 +14,13 @@ protocol SectionViewConfiguration {
 // MARK: - Category Section Configuration
 struct CategorySectionConfiguration: SectionViewConfiguration {
     typealias Item = FilterItem
-
+    
     let title: LocalizedStringKey
     let items: [FilterItem]
     let isLoading: Bool
     let maxItems: Int
     let iconName: String?
-
+    
     init(
         title: LocalizedStringKey,
         items: [FilterItem],
@@ -43,7 +43,7 @@ struct FileSectionConfiguration<Item: Identifiable>: SectionViewConfiguration {
     let isLoading: Bool
     let maxItems: Int
     let iconName: String?
-
+    
     init(
         title: LocalizedStringKey,
         items: [Item],
@@ -62,13 +62,13 @@ struct FileSectionConfiguration<Item: Identifiable>: SectionViewConfiguration {
 // MARK: - Simple String Section Configuration
 struct SimpleStringSectionConfiguration: SectionViewConfiguration {
     typealias Item = IdentifiableString
-
+    
     let title: LocalizedStringKey
     let items: [IdentifiableString]
     let isLoading: Bool
     let maxItems: Int
     let iconName: String?
-
+    
     init(
         title: LocalizedStringKey,
         items: [IdentifiableString],
@@ -87,7 +87,7 @@ struct SimpleStringSectionConfiguration: SectionViewConfiguration {
 // MARK: - Identifiable String Helper
 public struct IdentifiableString: Identifiable {
     public let id: String
-
+    
     public init(id: String) {
         self.id = id
     }

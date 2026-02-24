@@ -2,7 +2,7 @@ import SwiftUI
 
 struct CapeTextureView: View {
     let imageURL: String
-
+    
     var body: some View {
         AsyncImage(url: URL(string: imageURL.httpToHttps())) { phase in
             switch phase {
@@ -21,7 +21,7 @@ struct CapeTextureView: View {
             }
         }
     }
-
+    
     @ViewBuilder
     private func capeImageContent(image: Image) -> some View {
         GeometryReader { geometry in
@@ -29,14 +29,14 @@ struct CapeTextureView: View {
             let containerHeight = geometry.size.height
             let capeAspectRatio: CGFloat = 10.0 / 16.0
             let containerAspectRatio = containerWidth / containerHeight
-
+            
             let scale: CGFloat = containerAspectRatio > capeAspectRatio
-                ? containerHeight / 16.0
-                : containerWidth / 10.0
-
+            ? containerHeight / 16.0
+            : containerWidth / 10.0
+            
             let offsetX = (containerWidth - 10.0 * scale) / 2.0 - 1.0 * scale
             let offsetY = (containerHeight - 16.0 * scale) / 2.0 - 1.0 * scale
-
+            
             image
                 .resizable()
                 .interpolation(.none)
@@ -52,14 +52,14 @@ struct CapeTextureView: View {
             let containerHeight = geometry.size.height
             let capeAspectRatio: CGFloat = 10.0 / 16.0
             let containerAspectRatio = containerWidth / containerHeight
-
+            
             let scale: CGFloat = containerAspectRatio > capeAspectRatio
-                ? containerHeight / 16.0
-                : containerWidth / 10.0
-
+            ? containerHeight / 16.0
+            : containerWidth / 10.0
+            
             let offsetX = (containerWidth - 10.0 * scale) / 2.0 - 1.0 * scale
             let offsetY = (containerHeight - 16.0 * scale) / 2.0 - 1.0 * scale
-
+            
             Image(nsImage: image)
                 .resizable()
                 .interpolation(.none)
@@ -76,11 +76,11 @@ struct CapeSelectionView: View {
     @Binding var selectedCapeImageURL: String?
     @Binding var selectedCapeImage: NSImage?
     let onCapeSelected: (String?, String?) -> Void
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Cape").font(.headline)
-
+            
             if let playerProfile = playerProfile, let capes = playerProfile.capes, !capes.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
@@ -99,21 +99,22 @@ struct CapeSelectionView: View {
             }
         }
     }
-
+    
     private func capeOption(id: String?, name: String, imageURL: String? = nil, isSystemOption: Bool = false) -> some View {
         let isSelected = selectedCapeId == id
-
+        
         return Button {
             // The selected cloak does not allow repeated clicks
             guard !isSelected else { return }
-
+            
             selectedCapeId = id
+            
             if let imageURL = imageURL {
                 // Load NSImage asynchronously
                 DispatchQueue.global(qos: .userInitiated).async {
                     if let url = URL(string: imageURL.httpToHttps()),
-                        let data = try? Data(contentsOf: url),
-                        let nsImage = NSImage(data: data) {
+                       let data = try? Data(contentsOf: url),
+                       let nsImage = NSImage(data: data) {
                         DispatchQueue.main.async {
                             selectedCapeImageURL = imageURL
                             selectedCapeImage = nsImage
@@ -121,10 +122,12 @@ struct CapeSelectionView: View {
                     }
                 }
             }
+            
             onCapeSelected(id, imageURL)
         } label: {
             VStack(spacing: 6) {
                 capeIconContainer(isSelected: isSelected, imageURL: imageURL, isSystemOption: isSystemOption)
+                
                 Text(name)
                     .font(.caption)
                     .lineLimit(1)
@@ -136,7 +139,7 @@ struct CapeSelectionView: View {
         // Only the currently selected cloak button is disabled, others can still be selected
         .disabled(isSelected)
     }
-
+    
     private func capeIconContainer(isSelected: Bool, imageURL: String?, isSystemOption: Bool) -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: 8)
@@ -149,13 +152,18 @@ struct CapeSelectionView: View {
                             lineWidth: isSelected ? 2 : 1
                         )
                 )
-
+            
             if let imageURL = imageURL {
                 // Cloak display is loaded using URL by default
                 CapeTextureView(imageURL: imageURL)
-                    .id(imageURL).frame(width: 42, height: 62).clipped().cornerRadius(6)
+                    .id(imageURL)
+                    .frame(width: 42, height: 62)
+                    .clipped()
+                    .cornerRadius(6)
             } else if isSystemOption {
-                Image(systemName: "xmark").font(.system(size: 16)).foregroundColor(.secondary)
+                Image(systemName: "xmark")
+                    .font(.system(size: 16))
+                    .foregroundColor(.secondary)
             }
         }
     }

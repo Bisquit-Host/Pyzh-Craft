@@ -8,19 +8,19 @@ class GameStatusManager: ObservableObject {
     @Published private var gameRunningStates: [String: Bool] = [:]
     /// Game startup status dictionary, key is gameId, value is whether it is starting (not yet in running state)
     @Published private var gameLaunchingStates: [String: Bool] = [:]
-
+    
     private init() {}
-
+    
     /// Check if the specified game is running
     /// - Parameter gameId: game ID
     /// - Returns: Is it running?
     func isGameRunning(gameId: String) -> Bool {
         let actuallyRunning = GameProcessManager.shared.isGameRunning(gameId: gameId)
-
+        
         DispatchQueue.main.async {
             self.updateGameStatusIfNeeded(gameId: gameId, actuallyRunning: actuallyRunning)
         }
-
+        
         return actuallyRunning
     }
     /// Update game status (if needed)
@@ -35,7 +35,7 @@ class GameStatusManager: ObservableObject {
             gameRunningStates[gameId] = actuallyRunning
         }
     }
-
+    
     /// Force refresh the status of the specified game
     /// - Parameter gameId: game ID
     func refreshGameStatus(gameId: String) {
@@ -46,7 +46,7 @@ class GameStatusManager: ObservableObject {
             Logger.shared.debug("Force refresh of game state: \(gameId) -> \(actuallyRunning ? "running" : "stopped")")
         }
     }
-
+    
     /// - Parameters:
     ///   - gameId: game ID
     ///   - isRunning: whether it is running
@@ -60,11 +60,11 @@ class GameStatusManager: ObservableObject {
             }
         }
     }
-
+    
     /// Clean up stopped game state
     func cleanupStoppedGames() {
         let processManager = GameProcessManager.shared
-
+        
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             self.gameRunningStates = self.gameRunningStates.filter { gameId, _ in
@@ -72,21 +72,21 @@ class GameStatusManager: ObservableObject {
             }
         }
     }
-
+    
     /// Get all running game IDs
     var runningGameIds: [String] {
         return gameRunningStates.compactMap { gameId, isRunning in
             isRunning ? gameId : nil
         }
     }
-
+    
     /// Get all game status
     var allGameStates: [String: Bool] {
         gameRunningStates
     }
-
+    
     // MARK: - Startup status management
-
+    
     /// - Parameters:
     ///   - gameId: game ID
     ///   - isLaunching: whether it is launching
@@ -100,13 +100,13 @@ class GameStatusManager: ObservableObject {
             }
         }
     }
-
+    
     /// - Parameter gameId: game ID
     /// - Returns: Whether it is starting
     func isGameLaunching(gameId: String) -> Bool {
         gameLaunchingStates[gameId] ?? false
     }
-
+    
     /// - Parameter gameId: game ID
     func removeGameState(gameId: String) {
         DispatchQueue.main.async { [weak self] in

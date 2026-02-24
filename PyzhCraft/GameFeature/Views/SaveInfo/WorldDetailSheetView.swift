@@ -11,14 +11,14 @@ struct WorldDetailSheetView: View {
     let gameName: String
     @Environment(\.dismiss)
     private var dismiss
-
+    
     @State private var metadata: WorldDetailMetadata?
     @State private var rawDataTag: [String: Any]? // Original Data tag, display as much data as possible
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var showError = false
     @State private var showRawData = false // Control whether raw data is displayed
-
+    
     // MARK: - Body
     var body: some View {
         CommonSheetView(
@@ -38,14 +38,14 @@ struct WorldDetailSheetView: View {
             }
         }
     }
-
+    
     // MARK: - Header View
     private var headerView: some View {
         Text(world.name)
             .font(.headline)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
-
+    
     // MARK: - Body View
     private var bodyView: some View {
         Group {
@@ -58,14 +58,14 @@ struct WorldDetailSheetView: View {
             }
         }
     }
-
+    
     private var loadingView: some View {
         VStack {
             ProgressView().controlSize(.small)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-
+    
     private var errorView: some View {
         VStack(spacing: 12) {
             Image(systemName: "exclamationmark.triangle")
@@ -83,7 +83,7 @@ struct WorldDetailSheetView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
     }
-
+    
     private func metadataContentView(metadata: WorldDetailMetadata) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -102,7 +102,7 @@ struct WorldDetailSheetView: View {
                             infoRow(label: "Data Version", value: "\(dataVersion)")
                         }
                     }
-
+                    
                     // game settings
                     infoSection(title: "Game Settings") {
                         infoRow(label: "Game Mode", value: metadata.gameMode)
@@ -114,7 +114,7 @@ struct WorldDetailSheetView: View {
                         }
                     }
                 }
-
+                
                 // Other information
                 infoSection(title: "Other Information") {
                     if let lastPlayed = metadata.lastPlayed {
@@ -136,7 +136,7 @@ struct WorldDetailSheetView: View {
                         infoRow(label: "World Border", value: border, isMultiline: true)
                     }
                 }
-
+                
                 HStack(alignment: .center, spacing: 12) {
                     HStack(spacing: 0) {
                         Text("World Path")
@@ -154,7 +154,7 @@ struct WorldDetailSheetView: View {
                     .buttonStyle(.plain)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-
+                
                 // Raw data toggle button
                 if let raw = rawDataTag {
                     let displayedKeys: Set<String> = [
@@ -163,9 +163,9 @@ struct WorldDetailSheetView: View {
                         "LastPlayed", "RandomSeed", "SpawnX", "SpawnY", "SpawnZ",
                         "Time", "DayTime", "raining", "thundering", "WorldBorder",
                     ]
-
+                    
                     let filteredRaw = raw.filter { !displayedKeys.contains($0.key) }
-
+                    
                     if !filteredRaw.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
                             Button {
@@ -185,12 +185,12 @@ struct WorldDetailSheetView: View {
                                 }
                             }
                             .buttonStyle(.plain)
-
+                            
                             if showRawData {
                                 NBTStructureView(data: filteredRaw)
-//                                infoSection(title: "Detailed Information") {
-//
-//                                }
+                                //                                infoSection(title: "Detailed Information") {
+                                //
+                                //                                }
                             }
                         }
                     }
@@ -199,7 +199,7 @@ struct WorldDetailSheetView: View {
             .padding(.vertical, 8)
         }
     }
-
+    
     private func infoSection<Content: View>(title: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
@@ -209,7 +209,7 @@ struct WorldDetailSheetView: View {
             content()
         }
     }
-
+    
     private func infoRow(label: LocalizedStringKey, value: String, isMultiline: Bool = false) -> some View {
         HStack(alignment: isMultiline ? .top : .center, spacing: 12) {
             HStack(spacing: 0) {
@@ -232,7 +232,7 @@ struct WorldDetailSheetView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-
+    
     // MARK: - Footer View
     private var footerView: some View {
         HStack {
@@ -246,21 +246,21 @@ struct WorldDetailSheetView: View {
             .font(.caption)
             .foregroundColor(.secondary)
             .frame(maxWidth: 300, alignment: .leading)
-
+            
             Spacer()
-
+            
             Button("Close") {
                 dismiss()
             }
             .keyboardShortcut(.defaultAction)
         }
     }
-
+    
     // MARK: - Helper Methods
     private func loadMetadata() async {
         isLoading = true
         errorMessage = nil
-
+        
         do {
             let levelDatPath = world.path.appendingPathComponent("level.dat")
             let worldGenSettingsPath = world.path
@@ -268,8 +268,8 @@ struct WorldDetailSheetView: View {
                 .appendingPathComponent("minecraft", isDirectory: true)
                 .appendingPathComponent("world_gen_settings.dat")
             let pathForBackground = levelDatPath
-
-        let (dataTag, seedOverride): ([String: Any], Int64?) = try await Task.detached(priority: .userInitiated) {
+            
+            let (dataTag, seedOverride): ([String: Any], Int64?) = try await Task.detached(priority: .userInitiated) {
                 guard FileManager.default.fileExists(atPath: pathForBackground.path) else {
                     throw WorldDetailLoadError.levelDatNotFound
                 }
@@ -279,7 +279,7 @@ struct WorldDetailSheetView: View {
                 guard let tag = nbtData["Data"] as? [String: Any] else {
                     throw WorldDetailLoadError.invalidStructure
                 }
-
+                
                 // 26+ new version archive: seed split to data/minecraft/world_gen_settings.dat
                 var seed: Int64?
                 if FileManager.default.fileExists(atPath: worldGenSettingsPath.path) {
@@ -295,10 +295,10 @@ struct WorldDetailSheetView: View {
                         // Reading failure does not affect the display of level.dat
                     }
                 }
-
+                
                 return (tag, seed)
-        }.value
-
+            }.value
+            
             let metadata = parseWorldDetail(from: dataTag, folderName: world.name, path: world.path, seedOverride: seedOverride)
             await MainActor.run {
                 self.rawDataTag = dataTag
@@ -326,22 +326,22 @@ struct WorldDetailSheetView: View {
             }
         }
     }
-
+    
     private func parseWorldDetail(from dataTag: [String: Any], folderName: String, path: URL, seedOverride: Int64?) -> WorldDetailMetadata {
         let levelName = (dataTag["LevelName"] as? String) ?? folderName
-
+        
         // LastPlayed is a millisecond timestamp (Long), compatible with Int/Int64 and other types
         var lastPlayedDate: Date?
         if let ts = WorldNBTMapper.readInt64(dataTag["LastPlayed"]) {
             lastPlayedDate = Date(timeIntervalSince1970: TimeInterval(ts) / 1000.0)
         }
-
+        
         // GameType: 0 Survival, 1 Creation, 2 Adventure, 3 Spectator
         var gameMode = String(localized: "Unknown")
         if let gt = WorldNBTMapper.readInt64(dataTag["GameType"]) {
             gameMode = WorldNBTMapper.mapGameMode(Int(gt))
         }
-
+        
         // Difficulty: The old version is a numerical value, the new version (26+) is usually the difficulty_settings.difficulty string
         var difficulty = String(localized: "Unknown")
         if let diff = WorldNBTMapper.readInt64(dataTag["Difficulty"]) {
@@ -350,7 +350,7 @@ struct WorldDetailSheetView: View {
                   let diffStr = ds["difficulty"] as? String {
             difficulty = WorldNBTMapper.mapDifficultyString(diffStr)
         }
-
+        
         // The limit/cheating flag may be byte or bool in the new version, here it is unified as "non-0 means true"
         let hardcore: Bool = {
             if let ds = dataTag["difficulty_settings"] as? [String: Any] {
@@ -359,7 +359,7 @@ struct WorldDetailSheetView: View {
             return WorldNBTMapper.readBoolFlag(dataTag["hardcore"])
         }()
         let cheats: Bool = WorldNBTMapper.readBoolFlag(dataTag["allowCommands"])
-
+        
         var versionName: String?
         var versionId: Int?
         if let versionTag = dataTag["Version"] as? [String: Any] {
@@ -370,20 +370,20 @@ struct WorldDetailSheetView: View {
                 versionId = Int(id32)
             }
         }
-
+        
         var dataVersion: Int?
         if let dv = dataTag["DataVersion"] as? Int {
             dataVersion = dv
         } else if let dv32 = dataTag["DataVersion"] as? Int32 {
             dataVersion = Int(dv32)
         }
-
+        
         // Seed: 26+ first world_gen_settings.dat, followed by level.dat of RandomSeed / WorldGenSettings.seed
         var seed: Int64? = seedOverride
         if seed == nil {
             seed = WorldNBTMapper.readSeed(from: dataTag, worldPath: path)
         }
-
+        
         var spawn: String?
         if let x = WorldNBTMapper.readInt64(dataTag["SpawnX"]),
            let y = WorldNBTMapper.readInt64(dataTag["SpawnY"]),
@@ -402,10 +402,10 @@ struct WorldDetailSheetView: View {
                 spawn = "\(x), \(y), \(z)"
             }
         }
-
+        
         let time = WorldNBTMapper.readInt64(dataTag["Time"])
         let dayTime = WorldNBTMapper.readInt64(dataTag["DayTime"])
-
+        
         var weather: String?
         if let rainingFlag = dataTag["raining"] {
             let raining = WorldNBTMapper.readBoolFlag(rainingFlag)
@@ -418,17 +418,17 @@ struct WorldDetailSheetView: View {
                 weather = weather.map { "\($0), \(t)" } ?? t
             }
         }
-
+        
         var worldBorder: String?
         if let wb = dataTag["WorldBorder"] as? [String: Any] {
             worldBorder = flattenNBTDictionary(wb, prefix: "").map { "\($0.key)=\($0.value)" }.sorted().joined(separator: ", ")
         }
-
+        
         var gameRules: [String]?
         if let gr = dataTag["GameRules"] as? [String: Any] {
             gameRules = flattenNBTDictionary(gr, prefix: "").map { "\($0.key)=\($0.value)" }.sorted()
         }
-
+        
         return WorldDetailMetadata(
             levelName: levelName,
             folderName: folderName,
@@ -450,7 +450,7 @@ struct WorldDetailSheetView: View {
             gameRules: gameRules
         )
     }
-
+    
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
@@ -458,7 +458,7 @@ struct WorldDetailSheetView: View {
         formatter.locale = Locale.current
         return formatter.string(from: date)
     }
-
+    
     private func flattenNBTDictionary(_ dict: [String: Any], prefix: String = "") -> [String: String] {
         var result: [String: String] = [:]
         for (k, v) in dict {
@@ -474,7 +474,7 @@ struct WorldDetailSheetView: View {
         }
         return result
     }
-
+    
     private func stringifyNBTValue(_ value: Any) -> String {
         if let v = value as? String { return v }
         if let v = value as? Bool { return v ? "true" : "false" }
@@ -495,7 +495,7 @@ struct WorldDetailSheetView: View {
 struct NBTStructureView: View {
     let data: [String: Any]
     @State private var expandedKeys: Set<String> = []
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(Array(data.keys.sorted()), id: \.self) { key in
@@ -522,7 +522,7 @@ struct NBTEntryView: View {
     let fullKey: String
     private let indentWidth: CGFloat = 20
     @State private var isHovered = false
-
+    
     init(key: String, value: Any, expandedKeys: Binding<Set<String>>, indentLevel: Int, fullKey: String? = nil) {
         self.key = key
         self.value = value
@@ -530,7 +530,7 @@ struct NBTEntryView: View {
         self.indentLevel = indentLevel
         self.fullKey = fullKey ?? key
     }
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let dict = value as? [String: Any] {
@@ -550,7 +550,7 @@ struct NBTEntryView: View {
                         }
                     }
                 }
-
+                
                 if expandedKeys.contains(fullKey) {
                     ForEach(Array(dict.keys.sorted()), id: \.self) { subKey in
                         if let subValue = dict[subKey] {
@@ -581,7 +581,7 @@ struct NBTEntryView: View {
                         }
                     }
                 }
-
+                
                 if expandedKeys.contains(fullKey) {
                     ForEach(Array(array.enumerated()), id: \.offset) { index, item in
                         let arrayItemKey = "\(fullKey)[\(index)]"
@@ -612,7 +612,7 @@ struct NBTEntryView: View {
             }
         }
     }
-
+    
     private func formatNBTValue(_ value: Any) -> String {
         if let v = value as? String { return "\"\(v)\"" }
         if let v = value as? Bool { return v ? "true" : "false" }
@@ -637,7 +637,7 @@ struct NBTDisclosureButton: View {
     let indentLevel: Int
     @Binding var isHovered: Bool
     let action: () -> Void
-
+    
     var body: some View {
         Button(action: action) {
             HStack(spacing: 6) {
@@ -646,17 +646,17 @@ struct NBTDisclosureButton: View {
                     .foregroundColor(.secondary)
                     .frame(width: 14, alignment: .leading)
                     .contentShape(Rectangle())
-
+                
                 Text(label)
                     .font(.system(.subheadline, design: .monospaced))
                     .foregroundColor(.primary)
                     .lineLimit(1)
                     .truncationMode(.tail)
-
+                
                 Text(suffix)
                     .font(.system(.caption, design: .monospaced))
                     .foregroundColor(.secondary)
-
+                
                 Spacer()
             }
             .padding(.horizontal, 8)
@@ -681,7 +681,7 @@ struct NBTValueRow: View {
     let value: String
     let indentLevel: Int
     @State private var isHovered = false
-
+    
     var body: some View {
         HStack(spacing: 8) {
             Text(label + ":")
@@ -690,12 +690,12 @@ struct NBTValueRow: View {
                 .frame(width: 120, alignment: .trailing)
                 .lineLimit(1)
                 .truncationMode(.tail)
-
+            
             Text(value)
                 .font(.system(.subheadline, design: .monospaced))
                 .foregroundColor(.primary)
                 .textSelection(.enabled)
-
+            
             Spacer()
         }
         .padding(.horizontal, 8)

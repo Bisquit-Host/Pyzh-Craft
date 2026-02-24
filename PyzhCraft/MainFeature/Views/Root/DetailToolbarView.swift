@@ -11,33 +11,33 @@ public struct DetailToolbarView: ToolbarContent {
     @EnvironmentObject var playerListViewModel: PlayerListViewModel
     @StateObject private var gameStatusManager = GameStatusManager.shared
     @StateObject private var gameActionManager = GameActionManager.shared
-
+    
     private var currentGame: GameVersionInfo? {
         if case .game(let gameId) = detailState.selectedItem {
             return gameRepository.getGame(by: gameId)
         }
         return nil
     }
-
+    
     private func isGameRunning(gameId: String) -> Bool {
         gameStatusManager.isGameRunning(gameId: gameId)
     }
-
+    
     /// Open the project page of the current resource in the browser
     private func openCurrentResourceInBrowser() {
         guard let slug = detailState.loadedProjectDetail?.slug else { return }
-
+        
         let baseURL: String = switch filterState.dataSource {
         case .modrinth:
             URLConfig.API.Modrinth.webProjectBase
         case .curseforge:
             URLConfig.API.CurseForge.webProjectBase
         }
-
+        
         guard let url = URL(string: baseURL + slug) else { return }
         openURL(url)
     }
-
+    
     public var body: some ToolbarContent {
         ToolbarItemGroup(placement: .primaryAction) {
             switch detailState.selectedItem {
@@ -51,9 +51,9 @@ public struct DetailToolbarView: ToolbarContent {
                     if detailState.gameType {
                         dataSourceMenu
                     }
-
+                    
                     Spacer()
-
+                    
                     Button {
                         Task {
                             let isRunning = isGameRunning(gameId: game.id)
@@ -77,8 +77,8 @@ public struct DetailToolbarView: ToolbarContent {
                         } else {
                             Label(
                                 isRunning
-                                    ? LocalizedStringKey("Stop")
-                                    : LocalizedStringKey("Start"),
+                                ? LocalizedStringKey("Stop")
+                                : LocalizedStringKey("Start"),
                                 systemImage: isRunning
                                 ? "stop.fill" : "play.fill"
                             )
@@ -91,7 +91,7 @@ public struct DetailToolbarView: ToolbarContent {
                     )
                     .disabled(gameStatusManager.isGameLaunching(gameId: game.id))
                     .applyReplaceTransition()
-
+                    
                     Button {
                         gameActionManager.showInFinder(game: game)
                     } label: {
@@ -128,16 +128,16 @@ public struct DetailToolbarView: ToolbarContent {
             }
         }
     }
-
+    
     private var currentResourceTitle: String {
         resourceTypeTitle(for: detailState.gameResourcesType)
     }
     private var currentResourceTypeTitle: String {
         detailState.gameType
-            ? String(localized: "Resource Library")
-            : String(localized: "Installed")
+        ? String(localized: "Resource Library")
+        : String(localized: "Installed")
     }
-
+    
     private var resourcesMenu: some View {
         Menu {
             ForEach(resourceTypesForCurrentGame, id: \.self) { sort in
@@ -149,7 +149,7 @@ public struct DetailToolbarView: ToolbarContent {
             Label(currentResourceTitle, systemImage: "").labelStyle(.titleOnly)
         }.help("Resource Type")
     }
-
+    
     private var resourcesTypeMenu: some View {
         Button {
             detailState.gameType.toggle()
@@ -157,13 +157,13 @@ public struct DetailToolbarView: ToolbarContent {
             Label(
                 currentResourceTypeTitle,
                 systemImage: detailState.gameType
-                    ? "tray.and.arrow.down" : "icloud.and.arrow.down"
+                ? "tray.and.arrow.down" : "icloud.and.arrow.down"
             ).foregroundStyle(.primary)
         }
         .help("Resource Location")
         .applyReplaceTransition()
     }
-
+    
     private var resourceTypesForCurrentGame: [String] {
         var types = ["datapack", "resourcepack"]
         if let game = currentGame, game.modLoader.lowercased() != "vanilla" {
@@ -172,7 +172,7 @@ public struct DetailToolbarView: ToolbarContent {
         }
         return types
     }
-
+    
     private func resourceTypeTitle(for type: String) -> String {
         switch type.lowercased() {
         case "mod":
@@ -193,7 +193,7 @@ public struct DetailToolbarView: ToolbarContent {
             type.capitalized
         }
     }
-
+    
     private var dataSourceMenu: some View {
         Menu {
             ForEach(DataSource.allCases, id: \.self) { source in
@@ -206,7 +206,7 @@ public struct DetailToolbarView: ToolbarContent {
                 .labelStyle(.titleOnly)
         }
     }
-
+    
     private var localResourceFilterMenu: some View {
         Menu {
             ForEach(LocalResourceFilter.allCases) { filter in

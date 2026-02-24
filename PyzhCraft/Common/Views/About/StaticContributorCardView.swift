@@ -3,7 +3,7 @@ import SwiftUI
 /// Static contributor card view
 struct StaticContributorCardView: View {
     let contributor: StaticContributor
-
+    
     var body: some View {
         Group {
             if !contributor.url.isEmpty, let url = URL(string: contributor.url) {
@@ -15,12 +15,12 @@ struct StaticContributorCardView: View {
             }
         }
     }
-
+    
     private var contributorContent: some View {
         HStack(spacing: 12) {
             // Avatar (emoji)
             StaticContributorAvatarView(avatar: contributor.avatar)
-
+            
             // Information section
             VStack(alignment: .leading, spacing: 4) {
                 // username
@@ -28,7 +28,7 @@ struct StaticContributorCardView: View {
                     .font(.body)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
-
+                
                 // Contribution tag line
                 HStack(spacing: 6) {
                     ForEach(contributor.contributions, id: \.self) {
@@ -39,7 +39,7 @@ struct StaticContributorCardView: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-
+            
             // Show arrow icon if there is a URL
             if !contributor.url.isEmpty {
                 Image(systemName: "globe")

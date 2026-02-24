@@ -1,7 +1,7 @@
 import Foundation
 
 enum FabricLoaderService {
-
+    
     /// Get all Loader versions (silent versions)
     /// - Parameter minecraftVersion: Minecraft version
     /// - Returns: loader version list, returns empty array on failure
@@ -15,7 +15,7 @@ enum FabricLoaderService {
             return []
         }
     }
-
+    
     /// Get all Loader versions (throw exception version)
     /// - Parameter minecraftVersion: Minecraft version
     /// - Returns: Loader version list
@@ -24,7 +24,7 @@ enum FabricLoaderService {
         let url = URLConfig.API.Fabric.loader.appendingPathComponent(minecraftVersion)
         // Use a unified API client
         let data = try await APIClient.get(url: url)
-
+        
         var result: [FabricLoader] = []
         do {
             if let jsonArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
@@ -44,7 +44,7 @@ enum FabricLoaderService {
             )
         }
     }
-
+    
     /// Get the specified version of Fabric Loader
     /// - Parameters:
     ///   - minecraftVersion: Minecraft version
@@ -53,17 +53,17 @@ enum FabricLoaderService {
     /// - Throws: GlobalError when the operation fails
     static func fetchSpecificLoaderVersion(for minecraftVersion: String, loaderVersion: String) async throws -> ModrinthLoader {
         let cacheKey = "\(minecraftVersion)-\(loaderVersion)"
-
+        
         // 1. Check the global cache
         if let cached = AppCacheManager.shared.get(namespace: "fabric", key: cacheKey, as: ModrinthLoader.self) {
             return cached
         }
-
+        
         // 2. Directly download version.json of the specified version
         // Use a unified API client
         let url = URLConfig.API.Modrinth.loaderProfile(loader: "fabric", version: loaderVersion)
         let data = try await APIClient.get(url: url)
-
+        
         var result = try JSONDecoder().decode(ModrinthLoader.self, from: data)
         result.version = loaderVersion
         result = CommonService.processGameVersionPlaceholders(loader: result, gameVersion: minecraftVersion)
@@ -71,7 +71,7 @@ enum FabricLoaderService {
         AppCacheManager.shared.setSilently(namespace: "fabric", key: cacheKey, value: result)
         return result
     }
-
+    
     /// Set the specified version of Fabric loader (silent version)
     /// - Parameters:
     ///   - gameVersion: game version
@@ -99,7 +99,7 @@ enum FabricLoaderService {
             return nil
         }
     }
-
+    
     /// Set the specified version of the Fabric loader (throws exception version)
     /// - Parameters:
     ///   - gameVersion: game version
@@ -115,14 +115,14 @@ enum FabricLoaderService {
         onProgressUpdate: @escaping (String, Int, Int) -> Void
     ) async throws -> (loaderVersion: String, classpath: String, mainClass: String) {
         Logger.shared.info("Start setting up the Fabric loader for the specified version: \(loaderVersion)")
-
+        
         let fabricProfile = try await fetchSpecificLoaderVersion(for: gameVersion, loaderVersion: loaderVersion)
         let librariesDirectory = AppPaths.librariesDirectory
         let fileManager = CommonFileManager(librariesDir: librariesDirectory)
         fileManager.onProgressUpdate = onProgressUpdate
-
+        
         await fileManager.downloadFabricJars(libraries: fabricProfile.libraries)
-
+        
         let classpathString = CommonService.generateFabricClasspath(from: fabricProfile, librariesDir: librariesDirectory)
         let mainClass = fabricProfile.mainClass
         guard let version = fabricProfile.version else {

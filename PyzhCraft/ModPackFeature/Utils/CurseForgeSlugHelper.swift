@@ -10,14 +10,14 @@ enum CurseForgeSlugHelper {
         set.insert(charactersIn: "_!@$()`.+,\"-'")
         return set
     }()
-
+    
     static func toSlug(_ text: String) -> String {
         guard !text.isEmpty else { return "" }
-
+        
         let lowercased = text.lowercased()
         var result = ""
         var lastWasDash = false
-
+        
         for ch in lowercased {
             // Check if a character is in the allowed character set
             if ch.unicodeScalars.allSatisfy({ allowedCharacters.contains($0) }) {
@@ -31,10 +31,10 @@ enum CurseForgeSlugHelper {
                 }
             }
         }
-
+        
         // Remove the leading and trailing `-`
         let trimmed = result.trimmingCharacters(in: CharacterSet(charactersIn: "-"))
-
+        
         // Verification length (3-64)
         if trimmed.count < 3 {
             return ""
@@ -42,21 +42,21 @@ enum CurseForgeSlugHelper {
         if trimmed.count > 64 {
             return String(trimmed.prefix(64))
         }
-
+        
         return trimmed
     }
-
+    
     static func isValid(_ slug: String) -> Bool {
         // Length check: 3-64
         guard slug.count >= 3 && slug.count <= 64 else {
             return false
         }
-
+        
         // Character checking: only allow characters in allowedCharacters
         for scalar in slug.unicodeScalars where !allowedCharacters.contains(scalar) {
             return false
         }
-
+        
         return true
     }
 }

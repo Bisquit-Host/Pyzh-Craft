@@ -4,11 +4,11 @@ import Security
 /// Keychain management tool class for secure storage of sensitive information
 enum KeychainManager {
     // MARK: - Constants
-
+    
     private static let service = Bundle.main.identifier
-
+    
     // MARK: - Public Methods
-
+    
     /// Save data to Keychain
     /// - Parameters:
     ///   - data: data to be saved
@@ -22,13 +22,13 @@ enum KeychainManager {
             kSecAttrAccount as String: "\(account).\(key)",
             kSecValueData as String: data,
         ]
-
+        
         // Delete existing items first
         SecItemDelete(query as CFDictionary)
-
+        
         // Add new item
         let status = SecItemAdd(query as CFDictionary, nil)
-
+        
         if status == errSecSuccess {
             Logger.shared.debug("Keychain saved successfully - account: \(account), key: \(key)")
             return true
@@ -37,7 +37,7 @@ enum KeychainManager {
             return false
         }
     }
-
+    
     /// Read data from Keychain
     /// - Parameters:
     ///   - account: account identifier (usually user ID)
@@ -51,10 +51,10 @@ enum KeychainManager {
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne,
         ]
-
+        
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
-
+        
         if status == errSecSuccess, let data = result as? Data {
             Logger.shared.debug("Keychain read successfully - account: \(account), key: \(key)")
             return data
@@ -66,7 +66,7 @@ enum KeychainManager {
             return nil
         }
     }
-
+    
     /// Delete data from Keychain
     /// - Parameters:
     ///   - account: account identifier (usually user ID)
@@ -78,9 +78,9 @@ enum KeychainManager {
             kSecAttrService as String: service,
             kSecAttrAccount as String: "\(account).\(key)",
         ]
-
+        
         let status = SecItemDelete(query as CFDictionary)
-
+        
         if status == errSecSuccess || status == errSecItemNotFound {
             Logger.shared.debug("Keychain deleted successfully - account: \(account), key: \(key)")
             return true
@@ -89,7 +89,7 @@ enum KeychainManager {
             return false
         }
     }
-
+    
     /// Delete all Keychain data for the account
     /// Use kSecAttrAccount = "\(account).\(key)" when saving. Here you need to find out all the items with the account prefix and then delete them one by one
     /// - Parameter account: Account identifier (usually user ID)
@@ -102,10 +102,10 @@ enum KeychainManager {
             kSecMatchLimit as String: kSecMatchLimitAll,
             kSecReturnAttributes as String: true,
         ]
-
+        
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
-
+        
         guard status == errSecSuccess, let items = result as? [[String: Any]] else {
             if status == errSecItemNotFound {
                 Logger.shared.debug("Keychain has no data to delete - account: \(account)")
@@ -114,7 +114,7 @@ enum KeychainManager {
             Logger.shared.error("Keychain failed to query all data - account: \(account), status: \(status)")
             return false
         }
-
+        
         var allSucceeded = true
         for item in items {
             guard let storedAccount = item[kSecAttrAccount as String] as? String,
@@ -130,7 +130,7 @@ enum KeychainManager {
                 allSucceeded = false
             }
         }
-
+        
         if allSucceeded {
             Logger.shared.debug("Keychain deleted all data successfully - account: \(account)")
         }

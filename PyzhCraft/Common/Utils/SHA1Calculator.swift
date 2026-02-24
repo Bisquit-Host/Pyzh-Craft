@@ -4,7 +4,7 @@ import CryptoKit
 
 /// Unified SHA1 calculation tool class
 public enum SHA1Calculator {
-
+    
     /// Computes the SHA1 hash of Data (good for small files or in-memory data)
     /// - Parameter data: The data to calculate the hash
     /// - Returns: SHA1 hash string
@@ -15,7 +15,7 @@ public enum SHA1Calculator {
         }
         return digest.map { String(format: "%02hhx", $0) }.joined()
     }
-
+    
     /// Calculate the SHA1 hash of a file (streaming, for large files)
     /// - Parameter url: file path
     /// - Returns: SHA1 hash string
@@ -24,13 +24,13 @@ public enum SHA1Calculator {
         do {
             let fileHandle = try FileHandle(forReadingFrom: url)
             defer { try? fileHandle.close() }
-
+            
             var context = CC_SHA1_CTX()
             CC_SHA1_Init(&context)
-
+            
             // Use 1MB buffer for streaming
             let bufferSize = 1024 * 1024
-
+            
             while autoreleasepool(invoking: {
                 let data = fileHandle.readData(ofLength: bufferSize)
                 if !data.isEmpty {
@@ -41,10 +41,10 @@ public enum SHA1Calculator {
                 }
                 return false
             }) {}
-
+            
             var digest = [UInt8](repeating: 0, count: Int(CC_SHA1_DIGEST_LENGTH))
             _ = CC_SHA1_Final(&digest, &context)
-
+            
             return digest.map { String(format: "%02hhx", $0) }.joined()
         } catch {
             throw GlobalError.fileSystem(
@@ -53,7 +53,7 @@ public enum SHA1Calculator {
             )
         }
     }
-
+    
     /// Compute SHA1 hash of file (silent version, returns optional value)
     /// - Parameter url: file path
     /// - Returns: SHA1 hash string, or nil if the calculation fails
@@ -67,7 +67,7 @@ public enum SHA1Calculator {
             return nil
         }
     }
-
+    
     /// Calculate SHA1 using CryptoKit (for scenarios requiring CryptoKit features)
     /// - Parameter data: The data to calculate the hash
     /// - Returns: SHA1 hash string

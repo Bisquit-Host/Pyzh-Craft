@@ -3,7 +3,7 @@ import Foundation
 /// Launcher file filter
 /// Define file name rules that need to be filtered for each launcher (supports regular expressions)
 enum LauncherFileFilter {
-
+    
     /// Get the file filtering rules of the specified launcher
     /// - Parameter launcherType: launcher type
     /// - Returns: array of file name filtering rules (regular expression)
@@ -17,7 +17,7 @@ enum LauncherFileFilter {
                 ".*\\.log$",
                 "^pack\\.meta$",
             ]
-
+            
         case .gdLauncher:
             return [
                 // GDLauncher specific files
@@ -25,7 +25,7 @@ enum LauncherFileFilter {
                 ".*\\.log$",
                 "^metadata\\.json$",
             ]
-
+            
         case .hmcl:
             return [
                 // HMCL specific files
@@ -35,7 +35,7 @@ enum LauncherFileFilter {
                 "^hmclversion\\.cfg$",
                 "^usercache\\.json$",
             ]
-
+            
         case .sjmcLauncher:
             return [
                 // SJMCL specific files
@@ -44,7 +44,7 @@ enum LauncherFileFilter {
                 "^\\d+.*-.*\\.json$",
                 "^\\d+.*-.*\\.jar$",
             ]
-
+            
         case .xmcl:
             return [
                 // XMCL specific files
@@ -54,7 +54,7 @@ enum LauncherFileFilter {
             ]
         }
     }
-
+    
     /// Check if the file should be filtered
     /// - Parameters:
     ///   - fileName: file name (including relative path)
@@ -62,12 +62,12 @@ enum LauncherFileFilter {
     /// - Returns: true if the file should be filtered (not copied)
     static func shouldFilter(fileName: String, launcherType: ImportLauncherType) -> Bool {
         let patterns = getFilterPatterns(for: launcherType)
-
+        
         for pattern in patterns {
             do {
                 let regex = try NSRegularExpression(pattern: pattern, options: [.caseInsensitive])
                 let range = NSRange(fileName.startIndex..<fileName.endIndex, in: fileName)
-
+                
                 if regex.firstMatch(in: fileName, options: [], range: range) != nil {
                     Logger.shared.debug("Filter file: \(fileName) (matching rule: \(pattern))")
                     return true
@@ -76,10 +76,10 @@ enum LauncherFileFilter {
                 Logger.shared.warning("Invalid regular expression pattern: \(pattern), error: \(error.localizedDescription)")
             }
         }
-
+        
         return false
     }
-
+    
     /// Filter file list
     /// - Parameters:
     ///   - files: array of file URLs
@@ -97,7 +97,7 @@ enum LauncherFileFilter {
                 of: sourceDirectory.path + "/",
                 with: ""
             )
-
+            
             // Check if it should be filtered
             return !shouldFilter(fileName: relativePath, launcherType: launcherType)
         }

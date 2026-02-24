@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Resource filtering and list related status (observable)
 final class ResourceFilterState: ObservableObject {
-
+    
     // MARK: - Filter
     @Published var selectedVersions: [String] = []
     @Published var selectedLicenses: [String] = []
@@ -12,23 +12,23 @@ final class ResourceFilterState: ObservableObject {
     @Published var selectedPerformanceImpact: [String] = []
     @Published var selectedLoaders: [String] = []
     @Published var sortIndex: String = AppConstants.modrinthIndex
-
+    
     // MARK: - Paging and Tab
     @Published var versionCurrentPage: Int = 1
     @Published var versionTotal: Int = 0
     @Published var selectedTab: Int = 0
-
+    
     // MARK: - Data sources and searches
     @Published var dataSource: DataSource
     @Published var searchText = ""
     @Published var localResourceFilter: LocalResourceFilter = .all
-
+    
     init(dataSource: DataSource? = nil) {
         self.dataSource = dataSource ?? GameSettingsManager.shared.defaultAPISource
     }
-
+    
     // MARK: - Convenience method
-
+    
     /// Clear all filtering and paging (retain dataSource / searchText, etc. and can be expanded here as needed)
     func clearFiltersAndPagination() {
         selectedVersions.removeAll()
@@ -43,14 +43,14 @@ final class ResourceFilterState: ObservableObject {
         versionCurrentPage = 1
         versionTotal = 0
     }
-
+    
     /// Clear search text only
     func clearSearchText() {
         searchText = ""
     }
-
+    
     // MARK: - Bindings (used when subviews require Binding)
-
+    
     var selectedVersionsBinding: Binding<[String]> {
         Binding(get: { [weak self] in self?.selectedVersions ?? [] }, set: { [weak self] in self?.selectedVersions = $0 })
     }

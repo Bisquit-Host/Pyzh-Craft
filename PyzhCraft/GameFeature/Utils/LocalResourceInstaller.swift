@@ -5,7 +5,7 @@ import SwiftUI
 enum LocalResourceInstaller {
     enum ResourceType {
         case mod, datapack, resourcepack
-
+        
         var directoryName: String {
             switch self {
             case .mod: AppConstants.DirectoryNames.mods
@@ -13,13 +13,13 @@ enum LocalResourceInstaller {
             case .resourcepack: AppConstants.DirectoryNames.resourcepacks
             }
         }
-
+        
         /// Supported file extensions - jar and zip are uniformly supported
         var allowedExtensions: [String] {
             ["jar", "zip"]
         }
     }
-
+    
     /// Install local resource files to the specified directory
     /// - Parameters:
     ///   - fileURL: the local file selected by the user
@@ -35,7 +35,7 @@ enum LocalResourceInstaller {
                 level: .notification
             )
         }
-
+        
         // target directory
         var isDir: ObjCBool = false
         guard FileManager.default.fileExists(atPath: gameRoot.path, isDirectory: &isDir), isDir.boolValue else {
@@ -44,7 +44,7 @@ enum LocalResourceInstaller {
                 level: .notification
             )
         }
-
+        
         // Handle security scope
         let needsSecurity = fileURL.startAccessingSecurityScopedResource()
         defer { if needsSecurity { fileURL.stopAccessingSecurityScopedResource() } }
@@ -54,15 +54,15 @@ enum LocalResourceInstaller {
                 level: .notification
             )
         }
-
+        
         // target file path
         let destURL = gameRoot.appendingPathComponent(fileURL.lastPathComponent)
-
+        
         // If it already exists, remove it first
         if FileManager.default.fileExists(atPath: destURL.path) {
             try? FileManager.default.removeItem(at: destURL)
         }
-
+        
         do {
             try FileManager.default.copyItem(at: fileURL, to: destURL)
         } catch {
@@ -79,10 +79,10 @@ extension LocalResourceInstaller {
         let query: String
         let gameName: String
         let onResourceChanged: () -> Void
-
+        
         @State private var showImporter = false
         @StateObject private var errorHandler = GlobalErrorHandler.shared
-
+        
         var body: some View {
             VStack(spacing: 8) {
                 Button {
@@ -111,11 +111,11 @@ extension LocalResourceInstaller {
                     switch result {
                     case .success(let urls):
                         guard let fileURL = urls.first else { return }
-
+                        
                         // Check if query is a valid resource type
                         let validResourceTypes = ["mod", "datapack", "shader", "resourcepack"]
                         let queryLowercased = query.lowercased()
-
+                        
                         // If query is a modpack or an invalid resource type, show an error
                         if queryLowercased == "modpack" || !validResourceTypes.contains(queryLowercased) {
                             errorHandler.handle(GlobalError.configuration(
@@ -124,7 +124,7 @@ extension LocalResourceInstaller {
                             ))
                             return
                         }
-
+                        
                         let gameRootOpt = AppPaths.resourceDirectory(for: query, gameName: gameName)
                         guard let gameRoot = gameRootOpt else {
                             errorHandler.handle(GlobalError.fileSystem(
@@ -133,10 +133,10 @@ extension LocalResourceInstaller {
                             ))
                             return
                         }
-
+                        
                         // Simplified extension verification - unified support for jar and zip
                         let allowedExtensions = ["jar", "zip"]
-
+                        
                         do {
                             guard let ext = fileURL.pathExtension.lowercased() as String?, allowedExtensions.contains(ext) else {
                                 throw GlobalError.resource(
@@ -144,7 +144,7 @@ extension LocalResourceInstaller {
                                     level: .notification
                                 )
                             }
-
+                            
                             try LocalResourceInstaller.install(
                                 fileURL: fileURL,
                                 resourceType: .mod, // Only used for allowedExtensions verification, manually verified

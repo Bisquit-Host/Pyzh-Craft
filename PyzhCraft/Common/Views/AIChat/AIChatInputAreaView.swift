@@ -10,14 +10,14 @@ struct AIChatInputAreaView: View {
     let canSend: Bool
     let onSend: () -> Void
     let onAttachFile: () -> Void
-
+    
     private enum Constants {
         static let inputFontSize: CGFloat = 14
         static let inputHorizontalPadding: CGFloat = 16
         static let inputVerticalPadding: CGFloat = 12
         static let messageSpacing: CGFloat = 16
     }
-
+    
     var body: some View {
         VStack(spacing: 0) {
             // game selector
@@ -34,14 +34,14 @@ struct AIChatInputAreaView: View {
             .padding(.vertical, Constants.inputVerticalPadding)
         }
     }
-
+    
     // MARK: - View Components
-
+    
     private var selectedGame: GameVersionInfo? {
         guard let selectedGameId = selectedGameId else { return nil }
         return games.first { $0.id == selectedGameId }
     }
-
+    
     private var gameSelector: some View {
         Menu {
             ForEach(games) { game in
@@ -62,7 +62,7 @@ struct AIChatInputAreaView: View {
         .menuStyle(.borderlessButton)
         .frame(maxWidth: 50)
     }
-
+    
     private var attachFileButton: some View {
         Button(action: onAttachFile) {
             Image(systemName: "paperclip")
@@ -72,7 +72,7 @@ struct AIChatInputAreaView: View {
         .buttonStyle(.plain)
         .disabled(isSending)
     }
-
+    
     private var textField: some View {
         TextField("Type your message here...", text: $inputText, axis: .vertical)
             .textFieldStyle(.plain)
@@ -85,7 +85,7 @@ struct AIChatInputAreaView: View {
             }
             .disabled(isSending)
     }
-
+    
     private var sendButton: some View {
         Button(action: onSend) {
             Image(systemName: "arrow.up.circle")

@@ -13,11 +13,11 @@ struct CustomVersionPicker: View {
     let onVersionSelected: (String) async -> String  // New: version selection callback, return time information
     @State private var showMenu = false
     @State private var error: GlobalError?
-
+    
     private var versionItems: [FilterItem] {
         availableVersions.map { FilterItem(id: $0, name: $0) }
     }
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -43,7 +43,7 @@ struct CustomVersionPicker: View {
             }
         }
     }
-
+    
     private var versionInput: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 6)
@@ -73,7 +73,7 @@ struct CustomVersionPicker: View {
             versionPopoverContent
         }
     }
-
+    
     private var versionPopoverContent: some View {
         VersionGroupedView(
             items: versionItems,
@@ -105,7 +105,7 @@ struct CustomVersionPicker: View {
             maxHeight: Constants.versionPopoverMaxHeight
         )
     }
-
+    
     private func handleEmptyVersionsError() {
         let globalError = GlobalError.resource(
             i18nKey: "No Versions Available",
@@ -115,7 +115,7 @@ struct CustomVersionPicker: View {
         GlobalErrorHandler.shared.handle(globalError)
         error = globalError
     }
-
+    
     private func handleVersionSelectionError(_ error: Error) {
         let globalError = GlobalError.from(error)
         Logger.shared.error("Wrong version selection: \(globalError.chineseMessage)")

@@ -3,7 +3,7 @@ import SwiftUI
 /// Contribution type label view
 struct ContributionTagView: View {
     let contribution: Contribution
-
+    
     var body: some View {
         Text(contribution.localizedString)
             .font(.caption)

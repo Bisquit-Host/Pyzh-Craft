@@ -17,7 +17,7 @@ struct ModrinthDetailView: View {
     let header: AnyView?
     @Binding var scannedDetailIds: Set<String> // detailId Set of scanned resources for quick lookup
     @Binding var dataSource: DataSource
-
+    
     @StateObject private var viewModel = ModrinthSearchViewModel()
     @State private var hasLoaded = false
     @Binding var searchText: String
@@ -25,7 +25,7 @@ struct ModrinthDetailView: View {
     @State private var currentPage: Int = 1
     @State private var lastSearchParams = ""
     @State private var error: GlobalError?
-
+    
     init(
         query: String,
         selectedVersions: Binding<[String]>,
@@ -59,7 +59,7 @@ struct ModrinthDetailView: View {
         _dataSource = dataSource
         _searchText = searchText
     }
-
+    
     private var searchKey: String {
         [
             query,
@@ -73,11 +73,11 @@ struct ModrinthDetailView: View {
             dataSource.rawValue,
         ].joined(separator: "|")
     }
-
+    
     private var hasMoreResults: Bool {
         viewModel.results.count < viewModel.totalHits
     }
-
+    
     // MARK: - Body
     var body: some View {
         List {
@@ -179,7 +179,7 @@ struct ModrinthDetailView: View {
             resetPagination()
         }
     }
-
+    
     // MARK: - Private Methods
     private func initialLoadIfNeeded() async {
         if !hasLoaded {
@@ -188,13 +188,13 @@ struct ModrinthDetailView: View {
             await performSearchWithErrorHandling(page: 1, append: false)
         }
     }
-
+    
     private func triggerSearch() {
         Task {
             await performSearchWithErrorHandling(page: 1, append: false)
         }
     }
-
+    
     private func debounceSearch() {
         searchTimer?.invalidate()
         searchTimer = Timer.scheduledTimer(
@@ -206,7 +206,7 @@ struct ModrinthDetailView: View {
             }
         }
     }
-
+    
     private func performSearchWithErrorHandling(
         page: Int,
         append: Bool
@@ -222,22 +222,22 @@ struct ModrinthDetailView: View {
             }
         }
     }
-
+    
     private func performSearchThrowing(page: Int, append: Bool) async throws {
         let params = buildSearchParamsKey(page: page)
-
+        
         if params == lastSearchParams {
             // Exact duplicate, no request
             return
         }
-
+        
         guard !query.isEmpty else {
             throw GlobalError.validation(
                 i18nKey: "Query Type Empty",
                 level: .notification
             )
         }
-
+        
         lastSearchParams = params
         if !append {
             viewModel.beginNewSearch()
@@ -256,7 +256,7 @@ struct ModrinthDetailView: View {
             dataSource: dataSource
         )
     }
-
+    
     // MARK: - Result List
     @ViewBuilder private var listContent: some View {
         Group {
@@ -299,7 +299,7 @@ struct ModrinthDetailView: View {
             }
         }
     }
-
+    
     private func loadNextPageIfNeeded(currentItem mod: ModrinthProject) {
         guard hasMoreResults, !viewModel.isLoading, !viewModel.isLoadingMore else {
             return
@@ -307,7 +307,7 @@ struct ModrinthDetailView: View {
         guard
             let index = viewModel.results.firstIndex(where: { $0.projectId == mod.projectId })
         else { return }
-
+        
         let thresholdIndex = max(viewModel.results.count - 5, 0)
         if index >= thresholdIndex {
             currentPage += 1
@@ -317,12 +317,12 @@ struct ModrinthDetailView: View {
             }
         }
     }
-
+    
     private func resetPagination() {
         currentPage = 1
         lastSearchParams = ""
     }
-
+    
     // MARK: - clear data
     /// Clear all data on the page
     private func clearAllData() {
@@ -338,7 +338,7 @@ struct ModrinthDetailView: View {
         error = nil
         hasLoaded = false
     }
-
+    
     /// Clear data but keep search text (used when returning from details page)
     private func clearDataExceptSearchText() {
         // Clean up search timer to avoid memory leaks
@@ -352,7 +352,7 @@ struct ModrinthDetailView: View {
         error = nil
         hasLoaded = false
     }
-
+    
     private func buildSearchParamsKey(page: Int) -> String {
         [
             query,
@@ -368,7 +368,7 @@ struct ModrinthDetailView: View {
             dataSource.rawValue,
         ].joined(separator: "|")
     }
-
+    
     private var loadingMoreIndicator: some View {
         VStack(spacing: 12) {
             ProgressView()
@@ -377,7 +377,7 @@ struct ModrinthDetailView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(16)
     }
-
+    
     private var showsLoadingOverlay: Bool {
         viewModel.isLoading && viewModel.results.isEmpty && error == nil
     }

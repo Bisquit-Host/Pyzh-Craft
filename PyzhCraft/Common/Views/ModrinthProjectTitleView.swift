@@ -2,13 +2,13 @@ import SwiftUI
 
 struct ModrinthProjectTitleView: View {
     let projectDetail: ModrinthProjectDetail
-
+    
     var body: some View {
         VStack {
             HStack {
                 // Project icon
                 if let iconUrl = projectDetail.iconUrl,
-                    let url = URL(string: iconUrl) {
+                   let url = URL(string: iconUrl) {
                     AsyncImage(url: url) { image in
                         image
                             .resizable()
@@ -28,7 +28,7 @@ struct ModrinthProjectTitleView: View {
                                 .foregroundColor(.secondary)
                         )
                 }
-
+                
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Text(projectDetail.title)
@@ -75,6 +75,7 @@ struct ModrinthProjectTitleView: View {
                         }
                     }
                 }
+                
                 Spacer()
             }
         }

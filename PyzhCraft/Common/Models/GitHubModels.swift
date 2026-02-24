@@ -7,7 +7,7 @@ public struct GitHubContributor: Codable, Identifiable {
     public let avatarUrl: String
     public let htmlUrl: String
     public let contributions: Int
-
+    
     enum CodingKeys: String, CodingKey {
         case id, login
         case avatarUrl = "avatar_url"
@@ -19,7 +19,7 @@ public struct GitHubContributor: Codable, Identifiable {
 // MARK: - GitHub Release Model
 public struct GitHubRelease: Codable {
     public let tagName: String
-
+    
     enum CodingKeys: String, CodingKey {
         case tagName = "tag_name"
     }

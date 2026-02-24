@@ -27,7 +27,7 @@ enum NetworkUtils {
         let trimmed = input.trimmingCharacters(in: .whitespaces)
         var originalAddress = trimmed
         var originalPort = 25565
-
+        
         // Check if the port is included
         if let colonIndex = trimmed.lastIndex(of: ":") {
             // Check whether the content after the colon is a number (port)
@@ -45,7 +45,7 @@ enum NetworkUtils {
                 )
             }
         }
-
+        
         // Does not contain port, query SRV record
         if let srvResult = await querySRVRecord(for: trimmed) {
             // The SRV record returns the connection address, and the original address is the entered domain name
@@ -56,7 +56,7 @@ enum NetworkUtils {
                 originalPort: 25565  // Default port
             )
         }
-
+        
         // No SRV records, default port 25565 is used
         return ResolvedServerAddress(
             address: trimmed,
@@ -65,41 +65,41 @@ enum NetworkUtils {
             originalPort: 25565
         )
     }
-
+    
     /// Query Minecraft SRV records
     /// - Parameter domain: domain name
     /// - Returns: Address and port in the SRV record (only connection information), or nil if none
     private static func querySRVRecord(for domain: String) async -> (address: String, port: Int)? {
         let srvName = "_minecraft._tcp.\(domain)"
-
+        
         // Use the system's dig command to query SRV records (easier and more reliable)
         guard let output = await runDigShortSRVQuery(srvName: srvName) else { return nil }
-
+        
         // Parse SRV record format: priority weight port target
         // For example: "5 0 25565 mc.example.com."
         let lines = output.trimmingCharacters(in: .whitespacesAndNewlines).components(separatedBy: .newlines)
         guard let firstLine = lines.first, !firstLine.isEmpty else {
             return nil
         }
-
+        
         let components = firstLine.split(separator: " ").map(String.init)
         guard components.count >= 4 else {
             return nil
         }
-
+        
         guard let port = Int(components[2]), port > 0 && port <= 65535 else {
             return nil
         }
-
+        
         var target = components[3]
         // Remove the trailing dot (if any)
         if target.hasSuffix(".") {
             target = String(target.dropLast())
         }
-
+        
         return (address: target, port: port)
     }
-
+    
     /// Asynchronously execute `dig +short SRV <srvName>` and return stdout text
     private static func runDigShortSRVQuery(srvName: String) async -> String? {
         await withCheckedContinuation { continuation in
@@ -107,11 +107,11 @@ enum NetworkUtils {
                 private let lock = NSLock()
                 private var didResume = false
                 private let continuation: CheckedContinuation<String?, Never>
-
+                
                 init(continuation: CheckedContinuation<String?, Never>) {
                     self.continuation = continuation
                 }
-
+                
                 func resumeOnce(_ value: String?) {
                     lock.lock()
                     defer { lock.unlock() }
@@ -121,33 +121,33 @@ enum NetworkUtils {
                 }
             }
             let resumeGuard = ResumeGuard(continuation: continuation)
-
+            
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/usr/bin/dig")
             process.arguments = ["+short", "SRV", srvName]
-
+            
             let stdoutPipe = Pipe()
             process.standardOutput = stdoutPipe
             process.standardError = Pipe()
-
+            
             process.terminationHandler = { proc in
                 let data = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
                 try? stdoutPipe.fileHandleForReading.close()
-
+                
                 guard proc.terminationStatus == 0 else {
                     Logger.shared.debug("dig query failed, exit status: \(proc.terminationStatus)")
                     resumeGuard.resumeOnce(nil)
                     return
                 }
-
+                
                 guard let output = String(data: data, encoding: .utf8) else {
                     resumeGuard.resumeOnce(nil)
                     return
                 }
-
+                
                 resumeGuard.resumeOnce(output)
             }
-
+            
             do {
                 try process.run()
             } catch {
@@ -169,7 +169,7 @@ enum NetworkUtils {
     ) async -> ServerConnectionStatus {
         // Resolve server address (query SRV record)
         let resolved = await resolveServerAddress(address)
-
+        
         // Get server information using the Minecraft Server List Ping protocol
         // Use SRV target + port to establish connection, but handshake uses original domain name
         if let serverInfo = await MinecraftServerPing.ping(
@@ -184,7 +184,7 @@ enum NetworkUtils {
             return .timeout
         }
     }
-
+    
     /// Detect whether the server connection is available (compatible with old interfaces)
     /// - Parameters:
     ///   - address: server address

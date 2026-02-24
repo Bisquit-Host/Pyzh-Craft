@@ -4,12 +4,12 @@ import SwiftUI
 struct AIAvatarView: View {
     let size: CGFloat
     let url: String
-
+    
     init(size: CGFloat, url: String = "https://mcskins.top/assets/snippets/download/skin.php?n=7050") {
         self.size = size
         self.url = url
     }
-
+    
     var body: some View {
         MinecraftSkinUtils(
             type: .url,
@@ -26,7 +26,7 @@ struct MessageBubble: View {
     let cachedAIAvatar: AnyView?
     let cachedUserAvatar: AnyView?
     let aiAvatarURL: String
-
+    
     private enum Constants {
         static let avatarSize: CGFloat = 32
         static let messageFontSize: CGFloat = 13
@@ -43,7 +43,7 @@ struct MessageBubble: View {
         static let attachmentBottomPadding: CGFloat = 4
         static let spacerMinLength: CGFloat = 40
     }
-
+    
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: Constants.messageSpacing) {
             if message.role == .user {
@@ -54,17 +54,17 @@ struct MessageBubble: View {
         }
         .padding(.vertical, Constants.messageVerticalPadding)
     }
-
+    
     // MARK: - User Message View
-
+    
     @ViewBuilder private var userMessageView: some View {
         Spacer(minLength: Constants.spacerMinLength)
         messageContentView(alignment: .trailing, isUser: true)
         userAvatarView
     }
-
+    
     // MARK: - AI Message View
-
+    
     @ViewBuilder private var aiMessageView: some View {
         // Use cached AI avatars to avoid reloading each time
         if let cachedAvatar = cachedAIAvatar {
@@ -75,25 +75,25 @@ struct MessageBubble: View {
         messageContentView(alignment: .leading, isUser: false)
         Spacer(minLength: Constants.spacerMinLength)
     }
-
+    
     // MARK: - Message Content
-
+    
     private func messageContentView(alignment: HorizontalAlignment, isUser: Bool) -> some View {
         VStack(alignment: alignment, spacing: 4) {
             if !message.attachments.isEmpty {
                 attachmentsView(alignment: alignment)
                     .padding(.bottom, message.content.isEmpty ? 0 : Constants.attachmentBottomPadding)
             }
-
+            
             if !message.content.isEmpty {
                 messageTextBubble
             }
-
+            
             timestampView
         }
         .frame(maxWidth: Constants.messageMaxWidth, alignment: alignment == .leading ? .leading : .trailing)
     }
-
+    
     private func attachmentsView(alignment: HorizontalAlignment) -> some View {
         VStack(alignment: alignment, spacing: Constants.attachmentSpacing) {
             ForEach(Array(message.attachments.enumerated()), id: \.offset) { _, attachment in
@@ -101,7 +101,7 @@ struct MessageBubble: View {
             }
         }
     }
-
+    
     @ViewBuilder private var messageTextBubble: some View {
         Text(message.content)
             .textSelection(.enabled)
@@ -109,7 +109,7 @@ struct MessageBubble: View {
             .foregroundStyle(.primary)
             .frame(maxWidth: .infinity, alignment: message.role == .user ? .trailing : .leading)
     }
-
+    
     private var timestampView: some View {
         Text(message.timestamp, style: .time)
             .font(.system(size: Constants.timestampFontSize))
@@ -117,9 +117,9 @@ struct MessageBubble: View {
             .padding(.horizontal, Constants.timestampHorizontalPadding)
             .padding(.top, Constants.timestampTopPadding)
     }
-
+    
     // MARK: - Avatar Views
-
+    
     @ViewBuilder private var userAvatarView: some View {
         // Use cached user avatar to avoid reloading every time
         if let cachedAvatar = cachedUserAvatar {
@@ -142,7 +142,7 @@ struct MessageBubble: View {
 struct AttachmentPreview: View {
     let attachment: MessageAttachmentType
     let onRemove: () -> Void
-
+    
     private enum Constants {
         static let previewSize: CGFloat = 18
         static let cornerRadius: CGFloat = 6
@@ -150,7 +150,7 @@ struct AttachmentPreview: View {
         static let padding: CGFloat = 4
         static let spacing: CGFloat = 6
     }
-
+    
     var body: some View {
         HStack(spacing: Constants.spacing) {
             switch attachment {
@@ -164,13 +164,13 @@ struct AttachmentPreview: View {
                     .frame(width: Constants.previewSize, height: Constants.previewSize)
                     .background(Color(nsColor: .controlBackgroundColor))
                     .clipShape(RoundedRectangle(cornerRadius: Constants.cornerRadius))
-
+                
                 Text(fileName)
                     .font(.caption)
                     .lineLimit(1)
                     .frame(maxWidth: 100)
             }
-
+            
             Button(action: onRemove) {
                 Image(systemName: "xmark.circle.fill")
                     .font(.system(size: 14))
@@ -187,7 +187,7 @@ struct AttachmentPreview: View {
 /// Attachment display view (in messages)
 struct AttachmentView: View {
     let attachment: MessageAttachmentType
-
+    
     private enum Constants {
         static let imageMaxSize: CGFloat = 300
         static let imageCornerRadius: CGFloat = 12
@@ -198,7 +198,7 @@ struct AttachmentView: View {
         static let fileMaxWidth: CGFloat = 180
         static let fileNameMaxWidth: CGFloat = 120
     }
-
+    
     var body: some View {
         switch attachment {
         case .image:
@@ -213,7 +213,7 @@ struct AttachmentView: View {
             )
         }
     }
-
+    
     @ViewBuilder
     private func fileItemView(
         iconName: String,
@@ -226,13 +226,14 @@ struct AttachmentView: View {
                 .font(.system(size: 18))
                 .foregroundStyle(.blue)
                 .frame(width: Constants.fileIconSize, height: Constants.fileIconSize)
-
+            
             VStack(alignment: .leading, spacing: 2) {
                 Text(fileName)
                     .font(.system(size: 12))
                     .fontWeight(.medium)
                     .lineLimit(1)
                     .truncationMode(.middle)
+                
                 Text(fileExtension)
                     .font(.caption2)
                     .foregroundStyle(.secondary)

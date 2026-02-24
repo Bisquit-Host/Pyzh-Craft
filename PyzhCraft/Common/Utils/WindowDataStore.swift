@@ -13,15 +13,15 @@ struct SkinPreviewData {
 @MainActor
 class WindowDataStore: ObservableObject {
     static let shared = WindowDataStore()
-
+    
     private init() {}
-
+    
     // AI Chat window data
     @Published var aiChatState: ChatState?
-
+    
     // Skin Preview window data
     @Published var skinPreviewData: SkinPreviewData?
-
+    
     /// Clear the data of the specified window
     func cleanup(for windowID: WindowID) {
         switch windowID {

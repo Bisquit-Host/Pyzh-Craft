@@ -28,7 +28,7 @@ struct GameAdvancedSettingsView: View {
     private var currentJavaVersion: Int {
         currentGame?.javaVersion ?? 8
     }
-
+    
     /// Effective Java path (user-set or game default)
     private var effectiveJavaPath: String {
         javaPath.isEmpty ? (currentGame?.javaPath ?? "") : javaPath
@@ -87,7 +87,7 @@ struct GameAdvancedSettingsView: View {
                             javaPath = newValue
                             autoSave()
                         }
-
+                        
                         Button {
                             loadDetectedJavaRuntimes()
                         } label: {
@@ -95,23 +95,23 @@ struct GameAdvancedSettingsView: View {
                         }
                         .buttonStyle(.borderless)
                         .help("Refresh installed Java list")
-
+                        
                         if isLoadingDetectedJavaRuntimes {
                             ProgressView()
                                 .controlSize(.small)
                         }
-
+                        
                         Button("Browse\u{2026}") {
                             showJavaPathPicker = true
                         }
                         .help("Choose a Java executable manually")
-
+                        
                         Button("Reset") {
                             resetJavaPathSafely()
                         }
                         .help("Reset to default Java for this version")
                     }
-
+                    
                     if !effectiveJavaPath.isEmpty {
                         PathBreadcrumbView(path: effectiveJavaPath)
                             .help(effectiveJavaPath)
@@ -246,15 +246,15 @@ struct GameAdvancedSettingsView: View {
         if !jvmArgs.isEmpty {
             parseExistingJvmArguments(jvmArgs)
         }
-
+        
         syncSelectedDetectedJavaPath()
         loadDetectedJavaRuntimes()
     }
-
+    
     private func loadDetectedJavaRuntimes() {
         let requiredJavaVersion = currentJavaVersion
         isLoadingDetectedJavaRuntimes = true
-
+        
         Task {
             let runtimes = await Task.detached(priority: .userInitiated) {
                 JavaManager.shared.listInstalledJavaRuntimes(
@@ -262,7 +262,7 @@ struct GameAdvancedSettingsView: View {
                     includeIncompatible: true
                 )
             }.value
-
+            
             await MainActor.run {
                 detectedJavaRuntimes = runtimes
                 isLoadingDetectedJavaRuntimes = false
@@ -270,10 +270,10 @@ struct GameAdvancedSettingsView: View {
             }
         }
     }
-
+    
     private func detectedJavaLabel(_ runtime: JavaManager.DetectedJavaRuntime) -> String {
         let version = "Java \(runtime.majorVersion) (\(runtime.versionString))"
-
+        
         // Extract JVM name from standard macOS path (e.g. "temurin-21" from ".../JavaVirtualMachines/temurin-21.jdk/...")
         let components = runtime.path.split(separator: "/").map(String.init)
         let shortName: String
@@ -285,18 +285,18 @@ struct GameAdvancedSettingsView: View {
         } else {
             shortName = runtime.path
         }
-
+        
         let suffix = runtime.majorVersion < currentJavaVersion
-            ? " (incompatible)"
-            : ""
-
+        ? " (incompatible)"
+        : ""
+        
         return "\(version) — \(shortName)\(suffix)"
     }
-
+    
     private func syncSelectedDetectedJavaPath() {
         selectedDetectedJavaPath = detectedJavaRuntimes.contains(where: { $0.path == javaPath })
-            ? javaPath
-            : ""
+        ? javaPath
+        : ""
     }
     
     private func parseExistingJvmArguments(_ arguments: String) {
@@ -331,7 +331,7 @@ struct GameAdvancedSettingsView: View {
         
         var arguments: [String] = []
         arguments.append(contentsOf: gc.arguments)
-
+        
         arguments.append(contentsOf: defaultManagedArguments(for: gc))
         
         let extras = additionalJvmFlags

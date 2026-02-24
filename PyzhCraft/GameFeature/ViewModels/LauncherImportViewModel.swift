@@ -3,9 +3,9 @@ import SwiftUI
 /// Launcher import ViewModel
 @MainActor
 class LauncherImportViewModel: BaseGameFormViewModel {
-
+    
     // MARK: - Published Properties
-
+    
     @Published var selectedLauncherType: ImportLauncherType = .multiMC
     @Published var selectedInstancePath: URL?  // Directly selected instance path (all launchers use this method)
     @Published var isImporting = false {
@@ -14,29 +14,29 @@ class LauncherImportViewModel: BaseGameFormViewModel {
         }
     }
     @Published var importProgress: (fileName: String, completed: Int, total: Int)?
-
+    
     // MARK: - Private Properties
-
+    
     private var gameRepository: GameRepository?
     private var playerListViewModel: PlayerListViewModel?
     private var copyTask: Task<Void, Error>?
-
+    
     // MARK: - Initialization
-
+    
     override init(configuration: GameFormConfiguration) {
         super.init(configuration: configuration)
     }
-
+    
     // MARK: - Setup Methods
-
+    
     func setup(gameRepository: GameRepository, playerListViewModel: PlayerListViewModel) {
         self.gameRepository = gameRepository
         self.playerListViewModel = playerListViewModel
         updateParentState()
     }
-
+    
     // MARK: - Cleanup Methods
-
+    
     /// Clean cache and state (called when sheet is closed)
     func cleanup() {
         // Cancel an ongoing task
@@ -44,26 +44,26 @@ class LauncherImportViewModel: BaseGameFormViewModel {
         copyTask = nil
         downloadTask?.cancel()
         downloadTask = nil
-
+        
         // reset state
         selectedInstancePath = nil
         importProgress = nil
         isImporting = false
         selectedLauncherType = .multiMC
-
+        
         // Clean up the game name (optional, decide whether to keep it based on your needs)
         // gameNameValidator.gameName = ""
-
+        
         // Reset download status
         gameSetupService.downloadState.reset()
-
+        
         // Clean up references
         gameRepository = nil
         playerListViewModel = nil
     }
-
+    
     // MARK: - Override Methods
-
+    
     override func performConfirmAction() async {
         // All launchers use selectedInstancePath directly
         if let instancePath = selectedInstancePath {
@@ -72,7 +72,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             }
         }
     }
-
+    
     override func handleCancel() {
         if isDownloading || isImporting {
             // Cancel copy task
@@ -89,28 +89,28 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             configuration.actions.onCancel()
         }
     }
-
+    
     override func performCancelCleanup() async {
         // Clean created game folders
         if let instancePath = selectedInstancePath {
             // Infer launcher base path from instance path
             let basePath = inferBasePath(from: instancePath)
-
+            
             let parser = LauncherInstanceParserFactory.createParser(for: selectedLauncherType)
             if let info = try? parser.parseInstance(at: instancePath, basePath: basePath) {
                 do {
                     let fileManager = MinecraftFileManager()
                     // Use the game name entered by the user if available, otherwise use the instance's game name
                     let gameName = gameNameValidator.gameName.isEmpty
-                        ? info.gameName
-                        : gameNameValidator.gameName
+                    ? info.gameName
+                    : gameNameValidator.gameName
                     try fileManager.cleanupGameDirectories(gameName: gameName)
                 } catch {
                     Logger.shared.error("Failed to clean game folder: \(error.localizedDescription)")
                 }
             }
         }
-
+        
         await MainActor.run {
             isImporting = false
             importProgress = nil
@@ -118,53 +118,53 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             configuration.actions.onCancel()
         }
     }
-
+    
     override func computeIsDownloading() -> Bool {
         gameSetupService.downloadState.isDownloading || isImporting
     }
-
+    
     override func computeIsFormValid() -> Bool {
         // All launchers check selectedInstancePath
         guard selectedInstancePath != nil && gameNameValidator.isFormValid else {
             return false
         }
-
+        
         // Check if Mod Loader supports
         return isModLoaderSupported
     }
-
+    
     // MARK: - Instance Validation
-
+    
     /// Automatically fill the game name into the input box (if the input box is empty)
     func autoFillGameNameIfNeeded() {
         guard let instancePath = selectedInstancePath else { return }
-
+        
         // If the game name has been filled in, it will not be filled in automatically
         guard gameNameValidator.gameName.isEmpty else { return }
-
+        
         // Infer launcher base path from instance path
         let basePath = inferBasePath(from: instancePath)
         let parser = LauncherInstanceParserFactory.createParser(for: selectedLauncherType)
-
+        
         // Parse instance information and populate game name
         if let info = try? parser.parseInstance(at: instancePath, basePath: basePath) {
             gameNameValidator.gameName = info.gameName
         }
     }
-
+    
     /// Check if Mod Loader supports it and display notification if not
     func checkAndNotifyUnsupportedModLoader() {
         guard let info = currentInstanceInfo else { return }
-
+        
         // Check if Mod Loader supports
         guard !AppConstants.modLoaders.contains(info.modLoader.lowercased()) else { return }
-
+        
         // If not supported, show notification
         let supportedModLoadersList = AppConstants.modLoaders.joined(separator: ", ")
         let instanceName = selectedInstancePath?.lastPathComponent ?? "Unknown"
         let warningMessage = "Instance \(instanceName) uses an unsupported mod loader (\(info.modLoader)), only \(supportedModLoadersList) are supported"
         Logger.shared.warning(warningMessage)
-
+        
         GlobalErrorHandler.shared.handle(
             GlobalError.fileSystem(
                 i18nKey: "Unsupported Mod Loader",
@@ -172,43 +172,43 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             )
         )
     }
-
+    
     /// Verify that the selected instance folder is valid
     /// All launchers require direct selection of the instance folder
     func validateInstance(at instancePath: URL) -> Bool {
         let parser = LauncherInstanceParserFactory.createParser(for: selectedLauncherType)
         let fileManager = FileManager.default
-
+        
         // Check if the path exists and is a directory
         guard fileManager.fileExists(atPath: instancePath.path) else {
             return false
         }
-
+        
         let resourceValues = try? instancePath.resourceValues(forKeys: [.isDirectoryKey])
         guard resourceValues?.isDirectory == true else {
             return false
         }
-
+        
         // Verify if it is a valid instance
         return parser.isValidInstance(at: instancePath)
     }
-
+    
     // MARK: - Import Methods
-
+    
     /// Import instance directly from path (all launchers use this method)
     private func importSelectedInstancePath(_ instancePath: URL) async {
         guard let gameRepository = gameRepository else { return }
-
+        
         isImporting = true
         defer { isImporting = false }
-
+        
         let instanceName = instancePath.lastPathComponent
-
+        
         // Infer launcher base path from instance path
         let basePath = inferBasePath(from: instancePath)
-
+        
         let parser = LauncherInstanceParserFactory.createParser(for: selectedLauncherType)
-
+        
         // Parse instance information
         let instanceInfo: ImportInstanceInfo
         do {
@@ -233,7 +233,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             )
             return
         }
-
+        
         // The verification instance must have a version
         guard !instanceInfo.gameVersion.isEmpty else {
             Logger.shared.error("Instance \(instanceName) has no game version")
@@ -245,21 +245,21 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             )
             return
         }
-
+        
         // Verified Mod Loader support, error shown, only logged here
         guard AppConstants.modLoaders.contains(instanceInfo.modLoader.lowercased()) else {
             Logger.shared.error("Instance \(instanceName) uses an unsupported Mod Loader: \(instanceInfo.modLoader)")
             return
         }
-
+        
         // Generate game name (if not customized by user)
         let finalGameName = gameNameValidator.gameName.isEmpty
-            ? instanceInfo.gameName
-            : gameNameValidator.gameName
-
+        ? instanceInfo.gameName
+        : gameNameValidator.gameName
+        
         // 1. Copy the game directory first (keep mods, config and other files)
         let targetDirectory = AppPaths.profileDirectory(gameName: finalGameName)
-
+        
         do {
             // Create a replication task so it can be canceled
             copyTask = Task {
@@ -273,10 +273,10 @@ class LauncherImportViewModel: BaseGameFormViewModel {
                     }
                 }
             }
-
+            
             try await copyTask?.value
             copyTask = nil
-
+            
             Logger.shared.info("Successfully copied game directory: \(instanceName) -> \(finalGameName)")
         } catch is CancellationError {
             Logger.shared.info("Copying game directory canceled: \(instanceName)")
@@ -295,7 +295,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             )
             return
         }
-
+        
         // 2. Download the game and Mod Loader (only download the missing ones, do not overwrite existing ones)
         let downloadSuccess = await withCheckedContinuation { continuation in
             Task {
@@ -319,29 +319,29 @@ class LauncherImportViewModel: BaseGameFormViewModel {
                 )
             }
         }
-
+        
         if !downloadSuccess {
             Logger.shared.error("Failed to import instance: \(instanceName)")
             return
         }
-
+        
         Logger.shared.info("Successfully imported instance: \(instanceName) -> \(finalGameName)")
-
+        
         // Import completed
         await MainActor.run {
             gameSetupService.downloadState.reset()
             configuration.actions.onCancel()
         }
     }
-
+    
     // MARK: - Helper Methods
-
+    
     /// Infer launcher base path from instance path
     /// Looks up for the directory containing the icons folder, using the parent directory of the instance path's parent directory if not found
     private func inferBasePath(from instancePath: URL) -> URL {
         let fileManager = FileManager.default
         var currentPath = instancePath
-
+        
         // Search upward, up to 5 levels
         for _ in 0..<5 {
             let iconsPath = currentPath.appendingPathComponent("icons")
@@ -359,18 +359,18 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             
             currentPath = parentPath
         }
-
+        
         // If the icons folder is not found, use the parent directory of the instance path as a fallback
         return instancePath.deletingLastPathComponent().deletingLastPathComponent()
     }
-
+    
     /// download icon
     private func downloadIcon(from urlString: String, instanceName: String) async -> Data? {
         guard let url = URL(string: urlString) else { return nil }
-
+        
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
-
+            
             // cache icon
             let cacheDir = AppPaths.appCache.appendingPathComponent("imported_icons")
             try FileManager.default.createDirectory(
@@ -379,31 +379,31 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             )
             let cachedPath = cacheDir.appendingPathComponent("\(instanceName).png")
             try data.write(to: cachedPath)
-
+            
             return data
         } catch {
             Logger.shared.warning("Failed to download icon: \(error.localizedDescription)")
             return nil
         }
     }
-
+    
     // MARK: - Computed Properties
-
+    
     var shouldShowProgress: Bool {
         gameSetupService.downloadState.isDownloading || isImporting
     }
-
+    
     var hasSelectedInstance: Bool {
         selectedInstancePath != nil
     }
-
+    
     /// Get information about the currently selected instance
     var currentInstanceInfo: ImportInstanceInfo? {
         guard let instancePath = selectedInstancePath else { return nil }
-
+        
         // Infer launcher base path from instance path
         let basePath = inferBasePath(from: instancePath)
-
+        
         let parser = LauncherInstanceParserFactory.createParser(for: selectedLauncherType)
         do {
             if let info = try parser.parseInstance(at: instancePath, basePath: basePath) {
@@ -412,7 +412,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
                     Logger.shared.warning("The selected instance does not have a game version")
                     return nil
                 }
-
+                
                 return info
             } else {
                 Logger.shared.warning("Parse instance returns nil")
@@ -423,7 +423,7 @@ class LauncherImportViewModel: BaseGameFormViewModel {
             return nil
         }
     }
-
+    
     /// Checks whether the currently selected instance uses a supported Mod Loader
     var isModLoaderSupported: Bool {
         guard let info = currentInstanceInfo else { return false }

@@ -14,7 +14,7 @@ extension PyzhCraftApp {
                 .windowCleanup(for: .contributors)
         }
         .defaultSize(width: 280, height: 600)
-
+        
         // acknowledgment window
         Window("Acknowledgements", id: WindowID.acknowledgements.rawValue) {
             AboutView(showingAcknowledgements: true)
@@ -24,7 +24,7 @@ extension PyzhCraftApp {
                 .windowCleanup(for: .acknowledgements)
         }
         .defaultSize(width: 280, height: 600)
-
+        
         // AI chat window
         Window("AI Assistant", id: WindowID.aiChat.rawValue) {
             AIChatWindowContent()
@@ -35,7 +35,7 @@ extension PyzhCraftApp {
                 .windowCleanup(for: .aiChat)
         }
         .defaultSize(width: 500, height: 600)
-
+        
         // Java download window
         Window("Download", id: WindowID.javaDownload.rawValue) {
             JavaDownloadProgressWindow(downloadState: JavaDownloadManager.shared.downloadState)
@@ -43,7 +43,7 @@ extension PyzhCraftApp {
                 .windowCleanup(for: .javaDownload)
         }
         .defaultSize(width: 400, height: 100)
-
+        
         // Skin preview window
         Window("Skin Preview", id: WindowID.skinPreview.rawValue) {
             SkinPreviewWindowContent()
@@ -51,7 +51,7 @@ extension PyzhCraftApp {
                 .windowCleanup(for: .skinPreview)
         }
         .defaultSize(width: 1200, height: 800)
-
+        
         // Server settings window
         Window("Server Settings", id: WindowID.serverSettings.rawValue) {
             ServerSettingsWindowView()
@@ -73,7 +73,7 @@ private struct AIChatWindowContent: View {
     @EnvironmentObject var playerListViewModel: PlayerListViewModel
     @EnvironmentObject var gameRepository: GameRepository
     @EnvironmentObject var generalSettingsManager: GeneralSettingsManager
-
+    
     var body: some View {
         Group {
             if let chatState = windowDataStore.aiChatState {
@@ -89,7 +89,7 @@ private struct AIChatWindowContent: View {
 /// Skin preview window content view (used to observe WindowDataStore changes)
 private struct SkinPreviewWindowContent: View {
     @ObservedObject private var windowDataStore = WindowDataStore.shared
-
+    
     var body: some View {
         Group {
             if let data = windowDataStore.skinPreviewData {

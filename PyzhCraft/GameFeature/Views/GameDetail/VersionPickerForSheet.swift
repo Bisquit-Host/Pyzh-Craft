@@ -11,7 +11,7 @@ struct VersionPickerForSheet: View {
     var onVersionChange: ((ModrinthProjectDetailVersion?) -> Void)?
     @State private var isLoading = false
     @State private var error: GlobalError?
-
+    
     var body: some View {
         VStack(alignment: .leading) {
             if isLoading {
@@ -56,7 +56,7 @@ struct VersionPickerForSheet: View {
             onVersionChange?(newValue)
         }
     }
-
+    
     private func loadVersions() {
         isLoading = true
         error = nil
@@ -72,7 +72,7 @@ struct VersionPickerForSheet: View {
             }
         }
     }
-
+    
     private func loadVersionsThrowing() async throws {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
@@ -80,7 +80,7 @@ struct VersionPickerForSheet: View {
                 level: .notification
             )
         }
-
+        
         guard let game = selectedGame else {
             _ = await MainActor.run {
                 availableVersions = []
@@ -90,7 +90,7 @@ struct VersionPickerForSheet: View {
             }
             return
         }
-
+        
         // Use server-side filtering methods to reduce client-side filtering
         let filtered = try await ModrinthService.fetchProjectVersionsFilter(
             id: project.projectId,
@@ -98,7 +98,7 @@ struct VersionPickerForSheet: View {
             selectedLoaders: [game.modLoader],
             type: resourceType
         )
-
+        
         _ = await MainActor.run {
             availableVersions = filtered
             selectedVersion = filtered.first

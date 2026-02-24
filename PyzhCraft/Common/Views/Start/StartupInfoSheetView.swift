@@ -2,13 +2,13 @@ import SwiftUI
 
 /// Start information prompt Sheet view
 struct StartupInfoSheetView: View {
-
+    
     // MARK: - Properties
     @Environment(\.dismiss)
     private var dismiss
-
+    
     let announcementData: AnnouncementData?
-
+    
     // MARK: - Body
     var body: some View {
         CommonSheetView(
@@ -36,7 +36,7 @@ struct StartupInfoSheetView: View {
                             Spacer()
                         }
                         .padding(.bottom, 8)
-
+                        
                         // Main information content
                         if let announcementData = announcementData {
                             // Display announcement content obtained from API
@@ -52,7 +52,7 @@ struct StartupInfoSheetView: View {
                             .multilineTextAlignment(.leading)
                             .lineSpacing(4)
                             .fixedSize(horizontal: false, vertical: true)
-
+                            
                             // Author information
                             if !announcementData.author.isEmpty {
                                 Text(announcementData.author)
@@ -69,7 +69,7 @@ struct StartupInfoSheetView: View {
             footer: {
                 HStack {
                     Spacer()
-
+                    
                     Button("I Understand") {
                         dismiss()
                     }

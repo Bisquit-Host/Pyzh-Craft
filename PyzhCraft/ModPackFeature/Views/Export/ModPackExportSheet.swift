@@ -6,20 +6,20 @@ struct ModPackDocument: FileDocument {
     static var readableContentTypes: [UTType] {
         [UTType(filenameExtension: "mrpack") ?? UTType.zip]
     }
-
+    
     var data: Data
-
+    
     init(data: Data) {
         self.data = data
     }
-
+    
     init(configuration: ReadConfiguration) throws {
         guard let data = configuration.file.regularFileContents else {
             throw CocoaError(.fileReadCorruptFile)
         }
         self.data = data
     }
-
+    
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
         FileWrapper(regularFileWithContents: data)
     }
@@ -40,7 +40,7 @@ struct ModPackExportSheet: View {
     @State private var showSaveErrorAlert = false
     @State private var isExporting = false
     @State private var exportDocument: ModPackDocument?
-
+    
     // MARK: - Initialization
     init(gameInfo: GameVersionInfo) {
         self.gameInfo = gameInfo
@@ -51,7 +51,7 @@ struct ModPackExportSheet: View {
         }
         _viewModel = StateObject(wrappedValue: viewModel)
     }
-
+    
     // MARK: - Body
     var body: some View {
         CommonSheetView(
@@ -102,13 +102,13 @@ struct ModPackExportSheet: View {
             showSaveErrorAlert = error != nil
         }
     }
-
+    
     private var headerView: some View {
         Text("Export Modpack")
             .font(.headline)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
-
+    
     @ViewBuilder private var bodyView: some View {
         switch viewModel.exportState {
         case .idle:
@@ -118,9 +118,9 @@ struct ModPackExportSheet: View {
             exportProgressView
         }
     }
-
+    
     // MARK: - State Views
-
+    
     @ViewBuilder private var idleStateView: some View {
         if let error = viewModel.exportError {
             errorView(error: error)
@@ -128,7 +128,7 @@ struct ModPackExportSheet: View {
             exportFormView
         }
     }
-
+    
     private var exportFormView: some View {
         VStack(alignment: .leading, spacing: 16) {
             // Integrated package name
@@ -139,7 +139,7 @@ struct ModPackExportSheet: View {
                 TextField("Enter modpack name", text: $viewModel.modPackName)
                     .textFieldStyle(.roundedBorder)
             }
-
+            
             // Integrated package version
             VStack(alignment: .leading, spacing: 8) {
                 Text("Modpack Version")
@@ -150,7 +150,7 @@ struct ModPackExportSheet: View {
             }
         }
     }
-
+    
     private var exportProgressView: some View {
         VStack(alignment: .leading, spacing: 16) {
             exportFormView
@@ -159,7 +159,7 @@ struct ModPackExportSheet: View {
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
     }
-
+    
     private var footerView: some View {
         HStack {
             Button("Cancel") {
@@ -169,9 +169,9 @@ struct ModPackExportSheet: View {
                 dismiss()
             }
             .keyboardShortcut(.cancelAction)
-
+            
             Spacer()
-
+            
             Button("Export") {
                 if viewModel.exportState == .completed, let tempPath = viewModel.tempExportPath {
                     handleExportCompleted(tempFilePath: tempPath)
@@ -183,9 +183,9 @@ struct ModPackExportSheet: View {
             .disabled(viewModel.modPackName.isEmpty || viewModel.isExporting)
         }
     }
-
+    
     // MARK: - Reusable Components
-
+    
     private var progressItemsView: some View {
         VStack(spacing: 16) {
             // Scan resource progress bar (always shown because scanning is inevitable)
@@ -193,7 +193,7 @@ struct ModPackExportSheet: View {
                 progressRow(progress: scanProgress)
                     .id("scan-\(scanProgress.completed)-\(scanProgress.total)")
             }
-
+            
             // Copy file progress bar (only displayed when there is a copy task, no placeholder is displayed)
             if let copyProgress = viewModel.exportProgress.copyProgress {
                 progressRow(progress: copyProgress)
@@ -201,7 +201,7 @@ struct ModPackExportSheet: View {
             }
         }
     }
-
+    
     private func progressRow(progress: ModPackExporter.ExportProgress.ProgressItem) -> some View {
         FormSection {
             DownloadProgressRow(
@@ -215,16 +215,16 @@ struct ModPackExportSheet: View {
         }
         .frame(minHeight: 70)
     }
-
+    
     private func errorView(error: String) -> some View {
         VStack(spacing: 16) {
             Image(systemName: "xmark.circle.fill")
                 .foregroundColor(.red)
                 .font(.system(size: 48))
-
+            
             Text("Export Failed")
                 .font(.headline)
-
+            
             Text(error)
                 .font(.caption)
                 .foregroundColor(.secondary)
@@ -233,15 +233,15 @@ struct ModPackExportSheet: View {
         .padding()
         .frame(maxWidth: .infinity)
     }
-
+    
     // MARK: - Actions
-
+    
     /// The export process is completed and the save dialog box is displayed
     private func handleExportCompleted(tempFilePath: URL) {
         if viewModel.shouldShowSaveDialog {
             viewModel.markSaveDialogShown()
         }
-
+        
         Task {
             do {
                 let fileData = try await Task.detached(priority: .userInitiated) {

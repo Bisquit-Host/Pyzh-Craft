@@ -4,7 +4,7 @@ import Foundation
 /// Securely store authentication credentials using Keychain
 class AuthCredentialStore {
     // MARK: - Public Methods
-
+    
     /// Save authentication credentials
     /// - Parameter credential: the authentication credential to be saved
     /// - Returns: Whether the save was successful
@@ -18,7 +18,7 @@ class AuthCredentialStore {
             return false
         }
     }
-
+    
     /// Load authentication credentials
     /// - Parameter userId: user ID
     /// - Returns: Authentication credentials, returns nil if it does not exist or fails to load
@@ -26,7 +26,7 @@ class AuthCredentialStore {
         guard let data = KeychainManager.load(account: userId, key: "authCredential") else {
             return nil
         }
-
+        
         do {
             let decoder = JSONDecoder()
             return try decoder.decode(AuthCredential.self, from: data)
@@ -35,21 +35,21 @@ class AuthCredentialStore {
             return nil
         }
     }
-
+    
     /// Delete authentication credentials
     /// - Parameter userId: user ID
     /// - Returns: Whether the deletion was successful
     func deleteCredential(userId: String) -> Bool {
         KeychainManager.delete(account: userId, key: "authCredential")
     }
-
+    
     /// Remove all authentication credentials for a user
     /// - Parameter userId: user ID
     /// - Returns: Whether the deletion was successful
     func deleteAllCredentials(userId: String) -> Bool {
         KeychainManager.deleteAll(account: userId)
     }
-
+    
     /// Update authentication credentials
     /// - Parameter credential: updated authentication credentials
     /// - Returns: Whether the update is successful

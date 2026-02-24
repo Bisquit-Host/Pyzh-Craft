@@ -5,9 +5,9 @@ import Foundation
 class PlayerDataManager {
     private let profileStore = UserProfileStore()
     private let credentialStore = AuthCredentialStore()
-
+    
     // MARK: - Public Methods
-
+    
     /// Add new player
     /// - Parameters:
     ///   - name: player name
@@ -30,14 +30,14 @@ class PlayerDataManager {
         expiresAt: Date? = nil
     ) throws {
         let players = try loadPlayersThrowing()
-
+        
         if playerExists(name: name) {
             throw GlobalError.player(
                 i18nKey: "Already Exists",
                 level: .notification
             )
         }
-
+        
         do {
             // Create Player object
             let credential: AuthCredential?
@@ -59,7 +59,7 @@ class PlayerDataManager {
             } else {
                 credential = nil
             }
-
+            
             let newPlayer = try Player(
                 name: name,
                 uuid: uuid,
@@ -67,10 +67,10 @@ class PlayerDataManager {
                 credential: credential,
                 isCurrent: players.isEmpty
             )
-
+            
             // save profile
             try profileStore.addProfile(newPlayer.profile)
-
+            
             // If there is a credential, save it to Keychain
             if let credential = newPlayer.credential {
                 if !credentialStore.saveCredential(credential) {
@@ -82,7 +82,7 @@ class PlayerDataManager {
                     )
                 }
             }
-
+            
             Logger.shared.debug("New player added: \(name)")
         } catch {
             throw GlobalError.player(
@@ -91,7 +91,7 @@ class PlayerDataManager {
             )
         }
     }
-
+    
     /// Add new players (silent version)
     /// - Parameters:
     ///   - name: player name
@@ -132,7 +132,7 @@ class PlayerDataManager {
             return false
         }
     }
-
+    
     /// Load all saved players (silent version)
     /// - Returns: Player array
     func loadPlayers() -> [Player] {
@@ -145,30 +145,30 @@ class PlayerDataManager {
             return []
         }
     }
-
+    
     /// Load all saved players (throws exception version)
     /// - Returns: Player array
     /// - Throws: GlobalError when the operation fails
     func loadPlayersThrowing() throws -> [Player] {
         // Load all profiles from UserProfileStore
         let profiles = try profileStore.loadProfilesThrowing()
-
+        
         // Only basic information is loaded, Keychain is not accessed here,
         // Avoid reading the credentials of all players at once on startup (which will trigger multiple keychain password pop-ups)
         let players = profiles.map { profile in
             Player(profile: profile, credential: nil)
         }
-
+        
         return players
     }
-
+    
     /// Load authentication credentials on demand for specified players
     /// - Parameter userId: player ID
     /// - Returns: Authentication credentials, if not present, returns nil
     func loadCredential(userId: String) -> AuthCredential? {
         credentialStore.loadCredential(userId: userId)
     }
-
+    
     /// Check if player exists (case insensitive)
     /// - Parameter name: The name to check
     /// - Returns: Returns true if there is a player with the same name, otherwise returns false
@@ -183,23 +183,23 @@ class PlayerDataManager {
             return false
         }
     }
-
+    
     /// Delete the player with the specified ID
     /// - Parameter id: Player ID to be deleted
     /// - Throws: GlobalError when the operation fails
     func deletePlayer(byID id: String) throws {
         let players = try loadPlayersThrowing()
         let initialCount = players.count
-
+        
         // Check if the player to be deleted is the current player
         let isDeletingCurrentPlayer = players.contains { $0.id == id && $0.isCurrent }
-
+        
         // delete profile
         try profileStore.deleteProfile(byID: id)
-
+        
         // Remove the credential if it exists
         _ = credentialStore.deleteCredential(userId: id)
-
+        
         if initialCount > 0 {
             // If the current player is deleted, a new current player needs to be set
             if isDeletingCurrentPlayer {
@@ -214,7 +214,7 @@ class PlayerDataManager {
             Logger.shared.debug("Player deleted (ID: \(id))")
         }
     }
-
+    
     /// Delete the player with the specified ID (silent version)
     /// - Parameter id: Player ID to be deleted
     /// - Returns: Whether the deletion was successful
@@ -229,7 +229,7 @@ class PlayerDataManager {
             return false
         }
     }
-
+    
     /// Save player array (silent version)
     /// - Parameter players: Array of players to save
     func savePlayers(_ players: [Player]) {
@@ -241,7 +241,7 @@ class PlayerDataManager {
             GlobalErrorHandler.shared.handle(globalError)
         }
     }
-
+    
     /// Save player array (throws exception version)
     /// - Parameter players: Array of players to save
     /// - Throws: GlobalError when the operation fails
@@ -249,17 +249,17 @@ class PlayerDataManager {
         // Separate profiles and credentials
         var profiles: [UserProfile] = []
         var credentials: [AuthCredential] = []
-
+        
         for player in players {
             profiles.append(player.profile)
             if let credential = player.credential {
                 credentials.append(credential)
             }
         }
-
+        
         // Save profiles
         try profileStore.saveProfilesThrowing(profiles)
-
+        
         // save credentials
         for credential in credentials where !credentialStore.saveCredential(credential) {
             throw GlobalError.validation(
@@ -267,24 +267,24 @@ class PlayerDataManager {
                 level: .notification
             )
         }
-
+        
         // Clean up deleted player credentials
         let existingProfileIds = Set(profiles.map { $0.id })
         let allCredentials = try loadPlayersThrowing().compactMap { $0.credential }
         for credential in allCredentials where !existingProfileIds.contains(credential.userId) {
             _ = credentialStore.deleteCredential(userId: credential.userId)
         }
-
+        
         Logger.shared.debug("Player data saved")
     }
-
+    
     /// Update the specified player's information
     /// - Parameter updatedPlayer: updated player object
     /// - Throws: GlobalError when the operation fails
     func updatePlayer(_ updatedPlayer: Player) throws {
         // Update profile
         try profileStore.updateProfile(updatedPlayer.profile)
-
+        
         // Update or delete credentials
         if let credential = updatedPlayer.credential {
             if !credentialStore.saveCredential(credential) {
@@ -296,10 +296,10 @@ class PlayerDataManager {
         } else {
             Logger.shared.debug("No new authentication credentials provided, existing Keychain state retained - userId: \(updatedPlayer.id)")
         }
-
+        
         Logger.shared.debug("Updated player information: \(updatedPlayer.name)")
     }
-
+    
     /// Update the specified player's information (silent version)
     /// - Parameter updatedPlayer: updated player object
     /// - Returns: Whether the update is successful

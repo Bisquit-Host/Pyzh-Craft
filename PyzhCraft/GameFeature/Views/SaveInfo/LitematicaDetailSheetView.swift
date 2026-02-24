@@ -7,12 +7,12 @@ struct LitematicaDetailSheetView: View {
     let gameName: String
     @Environment(\.dismiss)
     private var dismiss
-
+    
     @State private var metadata: LitematicMetadata?
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var showError = false
-
+    
     // MARK: - Body
     var body: some View {
         CommonSheetView(
@@ -32,7 +32,7 @@ struct LitematicaDetailSheetView: View {
             }
         }
     }
-
+    
     // MARK: - Header View
     private var headerView: some View {
         HStack {
@@ -47,7 +47,7 @@ struct LitematicaDetailSheetView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-
+    
     // MARK: - Body View
     private var bodyView: some View {
         Group {
@@ -60,14 +60,14 @@ struct LitematicaDetailSheetView: View {
             }
         }
     }
-
+    
     private var loadingView: some View {
         VStack {
             ProgressView().controlSize(.small)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-
+    
     private var errorView: some View {
         VStack(spacing: 12) {
             Image(systemName: "exclamationmark.triangle")
@@ -85,7 +85,7 @@ struct LitematicaDetailSheetView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
     }
-
+    
     func metadataContentView(metadata: LitematicMetadata) -> some View {
         ScrollView {
             VStack {
@@ -98,7 +98,7 @@ struct LitematicaDetailSheetView: View {
                             infoRow(label: "Description", value: metadata.description, isMultiline: true)
                         }
                     }
-
+                    
                     // time information
                     infoSection(title: "Time") {
                         VStack(alignment: .leading, spacing: 12) {
@@ -109,7 +109,7 @@ struct LitematicaDetailSheetView: View {
                 }
                 .padding(.vertical, 8)
                 .padding(.bottom, 20)
-
+                
                 // size information
                 infoSection(title: "Size") {
                     VStack(alignment: .leading, spacing: 12) {
@@ -122,26 +122,26 @@ struct LitematicaDetailSheetView: View {
                         } else {
                             infoRow(label: "Enclosing Size", value: String(localized: "Unknown"))
                         }
-
+                        
                         if metadata.totalVolume > 0 {
                             infoRow(label: "Total Volume", value: formatNumber(Int(metadata.totalVolume)))
                         } else {
                             infoRow(label: "Total Volume", value: String(localized: "Unknown"))
                         }
-
+                        
                         if metadata.totalBlocks > 0 {
                             infoRow(label: "Total Blocks", value: formatNumber(Int(metadata.totalBlocks)))
                         } else {
                             infoRow(label: "Total Blocks", value: String(localized: "Unknown"))
                         }
-
+                        
                         infoRow(label: "Regions", value: "\(metadata.regionCount)")
                     }
                 }
             }
         }
     }
-
+    
     private func infoSection<Content: View>(title: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
@@ -152,7 +152,7 @@ struct LitematicaDetailSheetView: View {
             content()
         }
     }
-
+    
     private func infoRow(label: LocalizedStringKey, value: String, isMultiline: Bool = false) -> some View {
         HStack(alignment: isMultiline ? .top : .center, spacing: 12) {
             HStack(spacing: 0) {
@@ -175,7 +175,7 @@ struct LitematicaDetailSheetView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-
+    
     // MARK: - Footer View
     private var footerView: some View {
         HStack {
@@ -189,21 +189,21 @@ struct LitematicaDetailSheetView: View {
             .font(.caption)
             .foregroundColor(.secondary)
             .frame(maxWidth: 300, alignment: .leading)
-
+            
             Spacer()
-
+            
             Button("Close") {
                 dismiss()
             }
             .keyboardShortcut(.defaultAction)
         }
     }
-
+    
     // MARK: - Helper Methods
     private func loadMetadata() async {
         isLoading = true
         errorMessage = nil
-
+        
         do {
             Logger.shared.debug("Start loading projection details: \(filePath.lastPathComponent)")
             let loadedMetadata = try await LitematicaService.shared.loadFullMetadata(filePath: filePath)
@@ -229,18 +229,18 @@ struct LitematicaDetailSheetView: View {
             }
         }
     }
-
+    
     private func formatNumber(_ number: Int) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         return formatter.string(from: NSNumber(value: number)) ?? "\(number)"
     }
-
+    
     private func formatTimestamp(_ timestamp: Int64) -> String {
         guard timestamp > 0 else {
             return String(localized: "Unknown")
         }
-
+        
         let date = Date(timeIntervalSince1970: TimeInterval(timestamp) / 1000.0)
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
@@ -253,7 +253,7 @@ struct LitematicaDetailSheetView: View {
 // MARK: - Preview Helper
 struct MetadataContentViewPreview: View {
     let metadata: LitematicMetadata
-
+    
     var body: some View {
         let sheetView = LitematicaDetailSheetView(filePath: URL(fileURLWithPath: "/tmp/test.litematic"), gameName: "Test Game")
         return sheetView.metadataContentView(metadata: metadata)

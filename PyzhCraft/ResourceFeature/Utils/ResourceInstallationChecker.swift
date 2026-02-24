@@ -21,7 +21,7 @@ enum ResourceInstallationChecker {
         gameInfo: GameVersionInfo?
     ) async -> Bool {
         guard !installedHashes.isEmpty else { return false }
-
+        
         // Construct version/loader filter conditions (user selection is used first, and current game information is used secondly)
         let versionFilters: [String] = {
             if !selectedVersions.isEmpty {
@@ -32,7 +32,7 @@ enum ResourceInstallationChecker {
             }
             return []
         }()
-
+        
         let loaderFilters: [String] = {
             if !selectedLoaders.isEmpty {
                 return selectedLoaders.map { $0.lowercased() }
@@ -42,7 +42,7 @@ enum ResourceInstallationChecker {
             }
             return []
         }()
-
+        
         do {
             let versions = try await ModrinthService.fetchProjectVersionsFilter(
                 id: project.projectId,
@@ -50,14 +50,14 @@ enum ResourceInstallationChecker {
                 selectedLoaders: loaderFilters,
                 type: resourceType
             )
-
+            
             for version in versions {
                 guard
                     let primaryFile = ModrinthService.filterPrimaryFiles(
                         from: version.files
                     )
                 else { continue }
-
+                
                 if installedHashes.contains(primaryFile.hashes.sha1) {
                     return true
                 }
@@ -67,7 +67,7 @@ enum ResourceInstallationChecker {
                 "Failed to get project version to check installation status: \(error.localizedDescription)"
             )
         }
-
+        
         return false
     }
 }

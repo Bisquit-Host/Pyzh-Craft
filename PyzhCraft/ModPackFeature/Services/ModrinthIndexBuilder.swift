@@ -20,23 +20,23 @@ enum ModrinthIndexBuilder {
     ) async throws -> String {
         let gameVersion = gameInfo.gameVersion
         let loaderType = gameInfo.modLoader.lowercased()
-
+        
         // Get loader version
         let loaderVersion = await LoaderVersionResolver.resolve(
             loaderType: loaderType,
             gameVersion: gameVersion,
             gameInfo: gameInfo
         )
-
+        
         Logger.shared.info("Export modpack - Loader type: \(loaderType), Version: \(loaderVersion ?? "not found")")
-
+        
         // Build dependency dictionary
         let dependencies = buildDependencies(
             gameVersion: gameVersion,
             loaderType: loaderType,
             loaderVersion: loaderVersion
         )
-
+        
         // Build JSON dictionary
         var jsonDict: [String: Any] = [
             "formatVersion": 1,
@@ -44,11 +44,11 @@ enum ModrinthIndexBuilder {
             "versionId": modPackVersion,
             "name": modPackName,
         ]
-
+        
         if let summary = summary {
             jsonDict["summary"] = summary
         }
-
+        
         // Encode files, exclude non-standard fields
         var filesArray: [[String: Any]] = []
         for file in files {
@@ -61,7 +61,7 @@ enum ModrinthIndexBuilder {
                 "downloads": file.downloads,
                 "fileSize": file.fileSize,
             ]
-
+            
             // Add env field if present
             if let env = file.env {
                 var envDict: [String: String] = [:]
@@ -75,11 +75,11 @@ enum ModrinthIndexBuilder {
                     fileDict["env"] = envDict
                 }
             }
-
+            
             filesArray.append(fileDict)
         }
         jsonDict["files"] = filesArray
-
+        
         // coding dependencies
         var depsDict: [String: Any] = [:]
         if let minecraft = dependencies.minecraft {
@@ -98,7 +98,7 @@ enum ModrinthIndexBuilder {
             depsDict["neoforge-loader"] = neoforgeLoader
         }
         jsonDict["dependencies"] = depsDict
-
+        
         // Convert to JSON string
         let jsonData = try JSONSerialization.data(
             withJSONObject: jsonDict,
@@ -106,7 +106,7 @@ enum ModrinthIndexBuilder {
         )
         return String(data: jsonData, encoding: .utf8) ?? ""
     }
-
+    
     /// Build dependency dictionary
     private static func buildDependencies(
         gameVersion: String,
@@ -198,13 +198,13 @@ enum LoaderVersionResolver {
                 return gameInfo.modVersion
             }
         }
-
+        
         // 2. Try to infer version from installed loader mod
         let modsDir = AppPaths.modsDirectory(gameName: gameInfo.gameName)
         guard let modFiles = try? ResourceScanner.scanResourceDirectory(modsDir) else {
             return nil
         }
-
+        
         // Find the corresponding loader mod based on the loader type
         let loaderModPatterns: [String]
         switch loaderType {
@@ -219,7 +219,7 @@ enum LoaderVersionResolver {
         default:
             return nil
         }
-
+        
         // Find loader mod files
         for modFile in modFiles where loaderModPatterns.contains(where: { modFile.lastPathComponent.lowercased().contains($0) }) {
             let fileName = modFile.lastPathComponent.lowercased()
@@ -227,12 +227,12 @@ enum LoaderVersionResolver {
             if let version = extractVersionFromFileName(fileName) {
                 return version
             }
-
+            
             // If there is no version in the filename, try getting it from Modrinth
             if let modrinthInfo = await ModrinthResourceIdentifier.getModrinthInfo(for: modFile) {
                 // The cache contains optional server_side and client_side information
                 cacheModrinthSideInfo(modrinthInfo: modrinthInfo, modFile: modFile)
-
+                
                 let versionName = modrinthInfo.version.name
                 if let version = extractVersionFromString(versionName) {
                     return version
@@ -242,7 +242,7 @@ enum LoaderVersionResolver {
                 }
             }
         }
-
+        
         // 3. For Fabric, try to extract the version from the startup parameters
         if loaderType == "fabric" {
             for arg in gameInfo.launchCommand where arg.contains("fabric-loader") {
@@ -251,16 +251,16 @@ enum LoaderVersionResolver {
                 }
             }
         }
-
+        
         return nil
     }
-
+    
     /// Verify that the version number format is valid
     private static func isValidVersionFormat(_ version: String) -> Bool {
         let pattern = #"^\d+\.\d+(\.\d+)?(-.*)?$"#
         return version.range(of: pattern, options: .regularExpression) != nil
     }
-
+    
     /// Extract version number from file name
     private static func extractVersionFromFileName(_ fileName: String) -> String? {
         let patterns = [
@@ -268,7 +268,7 @@ enum LoaderVersionResolver {
             #"(\d+\.\d+)"#,            // 1.2
             #"v?(\d+\.\d+\.\d+)"#,     // v1.2.3
         ]
-
+        
         for pattern in patterns {
             if let regex = try? NSRegularExpression(pattern: pattern, options: []),
                let match = regex.firstMatch(in: fileName, range: NSRange(fileName.startIndex..., in: fileName)),
@@ -276,15 +276,15 @@ enum LoaderVersionResolver {
                 return String(fileName[range])
             }
         }
-
+        
         return nil
     }
-
+    
     /// Extract version number from string
     private static func extractVersionFromString(_ string: String) -> String? {
         extractVersionFromFileName(string.lowercased())
     }
-
+    
     /// Caching server_side and client_side information for Modrinth projects
     /// Only cache data containing "optional" values
     private static func cacheModrinthSideInfo(
@@ -292,26 +292,26 @@ enum LoaderVersionResolver {
         modFile: URL
     ) {
         let projectDetail = modrinthInfo.projectDetail
-
+        
         // Check if caching is required (at least one is optional)
         let shouldCache = projectDetail.clientSide == "optional" || projectDetail.serverSide == "optional"
-
+        
         guard shouldCache else {
             return
         }
-
+        
         // Use file hash as cache key
         guard let hash = try? SHA1Calculator.sha1(ofFileAt: modFile) else {
             return
         }
-
+        
         // Build cache data structure
         let sideInfo = ModrinthSideInfo(
             clientSide: projectDetail.clientSide,
             serverSide: projectDetail.serverSide,
             projectId: projectDetail.id
         )
-
+        
         // Cache to AppCacheManager
         let cacheKey = "modrinth_side_\(hash)"
         AppCacheManager.shared.setSilently(
@@ -327,7 +327,7 @@ private struct ModrinthSideInfo: Codable {
     let clientSide: String
     let serverSide: String
     let projectId: String
-
+    
     enum CodingKeys: String, CodingKey {
         case clientSide = "client_side"
         case serverSide = "server_side"

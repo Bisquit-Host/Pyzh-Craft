@@ -6,9 +6,9 @@ struct WorldInfoSectionView: View {
     let worlds: [WorldInfo]
     let isLoading: Bool
     let gameName: String
-
+    
     @State private var selectedWorld: WorldInfo?
-
+    
     // MARK: - Body
     var body: some View {
         GenericSectionView(
@@ -23,7 +23,7 @@ struct WorldInfoSectionView: View {
             WorldDetailSheetView(world: world, gameName: gameName)
         }
     }
-
+    
     // MARK: - Chip Builder
     private func worldChip(for world: WorldInfo) -> some View {
         FilterChip(

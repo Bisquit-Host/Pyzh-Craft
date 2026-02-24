@@ -3,10 +3,10 @@ import Foundation
 /// HMCL and SJMCL use different JSON formats
 struct SJMCLInstanceParser: LauncherInstanceParser {
     let launcherType: ImportLauncherType
-
+    
     func isValidInstance(at instancePath: URL) -> Bool {
         let fileManager = FileManager.default
-
+        
         // Use different validation logic based on launcher type
         if launcherType == .sjmcLauncher {
             // SJMCL: Check if sjmclcfg.json file exists
@@ -24,11 +24,11 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
         } else {
             // HMCL: Check if the instance folder contains foldername.json
             let fileManager = FileManager.default
-
+            
             // The user selects the instance folder, check whether it contains folder name.json
             let folderName = instancePath.lastPathComponent
             let folderNameJsonPath = instancePath.appendingPathComponent("\(folderName).json")
-
+            
             // Check if foldername.json file exists
             if fileManager.fileExists(atPath: folderNameJsonPath.path) {
                 // Try to parse the JSON file to verify whether it is a valid version configuration file
@@ -43,11 +43,11 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
                     return false
                 }
             }
-
+            
             return false
         }
     }
-
+    
     func parseInstance(at instancePath: URL, basePath: URL) throws -> ImportInstanceInfo? {
         // Use different parsing logic based on launcher type
         if launcherType == .sjmcLauncher {
@@ -56,27 +56,27 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
             try parseHMCLInstance(at: instancePath, basePath: basePath)
         }
     }
-
+    
     // MARK: - SJMCL Parsing
-
+    
     /// Parse SJMCL instances
     private func parseSJMCLInstance(at instancePath: URL, basePath: URL) throws -> ImportInstanceInfo? {
         let fileManager = FileManager.default
-
+        
         // Read the sjmclcfg.json file
         let sjmclcfgPath = instancePath.appendingPathComponent("sjmclcfg.json")
         guard fileManager.fileExists(atPath: sjmclcfgPath.path) else {
             return nil
         }
-
+        
         let sjmclInstance = try parseSJMCLInstanceJson(at: sjmclcfgPath)
-
+        
         // Extract information
         let gameName = sjmclInstance.name.isEmpty ? instancePath.lastPathComponent : sjmclInstance.name
         let gameVersion = sjmclInstance.version
         var modLoader = "vanilla"
         var modLoaderVersion = ""
-
+        
         // Extract Mod Loader information
         if let modLoaderInfo = sjmclInstance.modLoader {
             let loaderType = modLoaderInfo.loaderType.lowercased()
@@ -95,7 +95,7 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
             }
             modLoaderVersion = modLoaderInfo.version
         }
-
+        
         return ImportInstanceInfo(
             gameName: gameName,
             gameVersion: gameVersion,
@@ -107,34 +107,34 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
             launcherType: launcherType
         )
     }
-
+    
     /// Parse SJMCL instance JSON file
     private func parseSJMCLInstanceJson(at path: URL) throws -> SJMCLInstance {
         let data = try Data(contentsOf: path)
         return try JSONDecoder().decode(SJMCLInstance.self, from: data)
     }
-
+    
     // MARK: - HMCL Parsing
-
+    
     /// Parse HMCL instances
     private func parseHMCLInstance(at instancePath: URL, basePath: URL) throws -> ImportInstanceInfo? {
         let fileManager = FileManager.default
-
+        
         // Read information from foldername.json file
         let folderName = instancePath.lastPathComponent
         let folderNameJsonPath = instancePath.appendingPathComponent("\(folderName).json")
-
+        
         guard fileManager.fileExists(atPath: folderNameJsonPath.path),
               let versionInfo = try? parseHMCLVersionJson(at: folderNameJsonPath) else {
             return nil
         }
-
+        
         // Get information from version JSON file
         let gameName = versionInfo.id ?? instancePath.lastPathComponent
         let gameVersion = versionInfo.mcVersion ?? ""
         let modLoader = versionInfo.modLoader ?? "vanilla"
         let modLoaderVersion = versionInfo.modLoaderVersion ?? ""
-
+        
         return ImportInstanceInfo(
             gameName: gameName,
             gameVersion: gameVersion,
@@ -146,21 +146,21 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
             launcherType: launcherType
         )
     }
-
+    
     /// Parse HMCL version JSON file (folder name.json)
     private func parseHMCLVersionJson(at path: URL) throws -> HMCLVersionInfo? {
         guard let data = try? Data(contentsOf: path),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             return nil
         }
-
+        
         let id = json["id"] as? String
-
+        
         // Extract Mod Loader information from arguments.game
         var modLoader = "vanilla"
         var modLoaderVersion = ""
         var mcVersion = ""
-
+        
         if let arguments = json["arguments"] as? [String: Any],
            let gameArgs = arguments["game"] as? [Any] {
             // Traverse the parameter array to find Mod Loader related information
@@ -185,7 +185,7 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
                             }
                         }
                     }
-
+                    
                     // Check Forge version
                     if argString == "--fml.forgeVersion" {
                         if index + 1 < gameArgs.count,
@@ -196,7 +196,7 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
                             }
                         }
                     }
-
+                    
                     // Check Minecraft version
                     if argString == "--fml.mcVersion" {
                         if index + 1 < gameArgs.count,
@@ -204,7 +204,7 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
                             mcVersion = version
                         }
                     }
-
+                    
                     // Check NeoForge version
                     if argString == "--fml.neoforgeVersion" {
                         if index + 1 < gameArgs.count,
@@ -213,7 +213,7 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
                             modLoader = "neoforge"
                         }
                     }
-
+                    
                     // Check Fabric/Quilt version (usually in the --version parameter)
                     if argString == "--version" {
                         if index + 1 < gameArgs.count,
@@ -243,7 +243,7 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
                 }
             }
         }
-
+        
         return HMCLVersionInfo(
             id: id,
             mcVersion: mcVersion.isEmpty ? nil : mcVersion,
@@ -251,21 +251,21 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
             modLoaderVersion: modLoaderVersion.isEmpty ? nil : modLoaderVersion
         )
     }
-
+    
     /// Parse HMCL config.json file
     private func parseHMCLConfigJson(at path: URL) throws -> HMCLConfig? {
         let data = try Data(contentsOf: path)
         return try? JSONDecoder().decode(HMCLConfig.self, from: data)
     }
-
+    
     // MARK: - Common Methods
-
+    
     /// Extract version information from game directory
     private func extractVersionFromGameDirectory(_ gameDirectory: URL) throws -> String? {
         // Try reading from version file
         let versionFile = gameDirectory.appendingPathComponent("version.json")
         let fileManager = FileManager.default
-
+        
         if fileManager.fileExists(atPath: versionFile.path) {
             if let data = try? Data(contentsOf: versionFile),
                let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
@@ -273,7 +273,7 @@ struct SJMCLInstanceParser: LauncherInstanceParser {
                 return version
             }
         }
-
+        
         return nil
     }
 }

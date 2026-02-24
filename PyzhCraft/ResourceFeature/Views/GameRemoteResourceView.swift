@@ -16,7 +16,7 @@ struct GameRemoteResourceView: View {
     @Binding var scannedDetailIds: Set<String> // detailId Set passed in from the parent view for quick search
     @Binding var dataSource: DataSource
     @Binding var searchText: String
-
+    
     init(
         game: GameVersionInfo,
         query: Binding<String>,
@@ -50,7 +50,7 @@ struct GameRemoteResourceView: View {
         _dataSource = dataSource
         _searchText = searchText
     }
-
+    
     var body: some View {
         ModrinthDetailView(
             query: query,

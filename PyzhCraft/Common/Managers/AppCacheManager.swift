@@ -3,9 +3,9 @@ import Foundation
 class AppCacheManager {
     static let shared = AppCacheManager()
     private let queue = DispatchQueue(label: "AppCacheManager.queue")
-
+    
     private func fileURL(for namespace: String) throws -> URL {
-
+        
         do {
             try FileManager.default.createDirectory(at: AppPaths.appCache, withIntermediateDirectories: true)
         } catch {
@@ -14,12 +14,12 @@ class AppCacheManager {
                 level: .notification
             )
         }
-
+        
         return AppPaths.appCache.appendingPathComponent("\(namespace).json")
     }
-
+    
     // MARK: - Public API
-
+    
     /// - Parameters:
     ///   - namespace: namespace
     ///   - key: key
@@ -28,7 +28,7 @@ class AppCacheManager {
     func set<T: Codable>(namespace: String, key: String, value: T) throws {
         try queue.sync {
             var nsDict = try loadNamespace(namespace)
-
+            
             do {
                 let data = try JSONEncoder().encode(value)
                 nsDict[key] = data
@@ -41,7 +41,7 @@ class AppCacheManager {
             }
         }
     }
-
+    
     /// - Parameters:
     ///   - namespace: namespace
     ///   - key: key
@@ -53,7 +53,7 @@ class AppCacheManager {
             GlobalErrorHandler.shared.handle(error)
         }
     }
-
+    
     /// Get cached value
     /// - Parameters:
     ///   - namespace: namespace
@@ -65,7 +65,7 @@ class AppCacheManager {
             do {
                 let nsDict = try loadNamespace(namespace)
                 guard let data = nsDict[key] else { return nil }
-
+                
                 do {
                     return try JSONDecoder().decode(T.self, from: data)
                 } catch {
@@ -81,7 +81,7 @@ class AppCacheManager {
             }
         }
     }
-
+    
     /// Remove cached items
     /// - Parameters:
     ///   - namespace: namespace
@@ -94,7 +94,7 @@ class AppCacheManager {
             try saveNamespace(namespace, dict: nsDict)
         }
     }
-
+    
     /// Remove cached items (silent version)
     /// - Parameters:
     ///   - namespace: namespace
@@ -106,7 +106,7 @@ class AppCacheManager {
             GlobalErrorHandler.shared.handle(error)
         }
     }
-
+    
     /// Clear the cache of the specified namespace
     /// - Parameter namespace: namespace
     /// - Throws: GlobalError when the operation fails
@@ -115,7 +115,7 @@ class AppCacheManager {
             try saveNamespace(namespace, dict: [:])
         }
     }
-
+    
     /// Clear the cache of the specified namespace (silent version)
     /// - Parameter namespace: namespace
     func clearSilently(namespace: String) {
@@ -125,12 +125,12 @@ class AppCacheManager {
             GlobalErrorHandler.shared.handle(error)
         }
     }
-
+    
     /// Clear all cache
     /// - Throws: GlobalError when the operation fails
     func clearAll() throws {
         try queue.sync {
-
+            
             do {
                 let files = try FileManager.default.contentsOfDirectory(at: AppPaths.appCache, includingPropertiesForKeys: nil)
                 for file in files where file.pathExtension == "json" {
@@ -144,7 +144,7 @@ class AppCacheManager {
             }
         }
     }
-
+    
     /// Clear all caches (silent version)
     func clearAllSilently() {
         do {
@@ -153,20 +153,20 @@ class AppCacheManager {
             GlobalErrorHandler.shared.handle(error)
         }
     }
-
+    
     // MARK: - Persistence
-
+    
     /// Load namespace data
     /// - Parameter namespace: namespace
     /// - Returns: namespace data dictionary
     /// - Throws: GlobalError when the operation fails
     private func loadNamespace(_ namespace: String) throws -> [String: Data] {
         let url = try fileURL(for: namespace)
-
+        
         guard FileManager.default.fileExists(atPath: url.path) else {
             return [:]
         }
-
+        
         do {
             let data = try Data(contentsOf: url)
             return try JSONDecoder().decode([String: Data].self, from: data)
@@ -177,7 +177,7 @@ class AppCacheManager {
             )
         }
     }
-
+    
     /// Save namespace data
     /// - Parameters:
     ///   - namespace: namespace
@@ -185,7 +185,7 @@ class AppCacheManager {
     /// - Throws: GlobalError when the operation fails
     private func saveNamespace(_ namespace: String, dict: [String: Data]) throws {
         let url = try fileURL(for: namespace)
-
+        
         do {
             let data = try JSONEncoder().encode(dict)
             try data.write(to: url)

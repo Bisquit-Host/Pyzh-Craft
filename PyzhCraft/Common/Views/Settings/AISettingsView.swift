@@ -19,7 +19,7 @@ public struct AISettingsView: View {
                 }
             }
             .labeledContentStyle(.custom)
-
+            
             LabeledContent("API Key") {
                 HStack {
                     Group {
@@ -46,7 +46,7 @@ public struct AISettingsView: View {
                 }
             }
             .labeledContentStyle(.custom)
-
+            
             // Ollama address settings (only shown when Ollama is selected)
             if aiSettings.selectedProvider == .ollama {
                 LabeledContent("Ollama URL") {
@@ -59,7 +59,7 @@ public struct AISettingsView: View {
                 }
                 .labeledContentStyle(.custom)
             }
-
+            
             // Custom interface address settings in OpenAI format (can be used with compatible services such as DeepSeek)
             if aiSettings.selectedProvider.apiFormat == .openAI {
                 LabeledContent("API URL") {
@@ -76,7 +76,7 @@ public struct AISettingsView: View {
                 }
                 .labeledContentStyle(.custom)
             }
-
+            
             // Model settings (required)
             LabeledContent("Model Name") {
                 HStack {
@@ -91,7 +91,7 @@ public struct AISettingsView: View {
                 }
             }
             .labeledContentStyle(.custom)
-
+            
             // AI avatar settings
             LabeledContent("AI Avatar") {
                 VStack(alignment: .leading, spacing: 12) {

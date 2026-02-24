@@ -13,7 +13,7 @@ class DownloadState: ObservableObject {
     @Published var coreCompletedFiles: Int = 0
     @Published var resourcesCompletedFiles: Int = 0
     @Published var isCancelled = false
-
+    
     func reset() {
         isDownloading = false
         coreProgress = 0
@@ -26,7 +26,7 @@ class DownloadState: ObservableObject {
         resourcesCompletedFiles = 0
         isCancelled = false
     }
-
+    
     func startDownload(coreTotalFiles: Int, resourcesTotalFiles: Int) {
         self.coreTotalFiles = coreTotalFiles
         self.resourcesTotalFiles = resourcesTotalFiles
@@ -37,11 +37,11 @@ class DownloadState: ObservableObject {
         self.resourcesCompletedFiles = 0
         self.isCancelled = false
     }
-
+    
     func cancel() {
         isCancelled = true
     }
-
+    
     func updateProgress(
         fileName: String,
         completed: Int,
@@ -55,21 +55,21 @@ class DownloadState: ObservableObject {
             updateResourcesProgress(fileName: fileName, completed: completed, total: total)
         }
     }
-
+    
     private func updateCoreProgress(fileName: String, completed: Int, total: Int) {
         currentCoreFile = fileName
         coreCompletedFiles = completed
         coreTotalFiles = total
         coreProgress = calculateProgress(completed: completed, total: total)
     }
-
+    
     private func updateResourcesProgress(fileName: String, completed: Int, total: Int) {
         currentResourceFile = fileName
         resourcesCompletedFiles = completed
         resourcesTotalFiles = total
         resourcesProgress = calculateProgress(completed: completed, total: total)
     }
-
+    
     private func calculateProgress(completed: Int, total: Int) -> Double {
         guard total > 0 else { return 0.0 }
         return max(0.0, min(1.0, Double(completed) / Double(total)))

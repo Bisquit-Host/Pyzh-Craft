@@ -2,18 +2,18 @@ import SwiftUI
 
 class MinecraftAuthService: ObservableObject {
     static let shared = MinecraftAuthService()
-
+    
     @Published var authState: AuthenticationState = .notAuthenticated
     @Published var isLoading = false
     @Published var deviceCodeInfo: MicrosoftDeviceCodeResponse?
-
+    
     private let clientId = AppConstants.minecraftClientId
     private let scope = AppConstants.minecraftScope
     private let fallbackVerificationURL = URL(string: "https://microsoft.com/link") ?? URL(fileURLWithPath: "/")
     private var liveCookieHeader: String?
-
+    
     private init() {}
-
+    
     // MARK: - Authentication process (using Microsoft device code)
     @MainActor
     func startAuthentication() async {
@@ -22,13 +22,13 @@ class MinecraftAuthService: ObservableObject {
         deviceCodeInfo = nil
         liveCookieHeader = nil
         Logger.shared.info("Microsoft device code sign-in starts")
-
+        
         do {
             let deviceCode = try await requestDeviceCode()
             deviceCodeInfo = deviceCode
             openDeviceCodePage(for: deviceCode)
             Logger.shared.info("Device code has been obtained, waiting for user authorization")
-
+            
             let tokenResponse = try await pollForDeviceCodeToken(deviceCode: deviceCode)
             Logger.shared.info("Device code polling successful, Minecraft account verification begins")
             try await completeAuthentication(tokenResponse: tokenResponse)
@@ -45,12 +45,12 @@ class MinecraftAuthService: ObservableObject {
             authState = .error(globalError.chineseMessage)
         }
     }
-
+    
     private func openDeviceCodePage(for deviceCode: MicrosoftDeviceCodeResponse) {
         let verificationURL = URL(string: deviceCode.displayVerificationURL) ?? fallbackVerificationURL
         NSWorkspace.shared.open(verificationURL)
     }
-
+    
     private func requestDeviceCode() async throws -> MicrosoftDeviceCodeResponse {
         let url = URLConfig.API.Authentication.deviceCode
         let bodyParameters = [
@@ -59,21 +59,21 @@ class MinecraftAuthService: ObservableObject {
             "response_type": "device_code",
         ]
         let bodyData = encodeFormBody(bodyParameters)
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.httpBody = bodyData
-
+        
         let (data, httpResponse) = try await APIClient.performRequestWithResponse(request: request)
-
+        
         if let setCookieHeader = httpResponse.value(forHTTPHeaderField: "Set-Cookie") {
             liveCookieHeader = setCookieHeader
                 .split(separator: ";")
                 .first
                 .map(String.init)
         }
-
+        
         guard httpResponse.statusCode == 200 else {
             if let oauthError = parseOAuthErrorResponse(from: data) {
                 Logger.shared.error("Microsoft device code request failed: \(oauthError.error)")
@@ -83,7 +83,7 @@ class MinecraftAuthService: ObservableObject {
                 level: .notification
             )
         }
-
+        
         do {
             let response = try JSONDecoder().decode(MicrosoftDeviceCodeResponse.self, from: data)
             Logger.shared.debug("Device code obtained successfully, expiration time: \(response.expiresIn)s")
@@ -95,23 +95,23 @@ class MinecraftAuthService: ObservableObject {
             )
         }
     }
-
+    
     private enum DeviceCodePollingState {
         case waiting, slowDown, declined, expired, token(TokenResponse), failed
     }
-
+    
     private func pollForDeviceCodeToken(deviceCode: MicrosoftDeviceCodeResponse) async throws -> TokenResponse {
         let expiresAt = Date().addingTimeInterval(TimeInterval(deviceCode.expiresIn))
         var interval = max(deviceCode.interval ?? 5, 1)
         var attempt = 0
-
+        
         while Date() < expiresAt {
             try Task.checkCancellation()
-
+            
             let sleepNanoseconds = UInt64(interval) * 1_000_000_000
             try await Task.sleep(nanoseconds: sleepNanoseconds)
             attempt += 1
-
+            
             let pollingState = try await pollDeviceCodeTokenOnce(deviceCode: deviceCode.deviceCode)
             switch pollingState {
             case .waiting:
@@ -138,13 +138,13 @@ class MinecraftAuthService: ObservableObject {
                 )
             }
         }
-
+        
         throw GlobalError.authentication(
             i18nKey: "Authentication failed, timed out",
             level: .notification
         )
     }
-
+    
     private func pollDeviceCodeTokenOnce(deviceCode: String) async throws -> DeviceCodePollingState {
         let url = URLConfig.API.Authentication.token
             .appending(queryItems: [
@@ -156,7 +156,7 @@ class MinecraftAuthService: ObservableObject {
             "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
         ]
         let bodyData = encodeFormBody(bodyParameters)
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
@@ -164,9 +164,9 @@ class MinecraftAuthService: ObservableObject {
         if let liveCookieHeader, !liveCookieHeader.isEmpty {
             request.setValue(liveCookieHeader, forHTTPHeaderField: "Cookie")
         }
-
+        
         let (data, httpResponse) = try await APIClient.performRequestWithResponse(request: request)
-
+        
         if let oauthError = parseOAuthErrorResponse(from: data) {
             switch oauthError.error {
             case "authorization_pending":
@@ -182,78 +182,78 @@ class MinecraftAuthService: ObservableObject {
                 return .failed
             }
         }
-
+        
         guard httpResponse.statusCode == 200 else {
             Logger.shared.error("Microsoft device code polling failed: HTTP \(httpResponse.statusCode)")
             return .failed
         }
-
+        
         if let token = parseTokenResponse(from: data) {
             return .token(token)
         }
-
+        
         throw GlobalError.validation(
             i18nKey: "Token response parse failed",
             level: .notification
         )
     }
-
+    
     @MainActor
     private func completeAuthentication(tokenResponse: TokenResponse) async throws {
         authState = .processingAuthCode
-
+        
         let xboxToken = try await getXboxLiveTokenThrowing(accessToken: tokenResponse.accessToken)
         let minecraftToken = try await getMinecraftTokenThrowing(
             xboxToken: xboxToken.token,
             uhs: xboxToken.displayClaims.xui.first?.uhs ?? ""
         )
         try await checkMinecraftOwnership(accessToken: minecraftToken)
-
+        
         let minecraftTokenExpiration = JWTDecoder.getMinecraftTokenExpiration(from: minecraftToken)
         Logger.shared.info("Minecraft token expiration time: \(minecraftTokenExpiration)")
-
+        
         let profile = try await getMinecraftProfileThrowing(
             accessToken: minecraftToken,
             authXuid: xboxToken.displayClaims.xui.first?.uhs ?? "",
             refreshToken: tokenResponse.refreshToken ?? ""
         )
-
+        
         Logger.shared.info("Minecraft authentication successful, user: \(profile.name)")
         isLoading = false
         deviceCodeInfo = nil
         authState = .authenticated(profile: profile)
     }
-
+    
     private func encodeFormBody(_ params: [String: String]) -> Data? {
         let bodyString = params
             .map { "\($0.key)=\($0.value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")" }
             .joined(separator: "&")
         return bodyString.data(using: .utf8)
     }
-
+    
     private func parseOAuthErrorResponse(from data: Data) -> MicrosoftOAuthErrorResponse? {
         if let oauthError = try? JSONDecoder().decode(MicrosoftOAuthErrorResponse.self, from: data) {
             return oauthError
         }
-
+        
         guard let body = String(data: data, encoding: .utf8), !body.isEmpty else { return nil }
         guard let components = URLComponents(string: "?\(body)"),
               let queryItems = components.queryItems else { return nil }
-
+        
         guard let error = queryItems.first(where: { $0.name == "error" })?.value else { return nil }
         let errorDescription = queryItems.first(where: { $0.name == "error_description" })?.value
         return MicrosoftOAuthErrorResponse(error: error, errorDescription: errorDescription)
     }
-
+    
     private func parseTokenResponse(from data: Data) -> TokenResponse? {
         if let token = try? JSONDecoder().decode(TokenResponse.self, from: data) {
             return token
         }
-
+        
         guard let body = String(data: data, encoding: .utf8), !body.isEmpty else { return nil }
         guard let components = URLComponents(string: "?\(body)"),
               let queryItems = components.queryItems else { return nil }
-
+        
         guard let accessToken = queryItems.first(where: { $0.name == "access_token" })?.value else { return nil }
         let refreshToken = queryItems.first(where: { $0.name == "refresh_token" })?.value
         let expiresIn = queryItems
@@ -262,7 +262,7 @@ class MinecraftAuthService: ObservableObject {
             .flatMap(Int.init)
         return TokenResponse(accessToken: accessToken, refreshToken: refreshToken, expiresIn: expiresIn)
     }
-
+    
     // MARK: - Get Xbox Live token (silent version)
     private func getXboxLiveToken(accessToken: String) async -> XboxLiveTokenResponse? {
         do {
@@ -274,11 +274,11 @@ class MinecraftAuthService: ObservableObject {
             return nil
         }
     }
-
+    
     // MARK: - Get Xbox Live token (throws exception version)
     private func getXboxLiveTokenThrowing(accessToken: String) async throws -> XboxLiveTokenResponse {
         let url = URLConfig.API.Authentication.xboxLiveAuth
-
+        
         let body: [String: Any] = [
             "Properties": [
                 "AuthMethod": "RPS",
@@ -288,7 +288,7 @@ class MinecraftAuthService: ObservableObject {
             "RelyingParty": "http://auth.xboxlive.com",
             "TokenType": "JWT",
         ]
-
+        
         let bodyData: Data
         do {
             bodyData = try JSONSerialization.data(withJSONObject: body)
@@ -298,11 +298,11 @@ class MinecraftAuthService: ObservableObject {
                 level: .notification
             )
         }
-
+        
         // Use a unified API client
         let headers = ["Content-Type": "application/json"]
         let data = try await APIClient.post(url: url, body: bodyData, headers: headers)
-
+        
         do {
             return try JSONDecoder().decode(XboxLiveTokenResponse.self, from: data)
         } catch {
@@ -312,7 +312,7 @@ class MinecraftAuthService: ObservableObject {
             )
         }
     }
-
+    
     // MARK: - Get Minecraft access token (silent version)
     private func getMinecraftToken(xboxToken: String, uhs: String) async -> String? {
         do {
@@ -324,12 +324,12 @@ class MinecraftAuthService: ObservableObject {
             return nil
         }
     }
-
+    
     // MARK: - Get Minecraft access token (throws exception version)
     private func getMinecraftTokenThrowing(xboxToken: String, uhs: String) async throws -> String {
         // Get XSTS token
         let xstsUrl = URLConfig.API.Authentication.xstsAuth
-
+        
         let xstsBody: [String: Any] = [
             "Properties": [
                 "SandboxId": "RETAIL",
@@ -338,18 +338,18 @@ class MinecraftAuthService: ObservableObject {
             "RelyingParty": "rp://api.minecraftservices.com/",
             "TokenType": "JWT",
         ]
-
+        
         let xstsBodyData: Data
         do {
             xstsBodyData = try JSONSerialization.data(withJSONObject: xstsBody)
         } catch {
             throw GlobalError.validation(i18nKey: "XSTS Request Serialize Failed", level: .notification)
         }
-
+        
         // Use a unified API client
         let xstsHeaders = ["Content-Type": "application/json"]
         let xstsData = try await APIClient.post(url: xstsUrl, body: xstsBodyData, headers: xstsHeaders)
-
+        
         let xstsTokenResponse: XboxLiveTokenResponse
         do {
             xstsTokenResponse = try JSONDecoder().decode(XboxLiveTokenResponse.self, from: xstsData)
@@ -359,15 +359,15 @@ class MinecraftAuthService: ObservableObject {
                 level: .notification
             )
         }
-
+        
         // Get Minecraft access token
         Logger.shared.debug("Start getting your Minecraft access token")
         let minecraftUrl = URLConfig.API.Authentication.minecraftLogin
-
+        
         let minecraftBody: [String: Any] = [
             "identityToken": "XBL3.0 x=\(uhs);\(xstsTokenResponse.token)"
         ]
-
+        
         let minecraftBodyData: Data
         do {
             minecraftBodyData = try JSONSerialization.data(withJSONObject: minecraftBody)
@@ -377,20 +377,20 @@ class MinecraftAuthService: ObservableObject {
                 level: .notification
             )
         }
-
+        
         // Use unified API client (needs to handle non-200 status codes)
         var minecraftRequest = URLRequest(url: minecraftUrl)
         minecraftRequest.httpMethod = "POST"
         minecraftRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         minecraftRequest.timeoutInterval = 30.0
         minecraftRequest.httpBody = minecraftBodyData
-
+        
         let (minecraftData, minecraftHttpResponse) = try await APIClient.performRequestWithResponse(request: minecraftRequest)
-
+        
         guard minecraftHttpResponse.statusCode == 200 else {
             let statusCode = minecraftHttpResponse.statusCode
             Logger.shared.error("Minecraft authentication failed: HTTP \(statusCode)")
-
+            
             // Provide more specific error information based on different status codes
             switch statusCode {
             case 401:
@@ -420,7 +420,7 @@ class MinecraftAuthService: ObservableObject {
                 )
             }
         }
-
+        
         let minecraftTokenResponse: TokenResponse
         do {
             minecraftTokenResponse = try JSONDecoder().decode(TokenResponse.self, from: minecraftData)
@@ -430,10 +430,10 @@ class MinecraftAuthService: ObservableObject {
                 level: .notification
             )
         }
-
+        
         return minecraftTokenResponse.accessToken
     }
-
+    
     // MARK: - Check Minecraft game ownership
     private func checkMinecraftOwnership(accessToken: String) async throws {
         let url = URLConfig.API.Authentication.minecraftEntitlements
@@ -441,13 +441,13 @@ class MinecraftAuthService: ObservableObject {
         request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.timeoutInterval = 30.0
-
+        
         // Use unified API client (needs to handle non-200 status codes)
         let (data, httpResponse) = try await APIClient.performRequestWithResponse(request: request)
-
+        
         guard httpResponse.statusCode == 200 else {
             let statusCode = httpResponse.statusCode
-
+            
             // Provide specific error information based on status code
             switch statusCode {
             case 401:
@@ -467,21 +467,21 @@ class MinecraftAuthService: ObservableObject {
                 )
             }
         }
-
+        
         do {
             let entitlements = try JSONDecoder().decode(MinecraftEntitlementsResponse.self, from: data)
-
+            
             // Check if you have the necessary game permissions
             let hasProductMinecraft = entitlements.items.contains { $0.name == MinecraftEntitlement.productMinecraft.rawValue }
             let hasGameMinecraft = entitlements.items.contains { $0.name == MinecraftEntitlement.gameMinecraft.rawValue }
-
+            
             if !hasProductMinecraft || !hasGameMinecraft {
                 throw GlobalError.authentication(
                     i18nKey: "This Microsoft account has not purchased Minecraft or has insufficient entitlements, please log in with an account that has purchased Minecraft",
                     level: .popup
                 )
             }
-
+            
             // Verification passed
         } catch let decodingError as DecodingError {
             throw GlobalError.validation(
@@ -498,17 +498,17 @@ class MinecraftAuthService: ObservableObject {
             )
         }
     }
-
+    
     // MARK: - Get Minecraft user profile
     private func getMinecraftProfileThrowing(accessToken: String, authXuid: String, refreshToken: String = "") async throws -> MinecraftProfileResponse {
         let url = URLConfig.API.Authentication.minecraftProfile
         // Use a unified API client
         let headers = ["Authorization": "Bearer \(accessToken)"]
         let data = try await APIClient.get(url: url, headers: headers)
-
+        
         do {
             let profile = try JSONDecoder().decode(MinecraftProfileResponse.self, from: data)
-
+            
             // accessToken, authXuid and refreshToken are not returned by API and need to be set manually
             return MinecraftProfileResponse(
                 id: profile.id,
@@ -526,7 +526,7 @@ class MinecraftAuthService: ObservableObject {
             )
         }
     }
-
+    
     // MARK: - Logout/cancel authentication
     @MainActor
     func logout() {
@@ -534,7 +534,7 @@ class MinecraftAuthService: ObservableObject {
         deviceCodeInfo = nil
         isLoading = false
     }
-
+    
     // MARK: - Clean authentication data
     @MainActor
     func clearAuthenticationData() {
@@ -547,7 +547,7 @@ class MinecraftAuthService: ObservableObject {
 // MARK: - Token Validation and Refresh
 extension MinecraftAuthService {
     // MARK: - Token verification and refresh related methods
-
+    
     /// Refresh the token of the specified player (public interface)
     /// - Parameter player: Player who needs to refresh Token
     /// - Returns: refreshed player object
@@ -555,7 +555,7 @@ extension MinecraftAuthService {
     func refreshPlayerToken(for player: Player) async -> Result<Player, GlobalError> {
         isLoading = true
         defer { isLoading = false }
-
+        
         do {
             let refreshedPlayer = try await validateAndRefreshPlayerTokenThrowing(for: player)
             Logger.shared.info("Successfully refreshed player \(player.name)'s Token")
@@ -570,13 +570,13 @@ extension MinecraftAuthService {
             return .failure(globalError)
         }
     }
-
+    
     /// Verify and try to refresh player token
     /// - Parameter player: player object
     /// - Returns: verified/refreshed player object
     /// - Throws: GlobalError when the operation fails
     func validateAndRefreshPlayerTokenThrowing(for player: Player) async throws -> Player {
-
+        
         // If there is no access token, throw an error and ask to log in again
         guard !player.authAccessToken.isEmpty else {
             throw GlobalError.authentication(
@@ -584,17 +584,17 @@ extension MinecraftAuthService {
                 level: .notification
             )
         }
-
+        
         // Check whether the token expires based on tokenExpiresAt
         let isTokenExpired = await isTokenExpiredBasedOnTime(for: player)
-
+        
         if !isTokenExpired {
             Logger.shared.debug("Player \(player.name)'s Token has not expired and does not need to be refreshed")
             return player
         }
-
+        
         Logger.shared.info("Player \(player.name)'s Token has expired, try to refresh it")
-
+        
         // Token expires, try to refresh using refresh token
         guard !player.authRefreshToken.isEmpty else {
             throw GlobalError.authentication(
@@ -602,19 +602,19 @@ extension MinecraftAuthService {
                 level: .popup
             )
         }
-
+        
         // Refresh access token using refresh token
         let refreshedTokens = try await refreshTokenThrowing(refreshToken: player.authRefreshToken)
-
+        
         // Get the complete authentication chain using the new access token
         let xboxToken = try await getXboxLiveTokenThrowing(accessToken: refreshedTokens.accessToken)
         let minecraftToken = try await getMinecraftTokenThrowing(xboxToken: xboxToken.token, uhs: xboxToken.displayClaims.xui.first?.uhs ?? "")
-
+        
         // Create updated player object
         var updatedProfile = player.profile
         updatedProfile.lastPlayed = player.lastPlayed
         updatedProfile.isCurrent = player.isCurrent
-
+        
         var updatedCredential = player.credential
         if var credential = updatedCredential {
             credential.accessToken = minecraftToken
@@ -631,19 +631,19 @@ extension MinecraftAuthService {
                 xuid: xboxToken.displayClaims.xui.first?.uhs ?? ""
             )
         }
-
+        
         let updatedPlayer = Player(profile: updatedProfile, credential: updatedCredential)
-
+        
         return updatedPlayer
     }
-
+    
     /// Refresh access token using refresh token (throws exception version)
     /// - Parameter refreshToken: refresh token
     /// - Returns: new token response
     /// - Throws: GlobalError when refresh fails
     private func refreshTokenThrowing(refreshToken: String) async throws -> TokenResponse {
         let url = URLConfig.API.Authentication.token
-
+        
         // refresh_token may contain special characters and must be x-www-form-urlencoded encoded
         let bodyParameters: [String: String] = [
             "grant_type": "refresh_token",
@@ -655,15 +655,15 @@ extension MinecraftAuthService {
             .map { "\($0.key)=\($0.value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")" }
             .joined(separator: "&")
         let bodyData = bodyString.data(using: .utf8)
-
+        
         // Use unified API client (needs to handle non-200 status codes)
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.httpBody = bodyData
-
+        
         let (data, httpResponse) = try await APIClient.performRequestWithResponse(request: request)
-
+        
         // Check for OAuth errors
         if let errorResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
            let error = errorResponse["error"] as? String {
@@ -682,7 +682,7 @@ extension MinecraftAuthService {
                 )
             }
         }
-
+        
         guard httpResponse.statusCode == 200 else {
             Logger.shared.error("Failed to refresh access token: HTTP \(httpResponse.statusCode)")
             throw GlobalError.download(
@@ -692,7 +692,7 @@ extension MinecraftAuthService {
         }
         return try JSONDecoder().decode(TokenResponse.self, from: data)
     }
-
+    
     /// Check whether the Token has expired based on the timestamp
     /// - Parameter player: player object
     /// - Returns: Whether it has expired
@@ -700,7 +700,7 @@ extension MinecraftAuthService {
         // Normal logic: Determine whether it is about to expire based on the exp field in the JWT (including 5-minute buffer)
         return JWTDecoder.isTokenExpiringSoon(player.authAccessToken)
     }
-
+    
     /// Prompts the user to re-login to the specified player
     /// - Parameter player: Player who needs to log in again
     func promptForReauth(player: Player) {
@@ -709,7 +709,7 @@ extension MinecraftAuthService {
             i18nKey: "Login has expired, please re-login to this account in player management before starting the game",
             level: .notification
         )
-
+        
         GlobalErrorHandler.shared.handle(notification)
     }
 }

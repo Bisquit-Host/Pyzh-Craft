@@ -6,28 +6,28 @@ struct AddPlayerSheetView: View {
     var onAdd: () -> Void
     var onCancel: () -> Void
     var onLogin: (MinecraftProfileResponse) -> Void
-
+    
     enum PlayerProfile {
         case minecraft(MinecraftProfileResponse)
     }
-
+    
     @ObservedObject var playerListViewModel: PlayerListViewModel
-
+    
     @State private var isPremium = false
     @State private var authenticatedProfile: MinecraftProfileResponse?
     @StateObject private var authService = MinecraftAuthService.shared
-
+    
     @Environment(\.openURL)
     private var openURL
     @State private var selectedAuthType: AccountAuthType = .premium
     @FocusState private var isTextFieldFocused: Bool
     @State private var showErrorPopover = false
-
+    
     // Mark check status
     @State private var isCheckingFlag = true  // Initially true, loading will be displayed directly when entering the page
     // IP check results (only used if there is no genuine account in the list and there is no mark)
     @State private var isForeignIP = false
-
+    
     var body: some View {
         CommonSheetView(
             header: {
@@ -88,14 +88,14 @@ struct AddPlayerSheetView: View {
                                 }
                             }
                             .keyboardShortcut(.defaultAction)
-
+                            
                         case .authenticated(let profile):
-
+                            
                             Button("Add") {
                                 onLogin(profile)
                             }
                             .keyboardShortcut(.defaultAction)
-
+                            
                         case .error:
                             Button("Retry") {
                                 Task {
@@ -103,7 +103,7 @@ struct AddPlayerSheetView: View {
                                 }
                             }
                             .keyboardShortcut(.defaultAction)
-
+                            
                         default:
                             ProgressView().controlSize(.small)
                         }
@@ -115,7 +115,7 @@ struct AddPlayerSheetView: View {
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(.accentColor)
-
+                        
                         Button(
                             "Create account"
                         ) {
@@ -137,9 +137,9 @@ struct AddPlayerSheetView: View {
             clearAllData()
         }
     }
-
+    
     // MARK: - check logic
-
+    
     /// Check if you can add an offline account
     private func canAddOfflineAccount() -> Bool {
         // Check the mark: If a genuine account has been added (the mark exists), you can add an offline account
@@ -147,13 +147,13 @@ struct AddPlayerSheetView: View {
         if flagManager.hasAddedPremiumAccount() {
             return true
         }
-
+        
         // If there is no tag, you need to check the IP geolocation
         // If it is a foreign IP, adding an offline account is not allowed
         // If it is a domestic IP (or the check fails), offline accounts are allowed to be added
         return !isForeignIP
     }
-
+    
     /// Check genuine account mark
     private func checkPremiumAccountFlag() async {
         // Check mark
@@ -164,11 +164,11 @@ struct AddPlayerSheetView: View {
             // The loading status has been displayed and will continue to be displayed until the IP check is completed
             let locationService = IPLocationService.shared
             let foreign = await locationService.isForeignIP()
-
+            
             await MainActor.run {
                 isForeignIP = foreign
                 isCheckingFlag = false
-
+                
                 // selectedAuthType falls among the available options
                 if !availableAuthTypes.contains(selectedAuthType) {
                     selectedAuthType = .premium
@@ -181,18 +181,18 @@ struct AddPlayerSheetView: View {
             }
         }
     }
-
+    
     /// Get a list of available authentication types
     private var availableAuthTypes: [AccountAuthType] {
         // If offline accounts can be added, show all options
         if canAddOfflineAccount() {
             return AccountAuthType.allCases
         }
-
+        
         // If it is a foreign IP and there is no genuine account in the list, only the genuine option will be displayed
         return [.premium]
     }
-
+    
     // MARK: - clear data
     /// Clear all data on the page
     private func clearAllData() {
@@ -214,7 +214,7 @@ struct AddPlayerSheetView: View {
         // Reset IP check results
         isForeignIP = false
     }
-
+    
     // Description area
     private var playerInfoSection: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -234,7 +234,7 @@ struct AddPlayerSheetView: View {
                 .foregroundColor(.secondary)
         }
     }
-
+    
     // input area
     private var playerNameInputSection: some View {
         VStack(alignment: .leading) {
@@ -263,7 +263,7 @@ struct AddPlayerSheetView: View {
             }
         }
     }
-
+    
     // Determine border color based on input state and focus state
     private var borderColor: Color {
         if isTextFieldFocused {
@@ -272,7 +272,7 @@ struct AddPlayerSheetView: View {
             .clear
         }
     }
-
+    
     // Get error information (only when illegal, excluding empty string)
     private var playerNameError: String? {
         let trimmedName = playerName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -283,7 +283,7 @@ struct AddPlayerSheetView: View {
         // Other verification rules can be added
         return nil
     }
-
+    
     private func checkPlayerName(_ name: String) {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         // Set status based on playerNameError and whether it is empty to avoid repeated checks
@@ -296,15 +296,13 @@ struct AddPlayerSheetView: View {
 // Assuming AccountAuthType is defined as:
 enum AccountAuthType: String, CaseIterable, Identifiable {
     var id: String { rawValue }
-
+    
     case offline, premium
-
+    
     var displayName: String {
         switch self {
-        case .premium:
-            return String(localized: "Microsoft")
-        default:
-            return String(localized: "Offline")
+        case .premium: String(localized: "Microsoft")
+        default: String(localized: "Offline")
         }
     }
 }

@@ -18,7 +18,7 @@ public struct ModrinthProject: Codable {
     let clientSide: String
     let serverSide: String
     let fileName: String?
-
+    
     enum CodingKeys: String, CodingKey {
         case projectId = "project_id"
         case projectType = "project_type"
@@ -60,7 +60,7 @@ public struct ModrinthProjectDetail: Codable, Hashable, Equatable {
     let loaders: [String]
     var type: String?
     var fileName: String?
-
+    
     enum CodingKeys: String, CodingKey {
         case slug, title, description, categories,
              clientSide = "client_side",
@@ -86,7 +86,7 @@ struct ModrinthResult: Codable {
     let offset: Int
     let limit: Int
     let totalHits: Int
-
+    
     enum CodingKeys: String, CodingKey {
         case hits, offset, limit
         case totalHits = "total_hits"
@@ -99,7 +99,7 @@ struct GameVersion: Codable, Identifiable, Hashable {
     let version_type: String
     let date: String
     let major: Bool
-
+    
     var id: String { version }
 }
 
@@ -108,7 +108,7 @@ struct Loader: Codable, Identifiable {
     let name: String
     let icon: String
     let supported_project_types: [String]
-
+    
     var id: String { name }
 }
 
@@ -117,7 +117,7 @@ struct Category: Codable, Identifiable, Hashable {
     let name: String
     let project_type: String
     let header: String
-
+    
     var id: String { name }
 }
 
@@ -132,55 +132,55 @@ struct License: Codable, Equatable, Hashable {
 public struct ModrinthProjectDetailVersion: Codable, Identifiable, Equatable, Hashable {
     /// Game versions this version supports
     public let gameVersions: [String]
-
+    
     /// Loaders this version supports
     public let loaders: [String]
-
+    
     /// Version ID
     public let id: String
-
+    
     /// Project ID
     public let projectId: String
-
+    
     /// Author ID
     public let authorId: String
-
+    
     /// Whether this version is featured
     public let featured: Bool
-
+    
     /// Version name
     public let name: String
-
+    
     /// Version number
     public let versionNumber: String
-
+    
     /// Version changelog
     public let changelog: String?
-
+    
     /// URL to changelog
     public let changelogUrl: String?
-
+    
     /// Date published
     public let datePublished: Date
-
+    
     /// Number of downloads
     public let downloads: Int
-
+    
     /// Version type (release, beta, alpha)
     public let versionType: String
-
+    
     /// Version status
     public let status: String
-
+    
     /// Requested status
     public let requestedStatus: String?
-
+    
     /// Version files
     public let files: [ModrinthVersionFile]
-
+    
     /// Version dependencies
     public let dependencies: [ModrinthVersionDependency]
-
+    
     enum CodingKeys: String, CodingKey {
         case gameVersions = "game_versions",
              loaders, id,
@@ -203,22 +203,22 @@ public struct ModrinthProjectDetailVersion: Codable, Identifiable, Equatable, Ha
 public struct ModrinthVersionFile: Codable, Equatable, Hashable {
     /// File hashes
     public let hashes: ModrinthVersionFileHashes
-
+    
     /// File URL
     public let url: String
-
+    
     /// File name
     public let filename: String
-
+    
     /// Whether this is the primary file
     public let primary: Bool
-
+    
     /// File size in bytes
     public let size: Int
-
+    
     /// File type
     public let fileType: String?
-
+    
     enum CodingKeys: String, CodingKey {
         case hashes, url, filename, primary, size,
              fileType = "file_type"
@@ -229,7 +229,7 @@ public struct ModrinthVersionFile: Codable, Equatable, Hashable {
 public struct ModrinthVersionFileHashes: Codable, Equatable, Hashable {
     /// SHA512 hash
     public let sha512: String
-
+    
     /// SHA1 hash
     public let sha1: String
 }
@@ -238,13 +238,13 @@ public struct ModrinthVersionFileHashes: Codable, Equatable, Hashable {
 public struct ModrinthVersionDependency: Codable, Equatable, Hashable {
     /// Project ID
     public let projectId: String?
-
+    
     /// Version ID
     public let versionId: String?
-
+    
     /// Dependency type
     public let dependencyType: String
-
+    
     enum CodingKeys: String, CodingKey {
         case projectId = "project_id"
         case versionId = "version_id"
@@ -278,7 +278,7 @@ extension ModrinthProject {
             fileName: detail.fileName
         )
     }
-
+    
     /// Build ModrinthProjectDetail from ModrinthProject
     public func toDetail() -> ModrinthProjectDetail {
         ModrinthProjectDetail(

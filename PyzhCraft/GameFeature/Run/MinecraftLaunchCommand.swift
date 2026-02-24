@@ -5,7 +5,7 @@ import AVFoundation
 struct MinecraftLaunchCommand {
     let player: Player?
     let game: GameVersionInfo
-
+    
     /// Start the game (silent version)
     func launchGame() async {
         do {
@@ -14,23 +14,23 @@ struct MinecraftLaunchCommand {
             await handleLaunchError(error)
         }
     }
-
+    
     /// stop game
     func stopGame() async {
         // Stop the process, terminationHandler will automatically handle error monitoring stop and status update
         _ = GameProcessManager.shared.stopProcess(for: game.id)
     }
-
+    
     /// Start the game (throws exception version)
     /// - Throws: GlobalError when startup fails
     func launchGameThrowing() async throws {
         // Verify and refresh token (if necessary) before launching the game
         let validatedPlayer = try await validatePlayerTokenBeforeLaunch()
-
+        
         let command = game.launchCommand
         try await launchGameProcess(command: replaceAuthParameters(command: command, with: validatedPlayer))
     }
-
+    
     /// Verify player token before launching the game
     /// - Returns: Verified player object
     /// - Throws: GlobalError when validation fails
@@ -39,14 +39,14 @@ struct MinecraftLaunchCommand {
             Logger.shared.warning("No player selected, default authentication parameters are used")
             return nil
         }
-
+        
         // If it is an offline account, return directly
         guard player.isOnlineAccount else {
             return player
         }
-
+        
         Logger.shared.info("Verify player \(player.name)'s Token before starting the game")
-
+        
         // Load authentication credentials from Keychain for this player on demand before starting (only for the current player to avoid reading all accounts at once)
         var playerWithCredential = player
         if playerWithCredential.credential == nil {
@@ -55,20 +55,20 @@ struct MinecraftLaunchCommand {
                 playerWithCredential.credential = credential
             }
         }
-
+        
         // Verify using the loaded/updated player object and try to refresh the token
         let authService = MinecraftAuthService.shared
         let validatedPlayer = try await authService.validateAndRefreshPlayerTokenThrowing(for: playerWithCredential)
-
+        
         // If the Token is updated, it needs to be saved to PlayerDataManager
         if validatedPlayer.authAccessToken != player.authAccessToken {
             Logger.shared.info("Player \(player.name)'s Token has been updated and saved to the data manager")
             await updatePlayerInDataManager(validatedPlayer)
         }
-
+        
         return validatedPlayer
     }
-
+    
     /// Update player information in PlayerDataManager
     /// - Parameter updatedPlayer: updated player object
     private func updatePlayerInDataManager(_ updatedPlayer: Player) async {
@@ -84,13 +84,13 @@ struct MinecraftLaunchCommand {
             )
         }
     }
-
+    
     private func replaceAuthParameters(command: [String], with validatedPlayer: Player?) -> [String] {
         guard let player = validatedPlayer else {
             Logger.shared.warning("For unverified players, use the default authentication parameters")
             return replaceGameParameters(command: command)
         }
-
+        
         // Use NSMutableString to avoid chaining calls that create multiple temporary strings
         let authReplacedCommand = command.map { arg -> String in
             let mutableArg = NSMutableString(string: arg)
@@ -120,17 +120,17 @@ struct MinecraftLaunchCommand {
             )
             return mutableArg as String
         }
-
+        
         return replaceGameParameters(command: authReplacedCommand)
     }
-
+    
     private func replaceGameParameters(command: [String]) -> [String] {
         let settings = GameSettingsManager.shared
-
+        
         // Memory settings: Prioritize the game configuration. If the game has no configuration, use the global configuration
         let xms = game.xms > 0 ? game.xms : settings.globalXms
         let xmx = game.xmx > 0 ? game.xmx : settings.globalXmx
-
+        
         // Use NSMutableString to avoid chaining calls that create multiple temporary strings
         var replacedCommand = command.map { arg -> String in
             let mutableArg = NSMutableString(string: arg)
@@ -150,7 +150,7 @@ struct MinecraftLaunchCommand {
             )
             return mutableArg as String
         }
-
+        
         // Splice JVM parameters for advanced settings at runtime
         // Logic: If there are custom JVM parameters, use them directly, otherwise use garbage collector + performance optimization parameters
         if !game.jvmArguments.isEmpty {
@@ -166,10 +166,10 @@ struct MinecraftLaunchCommand {
             }
             replacedCommand.insert(contentsOf: uniqueAdvancedArgs, at: 0)
         }
-
+        
         return replacedCommand
     }
-
+    
     /// Start game process
     /// - Parameter command: startup command array
     /// - Throws: GlobalError when startup fails
@@ -185,18 +185,18 @@ struct MinecraftLaunchCommand {
                 level: .popup
             )
         }
-
+        
         // Get the game working directory
         let gameWorkingDirectory = AppPaths.profileDirectory(gameName: game.gameName)
-
+        
         Logger.shared.info("Start the game process: \(javaExecutable) \(command.joined(separator: " "))")
         Logger.shared.info("Game working directory: \(gameWorkingDirectory.path)")
-
+        
         let process = Process()
         process.executableURL = URL(fileURLWithPath: javaExecutable)
         process.arguments = command
         process.currentDirectoryURL = gameWorkingDirectory
-
+        
         // Set environment variables (advanced settings)
         if !game.environmentVariables.isEmpty {
             var env = ProcessInfo.processInfo.environment
@@ -210,38 +210,38 @@ struct MinecraftLaunchCommand {
             }
             process.environment = env
         }
-
+        
         // Store the process in the manager (will automatically set the termination handler)
         GameProcessManager.shared.storeProcess(gameId: game.id, process: process)
-
+        
         do {
             try process.run()
-
+            
             // Set the status to running immediately after the process starts
             _ = await MainActor.run {
                 GameStatusManager.shared.setGameRunning(gameId: game.id, isRunning: true)
             }
         } catch {
             Logger.shared.error("Failed to start process: \(error.localizedDescription)")
-
+            
             // Clean up process and reset state when startup fails
             _ = GameProcessManager.shared.stopProcess(for: game.id)
             _ = await MainActor.run {
                 GameStatusManager.shared.setGameRunning(gameId: game.id, isRunning: false)
             }
-
+            
             throw GlobalError.gameLaunch(
                 i18nKey: "Process Failed",
                 level: .popup
             )
         }
     }
-
+    
     /// Handle startup errors
     /// - Parameter error: startup error
     private func handleLaunchError(_ error: Error) async {
         Logger.shared.error("Failed to start game: \(error.localizedDescription)")
-
+        
         // Handling errors using a global error handler
         let globalError = GlobalError.from(error)
         GlobalErrorHandler.shared.handle(globalError)

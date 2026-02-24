@@ -8,7 +8,7 @@ enum WindowStyleHelper {
         window.collectionBehavior.insert(.fullScreenNone)
         window.standardWindowButton(.zoomButton)?.isEnabled = false
     }
-
+    
     /// 从工具栏右键菜单中移除「仅文字」选项，只保留「仅图标」与「文字和图标」
     static func disableToolbarTextOnlyMode(_ window: NSWindow) {
         guard let toolbar = window.toolbar else { return }
@@ -25,7 +25,7 @@ enum WindowStyleHelper {
 /// Window style configuration modifiers
 struct WindowStyleConfig: ViewModifier {
     let windowID: WindowID
-
+    
     func body(content: Content) -> some View {
         content
             .background(
@@ -34,7 +34,7 @@ struct WindowStyleConfig: ViewModifier {
                     if window.identifier?.rawValue != windowID.rawValue {
                         window.identifier = NSUserInterfaceItemIdentifier(windowID.rawValue)
                     }
-
+                    
                     // Uniform use of standard window styles
                     WindowStyleHelper.configureStandardWindow(window)
                 }
@@ -52,7 +52,7 @@ extension View {
 /// window cleanup modifier
 struct WindowCleanup: ViewModifier {
     let windowID: WindowID
-
+    
     func body(content: Content) -> some View {
         content
             .onDisappear {

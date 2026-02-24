@@ -15,16 +15,16 @@ enum BatchJarDownloader {
     ) async throws {
         let total = tasks.count
         let counter = Counter()
-
+        
         // Create a semaphore to control the number of concurrencies
         let semaphore = AsyncSemaphore(value: GeneralSettingsManager.shared.concurrentDownloads)
-
+        
         try await withThrowingTaskGroup(of: Void.self) { group in
             for task in tasks {
                 group.addTask {
                     await semaphore.wait()
                     defer { Task { await semaphore.signal() } }
-
+                    
                     let fileManager = FileManager.default
                     let destinationURL = metaLibrariesDir.appendingPathComponent(task.destinationPath)
                     try fileManager.createDirectory(at: destinationURL.deletingLastPathComponent(), withIntermediateDirectories: true)
@@ -42,10 +42,10 @@ enum BatchJarDownloader {
             try await group.waitForAll()
         }
     }
-
+    
     actor Counter {
         private var value = 0
-
+        
         func increment() -> Int {
             value += 1
             return value

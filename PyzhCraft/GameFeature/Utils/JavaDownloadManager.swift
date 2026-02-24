@@ -4,28 +4,28 @@ import Foundation
 @MainActor
 class JavaDownloadManager: ObservableObject {
     static let shared = JavaDownloadManager()
-
+    
     @Published var downloadState = JavaDownloadState()
     @Published var isWindowVisible = false
-
+    
     private let javaRuntimeService = JavaRuntimeService.shared
     private var dismissCallback: (() -> Void)?
-
+    
     /// Set window close callback
     func setDismissCallback(_ callback: @escaping () -> Void) {
         dismissCallback = callback
     }
-
+    
     /// Start downloading Java runtime
     func downloadJavaRuntime(version: String) async {
         do {
             // reset state
             downloadState.reset()
             downloadState.startDownload(version: version)
-
+            
             // Show download pop-up window
             showDownloadWindow()
-
+            
             // Set progress callback
             javaRuntimeService.setProgressCallback { [weak self] fileName, completed, total in
                 Task { @MainActor in
@@ -35,25 +35,25 @@ class JavaDownloadManager: ObservableObject {
                     self.downloadState.updateProgress(fileName: fileName, progress: progress)
                 }
             }
-
+            
             // Set cancel check callback
             javaRuntimeService.setCancelCallback { [weak self] in
                 return self?.downloadState.isCancelled ?? false
             }
-
+            
             // Start downloading
             try await javaRuntimeService.downloadJavaRuntime(for: version)
-
+            
             // Check if canceled
             if downloadState.isCancelled {
                 Logger.shared.info("Java download has been canceled")
                 cleanupCancelledDownload()
                 return
             }
-
+            
             // Download Complete - Set completion status to automatically close the window later
             downloadState.isDownloading = false
-
+            
             closeWindow()
         } catch {
             // Download failed
@@ -62,7 +62,7 @@ class JavaDownloadManager: ObservableObject {
             }
         }
     }
-
+    
     /// Cancel download
     func cancelDownload() {
         downloadState.cancel()
@@ -70,7 +70,7 @@ class JavaDownloadManager: ObservableObject {
         // Close window now
         cleanupCancelledDownload()
     }
-
+    
     /// Retry download
     func retryDownload() {
         guard !downloadState.version.isEmpty else { return }
@@ -78,13 +78,13 @@ class JavaDownloadManager: ObservableObject {
             await downloadJavaRuntime(version: downloadState.version)
         }
     }
-
+    
     /// Show download window
     private func showDownloadWindow() {
         WindowManager.shared.openWindow(id: .javaDownload)
         isWindowVisible = true
     }
-
+    
     /// close window
     func closeWindow() {
         WindowManager.shared.closeWindow(id: .javaDownload)
@@ -92,7 +92,7 @@ class JavaDownloadManager: ObservableObject {
         downloadState.reset()
         dismissCallback?()
     }
-
+    
     /// Clean canceled download data
     func cleanupCancelledDownload() {
         // Clean up some downloaded files

@@ -3,23 +3,23 @@ import SwiftUI
 struct MinecraftAuthView: View {
     @StateObject private var authService = MinecraftAuthService.shared
     var onLoginSuccess: ((MinecraftProfileResponse) -> Void)?
-
+    
     var body: some View {
         VStack(spacing: 20) {
             // Authentication status display
             switch authService.authState {
             case .notAuthenticated:
                 notAuthenticatedView
-//                waitingForBrowserAuthView
+                //                waitingForBrowserAuthView
             case .waitingForBrowserAuth:
                 waitingForBrowserAuthView
-
+                
             case .processingAuthCode:
                 processingAuthCodeView
-
+                
             case .authenticated(let profile):
                 authenticatedView(profile: profile)
-
+                
             case .error(let message):
                 errorView(message: message)
             }
@@ -30,7 +30,7 @@ struct MinecraftAuthView: View {
             clearAllData()
         }
     }
-
+    
     // MARK: - clear data
     /// Clear all data on the page
     private func clearAllData() {
@@ -40,7 +40,7 @@ struct MinecraftAuthView: View {
         }
         // The status is not cleared when authentication is successful, and authentication information may still be required
     }
-
+    
     // MARK: - Uncertified status
     private var notAuthenticatedView: some View {
         VStack(spacing: 16) {
@@ -52,14 +52,14 @@ struct MinecraftAuthView: View {
             Text("Login to Minecraft with Microsoft Account")
                 .font(.headline)
                 .multilineTextAlignment(.center)
-
+            
             Text("Please click the \"Start Login\" button below to begin authentication")
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
         }
     }
-
+    
     // MARK: - Wait for browser authorization status
     private var waitingForBrowserAuthView: some View {
         VStack(spacing: 16) {
@@ -67,22 +67,22 @@ struct MinecraftAuthView: View {
             Image(systemName: "person.crop.circle.badge.clock")
                 .font(.system(size: 46))
                 .foregroundColor(.secondary)
-
+            
             Text("Waiting for authorization")
                 .font(.headline)
                 .multilineTextAlignment(.center)
-
+            
             Text("Please complete the authorization in the browser window that has opened")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-
+            
             if let deviceCode = authService.deviceCodeInfo {
                 Text(deviceCode.displayVerificationURL)
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .textSelection(.enabled)
-
+                
                 Text(deviceCode.userCode)
                     .font(.system(.title3, design: .monospaced))
                     .bold()
@@ -90,12 +90,12 @@ struct MinecraftAuthView: View {
             }
         }
     }
-
+    
     // MARK: - Handle authorization code status
     private var processingAuthCodeView: some View {
         VStack(spacing: 16) {
             ProgressView().controlSize(.small)
-
+            
             Text("Verifying account information")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
@@ -107,7 +107,7 @@ struct MinecraftAuthView: View {
                 .multilineTextAlignment(.center)
         }
     }
-
+    
     // MARK: - Authentication success status
     private func authenticatedView(profile: MinecraftProfileResponse) -> some View {
         VStack(spacing: 20) {
@@ -124,45 +124,45 @@ struct MinecraftAuthView: View {
                             .foregroundColor(.gray)
                     )
             }
-
+            
             VStack(spacing: 8) {
                 Text("Login Successful!")
                     .font(.title2)
                     .bold()
                     .foregroundColor(.green)
-
+                
                 Text(profile.name)
                     .font(.headline)
-
+                
                 Text("UUID: \(profile.id)")
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .textSelection(.enabled)
             }
-
+            
             Text("Please click the \"Add\" button below to confirm using this account")
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
         }
     }
-
+    
     // MARK: - error status
     private func errorView(message: String) -> some View {
         VStack(spacing: 16) {
             Image(systemName: "exclamationmark.triangle")
                 .font(.system(size: 60))
                 .foregroundColor(.red)
-
+            
             Text("Login Failed")
                 .font(.headline)
                 .foregroundColor(.red)
-
+            
             Text(message)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-
+            
             Text("Please click the \"Retry\" button below to restart authentication")
                 .font(.caption)
                 .foregroundColor(.secondary)

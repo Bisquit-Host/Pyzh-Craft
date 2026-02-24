@@ -7,19 +7,15 @@ public enum SidebarItem: Hashable, Identifiable {
 
     public var id: String {
         switch self {
-        case .game(let gameId):
-            return "game_\(gameId)"
-        case .resource(let type):
-            return "resource_\(type.rawValue)"
+        case .game(let gameId): "game_\(gameId)"
+        case .resource(let type): "resource_\(type.rawValue)"
         }
     }
 
     public var title: String {
         switch self {
-        case .game(let gameId):
-            return gameId  // Name can be obtained from game data
-        case .resource(let type):
-            return type.localizedName
+        case .game(let gameId): gameId // Name can be obtained from game data
+        case .resource(let type): type.localizedName
         }
     }
 }
@@ -30,47 +26,32 @@ public enum ResourceType: String, CaseIterable {
 
     public var localizedNameKey: LocalizedStringKey {
         switch self {
-        case .mod:
-            "Mod"
-        case .datapack:
-            "Data Pack"
-        case .shader:
-            "Shader"
-        case .resourcepack:
-            "Resource Pack"
-        case .modpack:
-            "Modpack"
+        case .mod: "Mod"
+        case .datapack: "Data Pack"
+        case .shader: "Shader"
+        case .resourcepack: "Resource Pack"
+        case .modpack: "Modpack"
         }
     }
 
     public var localizedName: String {
         switch self {
-        case .mod:
-            String(localized: "Mod")
-        case .datapack:
-            String(localized: "Data Pack")
-        case .shader:
-            String(localized: "Shader")
-        case .resourcepack:
-            String(localized: "Resource Pack")
-        case .modpack:
-            String(localized: "Modpack")
+        case .mod: String(localized: "Mod")
+        case .datapack: String(localized: "Data Pack")
+        case .shader: String(localized: "Shader")
+        case .resourcepack: String(localized: "Resource Pack")
+        case .modpack: String(localized: "Modpack")
         }
     }
 
     /// SF Symbol icon name for the resource type
     public var systemImage: String {
         switch self {
-        case .mod:
-            return "puzzlepiece.extension"
-        case .datapack:
-            return "doc.on.doc"
-        case .shader:
-            return "sparkles"
-        case .resourcepack:
-            return "photo.stack"
-        case .modpack:
-            return "cube.box"
+        case .mod: "puzzlepiece.extension"
+        case .datapack: "doc.on.doc"
+        case .shader: "sparkles"
+        case .resourcepack: "photo.stack"
+        case .modpack: "cube.box"
         }
     }
 }

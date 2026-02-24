@@ -13,10 +13,10 @@ struct GlobalResourceFooter: View {
     @Binding var isDownloadingMainOnly: Bool
     let gameRepository: GameRepository
     let loadDependencies:
-        (ModrinthProjectDetailVersion, GameVersionInfo) -> Void
+    (ModrinthProjectDetailVersion, GameVersionInfo) -> Void
     @Binding var mainVersionId: String
     let compatibleGames: [GameVersionInfo]
-
+    
     var body: some View {
         Group {
             if projectDetail != nil {
@@ -66,7 +66,7 @@ struct GlobalResourceFooter: View {
             }
         }
     }
-
+    
     private func downloadMainOnly() {
         guard let game = selectedGame, selectedVersion != nil else { return }
         isDownloadingMainOnly = true
@@ -85,7 +85,7 @@ struct GlobalResourceFooter: View {
             }
         }
     }
-
+    
     private func downloadMainOnlyThrowing(game: GameVersionInfo) async throws {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
@@ -93,16 +93,16 @@ struct GlobalResourceFooter: View {
                 level: .notification
             )
         }
-
+        
         let (success, _, _) =
-            await ModrinthDependencyDownloader.downloadMainResourceOnly(
-                mainProjectId: project.projectId,
-                gameInfo: game,
-                query: resourceType,
-                gameRepository: gameRepository,
-                filterLoader: true
-            )
-
+        await ModrinthDependencyDownloader.downloadMainResourceOnly(
+            mainProjectId: project.projectId,
+            gameInfo: game,
+            query: resourceType,
+            gameRepository: gameRepository,
+            filterLoader: true
+        )
+        
         if !success {
             throw GlobalError.download(
                 i18nKey: "Main Resource Failed",
@@ -110,7 +110,7 @@ struct GlobalResourceFooter: View {
             )
         }
     }
-
+    
     private func downloadAllManual() {
         guard let game = selectedGame, selectedVersion != nil else { return }
         isDownloadingAll = true
@@ -130,7 +130,7 @@ struct GlobalResourceFooter: View {
             }
         }
     }
-
+    
     private func downloadAllManualThrowing(game: GameVersionInfo) async throws {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
@@ -138,24 +138,24 @@ struct GlobalResourceFooter: View {
                 level: .notification
             )
         }
-
+        
         let success =
-            await ModrinthDependencyDownloader.downloadManualDependenciesAndMain(
-                dependencies: dependencyState.dependencies,
-                selectedVersions: dependencyState.selected.compactMapValues {
-                    $0?.id
-                },
-                dependencyVersions: dependencyState.versions,
-                mainProjectId: project.projectId,
-                mainProjectVersionId: mainVersionId.isEmpty
-                    ? nil : mainVersionId,
-                gameInfo: game,
-                query: resourceType,
-                gameRepository: gameRepository,
-                onDependencyDownloadStart: { _ in },
-                onDependencyDownloadFinish: { _, _ in }
-            )
-
+        await ModrinthDependencyDownloader.downloadManualDependenciesAndMain(
+            dependencies: dependencyState.dependencies,
+            selectedVersions: dependencyState.selected.compactMapValues {
+                $0?.id
+            },
+            dependencyVersions: dependencyState.versions,
+            mainProjectId: project.projectId,
+            mainProjectVersionId: mainVersionId.isEmpty
+            ? nil : mainVersionId,
+            gameInfo: game,
+            query: resourceType,
+            gameRepository: gameRepository,
+            onDependencyDownloadStart: { _ in },
+            onDependencyDownloadFinish: { _, _ in }
+        )
+        
         if !success {
             throw GlobalError.download(
                 i18nKey: "Manual Dependencies Failed",
@@ -163,7 +163,7 @@ struct GlobalResourceFooter: View {
             )
         }
     }
-
+    
     private func downloadResource() {
         guard let game = selectedGame, selectedVersion != nil else { return }
         isDownloadingAll = true
@@ -181,7 +181,7 @@ struct GlobalResourceFooter: View {
             }
         }
     }
-
+    
     private func downloadResourceThrowing(game: GameVersionInfo) async throws {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
@@ -189,16 +189,16 @@ struct GlobalResourceFooter: View {
                 level: .notification
             )
         }
-
+        
         let (success, _, _) =
-            await ModrinthDependencyDownloader.downloadMainResourceOnly(
-                mainProjectId: project.projectId,
-                gameInfo: game,
-                query: resourceType,
-                gameRepository: gameRepository,
-                filterLoader: true
-            )
-
+        await ModrinthDependencyDownloader.downloadMainResourceOnly(
+            mainProjectId: project.projectId,
+            gameInfo: game,
+            query: resourceType,
+            gameRepository: gameRepository,
+            filterLoader: true
+        )
+        
         if !success {
             throw GlobalError.download(
                 i18nKey: "Resource Download Failed",

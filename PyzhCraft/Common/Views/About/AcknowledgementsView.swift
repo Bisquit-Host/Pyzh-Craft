@@ -6,9 +6,9 @@ public struct AcknowledgementsView: View {
     @State private var loadFailed = false
     @State private var loadTask: Task<Void, Never>?
     private let gitHubService = GitHubService.shared
-
+    
     public init() {}
-
+    
     public var body: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
@@ -28,7 +28,7 @@ public struct AcknowledgementsView: View {
             clearAllData()
         }
     }
-
+    
     // MARK: - Loading View
     private var loadingView: some View {
         VStack(spacing: 12) {
@@ -36,7 +36,7 @@ public struct AcknowledgementsView: View {
         }
         .frame(maxWidth: .infinity, minHeight: 100)
     }
-
+    
     // MARK: - Libraries Content
     private var librariesContent: some View {
         LazyVStack(spacing: 0) {
@@ -47,14 +47,14 @@ public struct AcknowledgementsView: View {
             }
         }
     }
-
+    
     // MARK: - Libraries List
     private var librariesList: some View {
         VStack(spacing: 0) {
             ForEach(libraries.indices, id: \.self) { index in
                 libraryRow(libraries[index])
                     .id("library-\(index)")
-
+                
                 if index < libraries.count - 1 {
                     Divider()
                         .padding(.horizontal, 16)
@@ -62,7 +62,7 @@ public struct AcknowledgementsView: View {
             }
         }
     }
-
+    
     // MARK: - Library Row
     private func libraryRow(_ library: OpenSourceLibrary) -> some View {
         Group {
@@ -75,13 +75,13 @@ public struct AcknowledgementsView: View {
             }
         }
     }
-
+    
     // MARK: - Library Row Content
     private func libraryRowContent(_ library: OpenSourceLibrary) -> some View {
         HStack(spacing: 12) {
             // avatar
             libraryAvatar(library)
-
+            
             // Information section
             VStack(alignment: .leading, spacing: 4) {
                 // library name
@@ -89,14 +89,14 @@ public struct AcknowledgementsView: View {
                     .font(.body)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
-
+                
                 // Description (with popover)
                 if let description = library.description, !description.isEmpty {
                     DescriptionTextWithPopover(description: description)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-
+            
             // arrow icon
             Image(systemName: "globe")
                 .font(.system(size: 16, weight: .medium))
@@ -106,7 +106,7 @@ public struct AcknowledgementsView: View {
         .padding(.vertical, 12)
         .contentShape(Rectangle())
     }
-
+    
     // MARK: - Library Avatar
     private func libraryAvatar(_ library: OpenSourceLibrary) -> some View {
         Group {
@@ -160,7 +160,7 @@ public struct AcknowledgementsView: View {
             }
         }
     }
-
+    
     /// Get optimized avatar URL (use thumbnail parameter to reduce download size)
     /// - Parameters:
     ///   - avatarURL: original avatar URL
@@ -168,7 +168,7 @@ public struct AcknowledgementsView: View {
     /// - Returns: optimized URL
     private func optimizedAvatarURL(from avatarURL: String, size: CGFloat) -> URL? {
         guard let url = URL(string: avatarURL) else { return nil }
-
+        
         // If it is already a GitHub avatar URL, add the size parameter
         // GitHub avatar URL format: https://avatars.githubusercontent.com/u/xxx or https://github.com/identicons/xxx.png
         if url.host?.contains("github.com") == true || url.host?.contains("avatars.githubusercontent.com") == true {
@@ -179,10 +179,10 @@ public struct AcknowledgementsView: View {
             components?.queryItems = [URLQueryItem(name: "s", value: "\(pixelSize)")]
             return components?.url
         }
-
+        
         return url
     }
-
+    
     // MARK: - Error View
     private var errorView: some View {
         VStack(spacing: 12) {
@@ -196,30 +196,30 @@ public struct AcknowledgementsView: View {
         .frame(maxWidth: .infinity, minHeight: 100)
         .padding()
     }
-
+    
     // MARK: - Load Libraries
     private func loadLibraries() {
         // Cancel the previous task (if it exists)
         loadTask?.cancel()
-
+        
         // reset state
         isLoading = true
         loadFailed = false
-
+        
         loadTask = Task {
             do {
                 // Check cancellation status before async operation starts
                 try Task.checkCancellation()
-
+                
                 let decodedLibraries: [OpenSourceLibrary] = try await gitHubService.fetchAcknowledgements()
-
+                
                 // Check cancellation status again before updating UI
                 try Task.checkCancellation()
-
+                
                 await MainActor.run {
                     // One last check for cancellation status (because it may have been canceled during await)
                     guard !Task.isCancelled else { return }
-
+                    
                     libraries = decodedLibraries
                     isLoading = false
                     loadFailed = false
@@ -234,43 +234,43 @@ public struct AcknowledgementsView: View {
             } catch {
                 // Check if the task has been canceled (avoid updating status after cancellation)
                 guard !Task.isCancelled else { return }
-
+                
                 Logger.shared.error("Failed to load libraries from GitHubService:", error)
                 await MainActor.run {
                     // Last check for cancellation status
                     guard !Task.isCancelled else { return }
-
+                    
                     loadFailed = true
                     isLoading = false
                 }
             }
         }
     }
-
+    
     // MARK: - Clear Libraries Data
     private func clearLibrariesData() {
         // Cancel a running load task
         loadTask?.cancel()
         loadTask = nil
-
+        
         libraries = []
         isLoading = true
         loadFailed = false
         Logger.shared.info("Libraries data cleared")
     }
-
+    
     /// Clean all data
     private func clearAllData() {
         clearLibrariesData()
     }
-
+    
     // MARK: - JSON Data Models
     private struct OpenSourceLibrary: Codable {
         let name: String
         let url: String
         let avatar: String?
         let description: String?
-
+        
         enum CodingKeys: String, CodingKey {
             case name, url, avatar, description
         }
@@ -283,7 +283,7 @@ private struct DescriptionTextWithPopover: View {
     @State private var isHovering = false
     @State private var showPopover = false
     @State private var hoverTask: Task<Void, Never>?
-
+    
     var body: some View {
         Button {
             // Also show popover when clicked
@@ -300,7 +300,7 @@ private struct DescriptionTextWithPopover: View {
             isHovering = hovering
             // Cancel previous task
             hoverTask?.cancel()
-
+            
             if hovering {
                 // Delay the display of popover to avoid frequent display when the mouse moves quickly
                 hoverTask = Task {

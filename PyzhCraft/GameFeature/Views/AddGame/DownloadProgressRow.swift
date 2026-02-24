@@ -7,7 +7,7 @@ struct DownloadProgressRow: View {
     let completed: Int
     let total: Int
     let version: String?
-
+    
     private var progressText: String {
         min(max(progress, 0), 1).formatted(.percent.precision(.fractionLength(0)))
     }

@@ -4,34 +4,34 @@ import Foundation
 /// Game version information warehouse
 class GameRepository: ObservableObject {
     // MARK: - Properties
-
+    
     /// A list of games grouped by working path, where the key is the working path and the value is an array of games
     @Published private(set) var gamesByWorkingPath: [String: [GameVersionInfo]] = [:]
-
+    
     var games: [GameVersionInfo] {
         gamesByWorkingPath[currentWorkingPath] ?? []
     }
-
+    
     private var currentWorkingPath: String {
         workingPathProvider.currentWorkingPath
     }
-
+    
     private let workingPathProvider: WorkingPathProviding
     private let database: GameVersionDatabase
     private var workingPathCancellable: AnyCancellable?
     private var lastWorkingPath = ""
-
+    
     @Published var workingPathChanged = false
-
+    
     // MARK: - Initialization
-
+    
     init(workingPathProvider: WorkingPathProviding = GeneralSettingsManager.shared) {
         self.workingPathProvider = workingPathProvider
         let dbPath = AppPaths.gameVersionDatabase.path
         self.database = GameVersionDatabase(dbPath: dbPath)
-
+        
         lastWorkingPath = currentWorkingPath
-
+        
         // Initialize database
         Task {
             do {
@@ -41,30 +41,30 @@ class GameRepository: ObservableObject {
                 GlobalErrorHandler.shared.handle(error)
             }
         }
-
+        
         DispatchQueue.main.async { [weak self] in
             self?.setupWorkingPathObserver()
         }
     }
-
+    
     /// Initialize database
     private func initializeDatabase() async throws {
         // Create database directory
         let dataDir = AppPaths.dataDirectory
         try? FileManager.default.createDirectory(at: dataDir, withIntermediateDirectories: true)
-
+        
         // Initialize database
         try database.initialize()
     }
-
+    
     deinit {
         workingPathCancellable?.cancel()
     }
-
+    
     /// Set up work path change observer
     private func setupWorkingPathObserver() {
         lastWorkingPath = currentWorkingPath
-
+        
         // Use injected WorkingPathProviding to monitor working path changes
         // Use debounce to avoid frequent triggering
         // Use skip(1) to skip the initial value when subscribing and only respond to subsequent changes
@@ -93,20 +93,20 @@ class GameRepository: ObservableObject {
                 }
             }
     }
-
+    
     // MARK: - Public Methods
-
+    
     func addGame(_ game: GameVersionInfo) async throws {
         let workingPath = currentWorkingPath
         let dbPath = AppPaths.gameVersionDatabase.path
         let gameToSave = game
-
+        
         try await Task.detached(priority: .userInitiated) {
             let db = GameVersionDatabase(dbPath: dbPath)
             try? db.initialize()
             try db.saveGame(gameToSave, workingPath: workingPath)
         }.value
-
+        
         await MainActor.run {
             if gamesByWorkingPath[workingPath] == nil {
                 gamesByWorkingPath[workingPath] = []
@@ -117,10 +117,10 @@ class GameRepository: ObservableObject {
                 gamesByWorkingPath[workingPath]?.append(game)
             }
         }
-
+        
         Logger.shared.info("Game added successfully: \(game.gameName) (working path: \(workingPath))")
     }
-
+    
     func addGameSilently(_ game: GameVersionInfo) {
         Task {
             do {
@@ -130,7 +130,7 @@ class GameRepository: ObservableObject {
             }
         }
     }
-
+    
     func deleteGame(id: String) async throws {
         let workingPath = currentWorkingPath
         guard let game = getGame(by: id) else {
@@ -140,20 +140,20 @@ class GameRepository: ObservableObject {
             )
         }
         let dbPath = AppPaths.gameVersionDatabase.path
-
+        
         try await Task.detached(priority: .userInitiated) {
             let db = GameVersionDatabase(dbPath: dbPath)
             try? db.initialize()
             try db.deleteGame(id: id)
         }.value
-
+        
         await MainActor.run {
             gamesByWorkingPath[workingPath]?.removeAll { $0.id == id }
         }
-
+        
         Logger.shared.info("Successfully deleted game: \(game.gameName) (working path: \(workingPath))")
     }
-
+    
     func deleteGameSilently(id: String) {
         Task {
             do {
@@ -163,26 +163,26 @@ class GameRepository: ObservableObject {
             }
         }
     }
-
+    
     func getGame(by id: String) -> GameVersionInfo? {
         return games.first { $0.id == id }
     }
-
+    
     func getGameByName(by gameName: String) -> GameVersionInfo? {
         return games.first { $0.gameName == gameName }
     }
-
+    
     func updateGame(_ game: GameVersionInfo) async throws {
         let workingPath = currentWorkingPath
         let dbPath = AppPaths.gameVersionDatabase.path
         let gameToSave = game
-
+        
         try await Task.detached(priority: .userInitiated) {
             let db = GameVersionDatabase(dbPath: dbPath)
             try? db.initialize()
             try db.saveGame(gameToSave, workingPath: workingPath)
         }.value
-
+        
         await MainActor.run {
             if let index = gamesByWorkingPath[workingPath]?.firstIndex(where: { $0.id == game.id }) {
                 gamesByWorkingPath[workingPath]?[index] = game
@@ -193,10 +193,10 @@ class GameRepository: ObservableObject {
                 gamesByWorkingPath[workingPath]?.append(game)
             }
         }
-
+        
         Logger.shared.info("Successfully updated game: \(game.gameName) (working path: \(workingPath))")
     }
-
+    
     func updateGameSilently(_ game: GameVersionInfo) -> Bool {
         Task {
             do {
@@ -207,7 +207,7 @@ class GameRepository: ObservableObject {
         }
         return true // Note: This will always return true since the operation is async
     }
-
+    
     func updateGameLastPlayed(id: String, lastPlayed: Date = Date()) async throws {
         let workingPath = currentWorkingPath
         guard var game = getGame(by: id) else {
@@ -217,13 +217,13 @@ class GameRepository: ObservableObject {
             )
         }
         let dbPath = AppPaths.gameVersionDatabase.path
-
+        
         try await Task.detached(priority: .userInitiated) {
             let db = GameVersionDatabase(dbPath: dbPath)
             try? db.initialize()
             try db.updateLastPlayed(id: id, lastPlayed: lastPlayed)
         }.value
-
+        
         game.lastPlayed = lastPlayed
         let updatedGame = game
         await MainActor.run {
@@ -231,10 +231,10 @@ class GameRepository: ObservableObject {
                 gamesByWorkingPath[workingPath]?[index] = updatedGame
             }
         }
-
+        
         Logger.shared.info("Successfully updated game last play time: \(game.gameName) (working path: \(workingPath))")
     }
-
+    
     func updateGameLastPlayedSilently(id: String, lastPlayed: Date = Date()) -> Bool {
         Task {
             do {
@@ -245,7 +245,7 @@ class GameRepository: ObservableObject {
         }
         return true // Note: This will always return true since the operation is async
     }
-
+    
     func updateJavaPath(id: String, javaPath: String) async throws {
         guard var game = getGame(by: id) else {
             throw GlobalError.validation(
@@ -253,12 +253,12 @@ class GameRepository: ObservableObject {
                 level: .notification
             )
         }
-
+        
         game.javaPath = javaPath
         try await updateGame(game)
         Logger.shared.info("Successfully updated game Java path: \(game.gameName)")
     }
-
+    
     func updateJavaPathSilently(id: String, javaPath: String) -> Bool {
         Task {
             do {
@@ -269,7 +269,7 @@ class GameRepository: ObservableObject {
         }
         return true // Note: This will always return true since the operation is async
     }
-
+    
     func updateJvmArguments(id: String, jvmArguments: String) async throws {
         guard var game = getGame(by: id) else {
             throw GlobalError.validation(
@@ -277,12 +277,12 @@ class GameRepository: ObservableObject {
                 level: .notification
             )
         }
-
+        
         game.jvmArguments = jvmArguments
         try await updateGame(game)
         Logger.shared.info("Successfully updated game JVM parameters: \(game.gameName)")
     }
-
+    
     func updateJvmArgumentsSilently(id: String, jvmArguments: String) -> Bool {
         Task {
             do {
@@ -293,7 +293,7 @@ class GameRepository: ObservableObject {
         }
         return true // Note: This will always return true since the operation is async
     }
-
+    
     func updateMemorySize(id: String, xms: Int, xmx: Int) async throws {
         guard var game = getGame(by: id) else {
             throw GlobalError.validation(
@@ -301,7 +301,7 @@ class GameRepository: ObservableObject {
                 level: .notification
             )
         }
-
+        
         // Verify memory parameters
         guard xms > 0 && xmx > 0 && xms <= xmx else {
             throw GlobalError.validation(
@@ -309,13 +309,13 @@ class GameRepository: ObservableObject {
                 level: .notification
             )
         }
-
+        
         game.xms = xms
         game.xmx = xmx
         try await updateGame(game)
         Logger.shared.info("Successfully updated game memory size: \(game.gameName)")
     }
-
+    
     func updateMemorySizeSilently(id: String, xms: Int, xmx: Int) -> Bool {
         Task {
             do {
@@ -326,20 +326,20 @@ class GameRepository: ObservableObject {
         }
         return true // Note: This will always return true since the operation is async
     }
-
+    
     // MARK: - Private Methods
-
+    
     /// Load game list from UserDefaults (silent version)
     func loadGames() {
         loadGamesSafely()
     }
-
+    
     /// Load game list from UserDefaults (silent version)
     private func loadGamesSafely() {
         Task {
             do {
                 try await loadGamesThrowing()
-
+                
                 // After loading, scan the mods directory of all games
                 await scanAllGamesModsDirectory()
             } catch {
@@ -350,12 +350,12 @@ class GameRepository: ObservableObject {
             }
         }
     }
-
+    
     // Asynchronously scan the mods directory of all games
     private func scanAllGamesModsDirectory() async {
         let games = games
         Logger.shared.info("Start scanning the mods directories of \(games.count) games")
-
+        
         // Scan all games concurrently
         await withTaskGroup(of: Void.self) { group in
             for game in games {
@@ -364,15 +364,15 @@ class GameRepository: ObservableObject {
                 }
             }
         }
-
+        
         Logger.shared.info("Complete mods directory scan for all games")
     }
-
+    
     // Only load games in the current working path (database and directory scanning are performed in the background to avoid blocking the main thread)
     func loadGamesThrowing() async throws {
         let workingPath = currentWorkingPath
         let dbPath = AppPaths.gameVersionDatabase.path
-
+        
         let (validGames, pathForLog): ([GameVersionInfo], String) = try await Task.detached(priority: .userInitiated) {
             let db = GameVersionDatabase(dbPath: dbPath)
             try? db.initialize()
@@ -395,11 +395,11 @@ class GameRepository: ObservableObject {
             let valid = games.filter { localGameNames.contains($0.gameName) }
             return (valid, workingPath)
         }.value
-
+        
         await MainActor.run {
             gamesByWorkingPath = [workingPath: validGames]
         }
-
+        
         Logger.shared.info("Successfully loaded \(validGames.count) games (working path: \(pathForLog))")
     }
 }

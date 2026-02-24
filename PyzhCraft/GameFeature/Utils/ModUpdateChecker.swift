@@ -3,7 +3,7 @@ import Foundation
 /// Mod update detector
 /// Detect local mod updates
 enum ModUpdateChecker {
-
+    
     /// Test results
     struct UpdateCheckResult {
         /// Is there a new version
@@ -15,7 +15,7 @@ enum ModUpdateChecker {
         /// Latest version information
         let latestVersion: ModrinthProjectDetailVersion?
     }
-
+    
     /// Check if a local mod has a new version
     /// - Parameters:
     ///   - project: Modrinth project information
@@ -36,7 +36,7 @@ enum ModUpdateChecker {
                 latestVersion: nil
             )
         }
-
+        
         // 1. Get the hash of local file
         guard let resourceDir = AppPaths.resourceDirectory(
             for: resourceType,
@@ -49,13 +49,13 @@ enum ModUpdateChecker {
                 latestVersion: nil
             )
         }
-
+        
         // Get the currently installed file hash
         let currentHash = await getCurrentInstalledHash(
             project: project,
             resourceDir: resourceDir
         )
-
+        
         guard let currentHash = currentHash else {
             // If the current hash cannot be obtained, it is considered that there is no update
             return UpdateCheckResult(
@@ -65,11 +65,11 @@ enum ModUpdateChecker {
                 latestVersion: nil
             )
         }
-
+        
         // 2. Get the latest compatible version
         let loaderFilters = [gameInfo.modLoader.lowercased()]
         let versionFilters = [gameInfo.gameVersion]
-
+        
         do {
             let versions = try await ModrinthService.fetchProjectVersionsFilter(
                 id: project.projectId,
@@ -77,11 +77,11 @@ enum ModUpdateChecker {
                 selectedLoaders: loaderFilters,
                 type: resourceType
             )
-
+            
             // Get the latest version (the first version is usually the latest)
             guard let latestVersion = versions.first,
                   let primaryFile = ModrinthService.filterPrimaryFiles(
-                      from: latestVersion.files
+                    from: latestVersion.files
                   ) else {
                 return UpdateCheckResult(
                     hasUpdate: false,
@@ -90,12 +90,12 @@ enum ModUpdateChecker {
                     latestVersion: nil
                 )
             }
-
+            
             let latestHash = primaryFile.hashes.sha1
-
+            
             // 3. Compare hashes
             let hasUpdate = currentHash != latestHash
-
+            
             return UpdateCheckResult(
                 hasUpdate: hasUpdate,
                 currentHash: currentHash,
@@ -112,7 +112,7 @@ enum ModUpdateChecker {
             )
         }
     }
-
+    
     /// Get the currently installed file hash
     /// - Parameters:
     ///   - project: Modrinth project information
@@ -128,7 +128,7 @@ enum ModUpdateChecker {
             if FileManager.default.fileExists(atPath: fileURL.path) {
                 return ModScanner.sha1Hash(of: fileURL)
             }
-
+            
             // Also check the .disabled version
             let disabledFileName = fileName + ".disabled"
             let disabledFileURL = resourceDir.appendingPathComponent(disabledFileName)
@@ -136,7 +136,7 @@ enum ModUpdateChecker {
                 return ModScanner.sha1Hash(of: disabledFileURL)
             }
         }
-
+        
         // Method 2: Find by project ID (scan directory)
         // If the project has a projectId, try to find matching files by scanning
         if !project.projectId.isEmpty {
@@ -145,7 +145,7 @@ enum ModUpdateChecker {
                 return matchingDetail.hash
             }
         }
-
+        
         return nil
     }
 }

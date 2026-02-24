@@ -14,7 +14,7 @@ struct WorldInfo: Identifiable, Equatable {
     let cheats: Bool
     let version: String?
     let seed: Int64?
-
+    
     init(
         name: String,
         path: URL,
@@ -46,7 +46,7 @@ struct ScreenshotInfo: Identifiable, Equatable {
     let path: URL
     let createdDate: Date?
     let fileSize: Int64
-
+    
     init(name: String, path: URL, createdDate: Date? = nil, fileSize: Int64 = 0) {
         self.id = path.lastPathComponent
         self.name = name
@@ -64,7 +64,7 @@ struct LogInfo: Identifiable, Equatable {
     let createdDate: Date?
     let fileSize: Int64
     let isCrashLog: Bool
-
+    
     init(name: String, path: URL, createdDate: Date? = nil, fileSize: Int64 = 0, isCrashLog: Bool = false) {
         self.id = path.lastPathComponent
         self.name = name

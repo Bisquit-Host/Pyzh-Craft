@@ -4,29 +4,29 @@ import SwiftUI
 /// Provides general game-related operations, such as displaying in Finder, deleting games, etc
 @MainActor
 class GameActionManager: ObservableObject {
-
+    
     static let shared = GameActionManager()
-
+    
     private init() {}
-
+    
     // MARK: - Public Methods
-
+    
     /// Show game directory in Finder
     /// - Parameter game: game version information
     func showInFinder(game: GameVersionInfo) {
         let gameDirectory = AppPaths.profileDirectory(gameName: game.gameName)
-
+        
         // Check if directory exists
         guard FileManager.default.fileExists(atPath: gameDirectory.path) else {
             Logger.shared.warning("Game directory does not exist: \(gameDirectory.path)")
             return
         }
-
+        
         // Show directory in Finder
         NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: gameDirectory.path)
         Logger.shared.info("Show game directory in Finder: \(game.gameName)")
     }
-
+    
     /// Delete the game and its folder
     /// - Parameters:
     ///   - game: game version information to be deleted
@@ -50,7 +50,7 @@ class GameActionManager: ObservableObject {
                     GlobalErrorHandler.shared.handle(error)
                     return
                 }
-
+                
                 // Switch to other games or resource pages first to avoid page reloading after deletion
                 if let selectedItem = selectedItem {
                     await MainActor.run {
@@ -65,11 +65,11 @@ class GameActionManager: ObservableObject {
                         }
                     }
                 }
-
+                
                 // Clear the residual status of the game in the process/state manager (to avoid invalid keys after deletion)
                 GameProcessManager.shared.removeGameState(gameId: game.id)
                 GameStatusManager.shared.removeGameState(gameId: game.id)
-
+                
                 // Delete the game folder first (if it does not exist, skip but continue deleting records)
                 let profileDir = AppPaths.profileDirectory(gameName: game.gameName)
                 if FileManager.default.fileExists(atPath: profileDir.path) {
@@ -77,15 +77,15 @@ class GameActionManager: ObservableObject {
                 } else {
                     Logger.shared.warning("Game directory not found when deleting game, file deletion skipped: \(profileDir.path)")
                 }
-
+                
                 // Clear all memory cache related to this game (icons, paths, mod scan results)
                 GameIconCache.shared.invalidateCache(for: game.gameName)
                 AppPaths.invalidatePaths(forGameName: game.gameName)
                 await ModScanner.shared.clearModCache(for: game.gameName)
-
+                
                 // Delete game history
                 try await gameRepository.deleteGame(id: game.id)
-
+                
                 Logger.shared.info("Game deleted successfully: \(game.gameName)")
             } catch {
                 let globalError = GlobalError.fileSystem(

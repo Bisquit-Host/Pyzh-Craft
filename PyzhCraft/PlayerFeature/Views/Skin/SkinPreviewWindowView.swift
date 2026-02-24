@@ -7,12 +7,12 @@ struct SkinPreviewWindowView: View {
     let skinPath: String?
     let capeImage: NSImage?
     let playerModel: PlayerModel
-
+    
     @State private var capeBinding: NSImage?
     // Use @State to manage data so it can be cleaned up when the window is closed
     @State private var currentSkinImage: NSImage?
     @State private var currentSkinPath: String?
-
+    
     init(
         skinImage: NSImage?,
         skinPath: String?,
@@ -28,7 +28,7 @@ struct SkinPreviewWindowView: View {
         self._currentSkinImage = State(initialValue: skinImage)
         self._currentSkinPath = State(initialValue: skinPath)
     }
-
+    
     var body: some View {
         VStack(spacing: 16) {
             if currentSkinImage != nil || currentSkinPath != nil {
@@ -41,7 +41,7 @@ struct SkinPreviewWindowView: View {
             clearAllData()
         }
     }
-
+    
     @ViewBuilder private var previewContent: some View {
         if let image = currentSkinImage {
             SkinRenderView(
@@ -55,7 +55,7 @@ struct SkinPreviewWindowView: View {
             )
         }
     }
-
+    
     /// Clean all data
     private func clearAllData() {
         // Clear the skin data, which will cause the SkinRenderView to be removed, triggering its cleanup logic

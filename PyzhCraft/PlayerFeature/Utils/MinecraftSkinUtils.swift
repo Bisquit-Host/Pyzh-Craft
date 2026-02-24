@@ -13,7 +13,7 @@ private class RenderedImageCache: NSObject {
     let layerImage: CGImage // Layer image (8x8)
     let hasLayerContent: Bool  // Whether the layer has actual content (non-transparent pixels)
     let cost: Int  // Memory cost (number of bytes)
-
+    
     init(headImage: CGImage, layerImage: CGImage, hasLayerContent: Bool) {
         self.headImage = headImage
         self.layerImage = layerImage
@@ -30,17 +30,17 @@ private class RenderedImageCache: NSObject {
 private enum Constants {
     static let padding: CGFloat = 6
     static let networkTimeout: TimeInterval = 10.0
-
+    
     // Cache configuration - optimized configuration
     static let maxCacheSize = 100  // Cache up to 100 rendered images (previously 50 full images)
     static let maxCacheMemory = 2 * 1024 * 1024  // Cache up to 2MB of memory (~800 rendered images)
-
+    
     // Minecraft skin coordinates (64x64 format)
     static let headStartX: CGFloat = 8
     static let headStartY: CGFloat = 8
     static let headWidth: CGFloat = 8
     static let headHeight: CGFloat = 8
-
+    
     // Skin layer coordinates (64x64 format)
     static let layerStartX: CGFloat = 40
     static let layerStartY: CGFloat = 8
@@ -53,12 +53,12 @@ struct MinecraftSkinUtils: View {
     let type: SkinType
     let src: String
     let size: CGFloat
-
+    
     @State private var renderedCache: RenderedImageCache?
     @State private var error: String?
     @State private var isLoading = false
     @State private var loadTask: Task<Void, Never>?
-
+    
     private static let imageCache: NSCache<NSString, RenderedImageCache> = {
         let cache = NSCache<NSString, RenderedImageCache>()
         cache.countLimit = Constants.maxCacheSize
@@ -67,7 +67,7 @@ struct MinecraftSkinUtils: View {
         cache.name = "MinecraftSkinCache"
         return cache
     }()
-
+    
     // Shared URLSession to avoid creating a new session for each request
     private static let sharedURLSession: URLSession = {
         let config = URLSessionConfiguration.default
@@ -83,25 +83,25 @@ struct MinecraftSkinUtils: View {
         )
         return URLSession(configuration: config)
     }()
-
+    
     // Cache statistics (for debugging and monitoring)
     private static var cacheStats = CacheStats()
-
+    
     // Only initialize once
     private static var memoryObserverSetup = false
     private static let memoryObserverQueue = DispatchQueue(label: "com.pyzhcraft.skincache.memory")
-
+    
     private struct CacheStats {
         var hits: Int = 0
         var misses: Int = 0
         var evictions: Int = 0
-
+        
         var hitRate: Double {
             let total = hits + misses
             return total > 0 ? Double(hits) / Double(total) : 0.0
         }
     }
-
+    
     private static let ciContext: CIContext = {
         // Create CIContext with CPU-based rendering to avoid Metal shader cache conflicts
         // This is more appropriate for simple image cropping operations and prevents
@@ -116,7 +116,7 @@ struct MinecraftSkinUtils: View {
         setupMemoryPressureObserverOnce()
         return context
     }()
-
+    
     // Generate cache key
     private var cacheKey: String {
         let typeString: String
@@ -128,7 +128,7 @@ struct MinecraftSkinUtils: View {
         }
         return "\(typeString):\(src)"
     }
-
+    
     // Get cached rendered image
     private static func getCachedRenderedImage(for key: String) -> RenderedImageCache? {
         let nsKey = key as NSString
@@ -140,18 +140,18 @@ struct MinecraftSkinUtils: View {
             return nil
         }
     }
-
+    
     // Check if the image has non-transparent pixels
     private static func hasNonTransparentPixels(_ cgImage: CGImage) -> Bool {
         let width = cgImage.width
         let height = cgImage.height
-
+        
         // Create bitmap context to ensure consistent format (RGBA)
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         let bytesPerPixel = 4
         let bytesPerRow = bytesPerPixel * width
         let bitsPerComponent = 8
-
+        
         guard let context = CGContext(
             data: nil,
             width: width,
@@ -161,13 +161,13 @@ struct MinecraftSkinUtils: View {
             space: colorSpace,
             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
         ),
-        let pixelData = context.data?.assumingMemoryBound(to: UInt8.self) else {
+              let pixelData = context.data?.assumingMemoryBound(to: UInt8.self) else {
             return false
         }
-
+        
         // Draw an image into a bitmap context
         context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
-
+        
         // Check the alpha channel of each pixel (alpha is the 4th byte in RGBA format)
         for y in 0..<height {
             for x in 0..<width {
@@ -180,16 +180,16 @@ struct MinecraftSkinUtils: View {
         }
         return false  // All pixels are transparent
     }
-
+    
     // Render and cache the image (cropped CGImage)
     private static func renderAndCacheImage(_ ciImage: CIImage, for key: String, context: CIContext) -> RenderedImageCache? {
         let nsKey = key as NSString
-
+        
         // Check if cached
         if let cached = imageCache.object(forKey: nsKey) {
             return cached
         }
-
+        
         // Render head image
         let headRect = CGRect(
             x: Constants.headStartX,
@@ -198,7 +198,7 @@ struct MinecraftSkinUtils: View {
             height: Constants.headHeight
         )
         let headCropped = ciImage.cropped(to: headRect)
-
+        
         // Render layer image
         let layerRect = CGRect(
             x: Constants.layerStartX,
@@ -207,29 +207,29 @@ struct MinecraftSkinUtils: View {
             height: Constants.layerHeight
         )
         let layerCropped = ciImage.cropped(to: layerRect)
-
+        
         // Convert to CGImage
         guard let headCGImage = context.createCGImage(headCropped, from: headCropped.extent),
               let layerCGImage = context.createCGImage(layerCropped, from: layerCropped.extent) else {
             return nil
         }
-
+        
         // Check if the layer has actual content
         let hasLayerContent = hasNonTransparentPixels(layerCGImage)
-
+        
         // Create cache object
         let cache = RenderedImageCache(headImage: headCGImage, layerImage: layerCGImage, hasLayerContent: hasLayerContent)
         imageCache.setObject(cache, forKey: nsKey, cost: cache.cost)
         return cache
     }
-
+    
     // Clean cache (for use when memory pressure occurs)
     static func clearCache() {
         imageCache.removeAllObjects()
         cacheStats = CacheStats()
         Logger.shared.debug("🧹 MinecraftSkinUtils cache cleared")
     }
-
+    
     // Get the current cache configuration (for debugging)
     static func getCacheInfo() -> (countLimit: Int, memoryLimit: Int, hitRate: Double) {
         return (
@@ -238,7 +238,7 @@ struct MinecraftSkinUtils: View {
             hitRate: cacheStats.hitRate
         )
     }
-
+    
     // Get cache statistics (for debugging)
     static func getCacheStats() -> (hits: Int, misses: Int, hitRate: Double) {
         return (
@@ -247,7 +247,7 @@ struct MinecraftSkinUtils: View {
             hitRate: cacheStats.hitRate
         )
     }
-
+    
     // Initialize cache maintenance tasks (make sure to initialize only once)
     private static func setupMemoryPressureObserverOnce() {
         memoryObserverQueue.sync {
@@ -255,13 +255,13 @@ struct MinecraftSkinUtils: View {
             memoryObserverSetup = true
         }
     }
-
+    
     init(type: SkinType, src: String, size: CGFloat = 64) {
         self.type = type
         self.src = src
         self.size = size
     }
-
+    
     var body: some View {
         ZStack {
             if let cache = renderedCache {
@@ -305,7 +305,7 @@ struct MinecraftSkinUtils: View {
             loadTask = nil
         }
     }
-
+    
     @ViewBuilder
     private func avatarLayers(for cache: RenderedImageCache) -> some View {
         ZStack {
@@ -331,32 +331,32 @@ struct MinecraftSkinUtils: View {
         }
         .shadow(color: Color.black.opacity(0.6), radius: 1)
     }
-
+    
     private func loadSkinData() {
         error = nil
         isLoading = true
-
+        
         // Cancel previous task
         loadTask?.cancel()
-
+        
         loadTask = Task {
             do {
                 // Check if the task has been canceled
                 try Task.checkCancellation()
-
+                
                 Logger.shared.debug("Loading skin: \(src)")
-
+                
                 let data = try await loadData()
-
+                
                 try Task.checkCancellation()
-
+                
                 guard let ciImage = CIImage(data: data) else {
                     throw GlobalError.validation(
                         i18nKey: "Invalid Image Data",
                         level: .silent
                     )
                 }
-
+                
                 // Validate skin dimensions
                 guard ciImage.extent.width == 64 && ciImage.extent.height == 64 else {
                     throw GlobalError.validation(
@@ -364,16 +364,16 @@ struct MinecraftSkinUtils: View {
                         level: .silent
                     )
                 }
-
+                
                 try Task.checkCancellation()
-
+                
                 // Render and cache the image (cropped CGImage)
                 // Render on a background thread to avoid blocking the main thread
                 let cacheKeyValue = cacheKey
                 let renderedCache = await Task.detached {
                     await Self.renderAndCacheImage(ciImage, for: cacheKeyValue, context: Self.ciContext)
                 }.value
-
+                
                 await MainActor.run {
                     self.renderedCache = renderedCache
                     self.isLoading = false
@@ -401,7 +401,7 @@ struct MinecraftSkinUtils: View {
             }
         }
     }
-
+    
     private func loadData() async throws -> Data {
         switch type {
         case .asset:
@@ -410,7 +410,7 @@ struct MinecraftSkinUtils: View {
             return try await loadURLData()
         }
     }
-
+    
     private func loadAssetData() async throws -> Data {
         guard let image = NSImage(named: src),
               let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
@@ -419,7 +419,7 @@ struct MinecraftSkinUtils: View {
                 level: .silent
             )
         }
-
+        
         let bitmapRep = NSBitmapImageRep(cgImage: cgImage)
         guard let data = bitmapRep.representation(using: .png, properties: [:]) else {
             throw GlobalError.validation(
@@ -427,10 +427,10 @@ struct MinecraftSkinUtils: View {
                 level: .silent
             )
         }
-
+        
         return data
     }
-
+    
     private func loadURLData() async throws -> Data {
         guard let url = URL(string: src) else {
             throw GlobalError.validation(
@@ -438,11 +438,11 @@ struct MinecraftSkinUtils: View {
                 level: .silent
             )
         }
-
+        
         // Use unified API client (needs to handle non-200 status codes)
         let request = URLRequest(url: url)
         let (data, httpResponse) = try await APIClient.performRequestWithResponse(request: request)
-
+        
         switch httpResponse.statusCode {
         case 200:
             return data
@@ -464,9 +464,9 @@ struct MinecraftSkinUtils: View {
             )
         }
     }
-
+    
     // MARK: - Export Functions
-
+    
     /// Export player avatar image
     /// - Parameters:
     ///   - type: skin type (URL or Asset)
@@ -502,7 +502,7 @@ struct MinecraftSkinUtils: View {
             }
             let request = URLRequest(url: url)
             let (responseData, httpResponse) = try await APIClient.performRequestWithResponse(request: request)
-
+            
             guard httpResponse.statusCode == 200 else {
                 throw GlobalError.download(
                     i18nKey: "Skin Download Failed",
@@ -511,7 +511,7 @@ struct MinecraftSkinUtils: View {
             }
             data = responseData
         }
-
+        
         // Create CIImage
         guard let ciImage = CIImage(data: data) else {
             throw GlobalError.validation(
@@ -519,7 +519,7 @@ struct MinecraftSkinUtils: View {
                 level: .silent
             )
         }
-
+        
         // Verify skin size
         guard ciImage.extent.width == 64 && ciImage.extent.height == 64 else {
             throw GlobalError.validation(
@@ -527,7 +527,7 @@ struct MinecraftSkinUtils: View {
                 level: .silent
             )
         }
-
+        
         // Crop header and layers
         let headRect = CGRect(
             x: Constants.headStartX,
@@ -536,7 +536,7 @@ struct MinecraftSkinUtils: View {
             height: Constants.headHeight
         )
         let headCropped = ciImage.cropped(to: headRect)
-
+        
         let layerRect = CGRect(
             x: Constants.layerStartX,
             y: ciImage.extent.height - Constants.layerStartY - Constants.layerHeight,
@@ -544,7 +544,7 @@ struct MinecraftSkinUtils: View {
             height: Constants.layerHeight
         )
         let layerCropped = ciImage.cropped(to: layerRect)
-
+        
         // Convert to CGImage and zoom in
         guard let headCGImage = ciContext.createCGImage(headCropped, from: headCropped.extent),
               let layerCGImage = ciContext.createCGImage(layerCropped, from: layerCropped.extent) else {
@@ -554,16 +554,16 @@ struct MinecraftSkinUtils: View {
                 level: .silent
             )
         }
-
+        
         // Check if the layer has content
         let hasLayerContent = hasNonTransparentPixels(layerCGImage)
-
+        
         // Create image of target size
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         let bytesPerPixel = 4
         let bytesPerRow = bytesPerPixel * size
         let bitsPerComponent = 8
-
+        
         guard let context = CGContext(
             data: nil,
             width: size,
@@ -579,18 +579,18 @@ struct MinecraftSkinUtils: View {
                 level: .silent
             )
         }
-
+        
         // Draw the head layer (zoom out to 90% if you need to scale to fit the layer)
         let headSize = hasLayerContent ? Int(Double(size) * 0.9) : size
         let headOffset = hasLayerContent ? (size - headSize) / 2 : 0
         context.interpolationQuality = .none
         context.draw(headCGImage, in: CGRect(x: headOffset, y: headOffset, width: headSize, height: headSize))
-
+        
         // If there is layer content, draw the layer (overlaying it above the head)
         if hasLayerContent {
             context.draw(layerCGImage, in: CGRect(x: 0, y: 0, width: size, height: size))
         }
-
+        
         // Get the final CGImage
         guard let finalCGImage = context.makeImage() else {
             throw GlobalError(
@@ -599,7 +599,7 @@ struct MinecraftSkinUtils: View {
                 level: .silent
             )
         }
-
+        
         // Convert to NSImage
         return NSImage(cgImage: finalCGImage, size: NSSize(width: size, height: size))
     }

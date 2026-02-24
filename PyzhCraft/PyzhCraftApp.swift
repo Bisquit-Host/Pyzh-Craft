@@ -25,9 +25,7 @@ struct PyzhCraftApp: App {
         }
     }
     
-    // MARK: - Body
     var body: some Scene {
-        
         WindowGroup {
             MainView()
                 .environment(\.appLogger, Logger.shared)
@@ -52,11 +50,11 @@ struct PyzhCraftApp: App {
         .windowResizability(.contentMinSize)
         .conditionalRestorationBehavior()
         .commands {
-            
             CommandGroup(after: .appInfo) {
                 Button("Check for Updates", action: sparkleUpdateService.checkForUpdatesWithUI)
                     .keyboardShortcut("u", modifiers: [.command, .shift])
             }
+            
             CommandGroup(after: .help) {
                 Button("Open Log", action: Logger.shared.openLogFile)
                     .keyboardShortcut("l", modifiers: [.command, .shift])

@@ -10,7 +10,7 @@ enum ResourceEnableDisableManager {
         guard let fileName = fileName else { return false }
         return fileName.hasSuffix(".disable")
     }
-
+    
     /// Toggle the enabled/disabled state of a resource
     /// - Parameters:
     ///   - fileName: current file name
@@ -24,7 +24,7 @@ enum ResourceEnableDisableManager {
         let fileManager = FileManager.default
         let currentURL = resourceDir.appendingPathComponent(fileName)
         let targetFileName: String
-
+        
         let isCurrentlyDisabled = fileName.hasSuffix(".disable")
         if isCurrentlyDisabled {
             guard fileName.hasSuffix(".disable") else {
@@ -37,10 +37,10 @@ enum ResourceEnableDisableManager {
         } else {
             targetFileName = fileName + ".disable"
         }
-
+        
         let targetURL = resourceDir.appendingPathComponent(targetFileName)
         try fileManager.moveItem(at: currentURL, to: targetURL)
-
+        
         return targetFileName
     }
 }

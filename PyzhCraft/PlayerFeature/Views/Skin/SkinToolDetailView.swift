@@ -6,11 +6,11 @@ struct SkinToolDetailView: View {
     @EnvironmentObject var playerListViewModel: PlayerListViewModel
     @Environment(\.dismiss)
     private var dismiss
-
+    
     // Preloaded data (optional)
     private let preloadedSkinInfo: PlayerSkinService.PublicSkinInfo?
     private let preloadedProfile: MinecraftProfileResponse?
-
+    
     @State private var currentModel: PlayerSkinService.PublicSkinInfo.SkinModel = .classic
     @State private var showingFileImporter = false
     @State private var operationInProgress = false
@@ -26,7 +26,7 @@ struct SkinToolDetailView: View {
     @State private var capeLoadCompleted = false
     @State private var publicSkinInfo: PlayerSkinService.PublicSkinInfo?
     @State private var playerProfile: MinecraftProfileResponse?
-
+    
     init(
         preloadedSkinInfo: PlayerSkinService.PublicSkinInfo? = nil,
         preloadedProfile: MinecraftProfileResponse? = nil
@@ -34,7 +34,7 @@ struct SkinToolDetailView: View {
         self.preloadedSkinInfo = preloadedSkinInfo
         self.preloadedProfile = preloadedProfile
     }
-
+    
     @State private var hasChanges = false
     @State private var currentSkinRenderImage: NSImage?
     // Cache previous values ​​to avoid unnecessary calculations
@@ -42,14 +42,14 @@ struct SkinToolDetailView: View {
     @State private var lastCurrentModel: PlayerSkinService.PublicSkinInfo.SkinModel = .classic
     @State private var lastSelectedCapeId: String?
     @State private var lastCurrentActiveCapeId: String?
-
+    
     // Task reference management, used to cancel all asynchronous tasks during cleanup
     @State private var loadCapeTask: Task<Void, Never>?
     @State private var loadSkinImageTask: Task<Void, Never>?
     @State private var downloadCapeTask: Task<Void, Never>?
     @State private var resetSkinTask: Task<Void, Never>?
     @State private var applyChangesTask: Task<Void, Never>?
-
+    
     var body: some View {
         CommonSheetView(
             header: { headerView },
@@ -73,20 +73,20 @@ struct SkinToolDetailView: View {
             playerProfile = profile
             currentModel = skinInfo.model
             selectedCapeId = PlayerSkinService.getActiveCapeId(from: profile)
-
+            
             // Initialize loading state
             isCapeLoading = false
             capeLoadCompleted = false
-
+            
             // Load current skin image
             loadCurrentSkinRenderImageIfNeeded()
-
+            
             // Immediately load the currently active cloak (using high priority tasks)
             loadCapeTask?.cancel()
             loadCapeTask = Task<Void, Never>(priority: .userInitiated) {
                 await loadCurrentActiveCapeIfNeeded(from: profile)
             }
-
+            
             updateHasChanges()
         }
         .onDisappear {
@@ -94,12 +94,12 @@ struct SkinToolDetailView: View {
             clearAllData()
         }
     }
-
+    
     private var headerView: some View {
         Text("Skin Manager").font(.headline)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
-
+    
     private var bodyContentView: some View {
         VStack(spacing: 24) {
             PlayerInfoSectionView(
@@ -109,7 +109,7 @@ struct SkinToolDetailView: View {
             .onChange(of: currentModel) { _, _ in
                 updateHasChanges()
             }
-
+            
             SkinUploadSectionView(
                 currentModel: $currentModel,
                 showingFileImporter: $showingFileImporter,
@@ -125,7 +125,7 @@ struct SkinToolDetailView: View {
                 onSkinDropped: handleSkinDroppedImage,
                 onDrop: handleDrop
             )
-
+            
             CapeSelectionView(
                 playerProfile: playerProfile,
                 selectedCapeId: $selectedCapeId,
@@ -134,7 +134,7 @@ struct SkinToolDetailView: View {
             ) { id, imageURL in
                 loadCapeTask?.cancel()
                 loadCapeTask = nil
-
+                
                 if let imageURL = imageURL, id != nil {
                     // Clear old images immediately when switching cloaks to avoid showing wrong preview images
                     // New images will be updated after the asynchronous download is complete
@@ -164,12 +164,12 @@ struct SkinToolDetailView: View {
             }
         }
     }
-
+    
     private var footerView: some View {
         HStack {
             Button("Cancel") { dismiss() }.keyboardShortcut(.cancelAction)
             Spacer()
-
+            
             HStack(spacing: 12) {
                 if resolvedPlayer?.isOnlineAccount == true {
                     Button("Reset Skin") { resetSkin() }.disabled(operationInProgress)
@@ -180,7 +180,7 @@ struct SkinToolDetailView: View {
             }
         }
     }
-
+    
     private func handleSkinDroppedImage(_ image: NSImage) {
         // Convert NSImage to PNG Data
         guard let tiff = image.tiffRepresentation,
@@ -190,13 +190,13 @@ struct SkinToolDetailView: View {
             Logger.shared.error("Failed to convert dropped image to PNG data")
             return
         }
-
+        
         // Validate PNG data
         guard data.isPNG else {
             Logger.shared.error("Converted data is not valid PNG format")
             return
         }
-
+        
         selectedSkinData = data
         selectedSkinImage = image
         Task { @MainActor in
@@ -206,12 +206,12 @@ struct SkinToolDetailView: View {
             selectedSkinPath = path
             updateHasChanges()
         }
-
+        
         Logger.shared.info("Skin image dropped and processed successfully. Model: \(currentModel.rawValue)")
     }
-
+    
     private var resolvedPlayer: Player? { playerListViewModel.currentPlayer }
-
+    
     /// When needing to access protected resources such as skins/cloaks, ensure that the player has loaded the authentication credentials (accessToken) from the Keychain
     private func playerWithCredentialIfNeeded(_ player: Player?) -> Player? {
         guard let p = player, p.isOnlineAccount else { return player }
@@ -223,25 +223,25 @@ struct SkinToolDetailView: View {
         }
         return copy
     }
-
+    
     private func updateHasChanges() {
         // Check if any relevant values ​​have changed
         let skinDataChanged = selectedSkinData != lastSelectedSkinData
         let modelChanged = currentModel != lastCurrentModel
         let capeIdChanged = selectedCapeId != lastSelectedCapeId
         let activeCapeIdChanged = currentActiveCapeId != lastCurrentActiveCapeId
-
+        
         // If there are no changes, return directly
         if !skinDataChanged && !modelChanged && !capeIdChanged && !activeCapeIdChanged {
             return
         }
-
+        
         // Update cached value
         lastSelectedSkinData = selectedSkinData
         lastCurrentModel = currentModel
         lastSelectedCapeId = selectedCapeId
         lastCurrentActiveCapeId = currentActiveCapeId
-
+        
         let hasSkinChange = PlayerSkinService.hasSkinChanges(
             selectedSkinData: selectedSkinData,
             currentModel: currentModel,
@@ -251,18 +251,18 @@ struct SkinToolDetailView: View {
             selectedCapeId: selectedCapeId,
             currentActiveCapeId: currentActiveCapeId
         )
-
+        
         hasChanges = hasSkinChange || hasCapeChange
     }
-
+    
     private var currentActiveCapeId: String? {
         PlayerSkinService.getActiveCapeId(from: playerProfile)
     }
-
+    
     private var originalModel: PlayerSkinService.PublicSkinInfo.SkinModel? {
         publicSkinInfo?.model
     }
-
+    
     private func loadCurrentSkinRenderImageIfNeeded() {
         if selectedSkinImage != nil || selectedSkinPath != nil { return }
         guard let urlString = publicSkinInfo?.skinURL?.httpToHttps(), let url = URL(string: urlString) else { return }
@@ -287,13 +287,13 @@ struct SkinToolDetailView: View {
             }
         }
     }
-
+    
     private func handleFileSelection(_ result: Result<[URL], Error>) {
         switch result {
         case .success(let urls):
             guard let url = urls.first,
                   url.startAccessingSecurityScopedResource() else { return }
-
+            
             let urlForBackground = url
             Task { @MainActor in
                 let data = await Task.detached(priority: .userInitiated) {
@@ -310,10 +310,10 @@ struct SkinToolDetailView: View {
             Logger.shared.error("File selection failed: \(error)")
         }
     }
-
+    
     private func handleDrop(_ providers: [NSItemProvider]) -> Bool {
         guard let provider = providers.first else { return false }
-
+        
         provider.loadDataRepresentation(forTypeIdentifier: UTType.image.identifier) { data, _ in
             guard let data = data else { return }
             Task { @MainActor in
@@ -334,7 +334,7 @@ struct SkinToolDetailView: View {
         }
         return true
     }
-
+    
     private func processSkinData(_ data: Data, filePath: String? = nil) {
         guard data.isPNG else { return }
         selectedSkinData = data
@@ -342,7 +342,7 @@ struct SkinToolDetailView: View {
         selectedSkinPath = filePath
         updateHasChanges()
     }
-
+    
     /// Write temporary skin files in the background to avoid main thread data.write
     nonisolated private func saveTempSkinFile(data: Data) -> URL? {
         let tempDir = FileManager.default.temporaryDirectory
@@ -356,7 +356,7 @@ struct SkinToolDetailView: View {
             return nil
         }
     }
-
+    
     private func clearSelectedSkin() {
         selectedSkinData = nil
         selectedSkinImage = nil
@@ -364,18 +364,18 @@ struct SkinToolDetailView: View {
         showingSkinPreview = false
         updateHasChanges()
     }
-
+    
     private func resetSkin() {
         guard let resolved = resolvedPlayer else { return }
         let player = playerWithCredentialIfNeeded(resolved) ?? resolved
-
+        
         operationInProgress = true
         resetSkinTask?.cancel()
         resetSkinTask = Task<Void, Never> {
             do {
                 let success = await PlayerSkinService.resetSkinAndRefresh(player: player)
                 try Task.checkCancellation()
-
+                
                 await MainActor.run {
                     operationInProgress = false
                     if success {
@@ -395,11 +395,11 @@ struct SkinToolDetailView: View {
             }
         }
     }
-
+    
     private func applyChanges() {
         guard let resolved = resolvedPlayer else { return }
         let player = playerWithCredentialIfNeeded(resolved) ?? resolved
-
+        
         operationInProgress = true
         applyChangesTask?.cancel()
         applyChangesTask = Task<Void, Never> {
@@ -408,7 +408,7 @@ struct SkinToolDetailView: View {
                 try Task.checkCancellation()
                 let capeSuccess = await handleCapeChanges(player: player)
                 try Task.checkCancellation()
-
+                
                 await MainActor.run {
                     operationInProgress = false
                     if skinSuccess && capeSuccess {
@@ -427,11 +427,11 @@ struct SkinToolDetailView: View {
             }
         }
     }
-
+    
     private func handleSkinChanges(player: Player) async -> Bool {
         do {
             try Task.checkCancellation()
-
+            
             if let skinData = selectedSkinData {
                 let result = await PlayerSkinService.uploadSkinAndRefresh(
                     imageData: skinData,
@@ -464,11 +464,11 @@ struct SkinToolDetailView: View {
             return false
         }
     }
-
+    
     private func handleCapeChanges(player: Player) async -> Bool {
         do {
             try Task.checkCancellation()
-
+            
             if selectedCapeId != currentActiveCapeId {
                 try Task.checkCancellation()
                 if let capeId = selectedCapeId {
@@ -507,15 +507,15 @@ struct SkinToolDetailView: View {
             return false
         }
     }
-
+    
     private func uploadCurrentSkinWithNewModel(skinURL: String, player: Player) async -> Bool {
         do {
             try Task.checkCancellation()
             let p = playerWithCredentialIfNeeded(player) ?? player
-
+            
             // Convert HTTP URLs to HTTPS to comply with ATS policies
             let httpsURL = skinURL.httpToHttps()
-
+            
             guard let url = URL(string: httpsURL) else {
                 return false
             }
@@ -527,7 +527,7 @@ struct SkinToolDetailView: View {
             }
             let data = try await APIClient.get(url: url, headers: headers)
             try Task.checkCancellation()
-
+            
             let result = await PlayerSkinService.uploadSkin(
                 imageData: data,
                 model: currentModel,
@@ -556,14 +556,14 @@ extension SkinToolDetailView {
     private func loadCurrentActiveCapeIfNeeded(from profile: MinecraftProfileResponse) async {
         do {
             try Task.checkCancellation()
-
+            
             // If the user has manually selected a different cloak than the currently active cloak, the "currently active cloak" will no longer be loaded to avoid overwriting the preview
             if let manualSelectedId = selectedCapeId,
                let activeId = PlayerSkinService.getActiveCapeId(from: profile),
                manualSelectedId != activeId {
                 return
             }
-
+            
             // Check capeURL in publicSkinInfo first
             if let capeURL = publicSkinInfo?.capeURL, !capeURL.isEmpty {
                 await MainActor.run {
@@ -580,9 +580,9 @@ extension SkinToolDetailView {
                 }
                 return
             }
-
+            
             try Task.checkCancellation()
-
+            
             // Otherwise look for the active cloak from profile
             guard let activeCapeId = PlayerSkinService.getActiveCapeId(from: profile) else {
                 await MainActor.run {
@@ -594,9 +594,9 @@ extension SkinToolDetailView {
                 }
                 return
             }
-
+            
             try Task.checkCancellation()
-
+            
             guard let capes = profile.capes, !capes.isEmpty else {
                 await MainActor.run {
                     selectedCapeImageURL = nil
@@ -607,9 +607,9 @@ extension SkinToolDetailView {
                 }
                 return
             }
-
+            
             try Task.checkCancellation()
-
+            
             guard let activeCape = capes.first(where: { $0.id == activeCapeId && $0.state == "ACTIVE" }) else {
                 await MainActor.run {
                     selectedCapeImageURL = nil
@@ -620,9 +620,9 @@ extension SkinToolDetailView {
                 }
                 return
             }
-
+            
             try Task.checkCancellation()
-
+            
             // There is a cloak that needs to be loaded, set the loading status
             await MainActor.run {
                 selectedCapeImageURL = activeCape.url
@@ -651,7 +651,7 @@ extension SkinToolDetailView {
             }
         }
     }
-
+    
     fileprivate func downloadCapeTextureIfNeeded(from urlString: String) async {
         if let current = selectedCapeImageURL, current == urlString, selectedCapeLocalPath != nil {
             return
@@ -677,7 +677,7 @@ extension SkinToolDetailView {
             Logger.shared.error("Cape download error: \(error)")
         }
     }
-
+    
     /// Download the cape texture and set the image
     private func downloadCapeTextureAndSetImage(from urlString: String) async {
         // Check if the same URL has already been downloaded
@@ -692,7 +692,7 @@ extension SkinToolDetailView {
             }
             return
         }
-
+        
         // Verify URL format
         guard let url = URL(string: urlString.httpToHttps()) else {
             await MainActor.run {
@@ -700,7 +700,7 @@ extension SkinToolDetailView {
             }
             return
         }
-
+        
         do {
             let p = playerWithCredentialIfNeeded(resolvedPlayer)
             var headers: [String: String]?
@@ -711,16 +711,16 @@ extension SkinToolDetailView {
             }
             let data = try await APIClient.get(url: url, headers: headers)
             try Task.checkCancellation()
-
+            
             guard !data.isEmpty, let image = NSImage(data: data) else {
                 await MainActor.run {
                     selectedCapeImage = nil
                 }
                 return
             }
-
+            
             try Task.checkCancellation()
-
+            
             // Update UI immediately without waiting for file to be saved
             await MainActor.run {
                 // Check if the URL still matches (prevents users from switching quickly)
@@ -728,9 +728,9 @@ extension SkinToolDetailView {
                     selectedCapeImage = image
                 }
             }
-
+            
             try Task.checkCancellation()
-
+            
             // Asynchronously save to temporary file (without blocking UI updates)
             let tempFile = FileManager.default.temporaryDirectory.appendingPathComponent("cape_\(UUID().uuidString).png")
             do {
@@ -753,7 +753,7 @@ extension SkinToolDetailView {
             Logger.shared.error("Cape download error: \(error.localizedDescription)")
         }
     }
-
+    
     // MARK: - clear data
     /// Clear all data on the page
     private func clearAllData() {
@@ -763,17 +763,17 @@ extension SkinToolDetailView {
         downloadCapeTask?.cancel()
         resetSkinTask?.cancel()
         applyChangesTask?.cancel()
-
+        
         // Clean all Task references
         loadCapeTask = nil
         loadSkinImageTask = nil
         downloadCapeTask = nil
         resetSkinTask = nil
         applyChangesTask = nil
-
+        
         // Delete temporary files
         deleteTemporaryFiles()
-
+        
         // Clear selected skin data
         selectedSkinData = nil
         selectedSkinImage = nil
@@ -800,11 +800,11 @@ extension SkinToolDetailView {
         lastSelectedCapeId = nil
         lastCurrentActiveCapeId = nil
     }
-
+    
     /// Delete temporary files created
     private func deleteTemporaryFiles() {
         let fileManager = FileManager.default
-
+        
         // Delete temporary skin files
         if let skinPath = selectedSkinPath, !skinPath.isEmpty {
             let skinURL = URL(fileURLWithPath: skinPath)
@@ -818,7 +818,7 @@ extension SkinToolDetailView {
                 }
             }
         }
-
+        
         // Delete temporary cloak files
         if let capePath = selectedCapeLocalPath, !capePath.isEmpty {
             let capeURL = URL(fileURLWithPath: capePath)

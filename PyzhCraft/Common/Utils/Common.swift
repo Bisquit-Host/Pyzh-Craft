@@ -10,13 +10,13 @@ extension URL {
         else {
             return nil
         }
-
+        
         // If it is HTTP protocol, replace it with HTTPS
         if components.scheme?.lowercased() == "http" {
             components.scheme = "https"
             return components.url
         }
-
+        
         // It is already HTTPS or other protocols, return directly
         return self
     }
@@ -36,7 +36,7 @@ enum CommonUtil {
     static func imageDataFromBase64(_ base64: String) -> Data? {
         if base64.hasPrefix("data:image") {
             if let base64String = base64.split(separator: ",").last,
-                let imageData = Data(base64Encoded: String(base64String)) {
+               let imageData = Data(base64Encoded: String(base64String)) {
                 return imageData
             }
         } else if let imageData = Data(base64Encoded: base64) {
@@ -44,7 +44,7 @@ enum CommonUtil {
         }
         return nil
     }
-
+    
     /// Format ISO8601 string as relative time (such as "3 days ago")
     static func formatRelativeTime(_ isoString: String) -> String {
         let isoFormatter = ISO8601DateFormatter()
@@ -62,14 +62,14 @@ enum CommonUtil {
         formatter.unitsStyle = .full
         return formatter.localizedString(for: date, relativeTo: Date())
     }
-
+    
     // MARK: - Minecraft version comparison and sorting
-
+    
     /// - Returns: -1 means version1 < version2, 0 is equal, 1 means version1 > version2
     static func compareMinecraftVersions(_ version1: String, _ version2: String) -> Int {
         let components1 = parseVersionComponents(version1)
         let components2 = parseVersionComponents(version2)
-
+        
         // Compare major version numbers
         for i in 0..<max(components1.count, components2.count) {
             let v1 = i < components1.count ? components1[i] : 0
@@ -80,15 +80,15 @@ enum CommonUtil {
                 return 1
             }
         }
-
+        
         return 0
     }
-
+    
     private static func parseVersionComponents(_ version: String) -> [Int] {
         return version.components(separatedBy: ".")
             .compactMap { Int($0.trimmingCharacters(in: .whitespacesAndNewlines)) }
     }
-
+    
     static func sortMinecraftVersions(_ versions: [String]) -> [String] {
         return versions.sorted { version1, version2 in
             compareMinecraftVersions(version1, version2) > 0

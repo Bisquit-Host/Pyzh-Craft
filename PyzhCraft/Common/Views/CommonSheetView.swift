@@ -3,12 +3,12 @@ import SwiftUI
 /// Universal Sheet view component
 /// Divided into three parts: header, body and bottom, adaptive content size
 struct CommonSheetView<Header: View, BodyContent: View, Footer: View>: View {
-
+    
     // MARK: - Properties
     let header: Header
     let bodyContent: BodyContent
     let footer: Footer
-
+    
     // MARK: - Initialization
     init(
         @ViewBuilder header: () -> Header,
@@ -19,7 +19,7 @@ struct CommonSheetView<Header: View, BodyContent: View, Footer: View>: View {
         self.bodyContent = body()
         self.footer = footer()
     }
-
+    
     // MARK: - Body
     var body: some View {
         VStack(spacing: 0) {
@@ -28,12 +28,12 @@ struct CommonSheetView<Header: View, BodyContent: View, Footer: View>: View {
                 .padding(.horizontal)
                 .padding()
             Divider()
-
+            
             // main area
             bodyContent
                 .padding(.horizontal)
                 .padding()
-
+            
             // bottom area
             Divider()
             footer
