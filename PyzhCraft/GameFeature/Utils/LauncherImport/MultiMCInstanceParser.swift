@@ -8,9 +8,10 @@ struct MultiMCInstanceParser: LauncherInstanceParser {
         let instanceCfgPath = instancePath.appendingPathComponent("instance.cfg")
         let mmcPackPath = instancePath.appendingPathComponent("mmc-pack.json")
         
-        let fileManager = FileManager.default
-        guard fileManager.fileExists(atPath: instanceCfgPath.path),
-              fileManager.fileExists(atPath: mmcPackPath.path) else {
+        guard
+            FileManager.default.fileExists(atPath: instanceCfgPath.path),
+            FileManager.default.fileExists(atPath: mmcPackPath.path)
+        else {
             return false
         }
         
@@ -124,18 +125,20 @@ private struct MMCPackComponent: Codable {
 // MARK: - Import Error
 
 enum ImportError: LocalizedError {
-    case gameDirectoryNotFound(instancePath: String)
-    case invalidConfiguration(message: String)
-    case fileNotFound(path: String)
+    case gameDirectoryNotFound(instancePath: String),
+         invalidConfiguration(message: String),
+         fileNotFound(path: String)
     
     var errorDescription: String? {
         switch self {
         case .gameDirectoryNotFound(let path):
             String(format: String(localized: "Game directory not found: \(path)"))
+            
         case .invalidConfiguration(let message):
             String(format: String(localized: "Invalid configuration: \(message)"))
+            
         case .fileNotFound(let path):
-            String(format: String(localized: "File not found: \(path)"),)
+            String(format: String(localized: "File not found: \(path)"))
         }
     }
 }
