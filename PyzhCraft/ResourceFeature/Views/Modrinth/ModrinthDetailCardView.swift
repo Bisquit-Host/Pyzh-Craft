@@ -19,13 +19,13 @@ struct ModrinthDetailCardView: View {
     @State private var showDeleteAlert = false
     @State private var isResourceDisabled = false  // Whether the resource is disabled (for graying effect)
     @EnvironmentObject private var gameRepository: GameRepository
-    
+
     // MARK: - Enums
     enum AddButtonState {
         case idle, loading, installed,
              update  // A new version is available
     }
-    
+
     // MARK: - Body
     var body: some View {
         HStack(spacing: ModrinthConstants.UIConstants.contentSpacing) {
@@ -41,20 +41,17 @@ struct ModrinthDetailCardView: View {
         .frame(maxWidth: .infinity)
         .opacity(isResourceDisabled ? 0.5 : 1.0)  // Grayed out when disabled
         .onAppear {
-            // Synchronize disabled status from data source to avoid displaying errors when list scrolling reuses rows
             isResourceDisabled = ResourceEnableDisableManager.isDisabled(fileName: project.fileName)
         }
         .onChange(of: project.fileName) { _, newFileName in
             isResourceDisabled = ResourceEnableDisableManager.isDisabled(fileName: newFileName)
         }
     }
-    
+
     // MARK: - View Components
     private var iconView: some View {
         Group {
-            // Use id prefix to determine local resources, which is more reliable
             if project.projectId.hasPrefix("local_") || project.projectId.hasPrefix("file_") {
-                // Local resources display questionmark.circle icon
                 localResourceIcon
             } else if let iconUrl = project.iconUrl,
                       let url = URL(string: iconUrl) {
@@ -76,7 +73,7 @@ struct ModrinthDetailCardView: View {
             }
         }
     }
-    
+
     private var placeholderIcon: some View {
         Color.gray.opacity(0.2)
             .frame(
@@ -85,7 +82,7 @@ struct ModrinthDetailCardView: View {
             )
             .cornerRadius(ModrinthConstants.UIConstants.cornerRadius)
     }
-    
+
     private var localResourceIcon: some View {
         Image(systemName: "questionmark.circle")
             .font(.system(size: ModrinthConstants.UIConstants.iconSize * 0.6))
@@ -97,7 +94,7 @@ struct ModrinthDetailCardView: View {
             .background(.gray.opacity(0.2))
             .cornerRadius(ModrinthConstants.UIConstants.cornerRadius)
     }
-    
+
     private var titleView: some View {
         HStack(spacing: 4) {
             Text(project.title)
@@ -118,14 +115,14 @@ struct ModrinthDetailCardView: View {
             }
         }
     }
-    
+
     private var descriptionView: some View {
         Text(project.description)
             .font(.subheadline)
             .lineLimit(ModrinthConstants.UIConstants.descriptionLineLimit)
             .foregroundColor(.secondary)
     }
-    
+
     private var tagsView: some View {
         HStack(spacing: ModrinthConstants.UIConstants.spacing) {
             ForEach(
@@ -147,7 +144,7 @@ struct ModrinthDetailCardView: View {
             }
         }
     }
-    
+
     private var infoView: some View {
         VStack(alignment: .trailing, spacing: ModrinthConstants.UIConstants.spacing) {
             downloadInfoView
@@ -170,21 +167,21 @@ struct ModrinthDetailCardView: View {
             .environmentObject(gameRepository)
         }
     }
-    
+
     private var downloadInfoView: some View {
         InfoRowView(
             icon: "arrow.down.circle",
             text: Self.formatNumber(project.downloads)
         )
     }
-    
+
     private var followerInfoView: some View {
         InfoRowView(
             icon: "heart",
             text: Self.formatNumber(project.follows)
         )
     }
-    
+
     // MARK: - Helper Methods
     static func formatNumber(_ num: Int) -> String {
         if num >= 1_000_000 {
@@ -194,34 +191,5 @@ struct ModrinthDetailCardView: View {
         } else {
             "\(num)"
         }
-    }
-}
-
-// MARK: - Supporting Views
-private struct TagView: View {
-    let text: String
-    
-    var body: some View {
-        Text(text)
-            .font(.caption2)
-            .padding(.horizontal, ModrinthConstants.UIConstants.tagHorizontalPadding)
-            .padding(.vertical, ModrinthConstants.UIConstants.tagVerticalPadding)
-            .background(.gray.opacity(0.15))
-            .cornerRadius(ModrinthConstants.UIConstants.tagCornerRadius)
-    }
-}
-
-private struct InfoRowView: View {
-    let icon: String
-    let text: String
-    
-    var body: some View {
-        HStack(spacing: 2) {
-            Image(systemName: icon)
-                .imageScale(.small)
-            Text(text)
-        }
-        .font(.caption2)
-        .foregroundColor(.secondary)
     }
 }

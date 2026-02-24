@@ -11,9 +11,9 @@ public struct GeneralSettingsView: View {
     @State private var isCancellingLanguageChange = false
     @State private var selectedLanguage = LanguageManager.shared.selectedLanguage
     @State private var error: GlobalError?
-    
+
     public init() {}
-    
+
     public var body: some View {
         Form {
             LabeledContent("Select Language") {
@@ -25,7 +25,6 @@ public struct GeneralSettingsView: View {
                 .labelsHidden()
                 .fixedSize()
                 .onChange(of: selectedLanguage) { _, newValue in
-                    // If the language is restored due to a cancellation operation, the restart prompt will not be triggered
                     if newValue != LanguageManager.shared.selectedLanguage {
                         showingRestartAlert = true
                     }
@@ -36,7 +35,6 @@ public struct GeneralSettingsView: View {
                     titleVisibility: .visible
                 ) {
                     Button("Restart Application", role: .destructive) {
-                        // Update Sparkle's language settings before restarting
                         sparkleUpdateService.updateSparkleLanguage(selectedLanguage)
                         LanguageManager.shared.selectedLanguage = selectedLanguage
                         restartAppSafely()
@@ -49,12 +47,12 @@ public struct GeneralSettingsView: View {
                     Text("Changing language requires restarting the application to take effect")
                 }
             }.labeledContentStyle(.custom).padding(.bottom, 10)
-            
+
             LabeledContent("Appearance") {
                 ThemeSelectorView(selectedTheme: $themeManager.themeMode)
                     .fixedSize()
             }.labeledContentStyle(.custom)
-            
+
             LabeledContent("Interface style") {
                 Picker("", selection: $generalSettings.interfaceLayoutStyle) {
                     ForEach(InterfaceLayoutStyle.allCases, id: \.self) {
@@ -65,7 +63,7 @@ public struct GeneralSettingsView: View {
                 .labelsHidden()
                 .fixedSize()
             }.labeledContentStyle(.custom).padding(.bottom, 10)
-            
+
             LabeledContent("Working Directory") {
                 DirectorySettingRow(
                     title: "Working Directory",
@@ -80,7 +78,7 @@ public struct GeneralSettingsView: View {
                         handleDirectoryImport(result)
                     }
             }.labeledContentStyle(.custom(alignment: .firstTextBaseline))
-            
+
             LabeledContent("Concurrent Downloads") {
                 HStack {
                     Slider(
@@ -97,7 +95,6 @@ public struct GeneralSettingsView: View {
                         in: 1...64
                     ).controlSize(.mini)
                         .animation(.easeOut(duration: 0.5), value: generalSettings.concurrentDownloads)
-                    // Current memory value display (right aligned, fixed width)
                     Text("\(generalSettings.concurrentDownloads)").font(
                         .subheadline
                     )
@@ -126,12 +123,12 @@ public struct GeneralSettingsView: View {
                             .frame(width: 200)
                             .focusable(false)
                             .disabled(!generalSettings.enableGitHubProxy)
-                        
+
                         Button("Reset to Default") {
                             generalSettings.gitProxyURL = "https://gh-proxy.com"
                         }
                         .disabled(!generalSettings.enableGitHubProxy)
-                        
+
                         InfoIconWithPopover(text: "When enabled, adds a proxy prefix to requests for github.com and raw.githubusercontent.com.")
                     }
                 }
@@ -151,10 +148,7 @@ public struct GeneralSettingsView: View {
             }
         }
     }
-    
-    // MARK: - Private Methods
-    
-    /// Safely reset the working directory
+
     private func resetWorkingDirectorySafely() {
         do {
             guard let supportDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appendingPathComponent(Bundle.main.appName) else {
@@ -163,12 +157,11 @@ public struct GeneralSettingsView: View {
                     level: .popup
                 )
             }
-            
-            // Make sure the directory exists
+
             try FileManager.default.createDirectory(at: supportDir, withIntermediateDirectories: true)
-            
+
             generalSettings.launcherWorkingDirectory = supportDir.path
-            
+
             Logger.shared.info("Working directory has been reset to: \(supportDir.path)")
         } catch {
             let globalError = GlobalError.from(error)
@@ -176,14 +169,12 @@ public struct GeneralSettingsView: View {
             self.error = globalError
         }
     }
-    
-    /// Processing catalog import results
+
     private func handleDirectoryImport(_ result: Result<[URL], Error>) {
         switch result {
         case .success(let urls):
             if let url = urls.first {
                 do {
-                    // Verify directory is accessible
                     let resourceValues = try url.resourceValues(forKeys: [.isDirectoryKey, .isReadableKey])
                     guard resourceValues.isDirectory == true, resourceValues.isReadable == true else {
                         throw GlobalError.fileSystem(
@@ -191,10 +182,9 @@ public struct GeneralSettingsView: View {
                             level: .notification
                         )
                     }
-                    
+
                     generalSettings.launcherWorkingDirectory = url.path
-                    // GameRepository observers will automatically reload, no need to manually loadGames
-                    
+
                     Logger.shared.info("The working directory has been set to: \(url.path)")
                 } catch {
                     let globalError = GlobalError.from(error)
@@ -212,8 +202,7 @@ public struct GeneralSettingsView: View {
             self.error = globalError
         }
     }
-    
-    /// Safely restart apps
+
     private func restartAppSafely() {
         do {
             try restartApp()
@@ -225,8 +214,6 @@ public struct GeneralSettingsView: View {
     }
 }
 
-/// Restart application
-/// - Throws: GlobalError when restart fails
 private func restartApp() throws {
     guard let appURL = Bundle.main.bundleURL as URL? else {
         throw GlobalError.configuration(
@@ -234,85 +221,15 @@ private func restartApp() throws {
             level: .popup
         )
     }
-    
+
     let task = Process()
     task.executableURL = URL(fileURLWithPath: "/usr/bin/open")
     task.arguments = [appURL.path]
-    
+
     try task.run()
-    
+
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
         NSApplication.shared.terminate(nil)
-    }
-}
-
-// MARK: - Theme Selector View
-struct ThemeSelectorView: View {
-    @Binding var selectedTheme: ThemeMode
-    
-    var body: some View {
-        HStack(spacing: 16) {
-            ForEach(ThemeMode.allCases, id: \.self) { theme in
-                ThemeOptionView(theme: theme, isSelected: selectedTheme == theme) {
-                    selectedTheme = theme
-                }
-            }
-        }
-    }
-}
-
-// MARK: - Theme Option View
-struct ThemeOptionView: View {
-    let theme: ThemeMode
-    let isSelected: Bool
-    let onTap: () -> Void
-    
-    var body: some View {
-        VStack(spacing: 12) {
-            // theme icon
-            ZStack {
-                RoundedRectangle(cornerRadius: 6)
-                    .stroke(isSelected ? Color.accentColor : Color.clear, lineWidth: isSelected ? 3 : 0)
-                    .frame(width: 61, height: 41)
-                
-                // Window icon content
-                ThemeWindowIcon(theme: theme)
-                    .frame(width: 60, height: 40)
-            }
-            
-            // Hashtag
-            Text(theme.localizedName)
-                .font(.caption)
-                .foregroundColor(isSelected ? .primary : .secondary)
-        }
-        .onTapGesture {
-            onTap()
-        }
-        .animation(.easeInOut(duration: 0.2), value: isSelected)
-    }
-}
-
-// MARK: - Theme Window Icon
-struct ThemeWindowIcon: View {
-    let theme: ThemeMode
-    
-    var body: some View {
-        Image(iconName)
-            .resizable()
-            .frame(width: 60, height: 40)
-            .cornerRadius(6)
-    }
-    
-    private var iconName: String {
-        let isSystem26 = ProcessInfo.processInfo.operatingSystemVersion.majorVersion == 26
-        switch theme {
-        case .system:
-            return isSystem26 ? "AppearanceAuto_Normal_Normal" : "AppearanceAuto_Normal"
-        case .light:
-            return isSystem26 ? "AppearanceLight_Normal_Normal" : "AppearanceLight_Normal"
-        case .dark:
-            return isSystem26 ? "AppearanceDark_Normal_Normal" : "AppearanceDark_Normal"
-        }
     }
 }
 

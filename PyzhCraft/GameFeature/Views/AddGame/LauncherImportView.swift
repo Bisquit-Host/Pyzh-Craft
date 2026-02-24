@@ -6,26 +6,26 @@ struct LauncherImportView: View {
     @StateObject private var viewModel: LauncherImportViewModel
     @EnvironmentObject var gameRepository: GameRepository
     @EnvironmentObject var playerListViewModel: PlayerListViewModel
-    
+
     // Bindings from parent
     private let triggerConfirm: Binding<Bool>
     private let triggerCancel: Binding<Bool>
     @Environment(\.dismiss)
     private var dismiss
-    
+
     // File picker status
     @State private var showFolderPicker = false
-    
+
     // MARK: - Initializer
     init(configuration: GameFormConfiguration) {
         self.triggerConfirm = configuration.triggerConfirm
         self.triggerCancel = configuration.triggerCancel
-        
+
         self._viewModel = StateObject(wrappedValue: LauncherImportViewModel(
             configuration: configuration
         ))
     }
-    
+
     // MARK: - Body
     var body: some View {
         formContentView
@@ -38,14 +38,11 @@ struct LauncherImportView: View {
             }
             .gameFormStateListeners(viewModel: viewModel, triggerConfirm: triggerConfirm, triggerCancel: triggerCancel)
             .onChange(of: viewModel.selectedLauncherType) { _, _ in
-                // Clear previous selection when launcher type changes
                 viewModel.selectedInstancePath = nil
             }
             .onChange(of: viewModel.selectedInstancePath) { _, newValue in
-                // When the selected instance path changes, automatically fill in the game name into the input box
                 if newValue != nil {
                     viewModel.autoFillGameNameIfNeeded()
-                    // Check if Mod Loader supports it and display notification if not
                     viewModel.checkAndNotifyUnsupportedModLoader()
                 }
             }
@@ -58,9 +55,9 @@ struct LauncherImportView: View {
             }
             .fileDialogDefaultDirectory(FileManager.default.homeDirectoryForCurrentUser)
     }
-    
+
     // MARK: - View Components
-    
+
     private var formContentView: some View {
         VStack(spacing: 16) {
             launcherSelectionSection
@@ -71,25 +68,23 @@ struct LauncherImportView: View {
             gameNameInputSection
             if viewModel.shouldShowProgress {
                 VStack(spacing: 16) {
-                    // Show copy progress (if copying is in progress)
                     if viewModel.isImporting, let progress = viewModel.importProgress {
                         importProgressSection(progress: progress)
                     }
-                    // Show download progress
                     downloadProgressSection
                 }
                 .padding(.top, 10)
             }
         }
     }
-    
+
     private var launcherSelectionSection: some View {
         FormSection {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Select Launcher")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-                
+
                 Picker("", selection: $viewModel.selectedLauncherType) {
                     ForEach(ImportLauncherType.allCases, id: \.self) {
                         Text($0.rawValue)
@@ -101,14 +96,14 @@ struct LauncherImportView: View {
             }
         }
     }
-    
+
     private var pathSelectionSection: some View {
         FormSection {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Select Instance Folder")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-                
+
                 HStack {
                     if let path = viewModel.selectedInstancePath?.path {
                         PathBreadcrumbView(path: path)
@@ -117,9 +112,9 @@ struct LauncherImportView: View {
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
-                    
+
                     Spacer()
-                    
+
                     Button("Browse") {
                         selectLauncherPath()
                     }
@@ -127,7 +122,7 @@ struct LauncherImportView: View {
             }
         }
     }
-    
+
     @ViewBuilder private var instanceInfoSection: some View {
         if let info = viewModel.currentInstanceInfo {
             FormSection {
@@ -143,7 +138,7 @@ struct LauncherImportView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                         }
-                        
+
                         // game version
                         HStack {
                             Text("Version")
@@ -154,7 +149,7 @@ struct LauncherImportView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                         }
-                        
+
                         // Mod loader
                         if !info.modLoader.isEmpty && info.modLoader != "vanilla" {
                             HStack {
@@ -179,7 +174,7 @@ struct LauncherImportView: View {
             }
         }
     }
-    
+
     private var gameNameInputSection: some View {
         FormSection {
             GameNameInputView(
@@ -196,7 +191,7 @@ struct LauncherImportView: View {
             )
         }
     }
-    
+
     private var downloadProgressSection: some View {
         // Get the modLoader of the selected instance, or use "vanilla" if there is none
         let selectedModLoader: String = {
@@ -205,7 +200,7 @@ struct LauncherImportView: View {
             }
             return "vanilla"
         }()
-        
+
         return DownloadProgressSection(
             gameSetupService: viewModel.gameSetupService,
             selectedModLoader: selectedModLoader,
@@ -213,7 +208,7 @@ struct LauncherImportView: View {
             modPackIndexInfo: nil
         )
     }
-    
+
     private func importProgressSection(progress: (fileName: String, completed: Int, total: Int)) -> some View {
         FormSection {
             DownloadProgressRow(
@@ -226,19 +221,19 @@ struct LauncherImportView: View {
             )
         }
     }
-    
+
     // MARK: - Helper Methods
-    
+
     private func selectLauncherPath() {
         showFolderPicker = true
     }
-    
+
     /// Handles folders selected via fileImporter
     private func handleFolderSelection(_ result: Result<[URL], Error>) {
         switch result {
         case .success(let urls):
             guard let url = urls.first else { return }
-            
+
             // Maintain security-scoped resource access
             guard url.startAccessingSecurityScopedResource() else {
                 GlobalErrorHandler.shared.handle(
@@ -249,9 +244,9 @@ struct LauncherImportView: View {
                 )
                 return
             }
-            
+
             defer { url.stopAccessingSecurityScopedResource() }
-            
+
             // Verify that the selected folder is a valid instance
             guard viewModel.validateInstance(at: url) else {
                 let launcherName = viewModel.selectedLauncherType.rawValue
@@ -264,45 +259,22 @@ struct LauncherImportView: View {
                 )
                 return
             }
-            
+
             // Directly use the selected instance path
             viewModel.selectedInstancePath = url
-            
+
             // Automatically fill in the game name into the input box
             viewModel.autoFillGameNameIfNeeded()
-            
+
             Logger.shared.info("Successfully selected \(viewModel.selectedLauncherType.rawValue) instance path: \(url.path)")
-            
+
         case .failure(let error):
             let globalError = GlobalError.from(error)
             GlobalErrorHandler.shared.handle(globalError)
         }
     }
-    
+
     #Preview {
-        struct PreviewWrapper: View {
-            @State private var isDownloading = false
-            @State private var isFormValid = false
-            @State private var triggerConfirm = false
-            @State private var triggerCancel = false
-            
-            var body: some View {
-                LauncherImportView(
-                    configuration: GameFormConfiguration(
-                        isDownloading: $isDownloading,
-                        isFormValid: $isFormValid,
-                        triggerConfirm: $triggerConfirm,
-                        triggerCancel: $triggerCancel,
-                        onCancel: {},
-                        onConfirm: {}
-                    )
-                )
-                .environmentObject(GameRepository())
-                .environmentObject(PlayerListViewModel())
-                .frame(width: 600, height: 500)
-                .padding()
-            }
-        }
-        return PreviewWrapper()
+        LauncherImportPreviewWrapper()
     }
 }

@@ -4,7 +4,7 @@ struct DownloadProgressView: View {
     @ObservedObject var gameSetupService: GameSetupUtil
     @ObservedObject var modPackInstallState: ModPackInstallState
     let lastParsedIndexInfo: ModrinthIndexInfo?
-    
+
     var body: some View {
         VStack(spacing: 24) {
             gameDownloadProgress
@@ -12,7 +12,7 @@ struct DownloadProgressView: View {
             modPackInstallProgress
         }
     }
-    
+
     private var gameDownloadProgress: some View {
         Group {
             progressRow(
@@ -27,13 +27,13 @@ struct DownloadProgressView: View {
             )
         }
     }
-    
+
     private var modLoaderDownloadProgress: some View {
         Group {
             if let indexInfo = lastParsedIndexInfo {
                 let loaderType = indexInfo.loaderType.lowercased()
                 let title = getLoaderTitle(for: indexInfo.loaderType)
-                
+
                 if loaderType == "fabric" || loaderType == "quilt" {
                     progressRow(
                         title: title,
@@ -59,11 +59,10 @@ struct DownloadProgressView: View {
             }
         }
     }
-    
+
     private var modPackInstallProgress: some View {
         Group {
             if modPackInstallState.isInstalling {
-                // Show overrides progress bar (only displayed when there are files that need to be merged)
                 if modPackInstallState.overridesTotal > 0 {
                     progressRow(
                         title: "Copy Files",
@@ -71,13 +70,13 @@ struct DownloadProgressView: View {
                         type: .overrides
                     )
                 }
-                
+
                 progressRow(
                     title: "Modpack Files",
                     installState: modPackInstallState,
                     type: .files
                 )
-                
+
                 if modPackInstallState.dependenciesTotal > 0 {
                     progressRow(
                         title: "Modpack Dependencies",
@@ -88,7 +87,7 @@ struct DownloadProgressView: View {
             }
         }
     }
-    
+
     private func progressRow(
         title: LocalizedStringKey,
         state: DownloadState,
@@ -104,7 +103,7 @@ struct DownloadProgressView: View {
             )
         }
     }
-    
+
     private func progressRow(
         title: LocalizedStringKey,
         installState: ModPackInstallState,
@@ -157,7 +156,7 @@ struct DownloadProgressView: View {
             )
         }
     }
-    
+
     private func getLoaderTitle(for loaderType: String) -> LocalizedStringKey {
         switch loaderType.lowercased() {
         case "fabric": "Fabric Loader"
@@ -169,34 +168,10 @@ struct DownloadProgressView: View {
     }
 }
 
-// MARK: - Supporting Types
-private enum ProgressType {
+enum ProgressType {
     case core, resources
 }
 
-private enum InstallProgressType {
+enum InstallProgressType {
     case files, dependencies, overrides
-}
-
-// MARK: - Progress Row Wrapper
-private struct ProgressRowWrapper: View {
-    let title: LocalizedStringKey
-    @ObservedObject var state: DownloadState
-    let type: ProgressType
-    let version: String?
-    
-    var body: some View {
-        DownloadProgressRow(
-            title: title,
-            progress: type == .core
-            ? state.coreProgress : state.resourcesProgress,
-            currentFile: type == .core
-            ? state.currentCoreFile : state.currentResourceFile,
-            completed: type == .core
-            ? state.coreCompletedFiles : state.resourcesCompletedFiles,
-            total: type == .core
-            ? state.coreTotalFiles : state.resourcesTotalFiles,
-            version: version
-        )
-    }
 }

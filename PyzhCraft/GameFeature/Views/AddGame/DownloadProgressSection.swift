@@ -6,7 +6,7 @@ struct DownloadProgressSection: View {
     var modPackViewModel: ModPackDownloadSheetViewModel?
     let modPackIndexInfo: ModrinthIndexInfo?
     let selectedModLoader: String
-    
+
     init(
         gameSetupService: GameSetupUtil,
         selectedModLoader: String = "vanilla",
@@ -18,7 +18,7 @@ struct DownloadProgressSection: View {
         self.modPackViewModel = modPackViewModel
         self.modPackIndexInfo = modPackIndexInfo
     }
-    
+
     var body: some View {
         VStack(spacing: 24) {
             // Game core download progress
@@ -31,7 +31,7 @@ struct DownloadProgressSection: View {
             }
         }
     }
-    
+
     // MARK: - Game Download Progress
     private var gameDownloadProgressView: some View {
         VStack(spacing: 24) {
@@ -47,7 +47,7 @@ struct DownloadProgressSection: View {
             )
         }
     }
-    
+
     // MARK: - Mod Loader Progress
     @ViewBuilder private var modLoaderProgressView: some View {
         if let loaderProgressInfo = getLoaderProgressInfo() {
@@ -59,13 +59,13 @@ struct DownloadProgressSection: View {
             )
         }
     }
-    
+
     // MARK: - Helper Methods
-    
+
     private enum ProgressType {
         case core, resources
     }
-    
+
     private func progressSection(
         title: LocalizedStringKey,
         state: DownloadState,
@@ -83,21 +83,21 @@ struct DownloadProgressSection: View {
             )
         }
     }
-    
+
     private struct LoaderProgressInfo {
         let title: LocalizedStringKey
         let state: DownloadState
         let version: String?
     }
-    
+
     private func getLoaderProgressInfo() -> LoaderProgressInfo? {
         let loaderType = selectedModLoader.lowercased()
-        
+
         // If it is integration package mode, use the loader information of the integration package
         if let indexInfo = modPackIndexInfo {
             let loaderState = getLoaderDownloadState(for: indexInfo.loaderType)
             let title = getLoaderTitle(for: indexInfo.loaderType)
-            
+
             if let state = loaderState {
                 return LoaderProgressInfo(
                     title: title,
@@ -109,7 +109,7 @@ struct DownloadProgressSection: View {
             // Normal game creation mode
             let state = getLoaderDownloadState(for: loaderType)
             let title = getLoaderTitle(for: loaderType)
-            
+
             if let state = state {
                 return LoaderProgressInfo(
                     title: title,
@@ -118,10 +118,10 @@ struct DownloadProgressSection: View {
                 )
             }
         }
-        
+
         return nil
     }
-    
+
     private func getLoaderDownloadState(for loaderType: String) -> DownloadState? {
         switch loaderType.lowercased() {
         case "fabric", "quilt": gameSetupService.fabricDownloadState
@@ -130,7 +130,7 @@ struct DownloadProgressSection: View {
         default: nil
         }
     }
-    
+
     private func getLoaderTitle(for loaderType: String) -> LocalizedStringKey {
         switch loaderType.lowercased() {
         case "fabric": "Fabric Loader"
@@ -138,97 +138,6 @@ struct DownloadProgressSection: View {
         case "forge": "Forge Loader"
         case "neoforge": "NeoForge Loader"
         default: ""
-        }
-    }
-}
-
-// MARK: - ModPack Progress View
-private struct ModPackProgressView: View {
-    @ObservedObject var modPackViewModel: ModPackDownloadSheetViewModel
-    
-    var body: some View {
-        if modPackViewModel.modPackInstallState.isInstalling {
-            VStack(spacing: 24) {
-                // Show overrides progress bar (only displayed when there are files that need to be merged)
-                if modPackViewModel.modPackInstallState.overridesTotal > 0 {
-                    modPackProgressSection(
-                        title: "Copy Files",
-                        state: modPackViewModel.modPackInstallState,
-                        type: .overrides
-                    )
-                }
-                
-                modPackProgressSection(
-                    title: "Modpack Files",
-                    state: modPackViewModel.modPackInstallState,
-                    type: .files
-                )
-                
-                if modPackViewModel.modPackInstallState.dependenciesTotal > 0 {
-                    modPackProgressSection(
-                        title: "Modpack Dependencies",
-                        state: modPackViewModel.modPackInstallState,
-                        type: .dependencies
-                    )
-                }
-            }
-        }
-    }
-    
-    private enum ModPackProgressType {
-        case files, dependencies, overrides
-    }
-    
-    private func modPackProgressSection(
-        title: LocalizedStringKey,
-        state: ModPackInstallState,
-        type: ModPackProgressType
-    ) -> some View {
-        FormSection {
-            DownloadProgressRow(
-                title: title,
-                progress: {
-                    switch type {
-                    case .files:
-                        return state.filesProgress
-                    case .dependencies:
-                        return state.dependenciesProgress
-                    case .overrides:
-                        return state.overridesProgress
-                    }
-                }(),
-                currentFile: {
-                    switch type {
-                    case .files:
-                        return state.currentFile
-                    case .dependencies:
-                        return state.currentDependency
-                    case .overrides:
-                        return state.currentOverride
-                    }
-                }(),
-                completed: {
-                    switch type {
-                    case .files:
-                        return state.filesCompleted
-                    case .dependencies:
-                        return state.dependenciesCompleted
-                    case .overrides:
-                        return state.overridesCompleted
-                    }
-                }(),
-                total: {
-                    switch type {
-                    case .files:
-                        return state.filesTotal
-                    case .dependencies:
-                        return state.dependenciesTotal
-                    case .overrides:
-                        return state.overridesTotal
-                    }
-                }(),
-                version: nil
-            )
         }
     }
 }

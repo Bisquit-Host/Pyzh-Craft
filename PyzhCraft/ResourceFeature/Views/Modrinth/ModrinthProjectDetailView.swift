@@ -2,7 +2,7 @@ import SwiftMarkDownUI
 import SwiftUI
 
 // MARK: - Constants
-private enum Constants {
+enum ModrinthProjectDetailConstants {
     static let iconSize: CGFloat = 75
     static let cornerRadius: CGFloat = 8
     static let spacing: CGFloat = 12
@@ -19,7 +19,7 @@ private enum Constants {
 // MARK: - ModrinthProjectDetailView
 struct ModrinthProjectDetailView: View {
     let projectDetail: ModrinthProjectDetail?
-    
+
     var body: some View {
         if let project = projectDetail {
             projectDetailView(project)
@@ -27,7 +27,7 @@ struct ModrinthProjectDetailView: View {
             loadingView
         }
     }
-    
+
     // MARK: - Project Detail View
     private func projectDetailView(_ project: ModrinthProjectDetail) -> some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -37,19 +37,19 @@ struct ModrinthProjectDetailView: View {
         .listRowInsets(EdgeInsets())
         .listRowBackground(Color.clear)
     }
-    
+
     // MARK: - Project Header
     private func projectHeader(_ project: ModrinthProjectDetail) -> some View {
-        VStack(alignment: .leading, spacing: Constants.spacing) {
-            HStack(alignment: .top, spacing: Constants.spacing) {
+        VStack(alignment: .leading, spacing: ModrinthProjectDetailConstants.spacing) {
+            HStack(alignment: .top, spacing: ModrinthProjectDetailConstants.spacing) {
                 projectIcon(project)
                 projectInfo(project)
             }
         }
-        .padding(.horizontal, Constants.padding)
-        .padding(.vertical, Constants.spacing)
+        .padding(.horizontal, ModrinthProjectDetailConstants.padding)
+        .padding(.vertical, ModrinthProjectDetailConstants.spacing)
     }
-    
+
     private func projectIcon(_ project: ModrinthProjectDetail) -> some View {
         Group {
             if let iconUrl = project.iconUrl, let url = URL(string: iconUrl) {
@@ -68,33 +68,33 @@ struct ModrinthProjectDetailView: View {
                         EmptyView()
                     }
                 }
-                .frame(width: Constants.iconSize, height: Constants.iconSize)
-                .cornerRadius(Constants.cornerRadius)
+                .frame(width: ModrinthProjectDetailConstants.iconSize, height: ModrinthProjectDetailConstants.iconSize)
+                .cornerRadius(ModrinthProjectDetailConstants.cornerRadius)
                 .clipped()
             }
         }
     }
-    
+
     private func projectInfo(_ project: ModrinthProjectDetail) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(project.title)
                 .font(.title2.bold())
-            
+
             Text(project.description)
                 .font(.body)
                 .foregroundColor(.secondary)
                 .lineLimit(2)
-            
+
             projectStats(project)
         }
     }
-    
+
     private func projectStats(_ project: ModrinthProjectDetail) -> some View {
-        HStack(spacing: Constants.spacing) {
+        HStack(spacing: ModrinthProjectDetailConstants.spacing) {
             Label("\(project.downloads)", systemImage: "arrow.down.circle")
             Label("\(project.followers)", systemImage: "heart")
-            
-            FlowLayout(spacing: Constants.categorySpacing) {
+
+            FlowLayout(spacing: ModrinthProjectDetailConstants.categorySpacing) {
                 ForEach(project.categories, id: \.self) {
                     CategoryTag(text: $0)
                 }
@@ -103,41 +103,27 @@ struct ModrinthProjectDetailView: View {
         .font(.caption)
         .foregroundColor(.secondary)
     }
-    
+
     // MARK: - Project Content
     private func projectContent(_ project: ModrinthProjectDetail) -> some View {
-        VStack(alignment: .leading, spacing: Constants.spacing) {
+        VStack(alignment: .leading, spacing: ModrinthProjectDetailConstants.spacing) {
             descriptionView(project)
         }
-        .padding(.horizontal, Constants.padding)
-        .padding(.bottom, Constants.spacing)
+        .padding(.horizontal, ModrinthProjectDetailConstants.padding)
+        .padding(.bottom, ModrinthProjectDetailConstants.spacing)
     }
-    
+
     private func descriptionView(_ project: ModrinthProjectDetail) -> some View {
         MixedMarkdownView(project.body)
     }
-    
+
     // MARK: - Loading View
     private var loadingView: some View {
-        VStack(spacing: Constants.spacing) {
+        VStack(spacing: ModrinthProjectDetailConstants.spacing) {
             ProgressView()
                 .controlSize(.small)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(Constants.padding)
-    }
-}
-
-// MARK: - Helper Views
-private struct CategoryTag: View {
-    let text: String
-    
-    var body: some View {
-        Text(text)
-            .font(.caption)
-            .padding(.horizontal, Constants.categoryPadding)
-            .padding(.vertical, Constants.categoryVerticalPadding)
-            .background(.gray.opacity(0.2))
-            .cornerRadius(Constants.categoryCornerRadius)
+        .padding(ModrinthProjectDetailConstants.padding)
     }
 }
