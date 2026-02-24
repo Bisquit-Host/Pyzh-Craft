@@ -294,9 +294,7 @@ struct GameAdvancedSettingsView: View {
     }
     
     private func syncSelectedDetectedJavaPath() {
-        selectedDetectedJavaPath = detectedJavaRuntimes.contains(where: { $0.path == javaPath })
-        ? javaPath
-        : ""
+        selectedDetectedJavaPath = detectedJavaRuntimes.contains { $0.path == javaPath } ? javaPath : ""
     }
     
     private func parseExistingJvmArguments(_ arguments: String) {

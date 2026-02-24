@@ -286,8 +286,7 @@ enum CommonService {
         }
         
         if let classifier = classifier {
-            return
-            "\(group)/\(artifact)/\(version)/\(artifact)-\(version)-\(classifier).jar"
+            return "\(group)/\(artifact)/\(version)/\(artifact)-\(version)-\(classifier).jar"
         } else {
             return "\(group)/\(artifact)/\(version)/\(artifact)-\(version).jar"
         }

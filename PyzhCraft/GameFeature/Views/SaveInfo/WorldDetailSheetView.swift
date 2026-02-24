@@ -206,6 +206,7 @@ struct WorldDetailSheetView: View {
                 .font(.headline)
                 .foregroundColor(.primary)
                 .padding(.bottom, 10)
+            
             content()
         }
     }
@@ -273,15 +274,18 @@ struct WorldDetailSheetView: View {
                 guard FileManager.default.fileExists(atPath: pathForBackground.path) else {
                     throw WorldDetailLoadError.levelDatNotFound
                 }
+                
                 let data = try Data(contentsOf: pathForBackground)
                 let parser = NBTParser(data: data)
                 let nbtData = try parser.parse()
+                
                 guard let tag = nbtData["Data"] as? [String: Any] else {
                     throw WorldDetailLoadError.invalidStructure
                 }
                 
                 // 26+ new version archive: seed split to data/minecraft/world_gen_settings.dat
                 var seed: Int64?
+                
                 if FileManager.default.fileExists(atPath: worldGenSettingsPath.path) {
                     do {
                         let wgsData = try Data(contentsOf: worldGenSettingsPath)
@@ -407,13 +411,16 @@ struct WorldDetailSheetView: View {
         let dayTime = WorldNBTMapper.readInt64(dataTag["DayTime"])
         
         var weather: String?
+        
         if let rainingFlag = dataTag["raining"] {
             let raining = WorldNBTMapper.readBoolFlag(rainingFlag)
             weather = raining ? String(localized: "Rain") : String(localized: "Clear")
         }
+        
         if let thunderingFlag = dataTag["thundering"] {
             let thundering = WorldNBTMapper.readBoolFlag(thunderingFlag)
             let t = thundering ? String(localized: "Thunderstorm") : nil
+            
             if let t {
                 weather = weather.map { "\($0), \(t)" } ?? t
             }
@@ -461,8 +468,10 @@ struct WorldDetailSheetView: View {
     
     private func flattenNBTDictionary(_ dict: [String: Any], prefix: String = "") -> [String: String] {
         var result: [String: String] = [:]
+        
         for (k, v) in dict {
             let key = prefix.isEmpty ? k : "\(prefix).\(k)"
+            
             if let sub = v as? [String: Any] {
                 let nested = flattenNBTDictionary(sub, prefix: key)
                 for (nk, nv) in nested { result[nk] = nv }
@@ -472,6 +481,7 @@ struct WorldDetailSheetView: View {
                 result[key] = stringifyNBTValue(v)
             }
         }
+        
         return result
     }
     
@@ -490,4 +500,3 @@ struct WorldDetailSheetView: View {
         return String(describing: value)
     }
 }
-

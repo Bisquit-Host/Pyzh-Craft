@@ -241,7 +241,7 @@ class MinecraftAuthService: ObservableObject {
               let queryItems = components.queryItems else { return nil }
         
         guard let error = queryItems.first(where: { $0.name == "error" })?.value else { return nil }
-        let errorDescription = queryItems.first(where: { $0.name == "error_description" })?.value
+        let errorDescription = queryItems.first { $0.name == "error_description" }?.value
         return MicrosoftOAuthErrorResponse(error: error, errorDescription: errorDescription)
     }
     
@@ -255,9 +255,9 @@ class MinecraftAuthService: ObservableObject {
               let queryItems = components.queryItems else { return nil }
         
         guard let accessToken = queryItems.first(where: { $0.name == "access_token" })?.value else { return nil }
-        let refreshToken = queryItems.first(where: { $0.name == "refresh_token" })?.value
+        let refreshToken = queryItems.first { $0.name == "refresh_token" }?.value
         let expiresIn = queryItems
-            .first(where: { $0.name == "expires_in" })?
+            .first { $0.name == "expires_in" }?
             .value
             .flatMap(Int.init)
         return TokenResponse(accessToken: accessToken, refreshToken: refreshToken, expiresIn: expiresIn)

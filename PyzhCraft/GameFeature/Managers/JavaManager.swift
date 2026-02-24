@@ -320,11 +320,13 @@ class JavaManager {
                     (candidatePath as NSString).appendingPathComponent("jre/bin/java"),
                     (candidatePath as NSString).appendingPathComponent("Contents/Home/bin/java"),
                 ]
+                
                 for binaryCandidate in binaryCandidates {
                     if fileManager.isExecutableFile(atPath: binaryCandidate) {
                         return URL(fileURLWithPath: binaryCandidate).resolvingSymlinksInPath().path
                     }
                 }
+                
                 return nil
             }
             
@@ -391,7 +393,7 @@ class JavaManager {
     
     private func extractNumericParts(_ text: String) -> [Int] {
         text
-            .split(whereSeparator: { !$0.isNumber })
+            .split { !$0.isNumber }
             .compactMap { Int($0) }
     }
     
