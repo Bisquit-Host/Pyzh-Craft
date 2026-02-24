@@ -35,11 +35,11 @@ func spacerView() -> some View {
 struct DirectorySettingRow: View {
     private let title: String
     private let path: String
-    private let description: String?
+    private let description: LocalizedStringKey?
     private let onChoose: () -> Void
     private let onReset: () -> Void
 
-    init(title: String, path: String, description: String? = nil, onChoose: @escaping () -> Void, onReset: @escaping () -> Void, showPopover: Bool = false) {
+    init(title: String, path: String, description: LocalizedStringKey? = nil, onChoose: @escaping () -> Void, onReset: @escaping () -> Void, showPopover: Bool = false) {
         self.title = title
         self.path = path
         self.description = description

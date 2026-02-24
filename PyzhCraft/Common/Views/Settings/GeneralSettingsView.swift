@@ -68,7 +68,7 @@ public struct GeneralSettingsView: View {
                 DirectorySettingRow(
                     title: "Working Directory",
                     path: generalSettings.launcherWorkingDirectory.isEmpty ? AppPaths.launcherSupportDirectory.path : generalSettings.launcherWorkingDirectory,
-                    description: String(localized: "This path setting only affects the storage location of game saves, mods, shaders, and other resources."),
+                    description: "This path setting only affects the storage location of game saves, mods, shaders, and other resources.",
                     onChoose: { showDirectoryPicker = true },
                     onReset: {
                         resetWorkingDirectorySafely()
@@ -85,8 +85,7 @@ public struct GeneralSettingsView: View {
                         value: Binding(
                             get: {
                                 Double(generalSettings.concurrentDownloads)
-                            },
-                            set: {
+                            }, set: {
                                 generalSettings.concurrentDownloads = Int(
                                     $0
                                 )
