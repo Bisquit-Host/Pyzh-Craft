@@ -219,7 +219,7 @@ struct MinecraftLaunchCommand {
             
             // Set the status to running immediately after the process starts
             _ = await MainActor.run {
-                GameStatusManager.shared.setGameRunning(gameId: game.id, userId: userId, isRunning: true)
+                GameStatusManager.shared.setGameRunning(gameId: game.id, isRunning: true)
             }
         } catch {
             Logger.shared.error("Failed to start process: \(error.localizedDescription)")
@@ -227,7 +227,7 @@ struct MinecraftLaunchCommand {
             // Clean up process and reset state when startup fails
             _ = GameProcessManager.shared.stopProcess(for: game.id)
             _ = await MainActor.run {
-                GameStatusManager.shared.setGameRunning(gameId: game.id, userId: userId, isRunning: false)
+                GameStatusManager.shared.setGameRunning(gameId: game.id, isRunning: false)
             }
             
             throw GlobalError.gameLaunch(

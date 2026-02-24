@@ -213,8 +213,6 @@ struct ModrinthDetailView: View {
     ) async {
         do {
             try await performSearchThrowing(page: page, append: append)
-            // 搜索完成后预加载图片
-            preloadImages()
         } catch {
             let globalError = GlobalError.from(error)
             Logger.shared.error("Search failed: \(globalError.chineseMessage)")

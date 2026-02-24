@@ -11,8 +11,6 @@ public struct GeneralSettingsView: View {
     @State private var isCancellingLanguageChange = false
     @State private var selectedLanguage = LanguageManager.shared.selectedLanguage
     @State private var error: GlobalError?
-    /// 数据库中所有工作路径及对应游戏数量（用于快速切换）
-    @State private var workingPathOptions: [(path: String, count: Int)] = []
 
     public init() {}
 
@@ -79,28 +77,7 @@ public struct GeneralSettingsView: View {
                     .fileImporter(isPresented: $showDirectoryPicker, allowedContentTypes: [.folder], allowsMultipleSelection: false) { result in
                         handleDirectoryImport(result)
                     }
-                    DirectorySettingRow(
-                        title: "settings.launcher_working_directory".localized(),
-                        path: generalSettings.launcherWorkingDirectory.isEmpty ? AppPaths.launcherSupportDirectory.path : generalSettings.launcherWorkingDirectory,
-                        description: "settings.working_directory.description".localized(),
-                        onChoose: { showDirectoryPicker = true },
-                        onReset: {
-                            resetWorkingDirectorySafely()
-                        }
-                    ).fixedSize()
-                        .fileImporter(isPresented: $showDirectoryPicker, allowedContentTypes: [.folder], allowsMultipleSelection: false) { result in
-                            handleDirectoryImport(result)
-                        }
-                }
             }.labeledContentStyle(.custom(alignment: .firstTextBaseline))
-            .task {
-                workingPathOptions = await gameRepository.fetchAllWorkingPathsWithCounts()
-            }
-            .onChange(of: generalSettings.launcherWorkingDirectory) { _, _ in
-                Task {
-                    workingPathOptions = await gameRepository.fetchAllWorkingPathsWithCounts()
-                }
-            }
 
             LabeledContent("Concurrent Downloads") {
                 HStack {
@@ -156,14 +133,6 @@ public struct GeneralSettingsView: View {
                     }
                 }
             }.labeledContentStyle(.custom(alignment: .firstTextBaseline)).padding(.top, 10)
-
-            LabeledContent("settings.resource_cache.label".localized()) {
-                Toggle(
-                    "settings.resource_cache.enable".localized(),
-                    isOn: $generalSettings.enableResourcePageCache
-                )
-                .toggleStyle(.checkbox)
-            }.labeledContentStyle(.custom).padding(.top, 6)
         }
         .globalErrorHandler()
         .alert(

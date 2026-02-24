@@ -37,16 +37,6 @@ final class CategoryDataCacheManager {
 // MARK: - ViewModel
 @MainActor
 final class CategoryContentViewModel: ObservableObject {
-    private struct CategoryContentCachePayload: Codable {
-        let categories: [Category]
-        let features: [Category]
-        let resolutions: [Category]
-        let performanceImpacts: [Category]
-        let versions: [GameVersion]
-        let loaders: [Loader]
-        let updatedAt: Date
-    }
-
     // MARK: - Published Properties
     @Published private(set) var categories: [Category] = []
     @Published private(set) var features: [Category] = []
@@ -58,6 +48,7 @@ final class CategoryContentViewModel: ObservableObject {
     @Published private(set) var loaders: [Loader] = []
     
     // MARK: - Private Properties
+    private var lastFetchTime: Date?
     private let project: String
     private var loadTask: Task<Void, Never>?
     
@@ -68,7 +59,6 @@ final class CategoryContentViewModel: ObservableObject {
     
     deinit {
         loadTask?.cancel()
-        cacheTask?.cancel()
     }
     
     // MARK: - Public Methods
@@ -91,7 +81,7 @@ final class CategoryContentViewModel: ObservableObject {
     
     func clearCache() {
         loadTask?.cancel()
-        cacheTask?.cancel()
+        lastFetchTime = nil
         resetData()
     }
     
@@ -211,11 +201,8 @@ final class CategoryContentViewModel: ObservableObject {
             self.performanceImpacts = filteredCategories.filter {
                 $0.header == CategoryHeader.performanceImpact
             }
+            self.lastFetchTime = Date()
             self.loaders = loaders
-        }
-
-        if settings.enableResourcePageCache {
-            saveToDiskCache()
         }
     }
     
@@ -237,40 +224,5 @@ final class CategoryContentViewModel: ObservableObject {
         loaders.removeAll(keepingCapacity: false)
         error = nil
         isLoading = false
-    }
-
-    private var cacheKey: String {
-        "project_\(project)"
-    }
-
-    private func loadFromDiskCacheAsync() async -> CategoryContentCachePayload? {
-        let key = cacheKey
-        return await withCheckedContinuation { continuation in
-            DispatchQueue.global(qos: .utility).async {
-                let cached: CategoryContentCachePayload? = AppCacheManager.shared.get(
-                    namespace: CategoryConstants.diskCacheNamespace,
-                    key: key,
-                    as: CategoryContentCachePayload.self
-                )
-                continuation.resume(returning: cached)
-            }
-        }
-    }
-
-    private func saveToDiskCache() {
-        let payload = CategoryContentCachePayload(
-            categories: categories,
-            features: features,
-            resolutions: resolutions,
-            performanceImpacts: performanceImpacts,
-            versions: versions,
-            loaders: loaders,
-            updatedAt: Date()
-        )
-        AppCacheManager.shared.setSilently(
-            namespace: CategoryConstants.diskCacheNamespace,
-            key: cacheKey,
-            value: payload
-        )
     }
 }

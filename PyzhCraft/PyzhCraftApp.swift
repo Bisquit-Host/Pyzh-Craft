@@ -42,10 +42,6 @@ struct PyzhCraftApp: App {
                     // Clear all window data when app starts
                     WindowDataStore.shared.cleanup(for: .aiChat)
                     WindowDataStore.shared.cleanup(for: .skinPreview)
-                    appIdleManager.startMonitoring()
-                }
-                .onChange(of: scenePhase) { _, newPhase in
-                    appIdleManager.handleScenePhase(newPhase)
                 }
         }
         .windowStyle(.titleBar)

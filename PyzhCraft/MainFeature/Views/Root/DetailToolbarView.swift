@@ -56,13 +56,12 @@ public struct DetailToolbarView: ToolbarContent {
                     
                     Button {
                         Task {
-                            let userId = playerListViewModel.currentPlayer?.id ?? ""
-                            let isRunning = isGameRunning(gameId: game.id, userId: userId)
+                            let isRunning = isGameRunning(gameId: game.id)
                             if isRunning {
-                                await gameLaunchUseCase.stopGame(player: playerListViewModel.currentPlayer, game: game)
+                                await gameLaunchUseCase.stopGame(game: game)
                             } else {
-                                gameStatusManager.setGameLaunching(gameId: game.id, userId: userId, isLaunching: true)
-                                defer { gameStatusManager.setGameLaunching(gameId: game.id, userId: userId, isLaunching: false) }
+                                gameStatusManager.setGameLaunching(gameId: game.id, isLaunching: true)
+                                defer { gameStatusManager.setGameLaunching(gameId: game.id, isLaunching: false) }
                                 await gameLaunchUseCase.launchGame(
                                     player: playerListViewModel.currentPlayer,
                                     game: game
@@ -70,9 +69,8 @@ public struct DetailToolbarView: ToolbarContent {
                             }
                         }
                     } label: {
-                        let userId = playerListViewModel.currentPlayer?.id ?? ""
-                        let isRunning = isGameRunning(gameId: game.id, userId: userId)
-                        let isLaunchingGame = gameStatusManager.isGameLaunching(gameId: game.id, userId: userId)
+                        let isRunning = isGameRunning(gameId: game.id)
+                        let isLaunchingGame = gameStatusManager.isGameLaunching(gameId: game.id)
                         if isLaunchingGame && !isRunning {
                             ProgressView()
                                 .controlSize(.small)
@@ -91,7 +89,7 @@ public struct DetailToolbarView: ToolbarContent {
                         ? "Stop"
                         : (gameStatusManager.isGameLaunching(gameId: game.id) ? "" : "Start")
                     )
-                    .disabled(gameStatusManager.isGameLaunching(gameId: game.id, userId: playerListViewModel.currentPlayer?.id ?? ""))
+                    .disabled(gameStatusManager.isGameLaunching(gameId: game.id))
                     .applyReplaceTransition()
                     
                     Button {
