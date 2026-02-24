@@ -99,8 +99,8 @@ Please visit [FAQ](doc/FAQ.md)
 
 | Component | Technology |
 |----------|------------|
-| **🎨 UI Framework** | SwiftUI |
 | **💻 Language** | Swift |
+| **🎨 UI Framework** | SwiftUI |
 | **🔄 Reactive Programming** | Combine |
 | **📱 Target Platform** | macOS 14.0+ |
 
