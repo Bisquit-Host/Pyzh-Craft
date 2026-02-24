@@ -2,19 +2,18 @@ import SwiftUI
 
 /// Sidebar navigation items
 public enum SidebarItem: Hashable, Identifiable {
-    case game(String)  // Game item, including game ID
-    case resource(ResourceType)  // Resource item
-
+    case game(String), resource(ResourceType) // Game item includes game ID
+    
     public var id: String {
         switch self {
         case .game(let gameId): "game_\(gameId)"
         case .resource(let type): "resource_\(type.rawValue)"
         }
     }
-
-    public var title: String {
+    
+    public var title: LocalizedStringKey {
         switch self {
-        case .game(let gameId): gameId // Name can be obtained from game data
+        case .game(let gameId): LocalizedStringKey(gameId) // Name can be obtained from game data
         case .resource(let type): type.localizedName
         }
     }
@@ -23,7 +22,7 @@ public enum SidebarItem: Hashable, Identifiable {
 /// Resource type
 public enum ResourceType: String, CaseIterable {
     case mod, datapack, shader, resourcepack, modpack
-
+    
     public var localizedNameKey: LocalizedStringKey {
         switch self {
         case .mod: "Mod"
@@ -33,17 +32,17 @@ public enum ResourceType: String, CaseIterable {
         case .modpack: "Modpack"
         }
     }
-
-    public var localizedName: String {
+    
+    public var localizedName: LocalizedStringKey {
         switch self {
-        case .mod: String(localized: "Mod")
-        case .datapack: String(localized: "Data Pack")
-        case .shader: String(localized: "Shader")
-        case .resourcepack: String(localized: "Resource Pack")
-        case .modpack: String(localized: "Modpack")
+        case .mod: "Mod"
+        case .datapack: "Data Pack"
+        case .shader: "Shader"
+        case .resourcepack: "Resource Pack"
+        case .modpack: "Modpack"
         }
     }
-
+    
     /// SF Symbol icon name for the resource type
     public var systemImage: String {
         switch self {
