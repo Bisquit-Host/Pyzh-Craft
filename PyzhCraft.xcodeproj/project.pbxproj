@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 90;
+	objectVersion = 100;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -134,7 +134,7 @@
 				90E387002F28FB8100F5D101 /* XCRemoteSwiftPackageReference "SwiftMarkDownUI" */,
 				90EDAA0F2F9AABCD00112233 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
-			preferredProjectObjectVersion = 90;
+			preferredProjectObjectVersion = 100;
 			productRefGroup = 9023D8282E3139B5005A53F1;
 			projectDirPath = "";
 			projectRoot = "";
