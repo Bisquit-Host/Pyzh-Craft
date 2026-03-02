@@ -1,13 +1,13 @@
 import SwiftUI
 
 struct ServerAddressChip: View {
-    let title: String
-    let address: String
-    let port: Int?
-    let isLoading: Bool
-    let connectionStatus: ServerConnectionStatus
-    let action: (() -> Void)?
-
+    private let title: String
+    private let address: String
+    private let port: Int?
+    private let isLoading: Bool
+    private let connectionStatus: ServerConnectionStatus
+    private let action: (() -> Void)?
+    
     init(
         title: String,
         address: String,
@@ -23,7 +23,7 @@ struct ServerAddressChip: View {
         self.connectionStatus = connectionStatus
         self.action = action
     }
-
+    
     var body: some View {
         Button(action: action ?? {}) {
             VStack(alignment: .leading, spacing: 2) {
@@ -31,12 +31,14 @@ struct ServerAddressChip: View {
                     Image(systemName: "server.rack")
                         .font(.caption)
                         .foregroundColor(iconColor)
+                    
                     Text(title)
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .lineLimit(1)
                         .frame(maxWidth: 150)
                 }
+                
                 if !address.isEmpty {
                     if let port = port, port > 0 {
                         Text("\(address):\(String(port))")
@@ -62,13 +64,13 @@ struct ServerAddressChip: View {
             .foregroundStyle(.primary)
             .overlay(
                 RoundedRectangle(cornerRadius: 4)
-                    .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                    .stroke(.secondary.opacity(0.2), lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
         .disabled(isLoading)
     }
-
+    
     private var iconColor: Color {
         switch connectionStatus {
         case .success: .green

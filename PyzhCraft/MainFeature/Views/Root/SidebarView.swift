@@ -399,7 +399,7 @@ private struct GameContextMenu: View {
             gameActionManager.showInFinder(game: game)
         }
         
-        Button("Settings", systemImage: "server.rack") {
+        Button("Settings", systemImage: "gear") {
             selectedGameManager.setSelectedGame(game.id)
             onOpenServerSettings()
         }
@@ -420,7 +420,11 @@ private struct GameContextMenu: View {
                 await gameLaunchUseCase.stopGame(game: game)
             } else {
                 gameStatusManager.setGameLaunching(gameId: game.id, isLaunching: true)
-                defer { gameStatusManager.setGameLaunching(gameId: game.id, isLaunching: false) }
+                
+                defer {
+                    gameStatusManager.setGameLaunching(gameId: game.id, isLaunching: false)
+                }
+                
                 await gameLaunchUseCase.launchGame(
                     player: playerListViewModel.currentPlayer,
                     game: game
