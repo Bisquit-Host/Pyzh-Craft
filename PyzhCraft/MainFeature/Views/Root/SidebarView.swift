@@ -16,12 +16,12 @@ public struct SidebarView: View {
     @ObservedObject private var selectedGameManager = SelectedGameManager.shared
     @State private var iconRefreshTriggers: [String: UUID] = [:]
     @State private var cancellable: AnyCancellable?
-
+    
     // MARK: - Add Player State
     @State private var showingAddPlayerSheet = false
     @State private var playerName = ""
     @State private var isPlayerNameValid = false
-
+    
     // MARK: - Skin Editor State
     @State private var showEditSkin = false
     @State private var isLoadingSkin = false
@@ -33,7 +33,7 @@ public struct SidebarView: View {
     public var body: some View {
         List(selection: detailState.selectedItemOptionalBinding) {
             // Resources section
-            Section(header: Text("Resource List")) {
+            Section("Resource List") {
                 ForEach(ResourceType.allCases, id: \.self) { type in
                     NavigationLink(value: SidebarItem.resource(type)) {
                         HStack(spacing: 6) {
@@ -48,7 +48,7 @@ public struct SidebarView: View {
             }
             
             // game section
-            Section(header: Text("Game List")) {
+            Section("Game List") {
                 ForEach(filteredGames) { game in
                     NavigationLink(value: SidebarItem.game(game.id)) {
                         HStack(spacing: 6) {
@@ -65,7 +65,9 @@ public struct SidebarView: View {
                     .contextMenu {
                         GameContextMenu(
                             game: game,
-                            onDelete: { gameToDelete = game; showDeleteAlert = true },
+                            onDelete: {
+                                gameToDelete = game; showDeleteAlert = true
+                            },
                             onOpenServerSettings: {
                                 WindowManager.shared.openWindow(id: .serverSettings)
                             },
@@ -84,9 +86,9 @@ public struct SidebarView: View {
                 if !playerListViewModel.players.isEmpty {
                     PlayerListView()
                 }
-
+                
                 Spacer()
-
+                
                 // Skin management button - only for online accounts
                 if currentPlayer?.isOnlineAccount == true {
                     Button {
@@ -113,7 +115,7 @@ public struct SidebarView: View {
                         }
                     }
                 }
-
+                
                 // Add player button
                 Button {
                     playerName = ""
@@ -217,11 +219,11 @@ public struct SidebarView: View {
     }
     
     // MARK: - Computed Properties
-
+    
     private var currentPlayer: Player? {
         playerListViewModel.currentPlayer
     }
-
+    
     // Only perform fuzzy search on game name
     private var filteredGames: [GameVersionInfo] {
         if searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -231,23 +233,23 @@ public struct SidebarView: View {
         let lower = searchText.lowercased()
         return gameRepository.games.filter { $0.gameName.lowercased().contains(lower) }
     }
-
+    
     // MARK: - Skin Manager
-
+    
     /// Open the skin manager (load data first, then display the sheet)
     private func openSkinManager() async {
         guard let player = currentPlayer else { return }
-
+        
         await MainActor.run {
             isLoadingSkin = true
         }
-
+        
         // If it is an offline account, use it directly without refreshing the token
         guard player.isOnlineAccount else {
             async let skinInfo = PlayerSkinService.fetchCurrentPlayerSkinFromServices(player: player)
             async let profile = PlayerSkinService.fetchPlayerProfile(player: player)
             let (loadedSkinInfo, loadedProfile) = await (skinInfo, profile)
-
+            
             await MainActor.run {
                 preloadedSkinInfo = loadedSkinInfo
                 preloadedProfile = loadedProfile
@@ -256,9 +258,9 @@ public struct SidebarView: View {
             }
             return
         }
-
+        
         Logger.shared.info("Verify player \(player.name)'s Token before opening the skin manager")
-
+        
         // Load authentication credentials on demand from Keychain
         var playerWithCredential = player
         if playerWithCredential.credential == nil {
@@ -267,13 +269,13 @@ public struct SidebarView: View {
                 playerWithCredential.credential = credential
             }
         }
-
+        
         // Verify and try to refresh the token
         let authService = MinecraftAuthService.shared
         let validatedPlayer: Player
         do {
             validatedPlayer = try await authService.validateAndRefreshPlayerTokenThrowing(for: playerWithCredential)
-
+            
             if validatedPlayer.authAccessToken != player.authAccessToken {
                 Logger.shared.info("Player \(player.name)'s Token has been updated and saved to the data manager")
                 let dataManager = PlayerDataManager()
@@ -291,12 +293,12 @@ public struct SidebarView: View {
             Logger.shared.error("Failed to refresh Token: \(error.localizedDescription)")
             validatedPlayer = playerWithCredential
         }
-
+        
         // Preload skin data
         async let skinInfo = PlayerSkinService.fetchCurrentPlayerSkinFromServices(player: validatedPlayer)
         async let profile = PlayerSkinService.fetchPlayerProfile(player: validatedPlayer)
         let (loadedSkinInfo, loadedProfile) = await (skinInfo, profile)
-
+        
         await MainActor.run {
             preloadedSkinInfo = loadedSkinInfo
             preloadedProfile = loadedProfile
