@@ -141,9 +141,6 @@ struct SkinToolDetailView: View {
                         selectedCapeLocalPath = nil
                     }
                     selectedCapeImageURL = imageURL
-                    // Clear old images immediately when switching cloaks to avoid showing wrong preview images
-                    // New images will be updated after the asynchronous download is complete
-                    selectedCapeImage = nil
                     downloadCapeTask = Task<Void, Never> {
                         await MainActor.run {
                             isCapeLoading = true

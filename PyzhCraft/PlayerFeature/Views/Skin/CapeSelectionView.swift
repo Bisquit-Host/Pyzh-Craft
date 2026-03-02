@@ -37,7 +37,9 @@ struct CapeSelectionView: View {
             guard !isSelected else { return }
 
             selectedCapeId = id
-            selectedCapeImage = nil
+            if id == nil {
+                selectedCapeImage = nil
+            }
 
             onCapeSelected(id, imageURL)
         } label: {
