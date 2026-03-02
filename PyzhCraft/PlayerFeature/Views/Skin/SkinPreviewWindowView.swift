@@ -3,6 +3,9 @@ import SkinRenderKit
 
 /// Skin preview window view
 struct SkinPreviewWindowView: View {
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
+    
     let skinImage: NSImage?
     let skinPath: String?
     let capeImage: NSImage?
@@ -44,15 +47,47 @@ struct SkinPreviewWindowView: View {
     
     @ViewBuilder private var previewContent: some View {
         if let image = currentSkinImage {
-            SkinRenderView(
-                skinImage: image,
-                capeImage: $capeBinding,
-                playerModel: playerModel,
-                rotationDuration: 0,
-                backgroundColor: NSColor.clear,
-                onSkinDropped: { _ in },
-                onCapeDropped: { _ in }
-            )
+            if reduceMotion {
+                StaticSkinRenderView(
+                    skinImage: image,
+                    capeImage: $capeBinding,
+                    playerModel: playerModel,
+                    rotationDuration: 0,
+                    backgroundColor: NSColor.clear
+                )
+                .frame(minWidth: 400, minHeight: 300)
+            } else {
+                SkinRenderView(
+                    skinImage: image,
+                    capeImage: $capeBinding,
+                    playerModel: playerModel,
+                    rotationDuration: 0,
+                    backgroundColor: NSColor.clear,
+                    onSkinDropped: { _ in },
+                    onCapeDropped: { _ in }
+                )
+            }
+        } else if let skinPath = currentSkinPath {
+            if reduceMotion {
+                StaticSkinRenderView(
+                    texturePath: skinPath,
+                    capeImage: $capeBinding,
+                    playerModel: playerModel,
+                    rotationDuration: 0,
+                    backgroundColor: NSColor.clear
+                )
+                .frame(minWidth: 400, minHeight: 300)
+            } else {
+                SkinRenderView(
+                    texturePath: skinPath,
+                    capeImage: $capeBinding,
+                    playerModel: playerModel,
+                    rotationDuration: 0,
+                    backgroundColor: NSColor.clear,
+                    onSkinDropped: { _ in },
+                    onCapeDropped: { _ in }
+                )
+            }
         }
     }
     

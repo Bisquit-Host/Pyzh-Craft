@@ -3,6 +3,9 @@ import UniformTypeIdentifiers
 import SkinRenderKit
 
 struct SkinUploadSectionView: View {
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
+    
     @Binding var currentModel: PlayerSkinService.PublicSkinInfo.SkinModel
     @Binding var showingFileImporter: Bool
     @Binding var selectedSkinImage: NSImage?
@@ -60,7 +63,7 @@ struct SkinUploadSectionView: View {
         return skinRenderContent(playerModel: playerModel)
             .frame(height: 220)
             .onTapGesture { showingFileImporter = true }
-            .conditionalDrop(isEnabled: !hasSkinRenderView, perform: onDrop)
+            .conditionalDrop(isEnabled: reduceMotion || !hasSkinRenderView, perform: onDrop)
     }
     
     @ViewBuilder
@@ -70,38 +73,60 @@ struct SkinUploadSectionView: View {
             // No longer switch view types back and forth due to cloak loading status, preventing SceneKit views from being destroyed and rebuilt
             Group {
                 if let image = selectedSkinImage ?? currentSkinRenderImage {
-                    SkinRenderView(
-                        skinImage: image,
-                        // Cloak update process:
-                        // 1. selectedCapeImage @Binding change (user operation/initialization)
-                        // 2. SwiftUI body re-evaluates and creates/updates SceneKitCharacterViewRepresentable
-                        // 3. updateNSViewController is called
-                        // 4. Check whether capeImage exists and call updateCapeTexture(image:) or removeCapeTexture()
-                        // 5. applyCapeUpdate checks whether the instances are the same (!==), if different, updates and calls rebuildCharacter()
-                        // 6. Rebuild or incrementally update character nodes, including new cloak textures
-                        // 7. SceneKit renders new character model
-                        capeImage: $selectedCapeImage,
-                        playerModel: playerModel,
-                        rotationDuration: 0,
-                        backgroundColor: NSColor.clear,
-                        onSkinDropped: { dropped in
-                            onSkinDropped(dropped)
-                        },
-                        onCapeDropped: { _ in }
-                    )
+                    if reduceMotion {
+                        StaticSkinRenderView(
+                            skinImage: image,
+                            capeImage: $selectedCapeImage,
+                            playerModel: playerModel,
+                            rotationDuration: 0,
+                            backgroundColor: NSColor.clear
+                        )
+                        .frame(minWidth: 400, minHeight: 300)
+                    } else {
+                        SkinRenderView(
+                            skinImage: image,
+                            // Cloak update process:
+                            // 1. selectedCapeImage @Binding change (user operation/initialization)
+                            // 2. SwiftUI body re-evaluates and creates/updates SceneKitCharacterViewRepresentable
+                            // 3. updateNSViewController is called
+                            // 4. Check whether capeImage exists and call updateCapeTexture(image:) or removeCapeTexture()
+                            // 5. applyCapeUpdate checks whether the instances are the same (!==), if different, updates and calls rebuildCharacter()
+                            // 6. Rebuild or incrementally update character nodes, including new cloak textures
+                            // 7. SceneKit renders new character model
+                            capeImage: $selectedCapeImage,
+                            playerModel: playerModel,
+                            rotationDuration: 0,
+                            backgroundColor: NSColor.clear,
+                            onSkinDropped: { dropped in
+                                onSkinDropped(dropped)
+                            },
+                            onCapeDropped: { _ in }
+                        )
+                    }
                 } else if let skinPath = selectedSkinPath {
-                    SkinRenderView(
-                        texturePath: skinPath,
-                        // The cape update process is the same as above: selectedCapeImage change → SwiftUI re-evaluation → SkinRenderView internal processing update
-                        capeImage: $selectedCapeImage,
-                        playerModel: playerModel,
-                        rotationDuration: 0,
-                        backgroundColor: NSColor.clear,
-                        onSkinDropped: { dropped in
-                            onSkinDropped(dropped)
-                        },
-                        onCapeDropped: { _ in }
-                    )
+                    if reduceMotion {
+                        StaticSkinRenderView(
+                            texturePath: skinPath,
+                            capeImage: $selectedCapeImage,
+                            playerModel: playerModel,
+                            rotationDuration: 0,
+                            backgroundColor: NSColor.clear
+                        )
+                        .frame(minWidth: 400, minHeight: 300)
+                    } else {
+                        SkinRenderView(
+                            texturePath: skinPath,
+                            // The cape update process is the same as above: selectedCapeImage change → SwiftUI re-evaluation → SkinRenderView internal processing update
+                            capeImage: $selectedCapeImage,
+                            playerModel: playerModel,
+                            rotationDuration: 0,
+                            backgroundColor: NSColor.clear,
+                            onSkinDropped: { dropped in
+                                onSkinDropped(dropped)
+                            },
+                            onCapeDropped: { _ in }
+                        )
+                    }
                 } else {
                     Color.clear
                 }
