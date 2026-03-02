@@ -113,24 +113,31 @@ class MinecraftAuthService: ObservableObject {
             attempt += 1
             
             let pollingState = try await pollDeviceCodeTokenOnce(deviceCode: deviceCode.deviceCode)
+            
             switch pollingState {
             case .waiting:
-                if attempt % 5 == 0 {
+                if attempt.isMultiple(of: 5) {
                     Logger.shared.debug("Device code polling is in progress, waiting for the user to complete authorization")
                 }
+                
                 continue
+                
             case .slowDown:
                 interval += 5
                 Logger.shared.debug("Device code polling requires slowing down, new polling interval: \(interval)s")
+                
             case .declined:
                 throw CancellationError()
+                
             case .expired:
                 throw GlobalError.authentication(
                     i18nKey: "Authentication failed, timed out",
                     level: .notification
                 )
+                
             case .token(let token):
                 return token
+                
             case .failed:
                 throw GlobalError.authentication(
                     i18nKey: "Authentication failed",
