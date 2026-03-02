@@ -134,12 +134,16 @@ struct SkinToolDetailView: View {
             ) { id, imageURL in
                 loadCapeTask?.cancel()
                 loadCapeTask = nil
+                downloadCapeTask?.cancel()
                 
                 if let imageURL = imageURL, id != nil {
+                    if selectedCapeImageURL != imageURL {
+                        selectedCapeLocalPath = nil
+                    }
+                    selectedCapeImageURL = imageURL
                     // Clear old images immediately when switching cloaks to avoid showing wrong preview images
                     // New images will be updated after the asynchronous download is complete
                     selectedCapeImage = nil
-                    downloadCapeTask?.cancel()
                     downloadCapeTask = Task<Void, Never> {
                         await MainActor.run {
                             isCapeLoading = true
@@ -152,6 +156,7 @@ struct SkinToolDetailView: View {
                         }
                     }
                 } else {
+                    selectedCapeImageURL = nil
                     selectedCapeLocalPath = nil
                     // Debug log: Deselecting cloak
                     // Logger.shared.info("[SkinToolDetailView] set selectedCapeImage = nil (unselect cape), id: \(id ?? "nil")")

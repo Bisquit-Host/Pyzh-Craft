@@ -37,19 +37,7 @@ struct CapeSelectionView: View {
             guard !isSelected else { return }
 
             selectedCapeId = id
-
-            if let imageURL = imageURL {
-                DispatchQueue.global(qos: .userInitiated).async {
-                    if let url = URL(string: imageURL.httpToHttps()),
-                       let data = try? Data(contentsOf: url),
-                       let nsImage = NSImage(data: data) {
-                        DispatchQueue.main.async {
-                            selectedCapeImageURL = imageURL
-                            selectedCapeImage = nsImage
-                        }
-                    }
-                }
-            }
+            selectedCapeImage = nil
 
             onCapeSelected(id, imageURL)
         } label: {
