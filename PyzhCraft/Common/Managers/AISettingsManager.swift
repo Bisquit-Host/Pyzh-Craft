@@ -150,13 +150,6 @@ class AISettingsManager: ObservableObject {
         }
     }
     
-    @AppStorage("aiModelOverride")
-    var modelOverride = "" {
-        didSet {
-            objectWillChange.send()
-        }
-    }
-    
     @AppStorage("aiAvatarURL")
     var aiAvatarURL = "https://mcskins.top/assets/snippets/download/skin.php?n=7050" {
         didSet {
@@ -208,21 +201,16 @@ class AISettingsManager: ObservableObject {
         let fetchedModels = await fetchProviderModels()
         let baseModels = fetchedModels.isEmpty ? fallbackModels(for: selectedProvider) : fetchedModels
         
-        return mergeConfiguredModel(into: baseModels)
+        return baseModels
     }
     
-    /// Get model name with fallback order: chat override -> settings override -> provider default
+    /// Get model name with fallback order: chat override -> provider default
     func getModel(chatOverride: String = "") -> String {
         let chatModel = chatOverride.trimmingCharacters(in: .whitespacesAndNewlines)
         if !chatModel.isEmpty {
             return chatModel
         }
-        
-        let configuredModel = modelOverride.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !configuredModel.isEmpty {
-            return configuredModel
-        }
-        
+
         return defaultModel(for: selectedProvider)
     }
     
@@ -299,19 +287,6 @@ class AISettingsManager: ObservableObject {
         }
         
         return uniqueModels
-    }
-    
-    private func mergeConfiguredModel(into models: [String]) -> [String] {
-        let configuredModel = modelOverride.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !configuredModel.isEmpty else {
-            return models
-        }
-        
-        if models.contains(configuredModel) {
-            return models
-        }
-        
-        return [configuredModel] + models
     }
     
     private init() {

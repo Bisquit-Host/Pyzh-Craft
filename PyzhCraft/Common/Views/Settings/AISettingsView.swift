@@ -77,21 +77,6 @@ public struct AISettingsView: View {
                 .labeledContentStyle(.custom)
             }
             
-            // Model settings (optional override)
-            LabeledContent("Model Name") {
-                HStack {
-                    TextField("e.g.: gpt-4o, deepseek-chat", text: $aiSettings.modelOverride)
-                        .textFieldStyle(.roundedBorder)
-                        .labelsHidden()
-                        .frame(width: 180)
-                        .fixedSize()
-                        .focusable(false)
-                    
-                    InfoIconWithPopover(text: "Optional override, leave empty to use the default model")
-                }
-            }
-            .labeledContentStyle(.custom)
-            
             // AI avatar settings
             LabeledContent("AI Avatar") {
                 VStack(alignment: .leading, spacing: 12) {
