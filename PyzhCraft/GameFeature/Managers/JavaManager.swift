@@ -321,10 +321,8 @@ class JavaManager {
                     (candidatePath as NSString).appendingPathComponent("Contents/Home/bin/java"),
                 ]
                 
-                for binaryCandidate in binaryCandidates {
-                    if fileManager.isExecutableFile(atPath: binaryCandidate) {
-                        return URL(fileURLWithPath: binaryCandidate).resolvingSymlinksInPath().path
-                    }
+                for binaryCandidate in binaryCandidates where fileManager.isExecutableFile(atPath: binaryCandidate) {
+                    return URL(fileURLWithPath: binaryCandidate).resolvingSymlinksInPath().path
                 }
                 
                 return nil
@@ -442,7 +440,9 @@ class JavaManager {
             try process.run()
             process.waitUntilExit()
             let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
-            let output = String(decoding: outputData, as: UTF8.self)
+            guard let output = String(bytes: outputData, encoding: .utf8) else {
+                return nil
+            }
             return (output, process.terminationStatus)
         } catch {
             return nil
