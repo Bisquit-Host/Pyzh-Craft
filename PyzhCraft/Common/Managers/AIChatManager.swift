@@ -17,7 +17,12 @@ class AIChatManager: ObservableObject {
     // MARK: - Send message
     
     /// Send message
-    func sendMessage(_ text: String, attachments: [MessageAttachmentType] = [], chatState: ChatState) async {
+    func sendMessage(
+        _ text: String,
+        attachments: [MessageAttachmentType] = [],
+        selectedModel: String = "",
+        chatState: ChatState
+    ) async {
         guard !settings.apiKey.isEmpty else {
             let error = GlobalError.configuration(
                 i18nKey: "OpenAI service not configured, please check API Key",
@@ -31,18 +36,7 @@ class AIChatManager: ObservableObject {
             return
         }
         
-        guard !settings.getModel().isEmpty else {
-            let error = GlobalError.configuration(
-                i18nKey: "AI model not configured, please fill in the model name in settings",
-                level: .notification
-            )
-            Logger.shared.error("The AI model is not configured, please fill in the model name in the settings")
-            await MainActor.run {
-                chatState.isSending = false
-                GlobalErrorHandler.shared.handle(error)
-            }
-            return
-        }
+        let model = settings.getModel(chatOverride: selectedModel)
         
         // Add user message
         let userMessage = ChatMessage(
@@ -67,11 +61,11 @@ class AIChatManager: ObservableObject {
         do {
             switch settings.selectedProvider.apiFormat {
             case .openAI:
-                try await sendOpenAIMessage(messages: allMessages, chatState: chatState)
+                try await sendOpenAIMessage(messages: allMessages, model: model, chatState: chatState)
             case .ollama:
-                try await sendOllamaMessage(messages: allMessages, chatState: chatState)
+                try await sendOllamaMessage(messages: allMessages, model: model, chatState: chatState)
                 //            case .gemini:
-                //                try await sendGeminiMessage(messages: allMessages, chatState: chatState)
+                //                try await sendGeminiMessage(messages: allMessages, model: model, chatState: chatState)
             }
         } catch {
             Logger.shared.error("Failed to send message: \(error.localizedDescription)")
@@ -105,7 +99,7 @@ class AIChatManager: ObservableObject {
     
     // MARK: - OpenAI format (compatible with DeepSeek, etc.)
     
-    private func sendOpenAIMessage(messages: [ChatMessage], chatState: ChatState) async throws {
+    private func sendOpenAIMessage(messages: [ChatMessage], model: String, chatState: ChatState) async throws {
         let apiURL = settings.getAPIURL()
         guard let url = URL(string: apiURL) else {
             throw GlobalError.network(
@@ -116,7 +110,7 @@ class AIChatManager: ObservableObject {
         
         // Build request body
         let requestBody: [String: Any] = [
-            "model": settings.getModel(),
+            "model": model,
             "stream": true,
             "messages": try await buildOpenAIMessages(messages: messages),
         ]
@@ -227,7 +221,7 @@ class AIChatManager: ObservableObject {
     
     // MARK: - Ollama format
     
-    private func sendOllamaMessage(messages: [ChatMessage], chatState: ChatState) async throws {
+    private func sendOllamaMessage(messages: [ChatMessage], model: String, chatState: ChatState) async throws {
         let baseURL = settings.selectedProvider == .ollama
         ? (settings.ollamaBaseURL.isEmpty ? settings.selectedProvider.baseURL : settings.ollamaBaseURL)
         : settings.selectedProvider.baseURL
@@ -242,7 +236,7 @@ class AIChatManager: ObservableObject {
         
         // Build request body
         let requestBody: [String: Any] = [
-            "model": settings.getModel(),
+            "model": model,
             "stream": true,
             "messages": try await buildOllamaMessages(messages: messages),
         ]
@@ -348,8 +342,7 @@ class AIChatManager: ObservableObject {
     
     // MARK: - Gemini format
     
-    private func sendGeminiMessage(messages: [ChatMessage], chatState: ChatState) async throws {
-        let model = settings.getModel()
+    private func sendGeminiMessage(messages: [ChatMessage], model: String, chatState: ChatState) async throws {
         // Gemini API requires key as query parameter
         let apiURL = "\(settings.selectedProvider.baseURL)/v1/models/\(model):streamGenerateContent?key=\(settings.apiKey.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? settings.apiKey)"
         

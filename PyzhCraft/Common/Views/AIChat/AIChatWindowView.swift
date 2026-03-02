@@ -11,6 +11,8 @@ struct AIChatWindowView: View {
     @State private var inputText = ""
     @FocusState private var isInputFocused: Bool
     @State private var selectedGameId: String?
+    @State private var modelOptions: [String] = []
+    @State private var isLoadingModels = false
     @State private var showFilePicker = false
     
     // Cache avatar view to avoid reloading every time message is updated
@@ -48,8 +50,12 @@ struct AIChatWindowView: View {
             AIChatInputAreaView(
                 inputText: $inputText,
                 selectedGameId: $selectedGameId,
+                selectedModel: $chatState.selectedModel,
                 isInputFocused: $isInputFocused,
                 games: gameRepository.games,
+                modelOptions: modelOptions,
+                defaultModel: aiSettings.getDefaultModel(),
+                isLoadingModels: isLoadingModels,
                 isSending: chatState.isSending,
                 canSend: canSend,
                 onSend: sendMessage
@@ -76,6 +82,10 @@ struct AIChatWindowView: View {
             }
             // Initialize avatar cache
             initializeAvatarCache()
+            
+            Task {
+                await refreshModelOptions()
+            }
         }
         .onChange(of: gameRepository.games) { _, newGames in
             // When the game list is loaded and no game is selected, the first game is automatically selected
@@ -91,6 +101,22 @@ struct AIChatWindowView: View {
             // Update the AI ​​avatar cache when the AI ​​avatar URL changes (only updates when the URL actually changes)
             if oldValue != newValue {
                 updateAIAvatarCache()
+            }
+        }
+        .onChange(of: aiSettings.selectedProvider) {
+            chatState.selectedModel = ""
+            Task {
+                await refreshModelOptions()
+            }
+        }
+        .onChange(of: aiSettings.openAIBaseURL) {
+            Task {
+                await refreshModelOptions()
+            }
+        }
+        .onChange(of: aiSettings.ollamaBaseURL) {
+            Task {
+                await refreshModelOptions()
             }
         }
         .onDisappear {
@@ -164,6 +190,7 @@ struct AIChatWindowView: View {
         isInputFocused = false
         // Clear selected games
         selectedGameId = nil
+        chatState.selectedModel = ""
     }
     
     private func sendMessage() {
@@ -175,8 +202,25 @@ struct AIChatWindowView: View {
         attachmentManager.clearAll()
         
         Task {
-            await AIChatManager.shared.sendMessage(text, attachments: attachments, chatState: chatState)
+            await AIChatManager.shared.sendMessage(
+                text,
+                attachments: attachments,
+                selectedModel: chatState.selectedModel,
+                chatState: chatState
+            )
         }
+    }
+    
+    private func refreshModelOptions() async {
+        isLoadingModels = true
+        let fetchedModels = await aiSettings.fetchModelOptions()
+        modelOptions = fetchedModels
+        
+        if !chatState.selectedModel.isEmpty && !fetchedModels.contains(chatState.selectedModel) {
+            chatState.selectedModel = ""
+        }
+        
+        isLoadingModels = false
     }
     
     /// Process file selection results

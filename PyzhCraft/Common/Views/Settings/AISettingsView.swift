@@ -77,7 +77,7 @@ public struct AISettingsView: View {
                 .labeledContentStyle(.custom)
             }
             
-            // Model settings (required)
+            // Model settings (optional override)
             LabeledContent("Model Name") {
                 HStack {
                     TextField("e.g.: gpt-4o, deepseek-chat", text: $aiSettings.modelOverride)
@@ -87,7 +87,7 @@ public struct AISettingsView: View {
                         .fixedSize()
                         .focusable(false)
                     
-                    InfoIconWithPopover(text: "The model name to use (required)")
+                    InfoIconWithPopover(text: "Optional override, leave empty to use the default model")
                 }
             }
             .labeledContentStyle(.custom)

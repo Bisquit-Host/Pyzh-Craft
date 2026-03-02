@@ -4,8 +4,12 @@ import SwiftUI
 struct AIChatInputAreaView: View {
     @Binding var inputText: String
     @Binding var selectedGameId: String?
+    @Binding var selectedModel: String
     @FocusState.Binding var isInputFocused: Bool
     let games: [GameVersionInfo]
+    let modelOptions: [String]
+    let defaultModel: String
+    let isLoadingModels: Bool
     let isSending: Bool
     let canSend: Bool
     let onSend: () -> Void
@@ -26,6 +30,19 @@ struct AIChatInputAreaView: View {
                 if !games.isEmpty {
                     gameSelector
                 }
+                Picker("", selection: $selectedModel) {
+                    Text("Default (\(defaultModel))")
+                        .tag("")
+                    
+                    ForEach(modelOptions, id: \.self) {
+                        Text($0)
+                            .tag($0)
+                    }
+                }
+                .labelsHidden()
+                .pickerStyle(.menu)
+                .disabled(isSending || isLoadingModels)
+                .frame(maxWidth: 140)
                 attachFileButton
                 textField
                 sendButton

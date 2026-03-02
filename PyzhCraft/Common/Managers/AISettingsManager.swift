@@ -4,6 +4,22 @@ import SwiftUI
 private let aiSettingsAccount = "aiSettings"
 private let aiApiKeyKeychainKey = "apiKey"
 
+private struct OpenAIModelListResponse: Decodable {
+    struct OpenAIModel: Decodable {
+        let id: String
+    }
+    
+    let data: [OpenAIModel]
+}
+
+private struct OllamaTagsResponse: Decodable {
+    struct OllamaModel: Decodable {
+        let name: String
+    }
+    
+    let models: [OllamaModel]
+}
+
 /// AI provider enumeration
 enum AIProvider: String, CaseIterable, Identifiable {
     case openai,
@@ -162,12 +178,142 @@ class AISettingsManager: ObservableObject {
         }
     }
     
-    /// Get the model name of the current provider (required)
-    func getModel() -> String {
-        modelOverride.trimmingCharacters(in: .whitespacesAndNewlines)
+    /// Provider default model
+    private func defaultModel(for provider: AIProvider) -> String {
+        switch provider {
+        case .openai:
+            "gpt-4o-mini"
+        case .ollama:
+            "llama3.2"
+        }
+    }
+    
+    /// Models shown in chat picker when remote fetch is unavailable
+    private func fallbackModels(for provider: AIProvider) -> [String] {
+        switch provider {
+        case .openai:
+            ["gpt-4o-mini", "gpt-4o", "gpt-4.1-mini", "deepseek-chat"]
+        case .ollama:
+            ["llama3.2", "llama3.1", "qwen2.5", "mistral"]
+        }
+    }
+    
+    /// Effective default model shown in chat
+    func getDefaultModel() -> String {
+        defaultModel(for: selectedProvider)
+    }
+    
+    /// Model options shown in chat picker
+    func fetchModelOptions() async -> [String] {
+        let fetchedModels = await fetchProviderModels()
+        let baseModels = fetchedModels.isEmpty ? fallbackModels(for: selectedProvider) : fetchedModels
+        
+        return mergeConfiguredModel(into: baseModels)
+    }
+    
+    /// Get model name with fallback order: chat override -> settings override -> provider default
+    func getModel(chatOverride: String = "") -> String {
+        let chatModel = chatOverride.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !chatModel.isEmpty {
+            return chatModel
+        }
+        
+        let configuredModel = modelOverride.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !configuredModel.isEmpty {
+            return configuredModel
+        }
+        
+        return defaultModel(for: selectedProvider)
+    }
+    
+    private func fetchProviderModels() async -> [String] {
+        switch selectedProvider {
+        case .openai:
+            await fetchOpenAIModels()
+        case .ollama:
+            await fetchOllamaModels()
+        }
+    }
+    
+    private func fetchOpenAIModels() async -> [String] {
+        let baseURL = openAIBaseURL.isEmpty ? selectedProvider.baseURL : openAIBaseURL
+        guard let url = URL(string: baseURL + "/v1/models") else {
+            return []
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        
+        if !apiKey.isEmpty {
+            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        }
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode) else {
+                return []
+            }
+            
+            let result = try JSONDecoder().decode(OpenAIModelListResponse.self, from: data)
+            return normalizeModels(result.data.map(\.id))
+        } catch {
+            Logger.shared.error("Failed to fetch OpenAI model list: \(error.localizedDescription)")
+            return []
+        }
+    }
+    
+    private func fetchOllamaModels() async -> [String] {
+        let baseURL = ollamaBaseURL.isEmpty ? selectedProvider.baseURL : ollamaBaseURL
+        guard let url = URL(string: baseURL + "/api/tags") else {
+            return []
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode) else {
+                return []
+            }
+            
+            let result = try JSONDecoder().decode(OllamaTagsResponse.self, from: data)
+            return normalizeModels(result.models.map(\.name))
+        } catch {
+            Logger.shared.error("Failed to fetch Ollama model list: \(error.localizedDescription)")
+            return []
+        }
+    }
+    
+    private func normalizeModels(_ models: [String]) -> [String] {
+        let cleanedModels = models
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
+        
+        var uniqueModels: [String] = []
+        for model in cleanedModels where !uniqueModels.contains(model) {
+            uniqueModels.append(model)
+        }
+        
+        return uniqueModels
+    }
+    
+    private func mergeConfiguredModel(into models: [String]) -> [String] {
+        let configuredModel = modelOverride.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !configuredModel.isEmpty else {
+            return models
+        }
+        
+        if models.contains(configuredModel) {
+            return models
+        }
+        
+        return [configuredModel] + models
     }
     
     private init() {
-        _ = apiKey
     }
 }

@@ -49,6 +49,7 @@ struct ChatMessage: Identifiable, Equatable {
 class ChatState: ObservableObject {
     @Published var messages: [ChatMessage] = []
     @Published var isSending = false
+    @Published var selectedModel = ""
     
     func addMessage(_ message: ChatMessage) {
         messages.append(message)
@@ -63,5 +64,6 @@ class ChatState: ObservableObject {
     func clear() {
         messages.removeAll()
         isSending = false
+        selectedModel = ""
     }
 }
