@@ -124,7 +124,7 @@ struct AIChatMessageListView: View {
     }
     
     private var loadingIndicatorView: some View {
-        HStack(alignment: .firstTextBaseline, spacing: Constants.messageSpacing) {
+        HStack(alignment: .center, spacing: Constants.messageSpacing) {
             // Using cached avatar view
             if let cachedAvatar = cachedAIAvatar {
                 cachedAvatar

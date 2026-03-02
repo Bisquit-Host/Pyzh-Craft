@@ -26,7 +26,7 @@ struct MessageBubble: View {
     }
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: Constants.messageSpacing) {
+        HStack(alignment: .center, spacing: Constants.messageSpacing) {
             if message.role == .user {
                 userMessageView
             } else {
