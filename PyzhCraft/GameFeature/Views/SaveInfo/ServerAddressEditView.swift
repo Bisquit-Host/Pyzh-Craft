@@ -6,7 +6,7 @@ struct ServerAddressEditView: View {
     let onRefresh: (() -> Void)?
     @Environment(\.dismiss)
     private var dismiss
-
+    
     @State private var serverName: String
     @State private var serverAddress: String
     @State private var serverPort: String
@@ -17,11 +17,11 @@ struct ServerAddressEditView: View {
     @State private var showError = false
     @State private var showDeleteConfirmation = false
     @State private var errorMessage = ""
-
+    
     var isNewServer: Bool {
         server == nil
     }
-
+    
     init(server: ServerAddress? = nil, gameName: String, onRefresh: (() -> Void)? = nil) {
         self.server = server
         self.gameName = gameName
@@ -40,7 +40,7 @@ struct ServerAddressEditView: View {
             _acceptTextures = State(initialValue: false)
         }
     }
-
+    
     var body: some View {
         CommonSheetView(
             header: { headerView },
@@ -53,15 +53,13 @@ struct ServerAddressEditView: View {
             Text(errorMessage)
         }
         .confirmationDialog("Delete Server", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
-            Button("Delete", role: .destructive) {
-                deleteServer()
-            }
-            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive, action: deleteServer)
+            Button("Cancel", role: .cancel) {}
         } message: {
-            Text(String(format: String(localized: "Are you sure you want to delete server \"\(serverName)\"? This action cannot be undone.")))
+            Text("Are you sure you want to delete server \"\(serverName)\"? This action cannot be undone.")
         }
     }
-
+    
     private var headerView: some View {
         HStack {
             Text(
@@ -70,7 +68,9 @@ struct ServerAddressEditView: View {
                 : LocalizedStringKey("Edit Server")
             )
             .font(.headline)
+            
             Spacer()
+            
             if let shareText = shareTextForServer, !shareText.isEmpty {
                 ShareLink(item: shareText) {
                     Image(systemName: "square.and.arrow.up")
@@ -81,11 +81,11 @@ struct ServerAddressEditView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-
+    
     private var shareTextForServer: String? {
         let address = serverAddress.trimmingCharacters(in: .whitespaces)
         let port = serverPort.trimmingCharacters(in: .whitespaces)
-
+        
         if !address.isEmpty {
             if !port.isEmpty {
                 return "\(address):\(port)"
@@ -93,34 +93,39 @@ struct ServerAddressEditView: View {
                 return address
             }
         }
-
+        
         if let existing = server {
             return existing.fullAddress
         }
-
+        
         return nil
     }
-
+    
     private var bodyView: some View {
         VStack(alignment: .leading) {
             Text("Server Name")
+            
             TextField("Server Name", text: $serverName)
                 .textFieldStyle(.roundedBorder)
                 .padding(.bottom, 20)
-
+            
             HStack {
                 VStack(alignment: .leading) {
                     Text("Server Address")
+                    
                     TextField("Server Address", text: $serverAddress)
                         .textFieldStyle(.roundedBorder)
                         .onChange(of: serverAddress) { _, newValue in
                             if let colonIndex = newValue.lastIndex(of: ":") {
                                 let afterColon = String(newValue[newValue.index(after: colonIndex)...])
+                                
                                 if let port = Int(afterColon), port > 0 && port <= 65535 {
                                     let addressOnly = String(newValue[..<colonIndex])
+                                    
                                     if serverAddress != addressOnly {
                                         serverAddress = addressOnly
                                     }
+                                    
                                     if serverPort != afterColon {
                                         serverPort = afterColon
                                     }
@@ -128,15 +133,17 @@ struct ServerAddressEditView: View {
                             }
                         }
                 }
+                
                 VStack(alignment: .leading) {
                     Text("Port")
+                    
                     TextField("25565 (Optional)", text: $serverPort)
                         .textFieldStyle(.roundedBorder)
                         .frame(maxWidth: 100)
                 }
             }
             .padding(.bottom, 20)
-
+            
             HStack {
                 Toggle("Hidden", isOn: $isHidden)
                 Spacer()
@@ -145,7 +152,7 @@ struct ServerAddressEditView: View {
             .padding(.bottom, 20)
         }
     }
-
+    
     private var footerView: some View {
         HStack {
             Button("Cancel") {
@@ -153,38 +160,37 @@ struct ServerAddressEditView: View {
             }
             .keyboardShortcut(.cancelAction)
             .disabled(isSaving || isDeleting)
+            
             if !isNewServer {
-                Button("Delete") {
-                    saveServer()
-                }
-                .keyboardShortcut(.delete, modifiers: [])
-                .disabled(isSaving || isDeleting)
+                Button("Delete", action: saveServer)
+                    .keyboardShortcut(.delete, modifiers: [])
+                    .disabled(isSaving || isDeleting)
             }
+            
             Spacer()
-            Button("Save") {
-                saveServer()
-            }
-            .keyboardShortcut(.defaultAction)
-            .disabled(isSaving || isDeleting || !isFormValid)
+            
+            Button("Save", action: saveServer)
+                .keyboardShortcut(.defaultAction)
+                .disabled(isSaving || isDeleting || !isFormValid)
         }
     }
-
+    
     private var isFormValid: Bool {
         let trimmedName = serverName.trimmingCharacters(in: .whitespaces)
         let trimmedAddress = serverAddress.trimmingCharacters(in: .whitespaces)
         let trimmedPort = serverPort.trimmingCharacters(in: .whitespaces)
-
+        
         guard !trimmedName.isEmpty && !trimmedAddress.isEmpty else {
             return false
         }
-
+        
         if !trimmedPort.isEmpty {
             return Int(trimmedPort) != nil
         }
-
+        
         return true
     }
-
+    
     private var portValue: Int? {
         let trimmedPort = serverPort.trimmingCharacters(in: .whitespaces)
         if trimmedPort.isEmpty {
@@ -192,25 +198,25 @@ struct ServerAddressEditView: View {
         }
         return Int(trimmedPort)
     }
-
+    
     private func saveServer() {
         let trimmedName = serverName.trimmingCharacters(in: .whitespaces)
         let trimmedAddress = serverAddress.trimmingCharacters(in: .whitespaces)
-
+        
         guard !trimmedName.isEmpty && !trimmedAddress.isEmpty else {
             errorMessage = String(localized: "Please fill in all required fields")
             showError = true
             return
         }
-
+        
         let port = portValue ?? 0
-
+        
         isSaving = true
-
+        
         Task {
             do {
                 var currentServers = try await ServerAddressService.shared.loadServerAddresses(for: gameName)
-
+                
                 if let existingServer = server {
                     let updatedServer = ServerAddress(
                         id: existingServer.id,
@@ -221,7 +227,7 @@ struct ServerAddressEditView: View {
                         icon: existingServer.icon,
                         acceptTextures: acceptTextures
                     )
-
+                    
                     if let index = currentServers.firstIndex(where: { $0.id == existingServer.id }) {
                         currentServers[index] = updatedServer
                     } else {
@@ -238,9 +244,9 @@ struct ServerAddressEditView: View {
                     )
                     currentServers.append(newServer)
                 }
-
+                
                 try await ServerAddressService.shared.saveServerAddresses(currentServers, for: gameName)
-
+                
                 await MainActor.run {
                     isSaving = false
                     dismiss()
@@ -255,22 +261,22 @@ struct ServerAddressEditView: View {
             }
         }
     }
-
+    
     private func deleteServer() {
         guard let serverToDelete = server else {
             return
         }
-
+        
         isDeleting = true
-
+        
         Task {
             do {
                 var currentServers = try await ServerAddressService.shared.loadServerAddresses(for: gameName)
-
+                
                 currentServers.removeAll { $0.id == serverToDelete.id }
-
+                
                 try await ServerAddressService.shared.saveServerAddresses(currentServers, for: gameName)
-
+                
                 await MainActor.run {
                     isDeleting = false
                     dismiss()

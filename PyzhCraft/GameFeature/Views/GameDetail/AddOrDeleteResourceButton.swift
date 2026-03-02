@@ -63,7 +63,6 @@ struct AddOrDeleteResourceButton: View {
     }
     
     var body: some View {
-        
         HStack(spacing: 8) {
             // Update button (only displayed in local mode and when there is an update)
             if type == false && addButtonState == .update {
@@ -132,10 +131,8 @@ struct AddOrDeleteResourceButton: View {
                 isPresented: $showDeleteAlert,
                 titleVisibility: .visible
             ) {
-                Button("Delete", role: .destructive) {
-                    deleteFile()
-                }
-                .keyboardShortcut(.defaultAction)  // Bind the Enter key
+                Button("Delete", role: .destructive, action: deleteFile)
+                    .keyboardShortcut(.defaultAction) // Enter
                 
                 Button("Cancel", role: .cancel) {}
             } message: {
@@ -212,9 +209,8 @@ struct AddOrDeleteResourceButton: View {
                     hasDownloadedInSheet = false
                     // Clean preloaded data
                     preloadedDetail = nil
-                },
-                content: {
-                    if let gameInfo = gameInfo {
+                }, content: {
+                    if let gameInfo {
                         GameResourceInstallSheet(
                             project: project,
                             resourceType: query,
@@ -234,6 +230,7 @@ struct AddOrDeleteResourceButton: View {
                                 deleteFile(fileName: old, isUpdate: true)
                                 oldFileNameForUpdate = nil
                             }
+                            
                             // Update process: only refresh the hash and list items of the current entry, no global scan
                             if wasUpdate, let new = newFileName, let old = oldF {
                                 onResourceUpdated?(project.projectId, old, new, newHash)
@@ -241,6 +238,7 @@ struct AddOrDeleteResourceButton: View {
                             } else if !type {
                                 currentFileName = nil
                             }
+                            
                             if type == false {
                                 checkForUpdate()
                             } else {
@@ -302,6 +300,7 @@ struct AddOrDeleteResourceButton: View {
                 i18nKey: "Delete File Failed",
                 level: .notification
             )
+            
             Logger.shared.error("Failed to delete file: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return
@@ -329,6 +328,7 @@ struct AddOrDeleteResourceButton: View {
                 i18nKey: "File name missing",
                 level: .notification
             )
+            
             Logger.shared.error("Failed to delete file: \(globalError.chineseMessage)")
             GlobalErrorHandler.shared.handle(globalError)
             return
@@ -349,6 +349,7 @@ struct AddOrDeleteResourceButton: View {
             // Save old file name for deletion after update
             oldFileNameForUpdate = currentFileName ?? project.fileName
             isUpdateButtonLoading = true
+            
             Task {
                 // Load project details and open the game resource installation sheet (reuse global resource installation logic)
                 await loadGameResourceInstallDetailBeforeOpeningSheet()
@@ -364,9 +365,11 @@ struct AddOrDeleteResourceButton: View {
                 // New: Special handling of modpacks
                 if query == "modpack" {
                     addButtonState = .loading
+                    
                     Task {
                         await loadModPackDetailBeforeOpeningSheet()
                     }
+                    
                     return
                 }
                 
@@ -375,11 +378,13 @@ struct AddOrDeleteResourceButton: View {
                     // Load project details and open the game resource installation sheet (reuse global resource installation logic)
                     await loadGameResourceInstallDetailBeforeOpeningSheet()
                 }
+                
             case .installed, .update:
                 // When there is an update, the main button displays Delete, and the delete operation is performed after clicking it
                 if !type {
                     showDeleteAlert = true
                 }
+                
             default:
                 break
             }
@@ -422,11 +427,13 @@ struct AddOrDeleteResourceButton: View {
                     // Open the GlobalResourceSheet to select the game to install
                     await loadProjectDetailBeforeOpeningSheet()
                 }
+                
             case .installed, .update:
                 // When there is an update, the main button displays Delete, and the delete operation is performed after clicking it
                 if !type {
                     showDeleteAlert = true
                 }
+                
             default:
                 break
             }
@@ -523,6 +530,7 @@ struct AddOrDeleteResourceButton: View {
             await MainActor.run {
                 addButtonState = .idle
             }
+            
             return
         }
         
@@ -611,11 +619,12 @@ struct AddOrDeleteResourceButton: View {
     }
     
     private func toggleDisableState() {
-        guard let gameInfo = gameInfo,
-              let resourceDir = AppPaths.resourceDirectory(
+        guard
+            let gameInfo = gameInfo,
+            let resourceDir = AppPaths.resourceDirectory(
                 for: query,
                 gameName: gameInfo.gameName
-              )
+            )
         else {
             Logger.shared.error("Failed to switch resource enablement status: Resource directory does not exist")
             return
@@ -633,9 +642,11 @@ struct AddOrDeleteResourceButton: View {
                 fileName: fileName,
                 resourceDir: resourceDir
             )
+            
             // Update current filename and disabled status
             currentFileName = newFileName
             isDisabled = ResourceEnableDisableManager.isDisabled(fileName: newFileName)
+            
             // Synchronously update the state exposed to the parent view
             isResourceDisabled = isDisabled
             
