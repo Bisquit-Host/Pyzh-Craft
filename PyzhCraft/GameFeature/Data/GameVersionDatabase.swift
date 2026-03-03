@@ -288,6 +288,31 @@ class GameVersionDatabase {
         }
     }
     
+    /// Delete game by game name and working path
+    /// - Parameters:
+    ///   - gameName: game name
+    ///   - workingPath: working path
+    /// - Throws: GlobalError when the operation fails
+    func deleteGame(gameName: String, workingPath: String) throws {
+        try db.transaction {
+            let sql = "DELETE FROM \(tableName) WHERE working_path = ? AND game_name = ?"
+            let statement = try db.prepare(sql)
+            defer { sqlite3_finalize(statement) }
+            
+            SQLiteDatabase.bind(statement, index: 1, value: workingPath)
+            SQLiteDatabase.bind(statement, index: 2, value: gameName)
+            
+            let result = sqlite3_step(statement)
+            guard result == SQLITE_DONE else {
+                let errorMessage = String(cString: sqlite3_errmsg(db.database))
+                throw GlobalError.validation(
+                    i18nKey: "Failed to delete game: \(errorMessage)",
+                    level: .notification
+                )
+            }
+        }
+    }
+    
     /// Delete all games from the specified working path
     /// - Parameter workingPath: working path
     /// - Throws: GlobalError when the operation fails

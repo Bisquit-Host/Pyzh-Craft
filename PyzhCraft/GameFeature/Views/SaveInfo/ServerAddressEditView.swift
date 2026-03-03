@@ -162,7 +162,9 @@ struct ServerAddressEditView: View {
             .disabled(isSaving || isDeleting)
             
             if !isNewServer {
-                Button("Delete", action: saveServer)
+                Button("Delete") {
+                    showDeleteConfirmation = true
+                }
                     .keyboardShortcut(.delete, modifiers: [])
                     .disabled(isSaving || isDeleting)
             }

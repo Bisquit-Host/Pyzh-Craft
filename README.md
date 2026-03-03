@@ -9,7 +9,7 @@
   [![Discord](https://img.shields.io/badge/Discord-bule.svg?logo=discord)](https://discord.com/invite/kerMT2r9rz)
   [![Homebrew](https://img.shields.io/badge/Homebrew-available-green.svg?logo=homebrew)](https://formulae.brew.sh/cask/swiftcraft-launcher)
   
-  💾 [Download](https://github.com/suhang12332/Swift-Craft-Launcher/releases/latest)
+  💾 [Download](https://github.com/Bisquit-Host/Pyzh-Craft/releases/latest)
 </div>
 
 ---
@@ -68,7 +68,7 @@ Please visit [FAQ](doc/FAQ.md)
 ### 🔨 Build from Source
 1. **⏬ Clone the repository**
    ```bash
-   git clone https://github.com/TopScrech/Pyzh-Craft.git
+   git clone https://github.com/Bisquit-Host/Pyzh-Craft.git
    cd Pyzh-Craft
    ```
 
@@ -101,8 +101,8 @@ This project is licensed under the GNU Affero General Public License v3.0. See [
 ## 🤝 Community & Support
 
 - **Discord**: [Discord](https://discord.com/invite/kerMT2r9rz)
-- **🐛 Issue Reports**: [GitHub Issues](https://github.com/TopScrech/Pyzh-Craft/issues)
-- **💡 Feature Suggestions**: [GitHub Discussions](https://github.com/TopScrech/Pyzh-Craft/discussions)
+- **🐛 Issue Reports**: [GitHub Issues](https://github.com/Bisquit-Host/Pyzh-Craft/issues)
+- **💡 Feature Suggestions**: [GitHub Discussions](https://github.com/Bisquit-Host/Pyzh-Craft/discussions)
 
 ## 🌟 Contributing
 

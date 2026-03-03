@@ -148,6 +148,20 @@ struct ModPackExportSheet: View {
                 TextField("1.0.0", text: $viewModel.modPackVersion)
                     .textFieldStyle(.roundedBorder)
             }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Description")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                TextEditor(text: $viewModel.summary)
+                    .font(.subheadline)
+                    .frame(minHeight: 88)
+                    .padding(6)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(.quaternary, lineWidth: 1)
+                    )
+            }
         }
     }
     

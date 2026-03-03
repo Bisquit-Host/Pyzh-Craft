@@ -11,10 +11,16 @@ public final class ResourceDetailState: ObservableObject {
         didSet {
             if selectedProjectId != oldValue {
                 loadedProjectDetail = nil
+                showInstallSheet = false
+                currentProject = nil
+                compatibleGames = []
             }
         }
     }
     @Published public var loadedProjectDetail: ModrinthProjectDetail?
+    @Published public var showInstallSheet = false
+    @Published public var currentProject: ModrinthProject?
+    @Published var compatibleGames: [GameVersionInfo] = []
     
     public init(
         selectedItem: SidebarItem = .resource(.mod),
@@ -46,6 +52,9 @@ public final class ResourceDetailState: ObservableObject {
     public func clearSelection() {
         selectedProjectId = nil
         loadedProjectDetail = nil
+        showInstallSheet = false
+        currentProject = nil
+        compatibleGames = []
     }
     
     // MARK: - Bindings (for use by subviews, GameActionManager, etc.)
@@ -92,6 +101,18 @@ public final class ResourceDetailState: ObservableObject {
         Binding(get: { [weak self] in self?.loadedProjectDetail }, set: { [weak self] value in
             guard let self else { return }
             DispatchQueue.main.async { self.loadedProjectDetail = value }
+        })
+    }
+    var currentProjectBinding: Binding<ModrinthProject?> {
+        Binding(get: { [weak self] in self?.currentProject }, set: { [weak self] value in
+            guard let self else { return }
+            DispatchQueue.main.async { self.currentProject = value }
+        })
+    }
+    var compatibleGamesBinding: Binding<[GameVersionInfo]> {
+        Binding(get: { [weak self] in self?.compatibleGames ?? [] }, set: { [weak self] value in
+            guard let self else { return }
+            DispatchQueue.main.async { self.compatibleGames = value }
         })
     }
 }

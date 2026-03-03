@@ -11,6 +11,8 @@ struct WorldDetailSheetView: View {
     let gameName: String
     @Environment(\.dismiss)
     private var dismiss
+    @Environment(\.openURL)
+    private var openURL
     
     @State private var metadata: WorldDetailMetadata?
     @State private var rawDataTag: [String: Any]? // Original Data tag, display as much data as possible
@@ -114,7 +116,7 @@ struct WorldDetailSheetView: View {
                         infoRow("Allow Cheats", value: metadata.cheats ? String(localized: "Yes") : String(localized: "No"))
                         
                         if let seed = metadata.seed {
-                            infoRow("World Seed", value: "\(seed)")
+                            worldSeedRow(seed)
                         }
                     }
                 }
@@ -141,23 +143,7 @@ struct WorldDetailSheetView: View {
                     }
                 }
                 
-                HStack(alignment: .center, spacing: 12) {
-                    HStack(spacing: 0) {
-                        Text("World Path")
-                        Text(":")
-                    }
-                    .font(.headline)
-                    
-                    Button {
-                        // Open file location in Finder
-                        NSWorkspace.shared.selectFile(metadata.path.path, inFileViewerRootedAtPath: "")
-                    } label: {
-                        PathBreadcrumbView(path: metadata.path.path)
-                            .frame(maxWidth: .infinity, alignment: .leading).font(.caption)
-                    }
-                    .buttonStyle(.plain)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                worldPathSection(metadata.path)
                 
                 // Raw data toggle button
                 if let raw = rawDataTag {
@@ -236,6 +222,81 @@ struct WorldDetailSheetView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private func worldSeedRow(_ seed: Int64) -> some View {
+        HStack(alignment: .center, spacing: 12) {
+            HStack(spacing: 0) {
+                Text("World Seed")
+                Text(":")
+            }
+            .font(.subheadline)
+            .foregroundColor(.secondary)
+            
+            Text("\(seed)")
+                .font(.subheadline)
+                .foregroundColor(.primary)
+            
+            Spacer()
+            
+            Button("Copy", systemImage: "doc.on.doc") {
+                copyToPasteboard("\(seed)")
+            }
+            .buttonStyle(.borderless)
+            
+            Button("ChunkBase", systemImage: "safari") {
+                openChunkBase(with: seed)
+            }
+            .buttonStyle(.borderless)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private func worldPathSection(_ path: URL) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .center, spacing: 12) {
+                HStack(spacing: 0) {
+                    Text("World Path")
+                    Text(":")
+                }
+                .font(.headline)
+                
+                Button {
+                    NSWorkspace.shared.selectFile(path.path, inFileViewerRootedAtPath: "")
+                } label: {
+                    PathBreadcrumbView(path: path.path)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .font(.caption)
+                }
+                .buttonStyle(.plain)
+            }
+            
+            HStack(spacing: 12) {
+                Button("Copy Path", systemImage: "doc.on.doc") {
+                    copyToPasteboard(path.path)
+                }
+                .buttonStyle(.borderless)
+                
+                Button("Open Folder", systemImage: "folder") {
+                    NSWorkspace.shared.open(path)
+                }
+                .buttonStyle(.borderless)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private func copyToPasteboard(_ value: String) {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(value, forType: .string)
+    }
+    
+    private func openChunkBase(with seed: Int64) {
+        guard let url = URL(string: "https://www.chunkbase.com/apps/seed-map#seed=\(seed)") else {
+            return
+        }
+        openURL(url)
     }
     
     // MARK: - Footer View

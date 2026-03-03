@@ -79,12 +79,13 @@ class ModPackExportViewModel: ObservableObject {
             .appendingPathComponent("\(modPackName).mrpack")
         
         exportTask = Task {
+            let trimmedSummary = summary.trimmingCharacters(in: .whitespacesAndNewlines)
             let result = await ModPackExporter.exportModPack(
                 gameInfo: gameInfo,
                 outputPath: tempPath,
                 modPackName: modPackName,
                 modPackVersion: modPackVersion,
-                summary: nil
+                summary: trimmedSummary.isEmpty ? nil : trimmedSummary
             ) { progress in
                 Task { @MainActor in
                     self.exportProgress = progress

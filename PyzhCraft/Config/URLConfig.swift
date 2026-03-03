@@ -145,7 +145,7 @@ enum URLConfig {
             static let assetsRepositoryName = "Swift-Craft-Launcher-Assets"
             static let repositoryName = "Swift-Craft-Launcher"
             /// Announcement base address:
-            /// For example: https://raw.githubusercontent.com/suhang12332/Swift-Craft-Launcher-Assets/refs/heads/main/news/api/announcements/0.3.1-beta/ar.json
+            /// For example: https://raw.githubusercontent.com/Bisquit-Host/Pyzh-Craft-Assets/refs/heads/main/news/api/announcements/0.3.1-beta/ar.json
             static let announcementBaseURL = URLConfig.url("https://raw.githubusercontent.com/\(repositoryOwner)/\(assetsRepositoryName)/refs/heads/main/news/api/announcements")
             
             // Private method: Build the base path of the warehouse
@@ -355,6 +355,23 @@ enum URLConfig {
             static let fallbackDownloadBaseURL = URLConfig.url("https://edge.forgecdn.net/files")
             /// CurseForge project details base URL, for example: https://www.curseforge.com/minecraft/mc-mods/geckolib
             static let webProjectBase = "https://www.curseforge.com/minecraft/mc-mods/"
+            
+            static func webProjectBase(resourceType: String) -> String {
+                switch resourceType.lowercased() {
+                case "mod":
+                    "https://www.curseforge.com/minecraft/mc-mods/"
+                case "modpack":
+                    "https://www.curseforge.com/minecraft/modpacks/"
+                case "resourcepack":
+                    "https://www.curseforge.com/minecraft/texture-packs/"
+                case "shader":
+                    "https://www.curseforge.com/minecraft/shaders/"
+                case "datapack":
+                    "https://www.curseforge.com/minecraft/data-packs/"
+                default:
+                    webProjectBase
+                }
+            }
             
             /// Automatically select base URL
             /// If API key exists, use official API first, otherwise use public mirror

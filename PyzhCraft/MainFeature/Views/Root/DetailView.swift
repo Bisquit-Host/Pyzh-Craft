@@ -6,12 +6,17 @@ struct DetailView: View {
     @EnvironmentObject var gameRepository: GameRepository
     
     @ViewBuilder var body: some View {
-        switch detailState.selectedItem {
-        case .game(let gameId):
-            gameDetailView(gameId: gameId).frame(maxWidth: .infinity, alignment: .leading)
-        case .resource(let type):
-            resourceDetailView(type: type)
-                .frame(maxWidth: .infinity, alignment: .leading)
+        Group {
+            switch detailState.selectedItem {
+            case .game(let gameId):
+                gameDetailView(gameId: gameId).frame(maxWidth: .infinity, alignment: .leading)
+            case .resource(let type):
+                resourceDetailView(type: type)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .sheet(isPresented: $detailState.showInstallSheet, onDismiss: clearInstallSheetData) {
+            installSheetView
         }
     }
     
@@ -62,5 +67,49 @@ struct DetailView: View {
                 searchText: filterState.searchTextBinding
             )
         }
+    }
+    
+    @ViewBuilder
+    private var installSheetView: some View {
+        if let project = detailState.currentProject,
+           let detail = detailState.loadedProjectDetail {
+            if detailState.gameResourcesType.lowercased() == "modpack" {
+                ModPackDownloadSheet(
+                    projectId: project.projectId,
+                    gameInfo: nil,
+                    query: detailState.gameResourcesType,
+                    preloadedDetail: detail
+                )
+                .environmentObject(gameRepository)
+            } else if let gameId = detailState.gameId,
+                      let gameInfo = gameRepository.getGame(by: gameId) {
+                GameResourceInstallSheet(
+                    project: project,
+                    resourceType: detailState.gameResourcesType,
+                    gameInfo: gameInfo,
+                    isPresented: $detailState.showInstallSheet,
+                    preloadedDetail: detail
+                )
+                .environmentObject(gameRepository)
+            } else {
+                GlobalResourceSheet(
+                    project: project,
+                    resourceType: detailState.gameResourcesType,
+                    isPresented: $detailState.showInstallSheet,
+                    preloadedDetail: detail,
+                    preloadedCompatibleGames: detailState.compatibleGames
+                )
+                .environmentObject(gameRepository)
+            }
+        } else {
+            ProgressView()
+                .controlSize(.small)
+                .padding()
+        }
+    }
+    
+    private func clearInstallSheetData() {
+        detailState.currentProject = nil
+        detailState.compatibleGames = []
     }
 }

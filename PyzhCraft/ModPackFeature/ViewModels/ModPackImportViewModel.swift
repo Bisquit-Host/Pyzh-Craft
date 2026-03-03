@@ -4,6 +4,7 @@ import SwiftUI
 @MainActor
 class ModPackImportViewModel: BaseGameFormViewModel {
     private let modPackViewModel = ModPackDownloadSheetViewModel()
+    private let minimumSupportedGameVersion = "1.13"
     
     @Published var selectedModPackFile: URL?
     @Published var extractedModPackPath: URL?
@@ -117,7 +118,7 @@ class ModPackImportViewModel: BaseGameFormViewModel {
         let hasFile = selectedModPackFile != nil
         let hasInfo = modPackIndexInfo != nil
         let nameValid = gameNameValidator.isFormValid
-        return hasFile && hasInfo && nameValid
+        return hasFile && hasInfo && nameValid && isModPackVersionSupported
     }
     
     // MARK: - ModPack Processing
@@ -139,6 +140,13 @@ class ModPackImportViewModel: BaseGameFormViewModel {
         // Parse index information
         if let parsed = await modPackViewModel.parseModrinthIndex(extractedPath: extracted) {
             modPackIndexInfo = parsed
+            if !CommonUtil.isVersionAtLeast(parsed.gameVersion, minimum: minimumSupportedGameVersion) {
+                let error = GlobalError.validation(
+                    i18nKey: "Only modpacks with Minecraft 1.13 or newer are supported",
+                    level: .notification
+                )
+                GlobalErrorHandler.shared.handle(error)
+            }
             let defaultName = GameNameGenerator.generateImportName(
                 modPackName: parsed.modPackName,
                 modPackVersion: parsed.modPackVersion,
@@ -159,6 +167,16 @@ class ModPackImportViewModel: BaseGameFormViewModel {
               let extractedPath = extractedModPackPath,
               let indexInfo = modPackIndexInfo,
               let gameRepository = gameRepository else { return }
+        
+        guard isModPackVersionSupported else {
+            GlobalErrorHandler.shared.handle(
+                GlobalError.validation(
+                    i18nKey: "Only modpacks with Minecraft 1.13 or newer are supported",
+                    level: .notification
+                )
+            )
+            return
+        }
         
         isProcessingModPack = true
         
@@ -466,6 +484,15 @@ class ModPackImportViewModel: BaseGameFormViewModel {
         return indexInfo.loaderVersion.isEmpty
         ? indexInfo.loaderType
         : "\(indexInfo.loaderType)-\(indexInfo.loaderVersion)"
+    }
+    
+    var isModPackVersionSupported: Bool {
+        guard let gameVersion = modPackIndexInfo?.gameVersion else { return true }
+        return CommonUtil.isVersionAtLeast(gameVersion, minimum: minimumSupportedGameVersion)
+    }
+    
+    var unsupportedVersionMessage: String {
+        "This modpack targets Minecraft \(gameVersion). Only 1.13 or newer is supported"
     }
     
     // MARK: - Expose Internal Objects

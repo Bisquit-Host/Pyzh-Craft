@@ -79,6 +79,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
     
     private var allModPackVersions: [ModrinthProjectDetailVersion] = []
     private var gameRepository: GameRepository?
+    private let minimumSupportedGameVersion = "1.13"
     
     func setGameRepository(_ repository: GameRepository) {
         self.gameRepository = repository
@@ -87,7 +88,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
     /// Apply preloaded project details to avoid repeated loading within the sheet
     func applyPreloadedDetail(_ detail: ModrinthProjectDetail) {
         projectDetail = detail
-        availableGameVersions = CommonUtil.sortMinecraftVersions(detail.gameVersions)
+        availableGameVersions = filterSupportedGameVersions(detail.gameVersions)
         isLoadingProjectDetails = false
     }
     
@@ -101,7 +102,7 @@ class ModPackDownloadSheetViewModel: ObservableObject {
                 id: projectId
             )
             let gameVersions = projectDetail?.gameVersions ?? []
-            availableGameVersions = CommonUtil.sortMinecraftVersions(gameVersions)
+            availableGameVersions = filterSupportedGameVersions(gameVersions)
         } catch {
             let globalError = GlobalError.from(error)
             GlobalErrorHandler.shared.handle(globalError)
@@ -134,6 +135,13 @@ class ModPackDownloadSheetViewModel: ObservableObject {
         }
         
         isLoadingModPackVersions = false
+    }
+    
+    private func filterSupportedGameVersions(_ versions: [String]) -> [String] {
+        let supportedVersions = versions.filter {
+            CommonUtil.isVersionAtLeast($0, minimum: minimumSupportedGameVersion)
+        }
+        return CommonUtil.sortMinecraftVersions(supportedVersions)
     }
     
     // MARK: - File Operations

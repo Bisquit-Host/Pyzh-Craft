@@ -7,9 +7,14 @@ class GameRepository: ObservableObject {
     
     /// A list of games grouped by working path, where the key is the working path and the value is an array of games
     @Published private(set) var gamesByWorkingPath: [String: [GameVersionInfo]] = [:]
+    @Published private(set) var corruptedGamesByWorkingPath: [String: [GameVersionInfo]] = [:]
     
     var games: [GameVersionInfo] {
         gamesByWorkingPath[currentWorkingPath] ?? []
+    }
+    
+    var corruptedGames: [GameVersionInfo] {
+        corruptedGamesByWorkingPath[currentWorkingPath] ?? []
     }
     
     private var currentWorkingPath: String {
@@ -116,6 +121,9 @@ class GameRepository: ObservableObject {
             } else {
                 gamesByWorkingPath[workingPath]?.append(game)
             }
+            corruptedGamesByWorkingPath[workingPath]?.removeAll {
+                $0.id == game.id || $0.gameName == game.gameName
+            }
         }
         
         Logger.shared.info("Game added successfully: \(game.gameName) (working path: \(workingPath))")
@@ -149,6 +157,7 @@ class GameRepository: ObservableObject {
         
         await MainActor.run {
             gamesByWorkingPath[workingPath]?.removeAll { $0.id == id }
+            corruptedGamesByWorkingPath[workingPath]?.removeAll { $0.id == id }
         }
         
         Logger.shared.info("Successfully deleted game: \(game.gameName) (working path: \(workingPath))")
@@ -162,6 +171,24 @@ class GameRepository: ObservableObject {
                 GlobalErrorHandler.shared.handle(error)
             }
         }
+    }
+    
+    func deleteCorruptedGame(gameName: String) async throws {
+        let workingPath = currentWorkingPath
+        let dbPath = AppPaths.gameVersionDatabase.path
+        
+        try await Task.detached(priority: .userInitiated) {
+            let db = GameVersionDatabase(dbPath: dbPath)
+            try? db.initialize()
+            try db.deleteGame(gameName: gameName, workingPath: workingPath)
+        }.value
+        
+        await MainActor.run {
+            corruptedGamesByWorkingPath[workingPath]?.removeAll { $0.gameName == gameName }
+            gamesByWorkingPath[workingPath]?.removeAll { $0.gameName == gameName }
+        }
+        
+        Logger.shared.info("Successfully deleted corrupted game record: \(gameName) (working path: \(workingPath))")
     }
     
     func getGame(by id: String) -> GameVersionInfo? {
@@ -191,6 +218,9 @@ class GameRepository: ObservableObject {
                     gamesByWorkingPath[workingPath] = []
                 }
                 gamesByWorkingPath[workingPath]?.append(game)
+            }
+            corruptedGamesByWorkingPath[workingPath]?.removeAll {
+                $0.id == game.id || $0.gameName == game.gameName
             }
         }
         
@@ -346,6 +376,7 @@ class GameRepository: ObservableObject {
                 GlobalErrorHandler.shared.handle(error)
                 await MainActor.run {
                     gamesByWorkingPath = [:]
+                    corruptedGamesByWorkingPath = [:]
                 }
             }
         }
@@ -373,7 +404,7 @@ class GameRepository: ObservableObject {
         let workingPath = currentWorkingPath
         let dbPath = AppPaths.gameVersionDatabase.path
         
-        let (validGames, pathForLog): ([GameVersionInfo], String) = try await Task.detached(priority: .userInitiated) {
+        let (validGames, corruptedGames, pathForLog): ([GameVersionInfo], [GameVersionInfo], String) = try await Task.detached(priority: .userInitiated) {
             let db = GameVersionDatabase(dbPath: dbPath)
             try? db.initialize()
             let games = try db.loadGames(workingPath: workingPath)
@@ -393,13 +424,18 @@ class GameRepository: ObservableObject {
                 localGameNames = []
             }
             let valid = games.filter { localGameNames.contains($0.gameName) }
-            return (valid, workingPath)
+            let corrupted = games.filter { !localGameNames.contains($0.gameName) }
+            return (valid, corrupted, workingPath)
         }.value
         
         await MainActor.run {
             gamesByWorkingPath = [workingPath: validGames]
+            corruptedGamesByWorkingPath = [workingPath: corruptedGames]
         }
         
         Logger.shared.info("Successfully loaded \(validGames.count) games (working path: \(pathForLog))")
+        if !corruptedGames.isEmpty {
+            Logger.shared.warning("Detected \(corruptedGames.count) corrupted game records (working path: \(pathForLog))")
+        }
     }
 }

@@ -10,6 +10,8 @@ public struct SidebarView: View {
     @State private var searchText = ""
     @State private var showDeleteAlert = false
     @State private var gameToDelete: GameVersionInfo?
+    @State private var showDeleteCorruptedAlert = false
+    @State private var corruptedGameToDelete: GameVersionInfo?
     @State private var gameToExport: GameVersionInfo?
     @StateObject private var gameActionManager = GameActionManager.shared
     @StateObject private var gameStatusManager = GameStatusManager.shared
@@ -75,6 +77,27 @@ public struct SidebarView: View {
                                 gameToExport = game
                             }
                         )
+                    }
+                }
+            }
+            
+            if !filteredCorruptedGames.isEmpty {
+                Section("Corrupted Game List") {
+                    ForEach(filteredCorruptedGames) { game in
+                        HStack(spacing: 6) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .frame(width: 16, height: 16)
+                                .foregroundStyle(.orange)
+                            
+                            Text(game.gameName)
+                                .lineLimit(1)
+                        }
+                        .contextMenu {
+                            Button("Delete Record", systemImage: "trash", role: .destructive) {
+                                corruptedGameToDelete = game
+                                showDeleteCorruptedAlert = true
+                            }
+                        }
                     }
                 }
             }
@@ -213,6 +236,26 @@ public struct SidebarView: View {
                 Text("Are you sure you want to delete the game \"\(gameToDelete.gameName)\" and all its data? (This will take a very long time)")
             }
         }
+        .confirmationDialog(
+            "Delete Corrupted Game Record",
+            isPresented: $showDeleteCorruptedAlert,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                if let corruptedGameToDelete {
+                    gameActionManager.deleteCorruptedGame(
+                        game: corruptedGameToDelete,
+                        gameRepository: gameRepository
+                    )
+                }
+            }
+            .keyboardShortcut(.defaultAction)
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            if let corruptedGameToDelete {
+                Text("Are you sure you want to delete the corrupted game record \"\(corruptedGameToDelete.gameName)\"?")
+            }
+        }
         .sheet(item: $gameToExport) { game in
             ModPackExportSheet(gameInfo: game)
         }
@@ -232,6 +275,15 @@ public struct SidebarView: View {
         
         let lower = searchText.lowercased()
         return gameRepository.games.filter { $0.gameName.lowercased().contains(lower) }
+    }
+    
+    private var filteredCorruptedGames: [GameVersionInfo] {
+        if searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return gameRepository.corruptedGames
+        }
+        
+        let lower = searchText.lowercased()
+        return gameRepository.corruptedGames.filter { $0.gameName.lowercased().contains(lower) }
     }
     
     // MARK: - Skin Manager

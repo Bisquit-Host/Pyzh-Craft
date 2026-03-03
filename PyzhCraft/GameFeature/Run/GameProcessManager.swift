@@ -38,6 +38,15 @@ final class GameProcessManager: ObservableObject, @unchecked Sendable {
             let isCrash = await checkIfCrash(gameId: gameId, process: process)
             
             if isCrash {
+                await MainActor.run {
+                    GlobalErrorHandler.shared.handle(
+                        GlobalError.gameLaunch(
+                            i18nKey: "Game crashed unexpectedly",
+                            level: .popup
+                        )
+                    )
+                }
+                
                 let gameSettings = GameSettingsManager.shared
                 if gameSettings.enableAICrashAnalysis {
                     Logger.shared.info("Game crash detected, AI analysis enabled: \(gameId)")

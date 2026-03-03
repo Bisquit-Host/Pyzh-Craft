@@ -49,6 +49,11 @@ struct ModPackImportView: View {
                     viewModel.updateParentState()
                 }
             }
+            .onChange(of: viewModel.modPackIndexInfo?.gameVersion) { oldValue, newValue in
+                if oldValue != newValue {
+                    viewModel.updateParentState()
+                }
+            }
             .onChange(of: viewModel.modPackViewModelForProgress.modPackInstallState.isInstalling) { oldValue, newValue in
                 if oldValue != newValue {
                     viewModel.updateParentState()
@@ -81,7 +86,10 @@ struct ModPackImportView: View {
     private var formContentView: some View {
         VStack {
             modPackImportContentView.padding(.bottom, 10)
-            if viewModel.hasSelectedModPack && !viewModel.isProcessingModPack && viewModel.modPackIndexInfo != nil {
+            if viewModel.hasSelectedModPack && !viewModel.isModPackVersionSupported {
+                unsupportedVersionHint
+            }
+            if viewModel.hasSelectedModPack && !viewModel.isProcessingModPack && viewModel.modPackIndexInfo != nil && viewModel.isModPackVersionSupported {
                 modPackGameNameInputSection
             }
             
@@ -180,6 +188,18 @@ struct ModPackImportView: View {
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
+    }
+    
+    private var unsupportedVersionHint: some View {
+        HStack(alignment: .center, spacing: 8) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(.orange)
+            Text(viewModel.unsupportedVersionMessage)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     private var modPackGameNameInputSection: some View {

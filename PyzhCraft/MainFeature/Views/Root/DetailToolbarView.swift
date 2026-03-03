@@ -11,6 +11,7 @@ public struct DetailToolbarView: ToolbarContent {
     @EnvironmentObject var playerListViewModel: PlayerListViewModel
     @StateObject private var gameStatusManager = GameStatusManager.shared
     @StateObject private var gameActionManager = GameActionManager.shared
+    @State private var isPreparingInstall = false
     
     private var currentGame: GameVersionInfo? {
         if case .game(let gameId) = detailState.selectedItem {
@@ -26,16 +27,65 @@ public struct DetailToolbarView: ToolbarContent {
     /// Open the project page of the current resource in the browser
     private func openCurrentResourceInBrowser() {
         guard let slug = detailState.loadedProjectDetail?.slug else { return }
+        let resourceType = detailState.loadedProjectDetail?.projectType
+        ?? detailState.gameResourcesType
         
         let baseURL: String = switch filterState.dataSource {
         case .modrinth:
             URLConfig.API.Modrinth.webProjectBase
         case .curseforge:
-            URLConfig.API.CurseForge.webProjectBase
+            URLConfig.API.CurseForge.webProjectBase(
+                resourceType: resourceType
+            )
         }
         
         guard let url = URL(string: baseURL + slug) else { return }
         openURL(url)
+    }
+    
+    private func openInstallSheet() {
+        guard let projectId = detailState.selectedProjectId else { return }
+        isPreparingInstall = true
+        
+        Task {
+            await prepareInstallSheetData(projectId: projectId)
+            await MainActor.run {
+                isPreparingInstall = false
+            }
+        }
+    }
+    
+    private func prepareInstallSheetData(projectId: String) async {
+        let resourceType = detailState.gameResourcesType
+        
+        if resourceType.lowercased() == "modpack" {
+            guard let detail = await ResourceDetailLoader.loadModPackDetail(projectId: projectId) else {
+                return
+            }
+            
+            await MainActor.run {
+                detailState.loadedProjectDetail = detail
+                detailState.currentProject = ModrinthProject.from(detail: detail)
+                detailState.compatibleGames = []
+                detailState.showInstallSheet = true
+            }
+            return
+        }
+        
+        guard let result = await ResourceDetailLoader.loadProjectDetail(
+            projectId: projectId,
+            gameRepository: gameRepository,
+            resourceType: resourceType
+        ) else {
+            return
+        }
+        
+        await MainActor.run {
+            detailState.loadedProjectDetail = result.detail
+            detailState.currentProject = ModrinthProject.from(detail: result.detail)
+            detailState.compatibleGames = result.compatibleGames
+            detailState.showInstallSheet = true
+        }
     }
     
     public var body: some ToolbarContent {
@@ -114,6 +164,16 @@ public struct DetailToolbarView: ToolbarContent {
                     }
                     .help("Return")
                     Spacer()
+                    Button(action: openInstallSheet) {
+                        if isPreparingInstall {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Label("Install", systemImage: "arrow.down.circle")
+                        }
+                    }
+                    .help("Install")
+                    .disabled(isPreparingInstall)
                     Button {
                         openCurrentResourceInBrowser()
                     } label: {

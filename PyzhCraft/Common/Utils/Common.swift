@@ -85,6 +85,10 @@ enum CommonUtil {
         return 0
     }
     
+    static func isVersionAtLeast(_ version: String, minimum: String) -> Bool {
+        compareMinecraftVersions(version, minimum) >= 0
+    }
+    
     private static func parseVersionComponents(_ version: String) -> [Int] {
         return version.components(separatedBy: ".")
             .compactMap { Int($0.trimmingCharacters(in: .whitespacesAndNewlines)) }

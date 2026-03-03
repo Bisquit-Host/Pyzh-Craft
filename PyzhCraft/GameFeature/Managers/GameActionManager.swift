@@ -97,4 +97,30 @@ class GameActionManager: ObservableObject {
             }
         }
     }
+    
+    /// Delete only corrupted game records in database
+    /// - Parameters:
+    ///   - game: corrupted game record
+    ///   - gameRepository: game repository
+    func deleteCorruptedGame(
+        game: GameVersionInfo,
+        gameRepository: GameRepository
+    ) {
+        Task {
+            do {
+                try await gameRepository.deleteCorruptedGame(gameName: game.gameName)
+                GameIconCache.shared.invalidateCache(for: game.gameName)
+                AppPaths.invalidatePaths(forGameName: game.gameName)
+                await ModScanner.shared.clearModCache(for: game.gameName)
+                Logger.shared.info("Corrupted game record deleted successfully: \(game.gameName)")
+            } catch {
+                let globalError = GlobalError.fileSystem(
+                    i18nKey: "Game Deletion Failed",
+                    level: .notification
+                )
+                Logger.shared.error("Failed to delete corrupted game record: \(globalError.chineseMessage)")
+                GlobalErrorHandler.shared.handle(globalError)
+            }
+        }
+    }
 }
