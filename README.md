@@ -9,7 +9,7 @@
   [![Discord](https://img.shields.io/badge/Discord-bule.svg?logo=discord)](https://discord.com/invite/kerMT2r9rz)
   [![Homebrew](https://img.shields.io/badge/Homebrew-available-green.svg?logo=homebrew)](https://formulae.brew.sh/cask/swiftcraft-launcher)
   
-  🌐 [Website](https://suhang12332.github.io/Swift-Craft-Launcher-Assets/web) • 💾 [Download](https://github.com/suhang12332/Swift-Craft-Launcher/releases/latest)
+  💾 [Download](https://github.com/suhang12332/Swift-Craft-Launcher/releases/latest)
 </div>
 
 ---
@@ -50,20 +50,17 @@ Pyzh Craft is a native macOS Minecraft launcher 🍎 built with SwiftUI, offerin
 
 ## 📥 Installation
 
-### 🍺 Using Homebrew Tap (Recommended)
-```bash
-# Method 1: One-command install
-brew install --cask suhang12332/swiftcraftlauncher/swift-craft-launcher
-
-# Method 2: Add Tap then install
-brew tap suhang12332/swiftcraftlauncher
-brew install --cask swift-craft-launcher
-```
-
-> **💡 Tip**: We created a dedicated [Homebrew Tap](https://github.com/suhang12332/homebrew-swiftcraftlauncher) for Pyzh Craft
-
-### 💾 Pre-built Release
-Download the latest version from [GitHub Releases](https://github.com/topscrech/Pyzh-Craft/releases/latest)
+<!--### 🍺 Using Homebrew Tap (Recommended)-->
+<!--```bash-->
+<!--# Method 1: One-command install-->
+<!--brew install --cask suhang12332/swiftcraftlauncher/swift-craft-launcher-->
+<!---->
+<!--# Method 2: Add Tap then install-->
+<!--brew tap suhang12332/swiftcraftlauncher-->
+<!--brew install --cask swift-craft-launcher-->
+<!--```-->
+<!---->
+<!--> **💡 Tip**: We created a dedicated [Homebrew Tap](https://github.com/suhang12332/homebrew-swiftcraftlauncher) for Pyzh Craft-->
 
 ### ❓ Frequently Asked Questions
 Please visit [FAQ](doc/FAQ.md)
