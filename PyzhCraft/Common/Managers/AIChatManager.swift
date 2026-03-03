@@ -59,14 +59,7 @@ class AIChatManager: ObservableObject {
         allMessages.append(userMessage)
         
         do {
-            switch settings.selectedProvider.apiFormat {
-            case .openAI:
-                try await sendOpenAIMessage(messages: allMessages, model: model, chatState: chatState)
-            case .ollama:
-                try await sendOllamaMessage(messages: allMessages, model: model, chatState: chatState)
-                //            case .gemini:
-                //                try await sendGeminiMessage(messages: allMessages, model: model, chatState: chatState)
-            }
+            try await sendOpenAIMessage(messages: allMessages, model: model, chatState: chatState)
         } catch {
             Logger.shared.error("Failed to send message: \(error.localizedDescription)")
             await MainActor.run {
@@ -209,127 +202,6 @@ class AIChatManager: ObservableObject {
                 messageDict["content"] = ""
             } else if contentParts.count == 1 {
                 messageDict["content"] = contentParts[0]
-            } else {
-                messageDict["content"] = contentParts.joined(separator: "\n\n")
-            }
-            
-            apiMessages.append(messageDict)
-        }
-        
-        return apiMessages
-    }
-    
-    // MARK: - Ollama format
-    
-    private func sendOllamaMessage(messages: [ChatMessage], model: String, chatState: ChatState) async throws {
-        let baseURL = settings.selectedProvider == .ollama
-        ? (settings.ollamaBaseURL.isEmpty ? settings.selectedProvider.baseURL : settings.ollamaBaseURL)
-        : settings.selectedProvider.baseURL
-        let apiURL = baseURL + settings.selectedProvider.apiPath
-        
-        guard let url = URL(string: apiURL) else {
-            throw GlobalError.network(
-                i18nKey: "Invalid URL",
-                level: .notification
-            )
-        }
-        
-        // Build request body
-        let requestBody: [String: Any] = [
-            "model": model,
-            "stream": true,
-            "messages": try await buildOllamaMessages(messages: messages),
-        ]
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        // Ollama may not require an API Key, but add it if you have one
-        if !settings.apiKey.isEmpty {
-            request.setValue(settings.apiKey, forHTTPHeaderField: "Authorization")
-        }
-        
-        let jsonData = try JSONSerialization.data(withJSONObject: requestBody)
-        request.httpBody = jsonData
-        
-        // Send streaming request
-        let (asyncBytes, response) = try await urlSession.bytes(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw GlobalError(
-                type: .network,
-                i18nKey: "Invalid response",
-                level: .notification
-            )
-        }
-        
-        guard (200...299).contains(httpResponse.statusCode) else {
-            let errorData = try await asyncBytes.reduce(into: Data()) { $0.append($1) }
-            let errorMessage = String(data: errorData, encoding: .utf8) ?? "Unknown error"
-            Logger.shared.error("AI API error response: \(errorMessage)")
-            throw GlobalError(
-                type: .network,
-                i18nKey: "API error",
-                level: .notification
-            )
-        }
-        
-        // Handling streaming responses
-        var accumulatedContent = ""
-        for try await line in asyncBytes.lines {
-            guard !line.isEmpty,
-                  let jsonData = line.data(using: .utf8),
-                  let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] else {
-                continue
-            }
-            
-            // Ollama streaming response format: {"message": {"content": "..."}, "done": false}
-            if let message = json["message"] as? [String: Any],
-               let content = message["content"] as? String {
-                accumulatedContent += content
-                await MainActor.run {
-                    chatState.updateLastMessage(accumulatedContent)
-                }
-            }
-            
-            if let done = json["done"] as? Bool, done {
-                break
-            }
-        }
-        
-        await MainActor.run {
-            chatState.isSending = false
-        }
-    }
-    
-    /// Construct a message array in Ollama format
-    private func buildOllamaMessages(messages: [ChatMessage]) async throws -> [[String: Any]] {
-        var apiMessages: [[String: Any]] = []
-        
-        for message in messages {
-            var messageDict: [String: Any] = [
-                "role": message.role.rawValue
-            ]
-            
-            // Handle text content and file attachments
-            var contentParts: [String] = []
-            
-            if !message.content.isEmpty {
-                contentParts.append(message.content)
-            }
-            
-            // Handle file attachments (skip images)
-            for attachment in message.attachments {
-                if case .file(let url, let fileName) = attachment {
-                    let fileText = await processFile(url: url, fileName: fileName)
-                    contentParts.append(fileText)
-                }
-                // Ignore image attachments
-            }
-            
-            if contentParts.isEmpty {
-                messageDict["content"] = ""
             } else {
                 messageDict["content"] = contentParts.joined(separator: "\n\n")
             }

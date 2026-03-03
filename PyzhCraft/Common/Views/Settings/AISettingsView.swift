@@ -47,19 +47,6 @@ public struct AISettingsView: View {
             }
             .labeledContentStyle(.custom)
             
-            // Ollama address settings (only shown when Ollama is selected)
-            if aiSettings.selectedProvider == .ollama {
-                LabeledContent("Ollama URL") {
-                    TextField("http://localhost:11434", text: $aiSettings.ollamaBaseURL)
-                        .textFieldStyle(.roundedBorder)
-                        .labelsHidden()
-                        .frame(maxWidth: 300)
-                        .fixedSize()
-                        .focusable(false)
-                }
-                .labeledContentStyle(.custom)
-            }
-            
             // Custom interface address settings in OpenAI format (can be used with compatible services such as DeepSeek)
             if aiSettings.selectedProvider.apiFormat == .openAI {
                 LabeledContent("API URL") {

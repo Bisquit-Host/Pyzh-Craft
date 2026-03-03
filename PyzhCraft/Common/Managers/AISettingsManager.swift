@@ -12,18 +12,9 @@ private struct OpenAIModelListResponse: Decodable {
     let data: [OpenAIModel]
 }
 
-private struct OllamaTagsResponse: Decodable {
-    struct OllamaModel: Decodable {
-        let name: String
-    }
-    
-    let models: [OllamaModel]
-}
-
 /// AI provider enumeration
 enum AIProvider: String, CaseIterable, Identifiable {
-    case openai,
-         ollama
+    case openai
     //    gemini
     
     var id: String { rawValue }
@@ -32,8 +23,6 @@ enum AIProvider: String, CaseIterable, Identifiable {
         switch self {
         case .openai:
             "OpenAI"
-        case .ollama:
-            "Ollama"
             //        case .gemini:
             //            "Google Gemini"
         }
@@ -43,8 +32,6 @@ enum AIProvider: String, CaseIterable, Identifiable {
         switch self {
         case .openai:
             "https://api.openai.com"
-        case .ollama:
-            "http://localhost:11434"
             //        case .gemini:
             //            "https://generativelanguage.googleapis.com"
         }
@@ -55,8 +42,6 @@ enum AIProvider: String, CaseIterable, Identifiable {
         switch self {
         case .openai:
                 .openAI
-        case .ollama:
-                .ollama
             //        case .gemini:
             //            .gemini
         }
@@ -67,8 +52,6 @@ enum AIProvider: String, CaseIterable, Identifiable {
         switch self {
         case .openai:
             "/v1/chat/completions"
-        case .ollama:
-            "/api/chat"
             //        case .gemini:
             //            "/v1/models/\(defaultModel):streamGenerateContent"
         }
@@ -77,8 +60,7 @@ enum AIProvider: String, CaseIterable, Identifiable {
 
 /// API format enum
 enum APIFormat {
-    case openAI,  // OpenAI format (compatible with DeepSeek, etc.)
-         ollama
+    case openAI  // OpenAI format (compatible with DeepSeek, etc.)
     //    case gemini
 }
 
@@ -136,13 +118,6 @@ class AISettingsManager: ObservableObject {
         }
     }
     
-    @AppStorage("aiOllamaBaseURL")
-    var ollamaBaseURL = "http://localhost:11434" {
-        didSet {
-            objectWillChange.send()
-        }
-    }
-    
     @AppStorage("aiOpenAIBaseURL")
     var openAIBaseURL = "" {
         didSet {
@@ -159,10 +134,7 @@ class AISettingsManager: ObservableObject {
     
     /// Get the API URL of the current provider (excluding Gemini as Gemini requires special handling)
     func getAPIURL() -> String {
-        if selectedProvider == .ollama {
-            let url = ollamaBaseURL.isEmpty ? selectedProvider.baseURL : ollamaBaseURL
-            return url + selectedProvider.apiPath
-        } else if selectedProvider.apiFormat == .openAI {
+        if selectedProvider.apiFormat == .openAI {
             // OpenAI format supports custom URLs (can be used with compatible services such as DeepSeek)
             let url = openAIBaseURL.isEmpty ? selectedProvider.baseURL : openAIBaseURL
             return url + selectedProvider.apiPath
@@ -176,8 +148,6 @@ class AISettingsManager: ObservableObject {
         switch provider {
         case .openai:
             "gpt-4o-mini"
-        case .ollama:
-            "llama3.2"
         }
     }
     
@@ -186,8 +156,6 @@ class AISettingsManager: ObservableObject {
         switch provider {
         case .openai:
             ["gpt-4o-mini", "gpt-4o", "gpt-4.1-mini", "deepseek-chat"]
-        case .ollama:
-            ["llama3.2", "llama3.1", "qwen2.5", "mistral"]
         }
     }
     
@@ -218,8 +186,6 @@ class AISettingsManager: ObservableObject {
         switch selectedProvider {
         case .openai:
             await fetchOpenAIModels()
-        case .ollama:
-            await fetchOllamaModels()
         }
     }
     
@@ -247,30 +213,6 @@ class AISettingsManager: ObservableObject {
             return normalizeModels(result.data.map(\.id))
         } catch {
             Logger.shared.error("Failed to fetch OpenAI model list: \(error.localizedDescription)")
-            return []
-        }
-    }
-    
-    private func fetchOllamaModels() async -> [String] {
-        let baseURL = ollamaBaseURL.isEmpty ? selectedProvider.baseURL : ollamaBaseURL
-        guard let url = URL(string: baseURL + "/api/tags") else {
-            return []
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse,
-                  (200...299).contains(httpResponse.statusCode) else {
-                return []
-            }
-            
-            let result = try JSONDecoder().decode(OllamaTagsResponse.self, from: data)
-            return normalizeModels(result.models.map(\.name))
-        } catch {
-            Logger.shared.error("Failed to fetch Ollama model list: \(error.localizedDescription)")
             return []
         }
     }

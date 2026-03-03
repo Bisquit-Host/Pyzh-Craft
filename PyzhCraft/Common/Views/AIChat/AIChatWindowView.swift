@@ -114,11 +114,6 @@ struct AIChatWindowView: View {
                 await refreshModelOptions()
             }
         }
-        .onChange(of: aiSettings.ollamaBaseURL) {
-            Task {
-                await refreshModelOptions()
-            }
-        }
         .onDisappear {
             // Clear all data after closing the page
             clearAllData()

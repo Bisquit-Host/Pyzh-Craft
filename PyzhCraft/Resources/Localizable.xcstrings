@@ -34391,9 +34391,6 @@
         }
       }
     },
-    "http://localhost:11434" : {
-      "shouldTranslate" : false
-    },
     "I Understand" : {
       "localizations" : {
         "ar" : {
@@ -53209,6 +53206,7 @@
     },
     "Ollama URL" : {
       "comment" : "AI Settings",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
