@@ -23,8 +23,8 @@ enum URLConfig {
         
         static var isEnabled: Bool {
             let defaults = UserDefaults.standard
-            // Enabled by default when not written
-            return (defaults.object(forKey: enableKey) as? Bool) ?? true
+            // Disabled by default when not written
+            return (defaults.object(forKey: enableKey) as? Bool) ?? false
         }
         
         static var proxyString: String {

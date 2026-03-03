@@ -60,9 +60,9 @@ public enum ThemeMode: String, CaseIterable {
 class GeneralSettingsManager: ObservableObject, WorkingPathProviding {
     static let shared = GeneralSettingsManager()
     
-    /// Whether to enable GitHub proxy (enabled by default)
+    /// Whether to enable GitHub proxy (disabled by default)
     @AppStorage("enableGitHubProxy")
-    var enableGitHubProxy = true {
+    var enableGitHubProxy = false {
         didSet { objectWillChange.send() }
     }
     
