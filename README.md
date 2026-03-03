@@ -63,9 +63,7 @@ brew install --cask swift-craft-launcher
 > **💡 Tip**: We created a dedicated [Homebrew Tap](https://github.com/suhang12332/homebrew-swiftcraftlauncher) for Pyzh Craft
 
 ### 💾 Pre-built Release
-Download the latest version from [GitHub Releases](https://github.com/suhang12332/Pyzh-Craft/releases/latest)
-
-> **⚠️ Note**: The current available downloads are test versions. Stable releases are coming soon
+Download the latest version from [GitHub Releases](https://github.com/topscrech/Pyzh-Craft/releases/latest)
 
 ### ❓ Frequently Asked Questions
 Please visit [FAQ](doc/FAQ.md)
