@@ -16,7 +16,7 @@
 
 ## Supported platforms
 - 🖥️ macOS 14+
-- ☕️ Java: 8 or later (for Minecraft runtime)
+- ☕️ Java: 8+ (for Minecraft runtime)
 
 ## 🎯 Overview
 
