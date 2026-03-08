@@ -2,16 +2,16 @@ import SwiftUI
 
 // MARK: - Constants
 private enum ServerAddressSectionConstants {
-    static let maxHeight: CGFloat = 235
-    static let verticalPadding: CGFloat = 4
-    static let headerBottomPadding: CGFloat = 4
-    static let placeholderCount: Int = 5
-    static let popoverWidth: CGFloat = 320
-    static let popoverMaxHeight: CGFloat = 320
-    static let chipPadding: CGFloat = 16
-    static let estimatedCharWidth: CGFloat = 10
-    static let maxItems: Int = 4  // Display up to 4
-    static let maxWidth: CGFloat = 320
+    static let maxHeight = 235.0
+    static let verticalPadding = 4.0
+    static let headerBottomPadding = 4.0
+    static let placeholderCount = 5
+    static let popoverWidth = 320.0
+    static let popoverMaxHeight = 320.0
+    static let chipPadding = 16.0
+    static let estimatedCharWidth = 10.0
+    static let maxItems = 4 // Display up to 4
+    static let maxWidth = 320.0
 }
 
 // MARK: - Server address area view
@@ -44,8 +44,8 @@ struct ServerAddressSectionView: View {
                 contentWithOverflow
             }
         }
-        .sheet(item: $selectedServer) { server in
-            ServerAddressEditView(server: server, gameName: gameName, onRefresh: onRefresh)
+        .sheet(item: $selectedServer) {
+            ServerAddressEditView(server: $0, gameName: gameName, onRefresh: onRefresh)
         }
         .sheet(isPresented: $showAddServer) {
             ServerAddressEditView(gameName: gameName, onRefresh: onRefresh)
@@ -61,11 +61,15 @@ struct ServerAddressSectionView: View {
     // MARK: - Header Views
     private var headerView: some View {
         let (_, overflowItems) = computeVisibleAndOverflowItems()
+        
         return HStack {
             headerTitle
+            
             Spacer()
+            
             HStack(spacing: 8) {
                 addServerButton
+                
                 if !overflowItems.isEmpty {
                     overflowButton
                 }
@@ -90,6 +94,7 @@ struct ServerAddressSectionView: View {
     
     private var overflowButton: some View {
         let (_, overflowItems) = computeVisibleAndOverflowItems()
+        
         return Button {
             showOverflowPopover = true
         } label: {
@@ -217,8 +222,9 @@ struct ServerAddressSectionView: View {
                         let status = await NetworkUtils.checkServerConnectionStatus(
                             address: server.address,
                             port: server.port,
-                            timeout: 5.0
+                            timeout: 5
                         )
+                        
                         return (server.id, status)
                     }
                 }
