@@ -69,8 +69,7 @@ struct DetailView: View {
         }
     }
     
-    @ViewBuilder
-    private var installSheetView: some View {
+    @ViewBuilder private var installSheetView: some View {
         if let project = detailState.currentProject, let detail = detailState.loadedProjectDetail {
             if detailState.gameResourcesType.lowercased() == "modpack" {
                 ModPackDownloadSheet(
