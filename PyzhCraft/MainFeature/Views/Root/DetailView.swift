@@ -71,8 +71,7 @@ struct DetailView: View {
     
     @ViewBuilder
     private var installSheetView: some View {
-        if let project = detailState.currentProject,
-           let detail = detailState.loadedProjectDetail {
+        if let project = detailState.currentProject, let detail = detailState.loadedProjectDetail {
             if detailState.gameResourcesType.lowercased() == "modpack" {
                 ModPackDownloadSheet(
                     projectId: project.projectId,
@@ -81,8 +80,7 @@ struct DetailView: View {
                     preloadedDetail: detail
                 )
                 .environmentObject(gameRepository)
-            } else if let gameId = detailState.gameId,
-                      let gameInfo = gameRepository.getGame(by: gameId) {
+            } else if let gameId = detailState.gameId, let gameInfo = gameRepository.getGame(by: gameId) {
                 GameResourceInstallSheet(
                     project: project,
                     resourceType: detailState.gameResourcesType,

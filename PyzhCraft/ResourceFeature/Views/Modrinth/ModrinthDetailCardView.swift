@@ -1,4 +1,5 @@
 import SwiftUI
+import Kingfisher
 
 struct ModrinthDetailCardView: View {
     // MARK: - Properties
@@ -19,13 +20,13 @@ struct ModrinthDetailCardView: View {
     @State private var showDeleteAlert = false
     @State private var isResourceDisabled = false  // Whether the resource is disabled (for graying effect)
     @EnvironmentObject private var gameRepository: GameRepository
-
+    
     // MARK: - Enums
     enum AddButtonState {
         case idle, loading, installed,
              update  // A new version is available
     }
-
+    
     // MARK: - Body
     var body: some View {
         HStack(spacing: ModrinthConstants.UIConstants.contentSpacing) {
@@ -47,54 +48,53 @@ struct ModrinthDetailCardView: View {
             isResourceDisabled = ResourceEnableDisableManager.isDisabled(fileName: newFileName)
         }
     }
-
+    
     // MARK: - View Components
     private var iconView: some View {
         Group {
             if project.projectId.hasPrefix("local_") || project.projectId.hasPrefix("file_") {
                 localResourceIcon
-            } else if let iconUrl = project.iconUrl,
-                      let url = URL(string: iconUrl) {
-                CachedAsyncImage(url: url) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    placeholderIcon
-                }
-                .frame(
-                    width: ModrinthConstants.UIConstants.iconSize,
-                    height: ModrinthConstants.UIConstants.iconSize
-                )
-                .cornerRadius(ModrinthConstants.UIConstants.cornerRadius)
-                .clipped()
+            } else if let iconUrl = project.iconUrl, let url = URL(string: iconUrl) {
+                KFImage(url)
+                    .placeholder {
+                        placeholderIcon
+                    }
+                    .cancelOnDisappear(true)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(
+                        width: ModrinthConstants.UIConstants.iconSize,
+                        height: ModrinthConstants.UIConstants.iconSize
+                    )
+                    .clipShape(.rect(cornerRadius: ModrinthConstants.UIConstants.cornerRadius))
+                    .clipped()
             } else {
                 placeholderIcon
             }
         }
     }
-
+    
     private var placeholderIcon: some View {
         Color.gray.opacity(0.2)
             .frame(
                 width: ModrinthConstants.UIConstants.iconSize,
                 height: ModrinthConstants.UIConstants.iconSize
             )
-            .cornerRadius(ModrinthConstants.UIConstants.cornerRadius)
+            .clipShape(.rect(cornerRadius: ModrinthConstants.UIConstants.cornerRadius))
     }
-
+    
     private var localResourceIcon: some View {
         Image(systemName: "questionmark.circle")
             .font(.system(size: ModrinthConstants.UIConstants.iconSize * 0.6))
-            .foregroundColor(.secondary)
+            .foregroundStyle(.secondary)
             .frame(
                 width: ModrinthConstants.UIConstants.iconSize,
                 height: ModrinthConstants.UIConstants.iconSize
             )
             .background(.gray.opacity(0.2))
-            .cornerRadius(ModrinthConstants.UIConstants.cornerRadius)
+            .clipShape(.rect(cornerRadius: ModrinthConstants.UIConstants.cornerRadius))
     }
-
+    
     private var titleView: some View {
         HStack(spacing: 4) {
             Text(project.title)
@@ -103,26 +103,26 @@ struct ModrinthDetailCardView: View {
             if type == true {
                 Text("by \(project.author)")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
             if type == false, let fileName = project.fileName {
                 Text(fileName)
                     .font(.subheadline)
                     .bold()
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
         }
     }
-
+    
     private var descriptionView: some View {
         Text(project.description)
             .font(.subheadline)
             .lineLimit(ModrinthConstants.UIConstants.descriptionLineLimit)
-            .foregroundColor(.secondary)
+            .foregroundStyle(.secondary)
     }
-
+    
     private var tagsView: some View {
         HStack(spacing: ModrinthConstants.UIConstants.spacing) {
             ForEach(
@@ -140,11 +140,11 @@ struct ModrinthDetailCardView: View {
                     "+\(project.displayCategories.count - ModrinthConstants.UIConstants.maxTags)"
                 )
                 .font(.caption2)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
             }
         }
     }
-
+    
     private var infoView: some View {
         VStack(alignment: .trailing, spacing: ModrinthConstants.UIConstants.spacing) {
             downloadInfoView
@@ -167,21 +167,21 @@ struct ModrinthDetailCardView: View {
             .environmentObject(gameRepository)
         }
     }
-
+    
     private var downloadInfoView: some View {
         InfoRowView(
             icon: "arrow.down.circle",
             text: Self.formatNumber(project.downloads)
         )
     }
-
+    
     private var followerInfoView: some View {
         InfoRowView(
             icon: "heart",
             text: Self.formatNumber(project.follows)
         )
     }
-
+    
     // MARK: - Helper Methods
     static func formatNumber(_ num: Int) -> String {
         if num >= 1_000_000 {
