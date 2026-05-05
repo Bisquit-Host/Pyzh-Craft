@@ -3,90 +3,98 @@ import Foundation
 class AppCacheManager {
     static let shared = AppCacheManager()
     private let queue = DispatchQueue(label: "AppCacheManager.queue")
-    
+    private let errorHandler: GlobalErrorHandler
+
+    private init(errorHandler: GlobalErrorHandler = AppServices.errorHandler) {
+        self.errorHandler = errorHandler
+    }
+
     private func fileURL(for namespace: String) throws -> URL {
-        
+
         do {
             try FileManager.default.createDirectory(at: AppPaths.appCache, withIntermediateDirectories: true)
         } catch {
             throw GlobalError.fileSystem(
-                i18nKey: "Cache Directory Creation Failed",
+                chineseMessage: "创建缓存目录失败: \(error.localizedDescription)",
+                i18nKey: "error.filesystem.cache_directory_creation_failed",
                 level: .notification
             )
         }
-        
+
         return AppPaths.appCache.appendingPathComponent("\(namespace).json")
     }
-    
+
     // MARK: - Public API
-    
+
     /// - Parameters:
-    ///   - namespace: namespace
-    ///   - key: key
-    ///   - value: value
-    /// - Throws: GlobalError when the operation fails
+    ///   - namespace: 命名空间
+    ///   - key: 键
+    ///   - value: 值
+    /// - Throws: GlobalError 当操作失败时
     func set<T: Codable>(namespace: String, key: String, value: T) throws {
         try queue.sync {
             var nsDict = try loadNamespace(namespace)
-            
+
             do {
                 let data = try JSONEncoder().encode(value)
                 nsDict[key] = data
                 try saveNamespace(namespace, dict: nsDict)
             } catch {
                 throw GlobalError.validation(
-                    i18nKey: "Cache Data Encode Failed",
+                    chineseMessage: "缓存数据编码失败: \(error.localizedDescription)",
+                    i18nKey: "error.validation.cache_data_encode_failed",
                     level: .notification
                 )
             }
         }
     }
-    
+
     /// - Parameters:
-    ///   - namespace: namespace
-    ///   - key: key
-    ///   - value: value
+    ///   - namespace: 命名空间
+    ///   - key: 键
+    ///   - value: 值
     func setSilently<T: Codable>(namespace: String, key: String, value: T) {
         do {
             try set(namespace: namespace, key: key, value: value)
         } catch {
-            GlobalErrorHandler.shared.handle(error)
+            errorHandler.handle(error)
         }
     }
-    
-    /// Get cached value
+
+    /// 获取缓存值
     /// - Parameters:
-    ///   - namespace: namespace
-    ///   - key: key
-    ///   - type: expected type
-    /// - Returns: decoded value, returns nil if it does not exist or decoding fails
+    ///   - namespace: 命名空间
+    ///   - key: 键
+    ///   - type: 期望的类型
+    /// - Returns: 解码后的值，如果不存在或解码失败则返回 nil
     func get<T: Codable>(namespace: String, key: String, as type: T.Type) -> T? {
         return queue.sync {
             do {
                 let nsDict = try loadNamespace(namespace)
                 guard let data = nsDict[key] else { return nil }
-                
+
                 do {
                     return try JSONDecoder().decode(T.self, from: data)
                 } catch {
-                    GlobalErrorHandler.shared.handle(GlobalError.validation(
-                        i18nKey: "Cache Data Decode Failed",
+                    errorHandler.handle(GlobalError.validation(
+                        chineseMessage: "解码缓存数据失败: \(error.localizedDescription)",
+                        i18nKey: "error.validation.cache_data_decode_failed",
                         level: .silent
                     ))
                     return nil
                 }
             } catch {
-                GlobalErrorHandler.shared.handle(error)
+                errorHandler.handle(error)
                 return nil
             }
         }
     }
-    
-    /// Remove cached items
+
+    /// 移除缓存项
     /// - Parameters:
-    ///   - namespace: namespace
-    ///   - key: key
-    /// - Throws: GlobalError when the operation fails
+    ///   - namespace: 命名空间
+    ///   - key: 键
+    /// - Throws: GlobalError 当操作失败时
     func remove(namespace: String, key: String) throws {
         try queue.sync {
             var nsDict = try loadNamespace(namespace)
@@ -94,43 +102,43 @@ class AppCacheManager {
             try saveNamespace(namespace, dict: nsDict)
         }
     }
-    
-    /// Remove cached items (silent version)
+
+    /// 移除缓存项（静默版本）
     /// - Parameters:
-    ///   - namespace: namespace
-    ///   - key: key
+    ///   - namespace: 命名空间
+    ///   - key: 键
     func removeSilently(namespace: String, key: String) {
         do {
             try remove(namespace: namespace, key: key)
         } catch {
-            GlobalErrorHandler.shared.handle(error)
+            errorHandler.handle(error)
         }
     }
-    
-    /// Clear the cache of the specified namespace
-    /// - Parameter namespace: namespace
-    /// - Throws: GlobalError when the operation fails
+
+    /// 清空指定命名空间的缓存
+    /// - Parameter namespace: 命名空间
+    /// - Throws: GlobalError 当操作失败时
     func clear(namespace: String) throws {
         try queue.sync {
             try saveNamespace(namespace, dict: [:])
         }
     }
-    
-    /// Clear the cache of the specified namespace (silent version)
-    /// - Parameter namespace: namespace
+
+    /// 清空指定命名空间的缓存（静默版本）
+    /// - Parameter namespace: 命名空间
     func clearSilently(namespace: String) {
         do {
             try clear(namespace: namespace)
         } catch {
-            GlobalErrorHandler.shared.handle(error)
+            errorHandler.handle(error)
         }
     }
-    
-    /// Clear all cache
-    /// - Throws: GlobalError when the operation fails
+
+    /// 清空所有缓存
+    /// - Throws: GlobalError 当操作失败时
     func clearAll() throws {
         try queue.sync {
-            
+
             do {
                 let files = try FileManager.default.contentsOfDirectory(at: AppPaths.appCache, includingPropertiesForKeys: nil)
                 for file in files where file.pathExtension == "json" {
@@ -138,60 +146,63 @@ class AppCacheManager {
                 }
             } catch {
                 throw GlobalError.fileSystem(
-                    i18nKey: "Cache Clear Failed",
+                    chineseMessage: "清空缓存文件失败: \(error.localizedDescription)",
+                    i18nKey: "error.filesystem.cache_clear_failed",
                     level: .notification
                 )
             }
         }
     }
-    
-    /// Clear all caches (silent version)
+
+    /// 清空所有缓存（静默版本）
     func clearAllSilently() {
         do {
             try clearAll()
         } catch {
-            GlobalErrorHandler.shared.handle(error)
+            errorHandler.handle(error)
         }
     }
-    
+
     // MARK: - Persistence
-    
-    /// Load namespace data
-    /// - Parameter namespace: namespace
-    /// - Returns: namespace data dictionary
-    /// - Throws: GlobalError when the operation fails
+
+    /// 加载命名空间数据
+    /// - Parameter namespace: 命名空间
+    /// - Returns: 命名空间数据字典
+    /// - Throws: GlobalError 当操作失败时
     private func loadNamespace(_ namespace: String) throws -> [String: Data] {
         let url = try fileURL(for: namespace)
-        
+
         guard FileManager.default.fileExists(atPath: url.path) else {
             return [:]
         }
-        
+
         do {
             let data = try Data(contentsOf: url)
             return try JSONDecoder().decode([String: Data].self, from: data)
         } catch {
             throw GlobalError.fileSystem(
-                i18nKey: "Cache Read Failed",
+                chineseMessage: "读取缓存文件失败: \(error.localizedDescription)",
+                i18nKey: "error.filesystem.cache_read_failed",
                 level: .notification
             )
         }
     }
-    
-    /// Save namespace data
+
+    /// 保存命名空间数据
     /// - Parameters:
-    ///   - namespace: namespace
-    ///   - dict: the data dictionary to be saved
-    /// - Throws: GlobalError when the operation fails
+    ///   - namespace: 命名空间
+    ///   - dict: 要保存的数据字典
+    /// - Throws: GlobalError 当操作失败时
     private func saveNamespace(_ namespace: String, dict: [String: Data]) throws {
         let url = try fileURL(for: namespace)
-        
+
         do {
             let data = try JSONEncoder().encode(dict)
             try data.write(to: url)
         } catch {
             throw GlobalError.fileSystem(
-                i18nKey: "Cache Write Failed",
+                chineseMessage: "写入缓存文件失败: \(error.localizedDescription)",
+                i18nKey: "error.filesystem.cache_write_failed",
                 level: .notification
             )
         }

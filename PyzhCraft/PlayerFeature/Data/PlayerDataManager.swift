@@ -1,24 +1,30 @@
 import Foundation
 
-/// Player Data Manager
-/// Separate storage using UserProfileStore (plist) and AuthCredentialStore (Keychain)
+/// 玩家数据管理器
+/// 使用 UserProfileStore (plist) 和 AuthCredentialStore (Keychain) 分离存储
 class PlayerDataManager {
-    private let profileStore = UserProfileStore()
+    private let errorHandler: GlobalErrorHandler
+    private let profileStore: UserProfileStore
     private let credentialStore = AuthCredentialStore()
-    
+
+    init(errorHandler: GlobalErrorHandler = AppServices.errorHandler) {
+        self.errorHandler = errorHandler
+        self.profileStore = UserProfileStore(errorHandler: errorHandler)
+    }
+
     // MARK: - Public Methods
-    
-    /// Add new player
+
+    /// 添加新玩家
     /// - Parameters:
-    ///   - name: player name
-    ///   - uuid: player UUID, if nil, generate offline UUID
-    ///   - isOnline: whether it is an online account
-    ///   - avatarName: avatar name
-    ///   - accToken: access token, default is empty string
-    ///   - refreshToken: refresh token, default is empty string
-    ///   - xuid: Xbox user ID, default is empty string
-    ///   - expiresAt: token expiration time, optional
-    /// - Throws: GlobalError when the operation fails
+    ///   - name: 玩家名称
+    ///   - uuid: 玩家UUID，如果为nil则生成离线UUID
+    ///   - isOnline: 是否为在线账户
+    ///   - avatarName: 头像名称
+    ///   - accToken: 访问令牌，默认为空字符串
+    ///   - refreshToken: 刷新令牌，默认为空字符串
+    ///   - xuid: Xbox用户ID，默认为空字符串
+    ///   - expiresAt: 令牌过期时间，可选
+    /// - Throws: GlobalError 当操作失败时
     func addPlayer(
         name: String,
         uuid: String? = nil,
@@ -30,19 +36,20 @@ class PlayerDataManager {
         expiresAt: Date? = nil
     ) throws {
         let players = try loadPlayersThrowing()
-        
+
         if playerExists(name: name) {
             throw GlobalError.player(
-                i18nKey: "Already Exists",
+                chineseMessage: "玩家已存在: \(name)",
+                i18nKey: "error.player.already_exists",
                 level: .notification
             )
         }
-        
+
         do {
-            // Create Player object
+            // 创建 Player 对象
             let credential: AuthCredential?
             if isOnline && !accToken.isEmpty {
-                // You need to create a Player first to obtain the ID. Here, create a profile first
+                // 需先创建 Player 获取 ID，此处先创建 profile
                 let tempId: String
                 if let providedUUID = uuid {
                     tempId = providedUUID
@@ -59,7 +66,7 @@ class PlayerDataManager {
             } else {
                 credential = nil
             }
-            
+
             let newPlayer = try Player(
                 name: name,
                 uuid: uuid,
@@ -67,42 +74,44 @@ class PlayerDataManager {
                 credential: credential,
                 isCurrent: players.isEmpty
             )
-            
-            // save profile
+
+            // 保存 profile
             try profileStore.addProfile(newPlayer.profile)
-            
-            // If there is a credential, save it to Keychain
+
+            // 如果有 credential，保存到 Keychain
             if let credential = newPlayer.credential {
                 if !credentialStore.saveCredential(credential) {
-                    // If saving the credential fails, roll back the profile
+                    // 如果保存 credential 失败，回滚 profile
                     try? profileStore.deleteProfile(byID: newPlayer.id)
                     throw GlobalError.validation(
-                        i18nKey: "Failed to save authentication credentials: \(credential.userId)",
+                        chineseMessage: "保存认证凭据失败",
+                        i18nKey: "error.validation.credential_save_failed",
                         level: .notification
                     )
                 }
             }
-            
-            Logger.shared.debug("New player added: \(name)")
+
+            Logger.shared.debug("已添加新玩家: \(name)")
         } catch {
             throw GlobalError.player(
-                i18nKey: "Creation Failed",
+                chineseMessage: "玩家创建失败: \(error.localizedDescription)",
+                i18nKey: "error.player.creation_failed",
                 level: .notification
             )
         }
     }
-    
-    /// Add new players (silent version)
+
+    /// 添加新玩家（静默版本）
     /// - Parameters:
-    ///   - name: player name
-    ///   - uuid: player UUID, if nil, generate offline UUID
-    ///   - isOnline: whether it is an online account
-    ///   - avatarName: avatar name
-    ///   - accToken: access token, default is empty string
-    ///   - refreshToken: refresh token, default is empty string
-    ///   - xuid: Xbox user ID, default is empty string
-    ///   - expiresAt: token expiration time, optional
-    /// - Returns: Whether added successfully
+    ///   - name: 玩家名称
+    ///   - uuid: 玩家UUID，如果为nil则生成离线UUID
+    ///   - isOnline: 是否为在线账户
+    ///   - avatarName: 头像名称
+    ///   - accToken: 访问令牌，默认为空字符串
+    ///   - refreshToken: 刷新令牌，默认为空字符串
+    ///   - xuid: Xbox用户ID，默认为空字符串
+    ///   - expiresAt: 令牌过期时间，可选
+    /// - Returns: 是否成功添加
     func addPlayerSilently(
         name: String,
         uuid: String? = nil,
@@ -127,190 +136,195 @@ class PlayerDataManager {
             return true
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to add player: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("添加玩家失败: \(globalError.chineseMessage)")
+            errorHandler.handle(globalError)
             return false
         }
     }
-    
-    /// Load all saved players (silent version)
-    /// - Returns: Player array
+
+    /// 加载所有保存的玩家（静默版本）
+    /// - Returns: 玩家数组
     func loadPlayers() -> [Player] {
         do {
             return try loadPlayersThrowing()
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to load player data: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("加载玩家数据失败: \(globalError.chineseMessage)")
+            errorHandler.handle(globalError)
             return []
         }
     }
-    
-    /// Load all saved players (throws exception version)
-    /// - Returns: Player array
-    /// - Throws: GlobalError when the operation fails
+
+    /// 加载所有保存的玩家（抛出异常版本）
+    /// - Returns: 玩家数组
+    /// - Throws: GlobalError 当操作失败时
     func loadPlayersThrowing() throws -> [Player] {
-        // Load all profiles from UserProfileStore
+        // 从 UserProfileStore 加载所有 profiles
         let profiles = try profileStore.loadProfilesThrowing()
-        
-        // Only basic information is loaded, Keychain is not accessed here,
-        // Avoid reading the credentials of all players at once on startup (which will trigger multiple keychain password pop-ups)
+
+        // 仅加载基础信息，不在此处访问 Keychain，
+        // 避免启动时对所有玩家的凭据进行一次性读取（会触发多次钥匙串密码弹窗）
         let players = profiles.map { profile in
             Player(profile: profile, credential: nil)
         }
-        
+
         return players
     }
-    
-    /// Load authentication credentials on demand for specified players
-    /// - Parameter userId: player ID
-    /// - Returns: Authentication credentials, if not present, returns nil
+
+    /// 为指定玩家按需加载认证凭据
+    /// - Parameter userId: 玩家 ID
+    /// - Returns: 认证凭据，如不存在则返回 nil
     func loadCredential(userId: String) -> AuthCredential? {
         credentialStore.loadCredential(userId: userId)
     }
-    
-    /// Check if player exists (case insensitive)
-    /// - Parameter name: The name to check
-    /// - Returns: Returns true if there is a player with the same name, otherwise returns false
+
+    /// 检查玩家是否存在（不区分大小写）
+    /// - Parameter name: 要检查的名称
+    /// - Returns: 如果存在同名玩家则返回 true，否则返回 false
     func playerExists(name: String) -> Bool {
         do {
             let players = try loadPlayersThrowing()
             return players.contains { $0.name.lowercased() == name.lowercased() }
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to check player existence: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("检查玩家存在性失败: \(globalError.chineseMessage)")
+            errorHandler.handle(globalError)
             return false
         }
     }
-    
-    /// Delete the player with the specified ID
-    /// - Parameter id: Player ID to be deleted
-    /// - Throws: GlobalError when the operation fails
+
+    /// 删除指定ID的玩家
+    /// - Parameter id: 要删除的玩家ID
+    /// - Throws: GlobalError 当操作失败时
     func deletePlayer(byID id: String) throws {
         let players = try loadPlayersThrowing()
         let initialCount = players.count
-        
-        // Check if the player to be deleted is the current player
+
+        // 检查要删除的玩家是否为当前玩家
         let isDeletingCurrentPlayer = players.contains { $0.id == id && $0.isCurrent }
-        
-        // delete profile
+
+        // 删除 profile
         try profileStore.deleteProfile(byID: id)
-        
-        // Remove the credential if it exists
+
+        // 删除 credential（如果存在）
         _ = credentialStore.deleteCredential(userId: id)
-        
+
+        // 删除该用户对应的三方服务器映射（如存在）
+        OfflineUserServerMap.removeServer(for: id)
+
         if initialCount > 0 {
-            // If the current player is deleted, a new current player needs to be set
+            // 如果删除的是当前玩家，需要设置新的当前玩家
             if isDeletingCurrentPlayer {
                 let remainingPlayers = try loadPlayersThrowing()
                 if !remainingPlayers.isEmpty {
                     var firstPlayer = remainingPlayers[0]
                     firstPlayer.isCurrent = true
                     try updatePlayer(firstPlayer)
-                    Logger.shared.debug("The current player has been deleted and the first player has been set as the current player: \(firstPlayer.name)")
+                    Logger.shared.debug("当前玩家被删除，已设置第一个玩家为当前玩家: \(firstPlayer.name)")
                 }
             }
-            Logger.shared.debug("Player deleted (ID: \(id))")
+            Logger.shared.debug("已删除玩家 (ID: \(id))")
         }
     }
-    
-    /// Delete the player with the specified ID (silent version)
-    /// - Parameter id: Player ID to be deleted
-    /// - Returns: Whether the deletion was successful
+
+    /// 删除指定ID的玩家（静默版本）
+    /// - Parameter id: 要删除的玩家ID
+    /// - Returns: 是否成功删除
     func deletePlayerSilently(byID id: String) -> Bool {
         do {
             try deletePlayer(byID: id)
             return true
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to delete player: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("删除玩家失败: \(globalError.chineseMessage)")
+            errorHandler.handle(globalError)
             return false
         }
     }
-    
-    /// Save player array (silent version)
-    /// - Parameter players: Array of players to save
+
+    /// 保存玩家数组（静默版本）
+    /// - Parameter players: 要保存的玩家数组
     func savePlayers(_ players: [Player]) {
         do {
             try savePlayersThrowing(players)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to save player data: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("保存玩家数据失败: \(globalError.chineseMessage)")
+            errorHandler.handle(globalError)
         }
     }
-    
-    /// Save player array (throws exception version)
-    /// - Parameter players: Array of players to save
-    /// - Throws: GlobalError when the operation fails
+
+    /// 保存玩家数组（抛出异常版本）
+    /// - Parameter players: 要保存的玩家数组
+    /// - Throws: GlobalError 当操作失败时
     func savePlayersThrowing(_ players: [Player]) throws {
-        // Separate profiles and credentials
+        // 分离 profiles 和 credentials
         var profiles: [UserProfile] = []
         var credentials: [AuthCredential] = []
-        
+
         for player in players {
             profiles.append(player.profile)
             if let credential = player.credential {
                 credentials.append(credential)
             }
         }
-        
-        // Save profiles
+
+        // 保存 profiles
         try profileStore.saveProfilesThrowing(profiles)
-        
-        // save credentials
+
+        // 保存 credentials
         for credential in credentials where !credentialStore.saveCredential(credential) {
             throw GlobalError.validation(
-                i18nKey: "Failed to save authentication credentials: \(credential.userId)",
+                chineseMessage: "保存认证凭据失败: \(credential.userId)",
+                i18nKey: "error.validation.credential_save_failed",
                 level: .notification
             )
         }
-        
-        // Clean up deleted player credentials
+
+        // 清理已删除玩家的 credentials
         let existingProfileIds = Set(profiles.map { $0.id })
         let allCredentials = try loadPlayersThrowing().compactMap { $0.credential }
         for credential in allCredentials where !existingProfileIds.contains(credential.userId) {
             _ = credentialStore.deleteCredential(userId: credential.userId)
         }
-        
-        Logger.shared.debug("Player data saved")
+
+        Logger.shared.debug("玩家数据已保存")
     }
-    
-    /// Update the specified player's information
-    /// - Parameter updatedPlayer: updated player object
-    /// - Throws: GlobalError when the operation fails
+
+    /// 更新指定玩家的信息
+    /// - Parameter updatedPlayer: 更新后的玩家对象
+    /// - Throws: GlobalError 当操作失败时
     func updatePlayer(_ updatedPlayer: Player) throws {
-        // Update profile
+        // 更新 profile
         try profileStore.updateProfile(updatedPlayer.profile)
-        
-        // Update or delete credentials
+
+        // 更新或删除 credential
         if let credential = updatedPlayer.credential {
             if !credentialStore.saveCredential(credential) {
                 throw GlobalError.validation(
-                    i18nKey: "Failed to update authentication credentials",
+                    chineseMessage: "更新认证凭据失败",
+                    i18nKey: "error.validation.credential_update_failed",
                     level: .notification
                 )
             }
         } else {
-            Logger.shared.debug("No new authentication credentials provided, existing Keychain state retained - userId: \(updatedPlayer.id)")
+            Logger.shared.debug("未提供新的认证凭据，保留现有 Keychain 状态 - userId: \(updatedPlayer.id)")
         }
-        
-        Logger.shared.debug("Updated player information: \(updatedPlayer.name)")
+
+        Logger.shared.debug("已更新玩家信息: \(updatedPlayer.name)")
     }
-    
-    /// Update the specified player's information (silent version)
-    /// - Parameter updatedPlayer: updated player object
-    /// - Returns: Whether the update is successful
+
+    /// 更新指定玩家的信息（静默版本）
+    /// - Parameter updatedPlayer: 更新后的玩家对象
+    /// - Returns: 是否成功更新
     func updatePlayerSilently(_ updatedPlayer: Player) -> Bool {
         do {
             try updatePlayer(updatedPlayer)
             return true
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to update player information: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("更新玩家信息失败: \(globalError.chineseMessage)")
+            errorHandler.handle(globalError)
             return false
         }
     }

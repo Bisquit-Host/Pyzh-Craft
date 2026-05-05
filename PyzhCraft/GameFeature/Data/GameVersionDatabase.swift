@@ -1,35 +1,40 @@
 import Foundation
 import SQLite3
 
-/// Game version database storage layer
-/// Use SQLite (WAL + mmap + JSON1) to store game version information
+/// 游戏版本数据库存储层
+/// 使用 SQLite (WAL + mmap + JSON1) 存储游戏版本信息
 class GameVersionDatabase {
     // MARK: - Properties
-    
+
     private let db: SQLiteDatabase
     private let tableName = AppConstants.DatabaseTables.gameVersions
-    
+    private var isInitialized = false
+
     // MARK: - Initialization
-    
-    /// Initialize game version database
-    /// - Parameter dbPath: database file path
+
+    /// 初始化游戏版本数据库
+    /// - Parameter dbPath: 数据库文件路径
     init(dbPath: String) {
         self.db = SQLiteDatabase(path: dbPath)
     }
-    
+
     // MARK: - Database Setup
-    
-    /// Open the database and initialize the table structure
-    /// - Throws: GlobalError when the operation fails
+
+    /// 打开数据库并初始化表结构
+    /// - Throws: GlobalError 当操作失败时
     func initialize() throws {
+        if isInitialized {
+            return
+        }
         try db.open()
         try createTable()
+        isInitialized = true
     }
-    
-    /// Create game version table
-    /// Use JSON1 extension to store complete game version information
+
+    /// 创建游戏版本表
+    /// 使用 JSON1 扩展存储完整的游戏版本信息
     private func createTable() throws {
-        // Create table
+        // 创建表
         let createTableSQL = """
         CREATE TABLE IF NOT EXISTS \(tableName) (
             id TEXT PRIMARY KEY,
@@ -41,46 +46,47 @@ class GameVersionDatabase {
             updated_at REAL NOT NULL
         );
         """
-        
+
         try db.execute(createTableSQL)
-        
-        // Create index if it does not exist
+
+        // 创建索引（如果不存在）
         let indexes = [
             ("idx_working_path", "working_path"),
             ("idx_last_played", "last_played"),
             ("idx_game_name", "game_name"),
         ]
-        
+
         for (indexName, column) in indexes {
             let createIndexSQL = """
             CREATE INDEX IF NOT EXISTS \(indexName) ON \(tableName)(\(column));
             """
-            try? db.execute(createIndexSQL) // Use try? because the index may already exist
+            try? db.execute(createIndexSQL) // 使用 try? 因为索引可能已存在
         }
-        
-        Logger.shared.debug("The game version table has been created or already exists")
+
+        Logger.shared.debug("游戏版本表已创建或已存在")
     }
-    
+
     // MARK: - CRUD Operations
-    
-    /// Save game version information
+
+    /// 保存游戏版本信息
     /// - Parameters:
-    ///   - game: game version information
-    ///   - workingPath: working path
-    /// - Throws: GlobalError when the operation fails
+    ///   - game: 游戏版本信息
+    ///   - workingPath: 工作路径
+    /// - Throws: GlobalError 当操作失败时
     func saveGame(_ game: GameVersionInfo, workingPath: String) throws {
         try db.transaction {
             let encoder = JSONEncoder()
-            // Encode dates using second-level timestamps (compatible with UserDefaults storage)
+            // 使用秒级时间戳编码日期（与 UserDefaults 存储兼容）
             encoder.dateEncodingStrategy = .secondsSince1970
             let jsonData = try encoder.encode(game)
             guard let jsonString = String(data: jsonData, encoding: .utf8) else {
                 throw GlobalError.validation(
-                    i18nKey: "Failed to encode game data as JSON",
+                    chineseMessage: "无法编码游戏数据为 JSON",
+                    i18nKey: "error.validation.json_encode_failed",
                     level: .notification
                 )
             }
-            
+
             let now = Date()
             let sql = """
             INSERT OR REPLACE INTO \(tableName)
@@ -89,10 +95,10 @@ class GameVersionDatabase {
                 COALESCE((SELECT created_at FROM \(tableName) WHERE id = ?), ?),
                 ?)
             """
-            
+
             let statement = try db.prepare(sql)
             defer { sqlite3_finalize(statement) }
-            
+
             SQLiteDatabase.bind(statement, index: 1, value: game.id)
             SQLiteDatabase.bind(statement, index: 2, value: workingPath)
             SQLiteDatabase.bind(statement, index: 3, value: game.gameName)
@@ -101,30 +107,31 @@ class GameVersionDatabase {
             SQLiteDatabase.bind(statement, index: 6, value: game.id)
             SQLiteDatabase.bind(statement, index: 7, value: now)
             SQLiteDatabase.bind(statement, index: 8, value: now)
-            
+
             let result = sqlite3_step(statement)
             guard result == SQLITE_DONE else {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
                 throw GlobalError.validation(
-                    i18nKey: "Failed to save game: \(errorMessage)",
+                    chineseMessage: "保存游戏失败: \(errorMessage)",
+                    i18nKey: "error.validation.game_save_failed",
                     level: .notification
                 )
             }
         }
     }
-    
-    /// Save game version information in batches
+
+    /// 批量保存游戏版本信息
     /// - Parameters:
-    ///   - games: Array of game version information
-    ///   - workingPath: working path
-    /// - Throws: GlobalError when the operation fails
+    ///   - games: 游戏版本信息数组
+    ///   - workingPath: 工作路径
+    /// - Throws: GlobalError 当操作失败时
     func saveGames(_ games: [GameVersionInfo], workingPath: String) throws {
         try db.transaction {
             let encoder = JSONEncoder()
-            // Encode dates using second-level timestamps (compatible with UserDefaults storage)
+            // 使用秒级时间戳编码日期（与 UserDefaults 存储兼容）
             encoder.dateEncodingStrategy = .secondsSince1970
             let now = Date()
-            
+
             let sql = """
             INSERT OR REPLACE INTO \(tableName)
             (id, working_path, game_name, data_json, last_played, created_at, updated_at)
@@ -132,16 +139,16 @@ class GameVersionDatabase {
                 COALESCE((SELECT created_at FROM \(tableName) WHERE id = ?), ?),
                 ?)
             """
-            
+
             let statement = try db.prepare(sql)
             defer { sqlite3_finalize(statement) }
-            
+
             for game in games {
                 let jsonData = try encoder.encode(game)
                 guard let jsonString = String(data: jsonData, encoding: .utf8) else {
                     continue
                 }
-                
+
                 sqlite3_reset(statement)
                 SQLiteDatabase.bind(statement, index: 1, value: game.id)
                 SQLiteDatabase.bind(statement, index: 2, value: workingPath)
@@ -151,82 +158,83 @@ class GameVersionDatabase {
                 SQLiteDatabase.bind(statement, index: 6, value: game.id)
                 SQLiteDatabase.bind(statement, index: 7, value: now)
                 SQLiteDatabase.bind(statement, index: 8, value: now)
-                
+
                 let result = sqlite3_step(statement)
                 guard result == SQLITE_DONE else {
                     let errorMessage = String(cString: sqlite3_errmsg(db.database))
                     throw GlobalError.validation(
-                        i18nKey: "Failed to batch save games: \(errorMessage)",
+                        chineseMessage: "批量保存游戏失败: \(errorMessage)",
+                        i18nKey: "error.validation.games_batch_save_failed",
                         level: .notification
                     )
                 }
             }
         }
     }
-    
-    /// Load all games in the specified working path
-    /// - Parameter workingPath: working path
-    /// - Returns: Array of game version information
-    /// - Throws: GlobalError when the operation fails
+
+    /// 加载指定工作路径的所有游戏
+    /// - Parameter workingPath: 工作路径
+    /// - Returns: 游戏版本信息数组
+    /// - Throws: GlobalError 当操作失败时
     func loadGames(workingPath: String) throws -> [GameVersionInfo] {
         let sql = """
         SELECT data_json FROM \(tableName)
         WHERE working_path = ?
         ORDER BY last_played DESC
         """
-        
+
         let statement = try db.prepare(sql)
         defer { sqlite3_finalize(statement) }
-        
+
         SQLiteDatabase.bind(statement, index: 1, value: workingPath)
-        
+
         var games: [GameVersionInfo] = []
         let decoder = JSONDecoder()
-        // Decode dates using second-level timestamps (compatible with UserDefaults storage)
+        // 使用秒级时间戳解码日期（与 UserDefaults 存储兼容）
         decoder.dateDecodingStrategy = .secondsSince1970
-        
+
         while sqlite3_step(statement) == SQLITE_ROW {
             guard let jsonString = SQLiteDatabase.stringColumn(statement, index: 0),
                   let jsonData = jsonString.data(using: .utf8) else {
                 continue
             }
-            
+
             do {
                 let game = try decoder.decode(GameVersionInfo.self, from: jsonData)
                 games.append(game)
             } catch {
-                Logger.shared.warning("Failed to decode game data: \(error.localizedDescription)")
+                Logger.shared.warning("解码游戏数据失败: \(error.localizedDescription)")
                 continue
             }
         }
-        
+
         return games
     }
-    
-    /// Load games for all working paths (grouped by working path)
-    /// - Returns: Game dictionary grouped by working path
-    /// - Throws: GlobalError when the operation fails
+
+    /// 加载所有工作路径的游戏（按工作路径分组）
+    /// - Returns: 按工作路径分组的游戏字典
+    /// - Throws: GlobalError 当操作失败时
     func loadAllGames() throws -> [String: [GameVersionInfo]] {
         let sql = """
         SELECT working_path, data_json FROM \(tableName)
         ORDER BY working_path, last_played DESC
         """
-        
+
         let statement = try db.prepare(sql)
         defer { sqlite3_finalize(statement) }
-        
+
         var gamesByPath: [String: [GameVersionInfo]] = [:]
         let decoder = JSONDecoder()
-        // Decode dates using second-level timestamps (compatible with UserDefaults storage)
+        // 使用秒级时间戳解码日期（与 UserDefaults 存储兼容）
         decoder.dateDecodingStrategy = .secondsSince1970
-        
+
         while sqlite3_step(statement) == SQLITE_ROW {
             guard let workingPath = SQLiteDatabase.stringColumn(statement, index: 0),
                   let jsonString = SQLiteDatabase.stringColumn(statement, index: 1),
                   let jsonData = jsonString.data(using: .utf8) else {
                 continue
             }
-            
+
             do {
                 let game = try decoder.decode(GameVersionInfo.self, from: jsonData)
                 if gamesByPath[workingPath] == nil {
@@ -234,112 +242,135 @@ class GameVersionDatabase {
                 }
                 gamesByPath[workingPath]?.append(game)
             } catch {
-                Logger.shared.warning("Failed to decode game data: \(error.localizedDescription)")
+                Logger.shared.warning("解码游戏数据失败: \(error.localizedDescription)")
                 continue
             }
         }
-        
+
         return gamesByPath
     }
-    
-    /// Get game by ID
-    /// - Parameter id: Game ID
-    /// - Returns: game version information, if it does not exist, return nil
-    /// - Throws: GlobalError when the operation fails
-    func getGame(by id: String) throws -> GameVersionInfo? {
-        let sql = "SELECT data_json FROM \(tableName) WHERE id = ? LIMIT 1"
-        
+
+    /// 按工作路径统计游戏数量（仅查 working_path + COUNT，不加载 JSON）
+    /// - Returns: [(工作路径, 游戏数量)]，按路径排序
+    /// - Throws: GlobalError 当操作失败时
+    func loadWorkingPathsWithCounts() throws -> [(path: String, count: Int)] {
+        let sql = """
+        SELECT working_path, COUNT(*) FROM \(tableName)
+        GROUP BY working_path
+        ORDER BY working_path
+        """
         let statement = try db.prepare(sql)
         defer { sqlite3_finalize(statement) }
-        
+        var result: [(String, Int)] = []
+        while sqlite3_step(statement) == SQLITE_ROW {
+            guard let path = SQLiteDatabase.stringColumn(statement, index: 0) else { continue }
+            let count = Int(SQLiteDatabase.intColumn(statement, index: 1))
+            result.append((path, count))
+        }
+        return result
+    }
+
+    /// 根据 ID 获取游戏
+    /// - Parameter id: 游戏 ID
+    /// - Returns: 游戏版本信息，如果不存在则返回 nil
+    /// - Throws: GlobalError 当操作失败时
+    func getGame(by id: String) throws -> GameVersionInfo? {
+        let sql = "SELECT data_json FROM \(tableName) WHERE id = ? LIMIT 1"
+
+        let statement = try db.prepare(sql)
+        defer { sqlite3_finalize(statement) }
+
         SQLiteDatabase.bind(statement, index: 1, value: id)
-        
+
         guard sqlite3_step(statement) == SQLITE_ROW,
               let jsonString = SQLiteDatabase.stringColumn(statement, index: 0),
               let jsonData = jsonString.data(using: .utf8) else {
             return nil
         }
-        
+
         let decoder = JSONDecoder()
-        // Decode dates using second-level timestamps (compatible with UserDefaults storage)
+        // 使用秒级时间戳解码日期（与 UserDefaults 存储兼容）
         decoder.dateDecodingStrategy = .secondsSince1970
         return try decoder.decode(GameVersionInfo.self, from: jsonData)
     }
-    
-    /// Delete game
-    /// - Parameter id: Game ID
-    /// - Throws: GlobalError when the operation fails
+
+    /// 删除游戏
+    /// - Parameter id: 游戏 ID
+    /// - Throws: GlobalError 当操作失败时
     func deleteGame(id: String) throws {
         try db.transaction {
             let sql = "DELETE FROM \(tableName) WHERE id = ?"
             let statement = try db.prepare(sql)
             defer { sqlite3_finalize(statement) }
-            
+
             SQLiteDatabase.bind(statement, index: 1, value: id)
-            
+
             let result = sqlite3_step(statement)
             guard result == SQLITE_DONE else {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
                 throw GlobalError.validation(
-                    i18nKey: "Failed to delete game: \(errorMessage)",
+                    chineseMessage: "删除游戏失败: \(errorMessage)",
+                    i18nKey: "error.validation.game_delete_failed",
                     level: .notification
                 )
             }
         }
     }
-    
-    /// Delete game by game name and working path
-    /// - Parameters:
-    ///   - gameName: game name
-    ///   - workingPath: working path
-    /// - Throws: GlobalError when the operation fails
-    func deleteGame(gameName: String, workingPath: String) throws {
-        try db.transaction {
-            let sql = "DELETE FROM \(tableName) WHERE working_path = ? AND game_name = ?"
-            let statement = try db.prepare(sql)
-            defer { sqlite3_finalize(statement) }
-            
-            SQLiteDatabase.bind(statement, index: 1, value: workingPath)
-            SQLiteDatabase.bind(statement, index: 2, value: gameName)
-            
-            let result = sqlite3_step(statement)
-            guard result == SQLITE_DONE else {
-                let errorMessage = String(cString: sqlite3_errmsg(db.database))
-                throw GlobalError.validation(
-                    i18nKey: "Failed to delete game: \(errorMessage)",
-                    level: .notification
-                )
-            }
-        }
-    }
-    
-    /// Delete all games from the specified working path
-    /// - Parameter workingPath: working path
-    /// - Throws: GlobalError when the operation fails
+
+    /// 删除指定工作路径的所有游戏
+    /// - Parameter workingPath: 工作路径
+    /// - Throws: GlobalError 当操作失败时
     func deleteGames(workingPath: String) throws {
         try db.transaction {
             let sql = "DELETE FROM \(tableName) WHERE working_path = ?"
             let statement = try db.prepare(sql)
             defer { sqlite3_finalize(statement) }
-            
+
             SQLiteDatabase.bind(statement, index: 1, value: workingPath)
-            
+
             let result = sqlite3_step(statement)
             guard result == SQLITE_DONE else {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
                 throw GlobalError.validation(
-                    i18nKey: "Failed to delete games in working path: \(errorMessage)",
+                    chineseMessage: "删除工作路径游戏失败: \(errorMessage)",
+                    i18nKey: "error.validation.games_delete_failed",
                     level: .notification
                 )
             }
         }
     }
-    
-    /// Update the last play time of the game
+
+    /// 按工作路径和游戏名删除游戏（可能存在多个相同名称的记录）
     /// - Parameters:
-    ///   - id: game ID
-    ///   - lastPlayed: last played time
-    /// - Throws: GlobalError when the operation fails
+    ///   - workingPath: 工作路径
+    ///   - gameName: 游戏名称
+    /// - Throws: GlobalError 当操作失败时
+    func deleteGames(workingPath: String, gameName: String) throws {
+        try db.transaction {
+            let sql = "DELETE FROM \(tableName) WHERE working_path = ? AND game_name = ?"
+            let statement = try db.prepare(sql)
+            defer { sqlite3_finalize(statement) }
+
+            SQLiteDatabase.bind(statement, index: 1, value: workingPath)
+            SQLiteDatabase.bind(statement, index: 2, value: gameName)
+
+            let result = sqlite3_step(statement)
+            guard result == SQLITE_DONE else {
+                let errorMessage = String(cString: sqlite3_errmsg(db.database))
+                throw GlobalError.validation(
+                    chineseMessage: "删除游戏失败: \(errorMessage)",
+                    i18nKey: "error.validation.game_delete_failed",
+                    level: .notification
+                )
+            }
+        }
+    }
+
+    /// 更新游戏最后游玩时间
+    /// - Parameters:
+    ///   - id: 游戏 ID
+    ///   - lastPlayed: 最后游玩时间
+    /// - Throws: GlobalError 当操作失败时
     func updateLastPlayed(id: String, lastPlayed: Date) throws {
         try db.transaction {
             let timestamp = lastPlayed.timeIntervalSince1970
@@ -350,27 +381,28 @@ class GameVersionDatabase {
                 updated_at = ?
             WHERE id = ?
             """
-            
+
             let statement = try db.prepare(sql)
             defer { sqlite3_finalize(statement) }
-            
+
             SQLiteDatabase.bind(statement, index: 1, value: String(timestamp))
             SQLiteDatabase.bind(statement, index: 2, value: lastPlayed)
             SQLiteDatabase.bind(statement, index: 3, value: Date())
             SQLiteDatabase.bind(statement, index: 4, value: id)
-            
+
             let result = sqlite3_step(statement)
             guard result == SQLITE_DONE else {
                 let errorMessage = String(cString: sqlite3_errmsg(db.database))
                 throw GlobalError.validation(
-                    i18nKey: "Failed to update last played time: \(errorMessage)",
+                    chineseMessage: "更新最后游玩时间失败: \(errorMessage)",
+                    i18nKey: "error.validation.last_played_update_failed",
                     level: .notification
                 )
             }
         }
     }
-    
-    /// Close database connection
+
+    /// 关闭数据库连接
     func close() {
         db.close()
     }

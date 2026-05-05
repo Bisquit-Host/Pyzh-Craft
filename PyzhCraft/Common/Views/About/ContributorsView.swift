@@ -2,13 +2,10 @@ import SwiftUI
 
 public struct ContributorsView: View {
     @StateObject private var viewModel = ContributorsViewModel()
-    @State private var staticContributors: [StaticContributor] = []
-    @State private var staticContributorsLoaded = false
-    @State private var staticContributorsLoadFailed = false
-    private let gitHubService = GitHubService.shared
-    
+    @StateObject private var staticViewModel = ContributorsStaticViewModel()
+
     public init() {}
-    
+
     public var body: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
@@ -21,18 +18,16 @@ public struct ContributorsView: View {
             .padding(.vertical, 8)
         }
         .onAppear {
-            // Re-fetch GitHub contributor data every time you open it
-            Task {
-                await viewModel.fetchContributors()
-            }
-            // Static contributor data is reloaded every time it is opened
-            loadStaticContributors()
+            // 每次打开都重新获取GitHub贡献者数据
+            Task { await viewModel.fetchContributors() }
+            // 每次打开都重新加载静态贡献者数据
+            staticViewModel.load()
         }
         .onDisappear {
             clearAllData()
         }
     }
-    
+
     // MARK: - Loading View
     private var loadingView: some View {
         VStack(spacing: 12) {
@@ -40,55 +35,57 @@ public struct ContributorsView: View {
         }
         .frame(maxWidth: .infinity, minHeight: 100)
     }
-    
+
     // MARK: - Contributors Content
     private var contributorsContent: some View {
-        LazyVStack(spacing: 16) {
-            // GitHub contributor list
+        VStack(spacing: 16) {
+            // GitHub贡献者列表
             if !viewModel.contributors.isEmpty {
                 contributorsList
             }
-            // Static contributor list (only displayed if loaded successfully)
-            if staticContributorsLoaded && !staticContributorsLoadFailed {
+            // 静态贡献者列表（只有成功加载时才显示）
+            if staticViewModel.loaded && !staticViewModel.loadFailed {
                 staticContributorsList
             }
         }
     }
-    
+
     // MARK: - Static Contributors List
     private var staticContributorsList: some View {
         VStack(spacing: 0) {
-            Text("Core Contributors")
+            Text("contributors.core_contributors".localized())
                 .font(.title3)
                 .fontWeight(.semibold)
                 .padding(.horizontal)
                 .padding(.bottom, 8)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            
-            ForEach(staticContributors.indices, id: \.self) { index in
-                staticContributorRow(staticContributors[index])
+
+            ForEach(staticViewModel.contributors.indices, id: \.self) { index in
+                StaticContributorCardView(
+                    contributor: staticViewModel.contributors[index]
+                )
                     .id("static-\(index)")
-                
-                if index < staticContributors.count - 1 {
+
+                if index < staticViewModel.contributors.count - 1 {
                     Divider()
                         .padding(.horizontal, 16)
                 }
             }
         }
     }
-    
+
     // MARK: - Contributors List
     private var contributorsList: some View {
         VStack(spacing: 0) {
-            // GitHub contributor titles
-            Text("GitHub Contributors")
+            // GitHub贡献者标题
+            Text("contributors.github_contributors".localized())
                 .font(.title3)
                 .fontWeight(.semibold)
                 .padding(.horizontal)
                 .padding(.bottom, 8)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            
-            // top contributors
+
+            // 顶级贡献者
             if !viewModel.topContributors.isEmpty {
                 ForEach(
                     Array(viewModel.topContributors.enumerated()),
@@ -98,23 +95,29 @@ public struct ContributorsView: View {
                         contributor: contributor,
                         isTopContributor: true,
                         rank: index + 1,
-                        contributionsText: "\(viewModel.formatContributions(contributor.contributions)) contributions"
+                        contributionsText: String(
+                            format: "contributors.contributions.format"
+                                .localized(),
+                            viewModel.formatContributions(
+                                contributor.contributions
+                            )
+                        )
                     )
                     .id("top-\(contributor.id)")
-                    
+
                     if index < viewModel.topContributors.count - 1 {
                         Divider()
                             .padding(.horizontal, 16)
                     }
                 }
-                
+
                 if !viewModel.otherContributors.isEmpty {
                     Divider()
                         .padding(.horizontal, 16)
                 }
             }
-            
-            // Other contributors
+
+            // 其他贡献者
             ForEach(
                 Array(viewModel.otherContributors.enumerated()),
                 id: \.element.id
@@ -123,10 +126,16 @@ public struct ContributorsView: View {
                     contributor: contributor,
                     isTopContributor: false,
                     rank: index + viewModel.topContributors.count + 1,
-                    contributionsText: "\(viewModel.formatContributions(contributor.contributions)) contributions"
+                    contributionsText: String(
+                        format: "contributors.contributions.format"
+                            .localized(),
+                        viewModel.formatContributions(
+                            contributor.contributions
+                        )
+                    )
                 )
                 .id("other-\(contributor.id)")
-                
+
                 if index < viewModel.otherContributors.count - 1 {
                     Divider()
                         .padding(.horizontal, 16)
@@ -134,69 +143,12 @@ public struct ContributorsView: View {
             }
         }
     }
-    
-    // MARK: - Static Contributor Row
-    private func staticContributorRow(
-        _ contributor: StaticContributor
-    ) -> some View {
-        StaticContributorCardView(contributor: contributor)
-    }
-    // MARK: - Load Static Contributors
-    private func loadStaticContributors() {
-        // reset state
-        staticContributorsLoaded = false
-        staticContributorsLoadFailed = false
-        
-        Task {
-            do {
-                let contributorsData: ContributorsData = try await gitHubService.fetchStaticContributors()
-                
-                await MainActor.run {
-                    staticContributors = contributorsData.contributors.map { contributorData in
-                        StaticContributor(
-                            name: contributorData.name,
-                            url: contributorData.url,
-                            avatar: contributorData.avatar,
-                            contributions: contributorData.contributions.compactMap {
-                                Contribution(rawValue: "contributor.contribution.\($0)")
-                            }
-                        )
-                    }
-                    staticContributorsLoaded = true
-                    staticContributorsLoadFailed = false
-                    
-                    Logger.shared.info(
-                        "Successfully loaded",
-                        staticContributors.count,
-                        "contributors from GitHubService"
-                    )
-                }
-            } catch {
-                Logger.shared.error("Failed to load contributors from GitHubService:", error)
-                
-                await MainActor.run {
-                    staticContributorsLoadFailed = true
-                }
-            }
-        }
-    }
-    
-    // MARK: - Clear Static Contributors Data
-    private func clearStaticContributorsData() {
-        staticContributors = []
-        staticContributorsLoaded = false
-        staticContributorsLoadFailed = false
-        Logger.shared.info("Static contributors data cleared")
-    }
-    
-    /// Clean all data
+
+    /// 清理所有数据
     private func clearAllData() {
-        clearStaticContributorsData()
-        // Clean up ViewModel’s contributor data and release memory
+        staticViewModel.clearAllData()
+        // 清理 ViewModel 的贡献者数据，释放内存
         viewModel.clearContributors()
-        // Clean image cache and free up memory
-        ContributorAvatarCache.shared.clearCache()
-        StaticContributorAvatarCache.shared.clearCache()
         Logger.shared.info("All contributors data cleared")
     }
 }

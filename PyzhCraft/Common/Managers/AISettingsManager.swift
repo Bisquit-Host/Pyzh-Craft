@@ -1,236 +1,176 @@
+//
+//  AISettingsManager.swift
+//  PyzhCraft
+//
+//
+
+import Foundation
 import SwiftUI
 
-// MARK: - Keychain stores constants
-private let aiSettingsAccount = "aiSettings"
-private let aiApiKeyKeychainKey = "apiKey"
-
-private struct OpenAIModelListResponse: Decodable {
-    struct OpenAIModel: Decodable {
-        let id: String
-    }
-    
-    let data: [OpenAIModel]
-}
-
-/// AI provider enumeration
+/// AI 提供商枚举
 enum AIProvider: String, CaseIterable, Identifiable {
-    case openai
-    //    gemini
-    
+    case openai = "openai"
+    case ollama = "ollama"
+//    case gemini = "gemini"
+
     var id: String { rawValue }
-    
+
     var displayName: String {
         switch self {
         case .openai:
-            "OpenAI"
-            //        case .gemini:
-            //            "Google Gemini"
+            return "OpenAI"
+        case .ollama:
+            return "Ollama"
+//        case .gemini:
+//            return "Google Gemini"
         }
     }
-    
+
     var baseURL: String {
         switch self {
         case .openai:
-            "https://api.openai.com"
-            //        case .gemini:
-            //            "https://generativelanguage.googleapis.com"
+            return "https://api.openai.com"
+        case .ollama:
+            return "http://localhost:11434"
+//        case .gemini:
+//            return "https://generativelanguage.googleapis.com"
         }
     }
-    
-    /// API format type
+
+    /// API 格式类型
     var apiFormat: APIFormat {
         switch self {
         case .openai:
-                .openAI
-            //        case .gemini:
-            //            .gemini
+            return .openAI
+        case .ollama:
+            return .ollama
+//        case .gemini:
+//            return .gemini
         }
     }
-    
-    /// API path
+
+    /// API 路径
     var apiPath: String {
         switch self {
         case .openai:
-            "/v1/chat/completions"
-            //        case .gemini:
-            //            "/v1/models/\(defaultModel):streamGenerateContent"
+            return "/v1/chat/completions"
+        case .ollama:
+            return "/api/chat"
+//        case .gemini:
+//            return "/v1/models/\(defaultModel):streamGenerateContent"
         }
     }
 }
 
-/// API format enum
+/// API 格式枚举
 enum APIFormat {
-    case openAI  // OpenAI format (compatible with DeepSeek, etc.)
-    //    case gemini
+    case openAI  // OpenAI 格式（兼容 DeepSeek 等）
+    case ollama
+//    case gemini
 }
 
-/// AI Settings Manager
+/// AI 设置管理器
 class AISettingsManager: ObservableObject {
     static let shared = AISettingsManager()
-    
-    @AppStorage("aiProvider")
-    private var _selectedProviderRawValue = "openai"
-    
+
+    @AppStorage(AppConstants.UserDefaultsKeys.aiProvider)
+    private var _selectedProviderRawValue: String = "openai"
+
     var selectedProvider: AIProvider {
         get {
-            AIProvider(rawValue: _selectedProviderRawValue) ?? .openai
-        } set {
+            return AIProvider(rawValue: _selectedProviderRawValue) ?? .openai
+        }
+        set {
             _selectedProviderRawValue = newValue.rawValue
             objectWillChange.send()
         }
     }
-    
+
     private var _cachedApiKey: String?
-    
-    /// AI API Key (secure storage using Keychain, with memory cache)
+
+    /// AI API Key（使用 Keychain 安全存储，带内存缓存）
     var apiKey: String {
         get {
-            // If the cache already exists, return directly
+            // 如果缓存已存在，直接返回
             if let cached = _cachedApiKey {
                 return cached
             }
-            
-            // Read from Keychain and cache
-            if let data = KeychainManager.load(account: aiSettingsAccount, key: aiApiKeyKeychainKey),
+
+            // 从 Keychain 读取并缓存
+            if let data = KeychainManager.load(account: AppConstants.KeychainAccounts.aiSettings, key: AppConstants.KeychainKeys.apiKey),
                let key = String(data: data, encoding: .utf8) {
                 _cachedApiKey = key
                 return key
             }
-            
-            // There is no data in the Keychain and the empty string is cached
+
+            // Keychain 中没有数据，缓存空字符串
             _cachedApiKey = ""
             return ""
-        } set {
-            // Update cache
+        }
+        set {
+            // 更新缓存
             _cachedApiKey = newValue.isEmpty ? "" : newValue
-            
-            // Save to Keychain
+
+            // 保存到 Keychain
             if newValue.isEmpty {
-                // If empty, deletes the item in Keychain
-                _ = KeychainManager.delete(account: aiSettingsAccount, key: aiApiKeyKeychainKey)
+                // 如果为空，删除 Keychain 中的项
+                _ = KeychainManager.delete(account: AppConstants.KeychainAccounts.aiSettings, key: AppConstants.KeychainKeys.apiKey)
             } else {
-                // Save to Keychain
+                // 保存到 Keychain
                 if let data = newValue.data(using: .utf8) {
-                    _ = KeychainManager.save(data: data, account: aiSettingsAccount, key: aiApiKeyKeychainKey)
+                    _ = KeychainManager.save(data: data, account: AppConstants.KeychainAccounts.aiSettings, key: AppConstants.KeychainKeys.apiKey)
                 }
             }
             objectWillChange.send()
         }
     }
-    
-    @AppStorage("aiOpenAIBaseURL")
-    var openAIBaseURL = "" {
+
+    @AppStorage(AppConstants.UserDefaultsKeys.aiOllamaBaseURL)
+    var ollamaBaseURL: String = "http://localhost:11434" {
         didSet {
             objectWillChange.send()
         }
     }
-    
-    @AppStorage("aiAvatarURL")
-    var aiAvatarURL = "https://mcskins.top/assets/snippets/download/skin.php?n=7050" {
+
+    @AppStorage(AppConstants.UserDefaultsKeys.aiOpenAIBaseURL)
+    var openAIBaseURL: String = "" {
         didSet {
             objectWillChange.send()
         }
     }
-    
-    /// Get the API URL of the current provider (excluding Gemini as Gemini requires special handling)
+
+    @AppStorage(AppConstants.UserDefaultsKeys.aiModelOverride)
+    var modelOverride: String = "" {
+        didSet {
+            objectWillChange.send()
+        }
+    }
+
+    @AppStorage(AppConstants.UserDefaultsKeys.aiAvatarURL)
+    var aiAvatarURL: String = "https://mcskins.top/assets/snippets/download/skin.php?n=7050" {
+        didSet {
+            objectWillChange.send()
+        }
+    }
+
+    /// 获取当前提供商的 API URL（不包括 Gemini，因为 Gemini 需要特殊处理）
     func getAPIURL() -> String {
-        if selectedProvider.apiFormat == .openAI {
-            // OpenAI format supports custom URLs (can be used with compatible services such as DeepSeek)
+        if selectedProvider == .ollama {
+            let url = ollamaBaseURL.isEmpty ? selectedProvider.baseURL : ollamaBaseURL
+            return url + selectedProvider.apiPath
+        } else if selectedProvider.apiFormat == .openAI {
+            // OpenAI 格式支持自定义 URL（可用于 DeepSeek 等兼容服务）
             let url = openAIBaseURL.isEmpty ? selectedProvider.baseURL : openAIBaseURL
             return url + selectedProvider.apiPath
         } else {
             return selectedProvider.baseURL + selectedProvider.apiPath
         }
     }
-    
-    /// Provider default model
-    private func defaultModel(for provider: AIProvider) -> String {
-        switch provider {
-        case .openai:
-            "gpt-4o-mini"
-        }
-    }
-    
-    /// Models shown in chat picker when remote fetch is unavailable
-    private func fallbackModels(for provider: AIProvider) -> [String] {
-        switch provider {
-        case .openai:
-            ["gpt-4o-mini", "gpt-4o", "gpt-4.1-mini", "deepseek-chat"]
-        }
-    }
-    
-    /// Effective default model shown in chat
-    func getDefaultModel() -> String {
-        defaultModel(for: selectedProvider)
-    }
-    
-    /// Model options shown in chat picker
-    func fetchModelOptions() async -> [String] {
-        let fetchedModels = await fetchProviderModels()
-        let baseModels = fetchedModels.isEmpty ? fallbackModels(for: selectedProvider) : fetchedModels
-        
-        return baseModels
-    }
-    
-    /// Get model name with fallback order: chat override -> provider default
-    func getModel(chatOverride: String = "") -> String {
-        let chatModel = chatOverride.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !chatModel.isEmpty {
-            return chatModel
-        }
 
-        return defaultModel(for: selectedProvider)
+    /// 获取当前提供商的模型名称（必填）
+    func getModel() -> String {
+        return modelOverride.trimmingCharacters(in: .whitespacesAndNewlines)
     }
-    
-    private func fetchProviderModels() async -> [String] {
-        switch selectedProvider {
-        case .openai:
-            await fetchOpenAIModels()
-        }
-    }
-    
-    private func fetchOpenAIModels() async -> [String] {
-        let baseURL = openAIBaseURL.isEmpty ? selectedProvider.baseURL : openAIBaseURL
-        guard let url = URL(string: baseURL + "/v1/models") else {
-            return []
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        
-        if !apiKey.isEmpty {
-            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        }
-        
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse,
-                  (200...299).contains(httpResponse.statusCode) else {
-                return []
-            }
-            
-            let result = try JSONDecoder().decode(OpenAIModelListResponse.self, from: data)
-            return normalizeModels(result.data.map(\.id))
-        } catch {
-            Logger.shared.error("Failed to fetch OpenAI model list: \(error.localizedDescription)")
-            return []
-        }
-    }
-    
-    private func normalizeModels(_ models: [String]) -> [String] {
-        let cleanedModels = models
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-            .sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
-        
-        var uniqueModels: [String] = []
-        for model in cleanedModels where !uniqueModels.contains(model) {
-            uniqueModels.append(model)
-        }
-        
-        return uniqueModels
-    }
-    
-    private init() {
-    }
+
+    private init() {}
 }

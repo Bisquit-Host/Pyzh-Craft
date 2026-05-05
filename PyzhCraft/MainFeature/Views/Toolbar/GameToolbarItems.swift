@@ -1,0 +1,34 @@
+//
+//  GameToolbarItems.swift
+//  PyzhCraft
+//
+
+import SwiftUI
+
+/// 选中游戏时的详情工具栏内容：筛选菜单 + 操作按钮
+struct GameToolbarItems: View {
+    let game: GameVersionInfo
+
+    @Environment(\.controlActiveState)
+    private var controlActiveState
+    @EnvironmentObject private var filterState: ResourceFilterState
+    @EnvironmentObject private var detailState: ResourceDetailState
+
+    var body: some View {
+        ResourceFilterMenus.resourcesTypeMenu(detailState: detailState)
+            .id(controlActiveState)
+        ResourceFilterMenus.resourcesMenu(currentGame: game, detailState: detailState)
+            .id(controlActiveState)
+        if detailState.gameType {
+            ResourceFilterMenus.dataSourceMenu(filterState: filterState)
+                .id(controlActiveState)
+        } else {
+            ResourceFilterMenus.localResourceFilterMenu(filterState: filterState)
+                .id(controlActiveState)
+        }
+
+        Spacer()
+
+        GameActionButtons(game: game)
+    }
+}

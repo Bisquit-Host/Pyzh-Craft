@@ -1,3 +1,10 @@
+//
+//  GameNameGenerator.swift
+//  PyzhCraft
+//
+//  Created by su on 2025/1/27.
+//
+
 import Foundation
 
 // MARK: - DateFormatter Extension
@@ -11,58 +18,70 @@ extension DateFormatter {
 
 // MARK: - GameNameGenerator
 enum GameNameGenerator {
-    /// Generate default game name for ModPack downloads
+    /// 为 ModPack 下载生成默认游戏名称
     /// - Parameters:
-    ///   - projectTitle: project title
-    ///   - gameVersion: game version
-    ///   - includeTimestamp: whether to include timestamp (default true)
-    /// - Returns: generated game name
+    ///   - projectTitle: 项目标题
+    ///   - gameVersion: 游戏版本
+    ///   - includeTimestamp: 是否包含时间戳（默认 true）
+    /// - Returns: 生成的游戏名称
     static func generateModPackName(
         projectTitle: String?,
         gameVersion: String,
         includeTimestamp: Bool = true
     ) -> String {
         let baseName = "\(projectTitle ?? "ModPack")-\(gameVersion)"
-        
+
         if includeTimestamp {
             let timestamp = DateFormatter.timestampFormatter.string(from: Date())
             return "\(baseName)-\(timestamp)"
         }
-        
+
         return baseName
     }
-    
-    /// Generate default game name for ModPack import
+
+    /// 为 ModPack 导入生成默认游戏名称
     /// - Parameters:
-    ///   - modPackName: integration package name
-    ///   - modPackVersion: integration package version
-    ///   - includeTimestamp: whether to include timestamp (default true)
-    /// - Returns: generated game name
+    ///   - modPackName: 整合包名称
+    ///   - modPackVersion: 整合包版本
+    ///   - includeTimestamp: 是否包含时间戳（默认 true）
+    /// - Returns: 生成的游戏名称
     static func generateImportName(
         modPackName: String,
         modPackVersion: String,
         includeTimestamp: Bool = true
     ) -> String {
         let baseName = "\(modPackName)-\(modPackVersion)"
-        
+
         if includeTimestamp {
             let timestamp = DateFormatter.timestampFormatter.string(from: Date())
             return "\(baseName)-\(timestamp)"
         }
-        
+
         return baseName
     }
-    
-    /// Generate default game name for normal game creation
+
+    /// 为普通游戏创建生成默认游戏名称
     /// - Parameters:
-    ///   - gameVersion: game version
-    ///   - modLoader: Mod loader
-    /// - Returns: generated game name
+    ///   - gameVersion: 游戏版本
+    ///   - modLoader: 模组加载器
+    /// - Returns: 生成的游戏名称
     static func generateGameName(
         gameVersion: String,
-        modLoader: String
+        loaderVersion: String,
+        modLoader: String,
+        includeTimestamp: Bool = true
     ) -> String {
-        let loaderName = modLoader.lowercased() == "vanilla" ? "" : "-\(modLoader)"
-        return "\(gameVersion)\(loaderName)"
+        let baseName: String
+        if modLoader.lowercased() == GameLoader.vanilla.displayName {
+            // 原版不拼接 loaderVersion
+            baseName = "\(gameVersion)-\(modLoader.lowercased())"
+        } else {
+            baseName = "\(gameVersion)-\(modLoader.lowercased())-\(loaderVersion)"
+        }
+        if includeTimestamp {
+            let timestamp = DateFormatter.timestampFormatter.string(from: Date())
+            return "\(baseName)-\(timestamp)"
+        }
+        return baseName
     }
 }

@@ -1,34 +1,40 @@
+//
+//  AIChatAttachmentManager.swift
+//  PyzhCraft
+//
+//
+
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// AI Chat Attachment Manager
+/// AI 聊天附件管理器
 class AIChatAttachmentManager: ObservableObject {
     @Published var pendingAttachments: [MessageAttachmentType] = []
-    
-    /// Handle file selection
+
+    /// 处理文件选择
     func handleFileSelection(_ urls: [URL]) {
         for url in urls {
             guard url.startAccessingSecurityScopedResource() else { continue }
             defer { url.stopAccessingSecurityScopedResource() }
-            
-            // Filter out image types and only allow non-image files
+
+            // 过滤掉图片类型，只允许非图片文件
             let isImage = UTType(filenameExtension: url.pathExtension)?.conforms(to: .image) ?? false
             if isImage {
                 continue
             }
-            // Only add non-image files
+            // 只添加非图片文件
             let attachment: MessageAttachmentType = .file(url, url.lastPathComponent)
             pendingAttachments.append(attachment)
         }
     }
-    
-    /// Remove attachment
+
+    /// 移除附件
     func removeAttachment(at index: Int) {
         guard index < pendingAttachments.count else { return }
         pendingAttachments.remove(at: index)
     }
-    
-    /// Clear all attachments
+
+    /// 清除所有附件
     func clearAll() {
         pendingAttachments.removeAll()
     }

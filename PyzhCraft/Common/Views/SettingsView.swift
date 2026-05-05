@@ -1,78 +1,102 @@
 import SwiftUI
+import Foundation
 
-/// Set tab enumeration
+/// 设置标签页枚举
 enum SettingsTab: Int {
     case general = 0
-    case game = 1
-    case ai = 2
+    case player = 1
+    case game = 2
+    case advanced = 3
+    case ai = 4
 }
 
-/// Common settings view
-/// Apply settings
+/// 通用设置视图
+/// 应用设置
 public struct SettingsView: View {
+    @StateObject private var general: GeneralSettingsManager
+    @StateObject private var selectedGameManager: SelectedGameManager
+    @EnvironmentObject private var gameRepository: GameRepository
     @State private var selectedTab: SettingsTab = .general
-    
-    public init() {}
-    
+
+    public init() {
+        _general = StateObject(wrappedValue: AppServices.generalSettingsManager)
+        _selectedGameManager = StateObject(wrappedValue: AppServices.selectedGameManager)
+    }
+
+    init(
+        general: GeneralSettingsManager,
+        selectedGameManager: SelectedGameManager
+    ) {
+        _general = StateObject(wrappedValue: general)
+        _selectedGameManager = StateObject(wrappedValue: selectedGameManager)
+    }
+
     public var body: some View {
         TabView(selection: $selectedTab) {
             GeneralSettingsView()
                 .tabItem {
-                    Label("General", systemImage: "gearshape")
+                    Label("settings.general.tab".localized(), systemImage: "gearshape")
                 }
                 .tag(SettingsTab.general)
+            PlayerSettingsView()
+                .tabItem {
+                    Label("settings.player.tab".localized(), systemImage: "person")
+                }
+                .tag(SettingsTab.player)
             GameSettingsView()
                 .tabItem {
-                    Label("Game", systemImage: "gamecontroller")
+                    Label("settings.game.tab".localized(), systemImage: "gamecontroller")
                 }
                 .tag(SettingsTab.game)
             AISettingsView()
                 .tabItem {
-                    Label("AI", systemImage: "brain")
+                    Label("settings.ai.tab".localized(), systemImage: "brain")
                 }
                 .tag(SettingsTab.ai)
+            GameAdvancedSettingsView()
+                .tabItem {
+                    Label(
+                        "settings.game.advanced.tab".localized(),
+                        systemImage: "gearshape.2"
+                    )
+                }
+                .tag(SettingsTab.advanced)
+                .disabled(selectedGameManager.selectedGameId == nil)
         }
+        .frame(maxWidth: .infinity)
         .padding()
+        .onChange(of: selectedGameManager.shouldOpenAdvancedSettings) { _, shouldOpen in
+            if shouldOpen {
+                checkAndOpenAdvancedSettings()
+            }
+        }
+        .onAppear {
+            checkAndOpenAdvancedSettings()
+        }
+    }
+
+    private func checkAndOpenAdvancedSettings() {
+        if selectedGameManager.shouldOpenAdvancedSettings && selectedGameManager.selectedGameId != nil {
+            selectedTab = .advanced
+            selectedGameManager.shouldOpenAdvancedSettings = false
+        }
     }
 }
 
 struct CustomLabeledContentStyle: LabeledContentStyle {
-    let alignment: VerticalAlignment
-    
-    init(alignment: VerticalAlignment = .center) {
-        self.alignment = alignment
-    }
-    
-    // Preserve system layout
     func makeBody(configuration: Configuration) -> some View {
-        HStack(alignment: alignment) {
-            // Use system label layout
+        LabeledContent {
+            configuration.content
+        } label: {
             HStack(spacing: 0) {
                 configuration.label
                 Text(":")
             }
-            .layoutPriority(1)  // Keep label priority
-            .multilineTextAlignment(.trailing)
-            .frame(minWidth: 320, alignment: .trailing)  // Container aligned right
-            // Right content
-            configuration.content
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.leading)  // Text left aligned
-                .frame(maxWidth: .infinity, alignment: .leading)  // Container left aligned
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 2)
     }
 }
 
-// Use extensions to avoid breaking layout
 extension LabeledContentStyle where Self == CustomLabeledContentStyle {
     static var custom: Self { .init() }
-    
-    static func custom(alignment: VerticalAlignment) -> Self {
-        .init(alignment: alignment)
-    }
-}
-
-#Preview {
-    SettingsView()
 }

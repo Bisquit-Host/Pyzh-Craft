@@ -1,56 +1,57 @@
-import SwiftUI
+import Foundation
 
-/// Sidebar navigation items
+/// 侧边栏导航项
 public enum SidebarItem: Hashable, Identifiable {
-    case game(String), resource(ResourceType) // Game item includes game ID
-    
+    case game(String)  // 游戏项，包含游戏ID
+    case resource(ResourceType)  // 资源项
+
     public var id: String {
         switch self {
-        case .game(let gameId): "game_\(gameId)"
-        case .resource(let type): "resource_\(type.rawValue)"
+        case .game(let gameId):
+            return "game_\(gameId)"
+        case .resource(let type):
+            return "resource_\(type.rawValue)"
         }
     }
-    
-    public var title: LocalizedStringKey {
+
+    public var title: String {
         switch self {
-        case .game(let gameId): LocalizedStringKey(gameId) // Name can be obtained from game data
-        case .resource(let type): type.localizedName
+        case .game(let gameId):
+            return gameId  // 可从游戏数据获取名称
+        case .resource(let type):
+            return type.localizedName
         }
     }
 }
 
-/// Resource type
+/// 资源类型
 public enum ResourceType: String, CaseIterable {
-    case mod, datapack, shader, resourcepack, modpack
-    
-    public var localizedNameKey: LocalizedStringKey {
-        switch self {
-        case .mod: "Mod"
-        case .datapack: "Data Pack"
-        case .shader: "Shader"
-        case .resourcepack: "Resource Pack"
-        case .modpack: "Modpack"
-        }
+    case mod = "mod"
+    case datapack = "datapack"
+    case shader = "shader"
+    case resourcepack = "resourcepack"
+    case modpack = "modpack"
+    case minecraftJavaServer = "minecraft_java_server"
+
+    public var localizedName: String {
+        "resource.content.type.\(rawValue)".localized()
     }
-    
-    public var localizedName: LocalizedStringKey {
-        switch self {
-        case .mod: "Mod"
-        case .datapack: "Data Pack"
-        case .shader: "Shader"
-        case .resourcepack: "Resource Pack"
-        case .modpack: "Modpack"
-        }
-    }
-    
-    /// SF Symbol icon name for the resource type
+
+    /// 资源类型的 SF Symbol 图标名称
     public var systemImage: String {
         switch self {
-        case .mod: "puzzlepiece.extension"
-        case .datapack: "doc.on.doc"
-        case .shader: "sparkles"
-        case .resourcepack: "photo.stack"
-        case .modpack: "cube.box"
+        case .mod:
+            return "puzzlepiece.extension"
+        case .datapack:
+            return "doc.on.doc"
+        case .shader:
+            return "sparkles"
+        case .resourcepack:
+            return "photo.stack"
+        case .modpack:
+            return "cube.box"
+        case .minecraftJavaServer:
+            return "server.rack"
         }
     }
 }

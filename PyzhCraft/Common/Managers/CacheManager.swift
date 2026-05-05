@@ -1,80 +1,44 @@
+//
+//  CacheManager.swift
+//  PyzhCraft
+//
+//  Created by su on 2025/7/31.
+//
 import SwiftUI
 
 class CacheManager: ObservableObject {
-    @Published var cacheInfo = CacheInfo(fileCount: 0, totalSize: 0)
-    private let calculator = CacheCalculator.shared
-    
-    /// Compute metadata cache information (silent version)
-    func calculateMetaCacheInfo() {
-        do {
-            self.cacheInfo = try calculator.calculateMetaCacheInfo()
-        } catch {
-            let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to calculate metadata cache information: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
-            // keep default value
-        }
+    @Published var cacheInfo: CacheInfo = CacheInfo(fileCount: 0, totalSize: 0)
+    private let errorHandler: GlobalErrorHandler
+    private let calculator: CacheCalculator
+
+    init(
+        errorHandler: GlobalErrorHandler = AppServices.errorHandler,
+        calculator: CacheCalculator = AppServices.cacheCalculator
+    ) {
+        self.errorHandler = errorHandler
+        self.calculator = calculator
     }
-    
-    /// - Throws: GlobalError when the operation fails
-    func calculateMetaCacheInfoThrowing() throws {
-        do {
-            self.cacheInfo = try calculator.calculateMetaCacheInfo()
-        } catch {
-            throw GlobalError.fileSystem(
-                i18nKey: "Meta Cache Calculation Failed",
-                level: .notification
-            )
-        }
-    }
-    
-    /// Calculate data cache information (silent version)
+
+    /// 计算数据缓存信息（静默版本）
     func calculateDataCacheInfo() {
         do {
             self.cacheInfo = try calculator.calculateCacheInfo()
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to calculate data cache information: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
-            // keep default value
+            Logger.shared.error("计算数据缓存信息失败: \(globalError.chineseMessage)")
+            errorHandler.handle(globalError)
         }
     }
-    
-    /// - Throws: GlobalError when the operation fails
-    func calculateDataCacheInfoThrowing() throws {
-        do {
-            self.cacheInfo = try calculator.calculateCacheInfo()
-        } catch {
-            throw GlobalError.fileSystem(
-                i18nKey: "Data Cache Calculation Failed",
-                level: .notification
-            )
-        }
-    }
-    
-    /// Calculate game cache information (silent version)
-    /// - Parameter game: game name
+
+    /// 计算游戏缓存信息（静默版本）
+    /// - Parameter game: 游戏名称
     func calculateGameCacheInfo(_ game: String) {
         do {
             self.cacheInfo = try calculator.calculateProfileCacheInfo(gameName: game)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to calculate game cache information: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
-            // keep default value
-        }
-    }
-    
-    /// - Parameter game: game name
-    /// - Throws: GlobalError when the operation fails
-    func calculateGameCacheInfoThrowing(_ game: String) throws {
-        do {
-            self.cacheInfo = try calculator.calculateProfileCacheInfo(gameName: game)
-        } catch {
-            throw GlobalError.fileSystem(
-                i18nKey: "Game Cache Calculation Failed",
-                level: .notification
-            )
+            Logger.shared.error("计算游戏缓存信息失败: \(globalError.chineseMessage)")
+            errorHandler.handle(globalError)
         }
     }
 }

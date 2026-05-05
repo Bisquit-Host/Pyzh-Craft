@@ -1,104 +1,132 @@
 import Foundation
 
-/// Java download manager
+/// Java下载管理器
 @MainActor
 class JavaDownloadManager: ObservableObject {
     static let shared = JavaDownloadManager()
-    
+
     @Published var downloadState = JavaDownloadState()
     @Published var isWindowVisible = false
-    
-    private let javaRuntimeService = JavaRuntimeService.shared
+
+    private let javaRuntimeService: JavaRuntimeService
+    private let windowManager: WindowManager
     private var dismissCallback: (() -> Void)?
-    
-    /// Set window close callback
+    private var currentDownloadTask: Task<Void, Error>?
+    private var cancelRequested = false
+
+    private init(
+        javaRuntimeService: JavaRuntimeService = AppServices.javaRuntimeService,
+        windowManager: WindowManager = AppServices.windowManager
+    ) {
+        self.javaRuntimeService = javaRuntimeService
+        self.windowManager = windowManager
+    }
+
+    /// 设置窗口关闭回调
     func setDismissCallback(_ callback: @escaping () -> Void) {
         dismissCallback = callback
     }
-    
-    /// Start downloading Java runtime
+
+    /// 开始下载Java运行时
     func downloadJavaRuntime(version: String) async {
+        defer {
+            currentDownloadTask = nil
+            cancelRequested = false
+        }
         do {
-            // reset state
+            // 重置状态
             downloadState.reset()
             downloadState.startDownload(version: version)
-            
-            // Show download pop-up window
+            cancelRequested = false
+
+            // 显示下载弹窗
             showDownloadWindow()
-            
-            // Set progress callback
+
+            // 设置进度回调
             javaRuntimeService.setProgressCallback { [weak self] fileName, completed, total in
                 Task { @MainActor in
-                    // Check if canceled
+                    // 检查是否已取消
                     guard let self = self, !self.downloadState.isCancelled else { return }
                     let progress = total > 0 ? Double(completed) / Double(total) : 0.0
                     self.downloadState.updateProgress(fileName: fileName, progress: progress)
                 }
             }
-            
-            // Set cancel check callback
+
+            // 设置取消检查回调
             javaRuntimeService.setCancelCallback { [weak self] in
-                return self?.downloadState.isCancelled ?? false
+                return self?.cancelRequested ?? false
             }
-            
-            // Start downloading
-            try await javaRuntimeService.downloadJavaRuntime(for: version)
-            
-            // Check if canceled
-            if downloadState.isCancelled {
-                Logger.shared.info("Java download has been canceled")
+
+            // 开始下载
+            let task = Task { [javaRuntimeService] in
+                try await javaRuntimeService.downloadJavaRuntime(for: version)
+            }
+            currentDownloadTask = task
+            try await task.value
+
+            // 检查是否被取消
+            if downloadState.isCancelled || cancelRequested {
+                Logger.shared.info("Java下载已被取消")
                 cleanupCancelledDownload()
                 return
             }
-            
-            // Download Complete - Set completion status to automatically close the window later
+
+            // 下载完成 - 设置完成状态，稍后自动关闭窗口
             downloadState.isDownloading = false
-            
+
             closeWindow()
         } catch {
-            // Download failed
+            if error is CancellationError || downloadState.isCancelled || cancelRequested {
+                Logger.shared.info("Java下载任务已取消")
+                cleanupCancelledDownload()
+                return
+            }
+            // 下载失败
             if !downloadState.isCancelled {
                 downloadState.setError(error.localizedDescription)
             }
         }
     }
-    
-    /// Cancel download
+
+    /// 取消下载
     func cancelDownload() {
+        guard downloadState.isDownloading else {
+            closeWindow()
+            return
+        }
+        cancelRequested = true
         downloadState.cancel()
-        // The cancellation status will be passed to JavaRuntimeService through the shouldCancel callback
-        // Close window now
-        cleanupCancelledDownload()
+        currentDownloadTask?.cancel()
     }
-    
-    /// Retry download
+
+    /// 重试下载
     func retryDownload() {
         guard !downloadState.version.isEmpty else { return }
         Task {
             await downloadJavaRuntime(version: downloadState.version)
         }
     }
-    
-    /// Show download window
+
+    /// 显示下载窗口
     private func showDownloadWindow() {
-        WindowManager.shared.openWindow(id: .javaDownload)
+        windowManager.openWindow(id: .javaDownload)
         isWindowVisible = true
     }
-    
-    /// close window
+
+    /// 关闭窗口
     func closeWindow() {
-        WindowManager.shared.closeWindow(id: .javaDownload)
+        windowManager.closeWindow(id: .javaDownload)
         isWindowVisible = false
         downloadState.reset()
         dismissCallback?()
     }
-    
-    /// Clean canceled download data
+
+    /// 清理取消的下载数据
     func cleanupCancelledDownload() {
-        // Clean up some downloaded files
-        // Cleaning logic can be added
+        // 清理已下载的部分文件
+        // 可添加清理逻辑
         Logger.shared.info("Cleaning up cancelled Java download for version: \(downloadState.version)")
-        // Reset state and close window
+        // 重置状态并关闭窗口
         closeWindow()
     }
 }

@@ -1,26 +1,41 @@
 <div align="center">
   <img src="PyzhCraft/Assets.xcassets/AppIcon.appiconset/mac512pt2x.png" alt="PyzhCraft" width="128" height="128">
   
-  # 🚀 Pyzh Craft
+  # 🚀 Swift Craft Launcher
   
-  **✨ A modern Minecraft launcher for macOS ✨**
+  **A lightweight, native Minecraft launcher for macOS, built with Swift and SwiftUI.**
   
-  [![Swift](https://img.shields.io/badge/Swift-5.5+-red.svg?logo=swift)](https://swift.org)
-  [![Discord](https://img.shields.io/badge/Discord-bule.svg?logo=discord)](https://discord.com/invite/kerMT2r9rz)
+  [![Swift Craft Launcher](https://img.shields.io/badge/Swift%20Craft%20Launcher-SCL-orange.svg?logo=swift)](https://github.com/suhang12332/Swift-Craft-Launcher)
+  [![Swift](https://img.shields.io/badge/Swift-5.5+-red.svg?logo=swift)](https://swift.org/)
+  [![Top Language](https://img.shields.io/github/languages/top/suhang12332/Swift-Craft-Launcher?style=flat)](https://github.com/suhang12332/Swift-Craft-Launcher)
+  [![macOS](https://img.shields.io/badge/macOS-14.0+-blue.svg?logo=apple)](https://developer.apple.com/macos/)
+
+  [![QQ Group](https://img.shields.io/badge/QQ%20Group-1057517524-blue.svg?logo=qq)](https://qm.qq.com/cgi-bin/qm/qr?k=1057517524)
+  [![Join The Community](https://img.shields.io/badge/Discord-7289DA.svg?logo=discord)](https://discord.gg/gYESVa3CZd)
+
+  [![latest-release](https://img.shields.io/github/v/release/suhang12332/Swift-Craft-Launcher?label=latest-release&logo=github)](https://github.com/suhang12332/Swift-Craft-Launcher/releases/latest)
+  [![Release Date](https://img.shields.io/github/release-date/suhang12332/Swift-Craft-Launcher?style=flat&logo=github)](https://github.com/suhang12332/Swift-Craft-Launcher/releases/latest)
+  
+  [![Downloads](https://img.shields.io/github/downloads/suhang12332/Swift-Craft-Launcher/total?label=Downloads&logo=github)](https://github.com/suhang12332/Swift-Craft-Launcher/releases)
+  [![Stars](https://img.shields.io/github/stars/suhang12332/Swift-Craft-Launcher?style=flat&logo=github)](https://github.com/suhang12332/Swift-Craft-Launcher/stargazers)
+  [![Repo Size](https://img.shields.io/github/repo-size/suhang12332/Swift-Craft-Launcher?style=flat&logo=github)](https://github.com/suhang12332/Swift-Craft-Launcher)
+  [![Contributors](https://img.shields.io/github/contributors/suhang12332/Swift-Craft-Launcher?color=ee8449&logo=githubsponsors)](https://github.com/suhang12332/Swift-Craft-Launcher/graphs/contributors)
+  
+  [![CI](https://img.shields.io/github/actions/workflow/status/suhang12332/Swift-Craft-Launcher/build-dmg.yml?branch=main&label=CI&logo=githubactions)](https://github.com/suhang12332/Swift-Craft-Launcher/actions/workflows/build-dmg.yml)
   [![Homebrew](https://img.shields.io/badge/Homebrew-available-green.svg?logo=homebrew)](https://formulae.brew.sh/cask/swiftcraft-launcher)
+  [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg?logo=gnu)](https://www.gnu.org/licenses/agpl-3.0)
+
   
-  💾 [Download](https://github.com/Bisquit-Host/Pyzh-Craft/releases/latest)
+  🌐 [Website](https://suhang12332.github.io/Swift-Craft-Launcher-Assets/web/) • 💾 [Download](https://github.com/suhang12332/Swift-Craft-Launcher/releases/latest) • 📚 [Documentation](https://suhang12332.github.io/Swift-Craft-Launcher-Assets/web/)
+  
+  **English** | [简体中文](doc/README_zh-CN.md) | [繁體中文](doc/README_zh-TW.md)
 </div>
 
 ---
 
-## Supported platforms
-- 🖥️ macOS 14+
-- ☕️ Java: 8+ (for Minecraft runtime)
-
 ## 🎯 Overview
 
-Pyzh Craft is a native macOS Minecraft launcher 🍎 built with SwiftUI, offering a streamlined and efficient gaming experience. Designed for modern macOS systems, it provides comprehensive mod loader support, Microsoft account authentication, and intuitive game management
+Swift Craft Launcher is a native macOS Minecraft launcher 🍎 built with SwiftUI, offering a streamlined and efficient gaming experience. Designed for modern macOS systems, it provides comprehensive mod loader support, Microsoft account authentication, and intuitive game management.
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/suhang12332/Swift-Craft-Launcher-Assets/refs/heads/main/imagebed/readme/screenshot2026-01-29-01.17.31.gif" alt="PyzhCraft Screenshot" width="800">
@@ -48,19 +63,29 @@ Pyzh Craft is a native macOS Minecraft launcher 🍎 built with SwiftUI, offerin
 - **🧠 Memory Allocation** - Visual range slider for Xms/Xmx parameter settings
 - **🔧 Custom Launch Parameters** - JVM and game argument customization
 
+## 📋 System Requirements
+
+- **💻 macOS**: 14.0 or later
+- **☕️ Java**: 8 or later (for Minecraft runtime)
+
 ## 📥 Installation
 
-<!--### 🍺 Using Homebrew Tap (Recommended)-->
-<!--```bash-->
-<!--# Method 1: One-command install-->
-<!--brew install --cask suhang12332/swiftcraftlauncher/swift-craft-launcher-->
-<!---->
-<!--# Method 2: Add Tap then install-->
-<!--brew tap suhang12332/swiftcraftlauncher-->
-<!--brew install --cask swift-craft-launcher-->
-<!--```-->
-<!---->
-<!--> **💡 Tip**: We created a dedicated [Homebrew Tap](https://github.com/suhang12332/homebrew-swiftcraftlauncher) for Pyzh Craft-->
+### 🍺 Using Homebrew Tap (Recommended)
+```bash
+# Method 1: One-command install
+brew install --cask suhang12332/swiftcraftlauncher/swift-craft-launcher
+
+# Method 2: Add Tap then install
+brew tap suhang12332/swiftcraftlauncher
+brew install --cask swift-craft-launcher
+```
+
+> **💡 Tip**: We created a dedicated [Homebrew Tap](https://github.com/suhang12332/homebrew-swiftcraftlauncher) for Swift Craft Launcher
+
+### 💾 Pre-built Release
+Download the latest version from [GitHub Releases](https://github.com/suhang12332/Swift-Craft-Launcher/releases/latest).
+
+> **⚠️ Note**: The current available downloads are test versions. Stable releases are coming soon.
 
 ### ❓ Frequently Asked Questions
 Please visit [FAQ](doc/FAQ.md)
@@ -68,8 +93,8 @@ Please visit [FAQ](doc/FAQ.md)
 ### 🔨 Build from Source
 1. **⏬ Clone the repository**
    ```bash
-   git clone https://github.com/Bisquit-Host/Pyzh-Craft.git
-   cd Pyzh-Craft
+   git clone https://github.com/suhang12332/Swift-Craft-Launcher.git
+   cd Swift-Craft-Launcher
    ```
 
 2. **🛠️ Open in Xcode**
@@ -80,29 +105,33 @@ Please visit [FAQ](doc/FAQ.md)
 3. **🚀 Build and run** using Xcode (⌘R)
 
 **Build Requirements:**
-- Xcode 13+
+- Xcode 13.0+
 - Swift 5.5+
 
 ## 🧪 Technical Architecture
 
 | Component | Technology |
 |----------|------------|
-| **💻 Language** | Swift |
 | **🎨 UI Framework** | SwiftUI |
+| **💻 Language** | Swift |
 | **🔄 Reactive Programming** | Combine |
-| **📱 Target Platform** | macOS 14+ |
+| **📱 Target Platform** | macOS 14.0+ |
 
 ## 📜 License
 
-This project is licensed under the GNU Affero General Public License v3.0. See [LICENSE](LICENSE) for details
+This project is licensed under the GNU Affero General Public License v3.0. See [LICENSE](LICENSE) for details.
 
-**Additional Terms**: This project includes additional terms requiring source attribution and prohibiting the use of the same software name. See [English terms](doc/ADDITIONAL_TERMS_en.md)
+**Additional Terms**: This project includes additional terms requiring source attribution and prohibiting the use of the same software name. See:
+- [简体中文](doc/ADDITIONAL_TERMS.md)
+- [繁體中文](doc/ADDITIONAL_TERMS_zh-TW.md)
+- [English](doc/ADDITIONAL_TERMS_en.md)
 
 ## 🤝 Community & Support
 
-- **Discord**: [Discord](https://discord.com/invite/kerMT2r9rz)
-- **🐛 Issue Reports**: [GitHub Issues](https://github.com/Bisquit-Host/Pyzh-Craft/issues)
-- **💡 Feature Suggestions**: [GitHub Discussions](https://github.com/Bisquit-Host/Pyzh-Craft/discussions)
+- **👥 Official QQ Group**: [1057517524](https://qm.qq.com/cgi-bin/qm/qr?k=1057517524)
+- **Discord**: [Discord](https://discord.gg/gYESVa3CZd)
+- **🐛 Issue Reports**: [GitHub Issues](https://github.com/suhang12332/Swift-Craft-Launcher/issues)
+- **💡 Feature Suggestions**: [GitHub Discussions](https://github.com/suhang12332/Swift-Craft-Launcher/discussions)
 
 ## 🌟 Contributing
 
@@ -116,6 +145,8 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 Special thanks to the following projects that have contributed to this launcher:
 
 - **[Archify](https://github.com/Oct4Pie/archify)** - Universal binary optimization tool for macOS applications
+
+- **[curseforge-fingerprint](https://github.com/meza/curseforge-fingerprint)** - CurseForge mod file fingerprinting algorithm binding
 
 ---
 

@@ -1,174 +1,176 @@
 import Foundation
 
-/// Mod Cache Manager
-/// Use SQLite database to store mod.json data (hash -> JSON BLOB)
+/// Mod 缓存管理器
+/// 使用 SQLite 数据库存储 mod.json 数据（hash -> JSON BLOB）
 class ModCacheManager {
     static let shared = ModCacheManager()
-    
+
     private let modCacheDB: ModCacheDatabase
+    private let errorHandler: GlobalErrorHandler
     private let queue = DispatchQueue(label: "ModCacheManager.queue")
     private var isInitialized = false
-    
-    private init() {
+
+    private init(errorHandler: GlobalErrorHandler = AppServices.errorHandler) {
+        self.errorHandler = errorHandler
         let dbPath = AppPaths.gameVersionDatabase.path
         self.modCacheDB = ModCacheDatabase(dbPath: dbPath)
     }
-    
+
     // MARK: - Initialization
-    
-    /// Initialize database connection
-    /// - Throws: GlobalError when the operation fails
+
+    /// 初始化数据库连接
+    /// - Throws: GlobalError 当操作失败时
     private func ensureInitialized() throws {
         if !isInitialized {
-            // Make sure the database directory exists
+            // 确保数据库目录存在
             let dataDir = AppPaths.dataDirectory
             try? FileManager.default.createDirectory(at: dataDir, withIntermediateDirectories: true)
-            
+
             try modCacheDB.open()
             isInitialized = true
         }
     }
-    
+
     // MARK: - Public API
-    
+
     /// - Parameters:
-    ///   - hash: the hash value of the mod file
-    ///   - jsonData: Data of JSON data (original JSON bytes)
-    /// - Throws: GlobalError when the operation fails
+    ///   - hash: mod 文件的 hash 值
+    ///   - jsonData: JSON 数据的 Data（原始 JSON bytes）
+    /// - Throws: GlobalError 当操作失败时
     func set(hash: String, jsonData: Data) throws {
         try queue.sync {
             try ensureInitialized()
             try modCacheDB.saveModCache(hash: hash, jsonData: jsonData)
         }
     }
-    
+
     /// - Parameters:
-    ///   - hash: the hash value of the mod file
-    ///   - jsonData: Data of JSON data (original JSON bytes)
+    ///   - hash: mod 文件的 hash 值
+    ///   - jsonData: JSON 数据的 Data（原始 JSON bytes）
     func setSilently(hash: String, jsonData: Data) {
         do {
             try set(hash: hash, jsonData: jsonData)
         } catch {
-            GlobalErrorHandler.shared.handle(error)
+            errorHandler.handle(error)
         }
     }
-    
-    /// Get mod cache value
-    /// - Parameter hash: the hash value of the mod file
-    /// - Returns: Data of JSON data (original JSON bytes), or nil if it does not exist
+
+    /// 获取 mod 缓存值
+    /// - Parameter hash: mod 文件的 hash 值
+    /// - Returns: JSON 数据的 Data（原始 JSON bytes），如果不存在则返回 nil
     func get(hash: String) -> Data? {
         return queue.sync {
             do {
                 try ensureInitialized()
                 return try modCacheDB.getModCache(hash: hash)
             } catch {
-                GlobalErrorHandler.shared.handle(error)
+                errorHandler.handle(error)
                 return nil
             }
         }
     }
-    
-    /// Get all mod cache data
-    /// - Returns: hash -> dictionary of JSON Data
+
+    /// 获取所有 mod 缓存数据
+    /// - Returns: hash -> JSON Data 的字典
     func getAll() -> [String: Data] {
         return queue.sync {
             do {
                 try ensureInitialized()
                 return try modCacheDB.getAllModCaches()
             } catch {
-                GlobalErrorHandler.shared.handle(error)
+                errorHandler.handle(error)
                 return [:]
             }
         }
     }
-    
-    /// Remove mod cache items
-    /// - Parameter hash: the hash value of the mod file
-    /// - Throws: GlobalError when the operation fails
+
+    /// 移除 mod 缓存项
+    /// - Parameter hash: mod 文件的 hash 值
+    /// - Throws: GlobalError 当操作失败时
     func remove(hash: String) throws {
         try queue.sync {
             try ensureInitialized()
             try modCacheDB.deleteModCache(hash: hash)
         }
     }
-    
-    /// Remove mod cache items (silent version)
-    /// - Parameter hash: the hash value of the mod file
+
+    /// 移除 mod 缓存项（静默版本）
+    /// - Parameter hash: mod 文件的 hash 值
     func removeSilently(hash: String) {
         do {
             try remove(hash: hash)
         } catch {
-            GlobalErrorHandler.shared.handle(error)
+            errorHandler.handle(error)
         }
     }
-    
-    /// Remove mod cache items in batches
-    /// - Parameter hashes: array of hashes to be deleted
-    /// - Throws: GlobalError when the operation fails
+
+    /// 批量移除 mod 缓存项
+    /// - Parameter hashes: 要删除的 hash 数组
+    /// - Throws: GlobalError 当操作失败时
     func remove(hashes: [String]) throws {
         try queue.sync {
             try ensureInitialized()
             try modCacheDB.deleteModCaches(hashes: hashes)
         }
     }
-    
-    /// Remove mod cache items in batches (silent version)
-    /// - Parameter hashes: array of hashes to be deleted
+
+    /// 批量移除 mod 缓存项（静默版本）
+    /// - Parameter hashes: 要删除的 hash 数组
     func removeSilently(hashes: [String]) {
         do {
             try remove(hashes: hashes)
         } catch {
-            GlobalErrorHandler.shared.handle(error)
+            errorHandler.handle(error)
         }
     }
-    
-    /// Clear all mod caches
-    /// - Throws: GlobalError when the operation fails
+
+    /// 清空所有 mod 缓存
+    /// - Throws: GlobalError 当操作失败时
     func clear() throws {
         try queue.sync {
             try ensureInitialized()
             try modCacheDB.clearAllModCaches()
         }
     }
-    
-    /// Clear all mod caches (silent version)
+
+    /// 清空所有 mod 缓存（静默版本）
     func clearSilently() {
         do {
             try clear()
         } catch {
-            GlobalErrorHandler.shared.handle(error)
+            errorHandler.handle(error)
         }
     }
-    
-    /// - Parameter hash: the hash value of the mod file
-    /// - Returns: Does it exist?
+
+    /// - Parameter hash: mod 文件的 hash 值
+    /// - Returns: 是否存在
     func has(hash: String) -> Bool {
         return queue.sync {
             do {
                 try ensureInitialized()
                 return try modCacheDB.hasModCache(hash: hash)
             } catch {
-                GlobalErrorHandler.shared.handle(error)
+                errorHandler.handle(error)
                 return false
             }
         }
     }
-    
-    /// - Parameter data: hash -> dictionary of JSON Data
-    /// - Throws: GlobalError when the operation fails
+
+    /// - Parameter data: hash -> JSON Data 的字典
+    /// - Throws: GlobalError 当操作失败时
     func setAll(_ data: [String: Data]) throws {
         try queue.sync {
             try ensureInitialized()
             try modCacheDB.saveModCaches(data)
         }
     }
-    
-    /// - Parameter data: hash -> dictionary of JSON Data
+
+    /// - Parameter data: hash -> JSON Data 的字典
     func setAllSilently(_ data: [String: Data]) {
         do {
             try setAll(data)
         } catch {
-            GlobalErrorHandler.shared.handle(error)
+            errorHandler.handle(error)
         }
     }
 }

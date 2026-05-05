@@ -1,12 +1,31 @@
 import Foundation
 import AVFoundation
-
-/// Minecraft launch command generator (only responsible for process and authentication, exposed by GameLaunchUseCase)
+/// Minecraft 启动命令生成器（仅负责进程与认证，由 GameLaunchUseCase 对外暴露）
 struct MinecraftLaunchCommand {
     let player: Player?
     let game: GameVersionInfo
-    
-    /// Start the game (silent version)
+    private let minecraftAuthService: MinecraftAuthService
+    private let gameSettingsManager: GameSettingsManager
+    private let gameProcessManager: GameProcessManager
+    private let gameStatusManager: GameStatusManager
+
+    init(
+        player: Player?,
+        game: GameVersionInfo,
+        minecraftAuthService: MinecraftAuthService = AppServices.minecraftAuthService,
+        gameSettingsManager: GameSettingsManager = AppServices.gameSettingsManager,
+        gameProcessManager: GameProcessManager = AppServices.gameProcessManager,
+        gameStatusManager: GameStatusManager = AppServices.gameStatusManager
+    ) {
+        self.player = player
+        self.game = game
+        self.minecraftAuthService = minecraftAuthService
+        self.gameSettingsManager = gameSettingsManager
+        self.gameProcessManager = gameProcessManager
+        self.gameStatusManager = gameStatusManager
+    }
+
+    /// 启动游戏（静默版本）
     func launchGame() async {
         do {
             try await launchGameThrowing()
@@ -14,40 +33,40 @@ struct MinecraftLaunchCommand {
             await handleLaunchError(error)
         }
     }
-    
-    /// stop game
+
+    /// 停止游戏（使用当前 command 的 player+game 定位进程）
     func stopGame() async {
-        // Stop the process, terminationHandler will automatically handle error monitoring stop and status update
-        _ = GameProcessManager.shared.stopProcess(for: game.id)
+        let userId = player?.id ?? ""
+        _ = gameProcessManager.stopProcess(for: game.id, userId: userId)
     }
-    
-    /// Start the game (throws exception version)
-    /// - Throws: GlobalError when startup fails
+
+    /// 启动游戏（抛出异常版本）
+    /// - Throws: GlobalError 当启动失败时
     func launchGameThrowing() async throws {
-        // Verify and refresh token (if necessary) before launching the game
+        // 在启动游戏前验证并刷新Token（如果需要）
         let validatedPlayer = try await validatePlayerTokenBeforeLaunch()
-        
+
         let command = game.launchCommand
         try await launchGameProcess(command: replaceAuthParameters(command: command, with: validatedPlayer))
     }
-    
-    /// Verify player token before launching the game
-    /// - Returns: Verified player object
-    /// - Throws: GlobalError when validation fails
+
+    /// 在启动游戏前验证玩家Token
+    /// - Returns: 验证后的玩家对象
+    /// - Throws: GlobalError 当验证失败时
     private func validatePlayerTokenBeforeLaunch() async throws -> Player? {
         guard let player = player else {
-            Logger.shared.warning("No player selected, default authentication parameters are used")
+            Logger.shared.warning("没有选择玩家，使用默认认证参数")
             return nil
         }
-        
-        // If it is an offline account, return directly
+
+        // 如果是离线账户，直接返回
         guard player.isOnlineAccount else {
             return player
         }
-        
-        Logger.shared.info("Verify player \(player.name)'s Token before starting the game")
-        
-        // Load authentication credentials from Keychain for this player on demand before starting (only for the current player to avoid reading all accounts at once)
+
+        Logger.shared.info("启动游戏前验证玩家 \(player.name) 的Token")
+
+        // 启动前按需从 Keychain 为该玩家加载认证凭据（只针对当前玩家，避免一次性读取所有账号）
         var playerWithCredential = player
         if playerWithCredential.credential == nil {
             let dataManager = PlayerDataManager()
@@ -55,43 +74,42 @@ struct MinecraftLaunchCommand {
                 playerWithCredential.credential = credential
             }
         }
-        
-        // Verify using the loaded/updated player object and try to refresh the token
-        let authService = MinecraftAuthService.shared
-        let validatedPlayer = try await authService.validateAndRefreshPlayerTokenThrowing(for: playerWithCredential)
-        
-        // If the Token is updated, it needs to be saved to PlayerDataManager
+
+        // 使用已加载/更新后的玩家对象验证并尝试刷新Token
+        let validatedPlayer = try await minecraftAuthService.validateAndRefreshPlayerTokenThrowing(for: playerWithCredential)
+
+        // 如果Token被更新了，需要保存到PlayerDataManager
         if validatedPlayer.authAccessToken != player.authAccessToken {
-            Logger.shared.info("Player \(player.name)'s Token has been updated and saved to the data manager")
+            Logger.shared.info("玩家 \(player.name) 的Token已更新，保存到数据管理器")
             await updatePlayerInDataManager(validatedPlayer)
         }
-        
+
         return validatedPlayer
     }
-    
-    /// Update player information in PlayerDataManager
-    /// - Parameter updatedPlayer: updated player object
+
+    /// 更新PlayerDataManager中的玩家信息
+    /// - Parameter updatedPlayer: 更新后的玩家对象
     private func updatePlayerInDataManager(_ updatedPlayer: Player) async {
         let dataManager = PlayerDataManager()
         let success = dataManager.updatePlayerSilently(updatedPlayer)
         if success {
-            Logger.shared.debug("Token information in player data manager has been updated")
-            // Synchronously update the player list in memory (to avoid using old tokens at next startup)
+            Logger.shared.debug("已更新玩家数据管理器中的Token信息")
+            // 同步更新内存中的玩家列表（避免下次启动仍使用旧 token）
             NotificationCenter.default.post(
-                name: PlayerSkinService.playerUpdatedNotification,
+                name: .playerUpdated,
                 object: nil,
                 userInfo: ["updatedPlayer": updatedPlayer]
             )
         }
     }
-    
+
     private func replaceAuthParameters(command: [String], with validatedPlayer: Player?) -> [String] {
         guard let player = validatedPlayer else {
-            Logger.shared.warning("For unverified players, use the default authentication parameters")
+            Logger.shared.warning("没有验证的玩家，使用默认认证参数")
             return replaceGameParameters(command: command)
         }
-        
-        // Use NSMutableString to avoid chaining calls that create multiple temporary strings
+
+        // 使用 NSMutableString 避免链式调用创建多个临时字符串
         let authReplacedCommand = command.map { arg -> String in
             let mutableArg = NSMutableString(string: arg)
             mutableArg.replaceOccurrences(
@@ -120,18 +138,21 @@ struct MinecraftLaunchCommand {
             )
             return mutableArg as String
         }
-        
-        return replaceGameParameters(command: authReplacedCommand)
+
+        var commandWithAuth = authReplacedCommand
+        commandWithAuth = injectAuthlibAgentIfNeeded(command: commandWithAuth, player: player)
+
+        return replaceGameParameters(command: commandWithAuth)
     }
-    
+
     private func replaceGameParameters(command: [String]) -> [String] {
-        let settings = GameSettingsManager.shared
-        
-        // Memory settings: Prioritize the game configuration. If the game has no configuration, use the global configuration
+        let settings = gameSettingsManager
+
+        // 内存设置：优先使用游戏配置，游戏没配置则使用全局
         let xms = game.xms > 0 ? game.xms : settings.globalXms
         let xmx = game.xmx > 0 ? game.xmx : settings.globalXmx
-        
-        // Use NSMutableString to avoid chaining calls that create multiple temporary strings
+
+        // 使用 NSMutableString 避免链式调用创建多个临时字符串
         var replacedCommand = command.map { arg -> String in
             let mutableArg = NSMutableString(string: arg)
             let xmsString = "\(xms)"
@@ -150,11 +171,11 @@ struct MinecraftLaunchCommand {
             )
             return mutableArg as String
         }
-        
-        // Splice JVM parameters for advanced settings at runtime
-        // Logic: If there are custom JVM parameters, use them directly, otherwise use garbage collector + performance optimization parameters
+
+        // 在运行时拼接高级设置的JVM参数
+        // 逻辑：如果有自定义JVM参数则直接使用，否则使用垃圾回收器+性能优化参数
         if !game.jvmArguments.isEmpty {
-            // Insert custom JVM parameters into the beginning of the command array (after the java command) and remove duplication to maintain order
+            // 将自定义JVM参数插入到命令数组的开头（java命令之后），并去重保持顺序
             let advancedArgs = game.jvmArguments
                 .components(separatedBy: " ")
                 .filter { !$0.isEmpty }
@@ -166,84 +187,118 @@ struct MinecraftLaunchCommand {
             }
             replacedCommand.insert(contentsOf: uniqueAdvancedArgs, at: 0)
         }
-        
+
         return replacedCommand
     }
-    
-    /// Start game process
-    /// - Parameter command: startup command array
-    /// - Throws: GlobalError when startup fails
+
+    /// 为第三方（Yggdrasil）玩家按需注入 authlib-injector 的 -javaagent 启动参数
+    /// 条件：头像为远程 URL（isRemote == true）且非微软正版在线账号（isOnlineAccount == false）
+    private func injectAuthlibAgentIfNeeded(command: [String], player: Player) -> [String] {
+        // 非三方用户直接返回原命令
+        guard player.isRemote, !player.isOnlineAccount else {
+            return command
+        }
+
+        // 如果 authlib-injector.jar 不存在，则不注入参数，避免启动失败
+        let jarPath = AppConstants.AuthlibInjector.jarPath
+        if !FileManager.default.fileExists(atPath: jarPath) {
+            Logger.shared.warning("Authlib Injector JAR 不存在，跳过 -javaagent 参数: \(jarPath)")
+            return command
+        }
+
+        // 仅使用为该用户绑定的服务器标识（通常为某个 YggdrasilServerConfig.baseURL）
+        let userId = player.id
+        guard let rawBaseURL = OfflineUserServerMap.serverKey(for: userId) else {
+            Logger.shared.warning("离线用户未绑定 Yggdrasil 服务器基地址，跳过 -javaagent 参数 - userId: \(userId)")
+            return command
+        }
+
+        let serverApiRoot = URLConfig.API.AuthlibInjector.serverApiRoot(for: rawBaseURL)
+        let agentArg = AppConstants.AuthlibInjector.agentArgument(serverApiRoot: serverApiRoot)
+
+        // 在最开头拼接 javaagent 参数
+        var newCommand = command
+        newCommand.insert(agentArg, at: 0)
+        return newCommand
+    }
+
+    /// 启动游戏进程
+    /// - Parameter command: 启动命令数组
+    /// - Throws: GlobalError 当启动失败时
     private func launchGameProcess(command: [String]) async throws {
-        if game.modLoader != "vanilla" {
+        if game.modLoader != GameLoader.vanilla.displayName,
+           AVCaptureDevice.authorizationStatus(for: .audio) == .notDetermined {
             AVCaptureDevice.requestAccess(for: .audio) { _ in }
         }
-        // Directly use the Java path specified by the game
+        // 直接使用游戏指定的Java路径
         let javaExecutable = game.javaPath
         guard !javaExecutable.isEmpty else {
             throw GlobalError.configuration(
-                i18nKey: "Java Path Not Set",
+                chineseMessage: "Java 路径未设置",
+                i18nKey: "error.configuration.java_path_not_set",
                 level: .popup
             )
         }
-        
-        // Get the game working directory
+
+        // 获取游戏工作目录
         let gameWorkingDirectory = AppPaths.profileDirectory(gameName: game.gameName)
-        
-        Logger.shared.info("Start the game process: \(javaExecutable) \(command.joined(separator: " "))")
-        Logger.shared.info("Game working directory: \(gameWorkingDirectory.path)")
-        
+
+        Logger.shared.info("游戏工作目录: \(gameWorkingDirectory.path)")
+
         let process = Process()
         process.executableURL = URL(fileURLWithPath: javaExecutable)
         process.arguments = command
         process.currentDirectoryURL = gameWorkingDirectory
-        
-        // Set environment variables (advanced settings)
+
+        // 设置环境变量（高级设置）
         if !game.environmentVariables.isEmpty {
             var env = ProcessInfo.processInfo.environment
-            let envLines = game.environmentVariables.components(separatedBy: "\n")
-            for line in envLines {
-                if let equalIndex = line.firstIndex(of: "=") {
-                    let key = String(line[..<equalIndex])
-                    let value = String(line[line.index(after: equalIndex)...])
+            let envItems = game.environmentVariables.split(whereSeparator: \.isWhitespace)
+            for pair in envItems {
+                if let equalIndex = pair.firstIndex(of: "=") {
+                    let key = String(pair[..<equalIndex])
+                    let value = String(pair[pair.index(after: equalIndex)...])
                     env[key] = value
                 }
             }
             process.environment = env
         }
-        
-        // Store the process in the manager (will automatically set the termination handler)
-        GameProcessManager.shared.storeProcess(gameId: game.id, process: process)
-        
+
+        // 存储进程到管理器（会自动设置终止处理器）
+        let userId = player?.id ?? ""
+        gameProcessManager.storeProcess(gameId: game.id, userId: userId, process: process)
+
         do {
             try process.run()
-            
-            // Set the status to running immediately after the process starts
+
+            // 进程启动后立即设置状态为运行中
             _ = await MainActor.run {
-                GameStatusManager.shared.setGameRunning(gameId: game.id, isRunning: true)
+                gameStatusManager.setGameRunning(gameId: game.id, userId: userId, isRunning: true)
             }
         } catch {
-            Logger.shared.error("Failed to start process: \(error.localizedDescription)")
-            
-            // Clean up process and reset state when startup fails
-            _ = GameProcessManager.shared.stopProcess(for: game.id)
+            Logger.shared.error("启动进程失败: \(error.localizedDescription)")
+
+            // 启动失败时清理进程并重置状态
+            _ = gameProcessManager.stopProcess(for: game.id, userId: userId)
             _ = await MainActor.run {
-                GameStatusManager.shared.setGameRunning(gameId: game.id, isRunning: false)
+                gameStatusManager.setGameRunning(gameId: game.id, userId: userId, isRunning: false)
             }
-            
+
             throw GlobalError.gameLaunch(
-                i18nKey: "Process Failed",
+                chineseMessage: "启动游戏进程失败: \(error.localizedDescription)",
+                i18nKey: "error.game_launch.process_failed",
                 level: .popup
             )
         }
     }
-    
-    /// Handle startup errors
-    /// - Parameter error: startup error
+
+    /// 处理启动错误
+    /// - Parameter error: 启动错误
     private func handleLaunchError(_ error: Error) async {
-        Logger.shared.error("Failed to start game: \(error.localizedDescription)")
-        
-        // Handling errors using a global error handler
+        Logger.shared.error("启动游戏失败：\(error.localizedDescription)")
+
+        // 使用全局错误处理器处理错误
         let globalError = GlobalError.from(error)
-        GlobalErrorHandler.shared.handle(globalError)
+        AppServices.errorHandler.handle(globalError)
     }
 }

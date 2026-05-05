@@ -1,117 +1,117 @@
-import SwiftUI
+import Foundation
 import UserNotifications
-import OSLog
+import os
 
 // MARK: - Notification Center Delegate
 
 final class NotificationCenterDelegate: NSObject, UNUserNotificationCenterDelegate {
-    
-    /// App receives notification when it is in the foreground and decides how to display it
+
+    /// App 在前台时收到通知，决定如何展示
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        // Allow displaying banners/lists in the foreground and playing sounds and updating logos
+        // 允许在前台显示横幅 / 列表，并播放声音与更新徽标
         completionHandler([.banner, .list, .sound, .badge])
     }
 }
 
 enum NotificationManager {
-    
-    /// Send notification
+
+    /// 发送通知
     /// - Parameters:
-    ///   - title: notification title
-    ///   - body: notification content
-    /// - Throws: GlobalError when the operation fails
-    static func send(title: String, body: String) throws {
+    ///   - title: 通知标题
+    ///   - body: 通知内容
+    /// - Throws: GlobalError 当操作失败时
+    static func send(title: String, body: String) async throws {
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
         content.sound = .default
-        
+
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
-        
-        let semaphore = DispatchSemaphore(value: 0)
-        var notificationError: Error?
-        
-        UNUserNotificationCenter.current().add(request) { error in
-            notificationError = error
-            semaphore.signal()
-        }
-        
-        semaphore.wait()
-        
-        if let error = notificationError {
-            Logger.shared.error("Error adding notification request: \(error.localizedDescription)")
-            throw GlobalError.resource(
-                i18nKey: "Notification Send Failed",
-                level: .silent
-            )
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            UNUserNotificationCenter.current().add(request) { error in
+                if let error = error {
+                    Logger.shared.error("添加通知请求时出错：\(error.localizedDescription)")
+                    continuation.resume(
+                        throwing: GlobalError.resource(
+                            chineseMessage: "发送通知失败: \(error.localizedDescription)",
+                            i18nKey: "error.resource.notification_send_failed",
+                            level: .silent
+                        )
+                    )
+                    return
+                }
+                continuation.resume(returning: ())
+            }
         }
     }
-    
-    /// Send notification (silent version, logs errors but does not throw exceptions on failure)
+
+    /// 发送通知（静默版本，失败时记录错误但不抛出异常）
     /// - Parameters:
-    ///   - title: notification title
-    ///   - body: notification content
-    static func sendSilently(title: String, body: String) {
+    ///   - title: 通知标题
+    ///   - body: 通知内容
+    static func sendSilently(title: String, body: String) async {
         do {
-            try send(title: title, body: body)
+            try await send(title: title, body: body)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to send notification: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("发送通知失败: \(globalError.chineseMessage)")
+            AppServices.errorHandler.handle(globalError)
         }
     }
-    
-    /// Request notification permission
-    /// - Throws: GlobalError when the operation fails
+
+    /// 请求通知权限
+    /// - Throws: GlobalError 当操作失败时
     static func requestAuthorization() async throws {
         do {
             let granted = try await UNUserNotificationCenter.current()
                 .requestAuthorization(options: [.alert, .sound, .badge])
-            
+
             if granted {
-                Logger.shared.info("Notification permission granted")
+                Logger.shared.info("通知权限已授予")
             } else {
-                Logger.shared.warning("User denied notification permission")
+                Logger.shared.warning("用户拒绝了通知权限")
                 throw GlobalError.configuration(
-                    i18nKey: "Notification Permission Denied",
+                    chineseMessage: "用户拒绝了通知权限",
+                    i18nKey: "error.configuration.notification_permission_denied",
                     level: .notification
                 )
             }
         } catch {
-            Logger.shared.error("Error while requesting notification permission: \(error.localizedDescription)")
+            Logger.shared.error("请求通知权限时出错: \(error.localizedDescription)")
             if error is GlobalError {
                 throw error
             } else {
                 throw GlobalError.configuration(
-                    i18nKey: "Notification Permission Request Failed",
+                    chineseMessage: "请求通知权限失败: \(error.localizedDescription)",
+                    i18nKey: "error.configuration.notification_permission_request_failed",
                     level: .notification
                 )
             }
         }
     }
-    
-    /// Request notification permission (silent version, logs an error but does not throw an exception on failure)
+
+    /// 请求通知权限（静默版本，失败时记录错误但不抛出异常）
     static func requestAuthorizationIfNeeded() async {
         do {
             try await requestAuthorization()
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to request notification permission: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("请求通知权限失败: \(globalError.chineseMessage)")
+            AppServices.errorHandler.handle(globalError)
         }
     }
-    
-    /// - Returns: permission status
+
+    /// - Returns: 权限状态
     static func checkAuthorizationStatus() async -> UNAuthorizationStatus {
-        await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+        return await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
     }
-    
-    /// Check if you have notification permission
-    /// - Returns: Do you have permission?
+
+    /// 检查是否有通知权限
+    /// - Returns: 是否有权限
     static func hasAuthorization() async -> Bool {
         let status = await checkAuthorizationStatus()
         return status == .authorized

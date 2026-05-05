@@ -1,275 +1,140 @@
 import Foundation
 
-/// CurseForge Services
-/// Provide a unified CurseForge API access interface
+/// CurseForge 服务
+/// 提供统一的 CurseForge API 访问接口
 enum CurseForgeService {
-    
+
     // MARK: - Private Helpers
-    
-    /// Get the CurseForge API request header (including API key, if available)
+
+    /// 获取 CurseForge API 请求头（包含 API key，如果可用）
     private static func getHeaders() -> [String: String] {
-        var headers: [String: String] = ["Accept": "application/json"]
-        if let apiKey = AppConstants.curseForgeAPIKey?
-            .trimmingCharacters(in: .whitespacesAndNewlines),
-           !apiKey.isEmpty {
+        var headers: [String: String] = APIClient.DefaultHeaders.acceptJSON
+        if let apiKey = AppConstants.curseForgeAPIKey {
             headers["x-api-key"] = apiKey
         }
         return headers
     }
-    
+
     // MARK: - Public Methods
-    
-    /// Get CurseForge file details
+
+    /// 获取 CurseForge 文件详情
     /// - Parameters:
-    ///   - projectId: project ID
-    ///   - fileId: file ID
-    /// - Returns: file details, if the acquisition fails, return nil
+    ///   - projectId: 项目 ID
+    ///   - fileId: 文件 ID
+    /// - Returns: 文件详情，如果获取失败则返回 nil
     static func fetchFileDetail(projectId: Int, fileId: Int) async -> CurseForgeModFileDetail? {
         do {
             return try await fetchFileDetailThrowing(projectId: projectId, fileId: fileId)
         } catch {
-            Logger.shared.error("Failed to get CurseForge file details: \(error.localizedDescription)")
+            Logger.shared.error("获取 CurseForge 文件详情失败: \(error.localizedDescription)")
             return nil
         }
     }
-    
-    /// Get CurseForge file details (throws exception version)
+
+    /// 获取 CurseForge 文件详情（抛出异常版本）
     /// - Parameters:
-    ///   - projectId: project ID
-    ///   - fileId: file ID
-    /// - Returns: File details
-    /// - Throws: Network error or parsing error
+    ///   - projectId: 项目 ID
+    ///   - fileId: 文件 ID
+    /// - Returns: 文件详情
+    /// - Throws: 网络错误或解析错误
     static func fetchFileDetailThrowing(projectId: Int, fileId: Int) async throws -> CurseForgeModFileDetail {
-        // Use the configured CurseForge API URL
+        // 使用配置的 CurseForge API URL
         let url = URLConfig.API.CurseForge.fileDetail(projectId: projectId, fileId: fileId)
-        
+
         return try await tryFetchFileDetail(from: url.absoluteString)
     }
-    
-    /// Get CurseForge module details
-    /// - Parameter modId: Module ID
-    /// - Returns: Module details, if the acquisition fails, return nil
+
+    /// 获取 CurseForge 模组详情
+    /// - Parameter modId: 模组 ID
+    /// - Returns: 模组详情，如果获取失败则返回 nil
     static func fetchModDetail(modId: Int) async -> CurseForgeModDetail? {
         do {
             return try await fetchModDetailThrowing(modId: modId)
         } catch {
-            Logger.shared.error("Failed to get CurseForge module details: \(error.localizedDescription)")
+            Logger.shared.error("获取 CurseForge 模组详情失败: \(error.localizedDescription)")
             return nil
         }
     }
-    
-    /// Get CurseForge module details (throws exception version)
-    /// - Parameter modId: Module ID
-    /// - Returns: Module details
-    /// - Throws: Network error or parsing error
+
+    /// 获取 CurseForge 模组详情（抛出异常版本）
+    /// - Parameter modId: 模组 ID
+    /// - Returns: 模组详情
+    /// - Throws: 网络错误或解析错误
     static func fetchModDetailThrowing(modId: Int) async throws -> CurseForgeModDetail {
-        // Use the configured CurseForge API URL
+        // 使用配置的 CurseForge API URL
         let url = URLConfig.API.CurseForge.modDetail(modId: modId)
-        
+
         return try await tryFetchModDetail(from: url.absoluteString)
     }
-    
-    /// Get CurseForge module description (throws exception version)
-    /// - Parameter modId: Module ID
-    /// - Returns: Description content in HTML format
-    /// - Throws: Network error or parsing error
+
+    /// 获取 CurseForge 模组描述（抛出异常版本）
+    /// - Parameter modId: 模组 ID
+    /// - Returns: HTML 格式的描述内容
+    /// - Throws: 网络错误或解析错误
     static func fetchModDescriptionThrowing(modId: Int) async throws -> String {
-        // Use the configured CurseForge API URL
+        // 使用配置的 CurseForge API URL
         let url = URLConfig.API.CurseForge.modDescription(modId: modId)
-        
+
         return try await tryFetchModDescription(from: url.absoluteString)
     }
-    
-    /// Get CurseForge project file list
+
+    /// 获取 CurseForge 项目文件列表
     /// - Parameters:
-    ///   - projectId: project ID
-    ///   - gameVersion: game version filtering (optional)
-    ///   - modLoaderType: Mod loader type filtering (optional)
-    /// - Returns: file list, returns nil if acquisition fails
+    ///   - projectId: 项目 ID
+    ///   - gameVersion: 游戏版本过滤（可选）
+    ///   - modLoaderType: 模组加载器类型过滤（可选）
+    /// - Returns: 文件列表，如果获取失败则返回 nil
     static func fetchProjectFiles(projectId: Int, gameVersion: String? = nil, modLoaderType: Int? = nil) async -> [CurseForgeModFileDetail]? {
         do {
             return try await fetchProjectFilesThrowing(projectId: projectId, gameVersion: gameVersion, modLoaderType: modLoaderType)
         } catch {
-            Logger.shared.error("Failed to get CurseForge project file list: \(error.localizedDescription)")
+            Logger.shared.error("获取 CurseForge 项目文件列表失败: \(error.localizedDescription)")
             return nil
         }
     }
-    
-    /// Get CurseForge project file list (throws exception version)
+
+    /// 获取 CurseForge 项目文件列表（抛出异常版本）
     /// - Parameters:
-    ///   - projectId: project ID
-    ///   - gameVersion: game version filtering (optional)
-    ///   - modLoaderType: Mod loader type filtering (optional)
-    ///   - modDetail: Module details obtained in advance (optional, used to reuse and reduce requests)
-    /// - Returns: file list
-    /// - Throws: Network error or parsing error
+    ///   - projectId: 项目 ID
+    ///   - gameVersion: 游戏版本过滤（可选）
+    ///   - modLoaderType: 模组加载器类型过滤（可选）
+    ///   - modDetail: 预先获取的模组详情（可选，用于复用减少请求）
+    /// - Returns: 文件列表
+    /// - Throws: 网络错误或解析错误
     static func fetchProjectFilesThrowing(
         projectId: Int,
         gameVersion: String? = nil,
         modLoaderType: Int? = nil,
     ) async throws -> [CurseForgeModFileDetail] {
-        // Parse file information from modDetail without calling projectFiles API
-        let modDetailToUse = try await fetchModDetailThrowing(modId: projectId)
-        
-        var files: [CurseForgeModFileDetail] = []
-        
-        // Get the file list from latestFiles first
-        if let latestFilesIndexes = modDetailToUse.latestFilesIndexes, !latestFilesIndexes.isEmpty {
-            // If latestFiles does not exist, construct file details from latestFilesIndexes
-            // Group by fileId to collect all game versions
-            var fileIndexMap: [Int: [CurseForgeFileIndex]] = [:]
-            for index in latestFilesIndexes {
-                fileIndexMap[index.fileId, default: []].append(index)
-            }
-            
-            // Construct file details for each unique fileId
-            for (fileId, indexes) in fileIndexMap {
-                guard let firstIndex = indexes.first else { continue }
-                
-                // Collect all matching game versions
-                let gameVersions = indexes.map { $0.gameVersion }
-                
-                // Build download link using fileId and fileName
-                let downloadUrl = URLConfig.API.CurseForge.fallbackDownloadUrl(
-                    fileId: fileId,
-                    fileName: firstIndex.filename
-                ).absoluteString
-                
-                // Construction file details
-                let fileDetail = CurseForgeModFileDetail(
-                    id: fileId,
-                    displayName: firstIndex.filename,
-                    fileName: firstIndex.filename,
-                    downloadUrl: downloadUrl,
-                    fileDate: "", // There is no date information in latestFilesIndexes
-                    releaseType: firstIndex.releaseType,
-                    gameVersions: gameVersions,
-                    dependencies: nil,
-                    changelog: nil,
-                    fileLength: nil,
-                    hash: nil,
-                    hashes: nil,
-                    modules: nil,
-                    projectId: projectId,
-                    projectName: modDetailToUse.name,
-                    authors: modDetailToUse.authors
-                )
-                files.append(fileDetail)
-            }
-        }
-        
-        // Filter based on gameVersion and modLoaderType
-        var filteredFiles = files
-        
-        if let gameVersion = gameVersion {
-            filteredFiles = filteredFiles.filter { file in
-                file.gameVersions.contains(gameVersion)
-            }
-        }
-        
-        // If modLoaderType is specified, modLoader information needs to be obtained from latestFilesIndexes for filtering
-        if let modLoaderType = modLoaderType {
-            if let latestFilesIndexes = modDetailToUse.latestFilesIndexes {
-                // Get the fileId collection matching modLoaderType
-                let matchingFileIds = Set(latestFilesIndexes
-                    .filter { $0.modLoader == modLoaderType }
-                    .map { $0.fileId })
-                
-                // Keep only matching files
-                filteredFiles = filteredFiles.filter { file in
-                    matchingFileIds.contains(file.id)
-                }
-            }
-            // Unable to filter by modLoaderType when latestFilesIndexes does not exist
-            // In this case all files are returned (possibly including unmatched loaders)
-        }
-        
-        // Get full file details (including hashes) for each file
-        // Use batch processing to limit the number of concurrencies to avoid excessive memory usage
-        let maxConcurrentTasks = 20 // Limit the maximum number of concurrent tasks
-        var filesWithHashes: [CurseForgeModFileDetail] = []
-        // Process files in batches, up to maxConcurrentTasks per batch
-        var currentIndex = 0
-        while currentIndex < filteredFiles.count {
-            let endIndex = min(currentIndex + maxConcurrentTasks, filteredFiles.count)
-            let batch = Array(filteredFiles[currentIndex..<endIndex])
-            currentIndex = endIndex
-            
-            await withTaskGroup(of: (Int, CurseForgeModFileDetail?).self) { group in
-                for file in batch {
-                    group.addTask {
-                        do {
-                            let fileDetail = try await fetchFileDetailThrowing(projectId: projectId, fileId: file.id)
-                            return (file.id, fileDetail)
-                        } catch {
-                            Logger.shared.warning("Failed to get file details (fileId: \(file.id)): \(error.localizedDescription)")
-                            return (file.id, nil)
-                        }
-                    }
-                }
-                
-                // Create a mapping of fileId to file details
-                var fileDetailMap: [Int: CurseForgeModFileDetail] = [:]
-                for await (fileId, fileDetail) in group {
-                    if let detail = fileDetail {
-                        fileDetailMap[fileId] = detail
-                    }
-                }
-                
-                // Update the file list using the obtained file details (including hashes)
-                for file in batch {
-                    if let detailedFile = fileDetailMap[file.id] {
-                        // Extract the hash with algo = 1 from the hashes array
-                        let sha1Hash = detailedFile.hashes?.first { $0.algo == 1 }
-                        
-                        // Create updated file details, retaining the original information but updating the hash
-                        let updatedFile = CurseForgeModFileDetail(
-                            id: file.id,
-                            displayName: file.displayName,
-                            fileName: file.fileName,
-                            downloadUrl: file.downloadUrl ?? detailedFile.downloadUrl,
-                            fileDate: file.fileDate.isEmpty ? detailedFile.fileDate : file.fileDate,
-                            releaseType: file.releaseType,
-                            gameVersions: file.gameVersions,
-                            dependencies: file.dependencies ?? detailedFile.dependencies,
-                            changelog: file.changelog ?? detailedFile.changelog,
-                            fileLength: file.fileLength ?? detailedFile.fileLength,
-                            hash: sha1Hash ?? file.hash ?? detailedFile.hash,
-                            hashes: detailedFile.hashes,
-                            modules: file.modules ?? detailedFile.modules,
-                            projectId: file.projectId,
-                            projectName: file.projectName,
-                            authors: file.authors
-                        )
-                        filesWithHashes.append(updatedFile)
-                    } else {
-                        // If obtaining details fails, keep the original file
-                        filesWithHashes.append(file)
-                    }
-                }
-            }
-        }
-        
-        return filesWithHashes
+        let url = URLConfig.API.CurseForge.projectFiles(
+            projectId: projectId,
+            gameVersion: gameVersion,
+            modLoaderType: modLoaderType
+        )
+
+        let headers = getHeaders()
+        let data = try await APIClient.get(url: url, headers: headers)
+        let result = try JSONDecoder().decode(CurseForgeFilesResult.self, from: data)
+        return result.data
     }
-    
+
     // MARK: - Search Methods
-    
-    /// Search items (silent version)
+
+    /// 搜索项目（静默版本）
     /// - Parameters:
-    ///   - gameId: game ID (432 for Minecraft)
-    ///   - classId: content type ID (optional)
-    ///   - categoryId: category ID (optional, will be overridden by categoryIds)
-    ///   - categoryIds: Category ID list (optional, will cover categoryId, up to 10)
-    ///   - gameVersion: game version (optional, will be overridden by gameVersions)
-    ///   - gameVersions: Game version list (optional, will overwrite gameVersion, up to 4)
-    ///   - searchFilter: search keyword (optional)
-    ///   - modLoaderType: Mod loader type (optional, will be overridden by modLoaderTypes)
-    ///   - modLoaderTypes: Mod loader type list (optional, will override modLoaderType, up to 5)
-    ///   - index: page index (optional)
-    ///   - pageSize: size of each page (optional)
-    /// - Returns: search results, empty results are returned if failed
-    /// - Note: API limitations: categoryIds can be up to 10, gameVersions can be up to 4, modLoaderTypes can be up to 5
+    ///   - gameId: 游戏 ID（Minecraft 为 432）
+    ///   - classId: 内容类型 ID（可选）
+    ///   - categoryId: 分类 ID（可选，会被 categoryIds 覆盖）
+    ///   - categoryIds: 分类 ID 列表（可选，会覆盖 categoryId，最多 10 个）
+    ///   - gameVersion: 游戏版本（可选，会被 gameVersions 覆盖）
+    ///   - gameVersions: 游戏版本列表（可选，会覆盖 gameVersion，最多 4 个）
+    ///   - searchFilter: 搜索关键词（可选）
+    ///   - modLoaderType: 模组加载器类型（可选，会被 modLoaderTypes 覆盖）
+    ///   - modLoaderTypes: 模组加载器类型列表（可选，会覆盖 modLoaderType，最多 5 个）
+    ///   - index: 页码索引（可选）
+    ///   - pageSize: 每页大小（可选）
+    /// - Returns: 搜索结果，失败时返回空结果
+    /// - Note: API 限制：categoryIds 最多 10 个，gameVersions 最多 4 个，modLoaderTypes 最多 5 个
     static func searchProjects(
         gameId: Int = 432,
         classId: Int? = nil,
@@ -299,30 +164,30 @@ enum CurseForgeService {
             )
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Search for CurseForge project failed: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("搜索 CurseForge 项目失败: \(globalError.chineseMessage)")
+            AppServices.errorHandler.handle(globalError)
             return CurseForgeSearchResult(data: [], pagination: nil)
         }
     }
-    
-    /// Search project (throws exception version)
+
+    /// 搜索项目（抛出异常版本）
     /// - Parameters:
-    ///   - gameId: game ID (432 for Minecraft)
-    ///   - classId: content type ID (optional)
-    ///   - categoryId: category ID (optional, will be overridden by categoryIds)
-    ///   - categoryIds: Category ID list (optional, will cover categoryId, up to 10)
-    ///   - gameVersion: game version (optional, will be overridden by gameVersions)
-    ///   - gameVersions: Game version list (optional, will overwrite gameVersion, up to 4)
-    ///   - searchFilter: search keyword (optional)
-    ///   - modLoaderType: Mod loader type (optional, will be overridden by modLoaderTypes)
-    ///   - modLoaderTypes: Mod loader type list (optional, will override modLoaderType, up to 5)
-    ///   - index: page index (optional)
-    ///   - pageSize: size of each page (optional)
-    /// - Returns: search results
-    /// - Throws: GlobalError when the operation fails
+    ///   - gameId: 游戏 ID（Minecraft 为 432）
+    ///   - classId: 内容类型 ID（可选）
+    ///   - categoryId: 分类 ID（可选，会被 categoryIds 覆盖）
+    ///   - categoryIds: 分类 ID 列表（可选，会覆盖 categoryId，最多 10 个）
+    ///   - gameVersion: 游戏版本（可选，会被 gameVersions 覆盖）
+    ///   - gameVersions: 游戏版本列表（可选，会覆盖 gameVersion，最多 4 个）
+    ///   - searchFilter: 搜索关键词（可选）
+    ///   - modLoaderType: 模组加载器类型（可选，会被 modLoaderTypes 覆盖）
+    ///   - modLoaderTypes: 模组加载器类型列表（可选，会覆盖 modLoaderType，最多 5 个）
+    ///   - index: 页码索引（可选）
+    ///   - pageSize: 每页大小（可选）
+    /// - Returns: 搜索结果
+    /// - Throws: GlobalError 当操作失败时
     /// - Note:
-    ///   - If sortField and sortOrder are not passed, the default sorting of the CurseForge API will be used (usually by relevance)
-    ///   - API restrictions: categoryIds can be up to 10, gameVersions can be up to 4, modLoaderTypes can be up to 5
+    ///   - 如果不传递 sortField 和 sortOrder，将使用 CurseForge API 的默认排序（通常按相关性排序）
+    ///   - API 限制：categoryIds 最多 10 个，gameVersions 最多 4 个，modLoaderTypes 最多 5 个
     static func searchProjectsThrowing(
         gameId: Int = 432,
         classId: Int? = nil,
@@ -330,42 +195,43 @@ enum CurseForgeService {
         categoryIds: [Int]? = nil,
         gameVersion: String? = nil,
         gameVersions: [String]? = nil,
-        /// Original search keyword (blanks will be automatically collapsed and connected with "+", e.g. "fabric api" -> "fabric+api")
+        /// 原始搜索关键字（会自动将空白折叠并用 "+" 连接，例如 "fabric api" -> "fabric+api"）
         searchFilter: String? = nil,
         modLoaderType: Int? = nil,
         modLoaderTypes: [Int]? = nil,
         index: Int = 0,
         pageSize: Int = 20
     ) async throws -> CurseForgeSearchResult {
-        // Forced to use descending order by total downloads
+        // 强制使用按总下载量降序
         let effectiveSortField = 6
         let effectiveSortOrder = "desc"
-        
+
         var components = URLComponents(
             url: URLConfig.API.CurseForge.search,
             resolvingAgainstBaseURL: true
         )
-        
+
         var queryItems: [URLQueryItem] = [
             URLQueryItem(name: "gameId", value: String(gameId)),
             URLQueryItem(name: "index", value: String(index)),
             URLQueryItem(name: "pageSize", value: String(min(pageSize, 50))),
         ]
-        
+
         if let classId = classId {
             queryItems.append(URLQueryItem(name: "classId", value: String(classId)))
         }
-        
-        // categoryIds will override categoryId
-        // API limit: Maximum 10 category IDs
+
+        // categoryIds 会覆盖 categoryId
+        // API 限制：最多 10 个分类 ID
         if let categoryIds = categoryIds, !categoryIds.isEmpty {
             let limitedCategoryIds = Array(categoryIds.prefix(10))
-            // As required by the documentation, use the JSON array string format: ["6","7"]
+            // 按文档要求，使用 JSON 数组字符串格式：["6","7"]
             let stringIds = limitedCategoryIds.map { String($0) }
             let data = try JSONEncoder().encode(stringIds)
             guard let jsonArrayString = String(data: data, encoding: .utf8) else {
                 throw GlobalError.validation(
-                    i18nKey: "Encode Category IDs Failed",
+                    chineseMessage: "编码 categoryIds 失败",
+                    i18nKey: "error.validation.encode_category_ids_failed",
                     level: .notification
                 )
             }
@@ -373,16 +239,17 @@ enum CurseForgeService {
         } else if let categoryId = categoryId {
             queryItems.append(URLQueryItem(name: "categoryId", value: String(categoryId)))
         }
-        
-        // gameVersions will override gameVersion
-        // API limit: up to 4 game versions
+
+        // gameVersions 会覆盖 gameVersion
+        // API 限制：最多 4 个游戏版本
         if let gameVersions = gameVersions, !gameVersions.isEmpty {
             let limitedGameVersions = Array(gameVersions.prefix(4))
-            // As required by the API documentation, use the JSON array string format: ["1.0","1.1"]
+            // 按 API 文档要求，使用 JSON 数组字符串格式：["1.0","1.1"]
             let data = try JSONEncoder().encode(limitedGameVersions)
             guard let jsonArrayString = String(data: data, encoding: .utf8) else {
                 throw GlobalError.validation(
-                    i18nKey: "Encode Game Versions Failed",
+                    chineseMessage: "编码 gameVersions 失败",
+                    i18nKey: "error.validation.encode_game_versions_failed",
                     level: .notification
                 )
             }
@@ -390,32 +257,33 @@ enum CurseForgeService {
         } else if let gameVersion = gameVersion {
             queryItems.append(URLQueryItem(name: "gameVersion", value: gameVersion))
         }
-        
+
         if let rawSearchFilter = searchFilter?
             .trimmingCharacters(in: .whitespacesAndNewlines),
            !rawSearchFilter.isEmpty {
-            // Fold consecutive blank spaces and connect them with "+" to get a format similar to "fabric+api"
+            // 将连续空白折叠，并用 "+" 连接，得到类似 "fabric+api" 的格式
             let components = rawSearchFilter
                 .split { $0.isWhitespace }
                 .map(String.init)
             let normalizedSearchFilter = components.joined(separator: "+")
             queryItems.append(URLQueryItem(name: "searchFilter", value: normalizedSearchFilter))
         }
-        
-        // Sorting parameters: forced to add sortField=6, sortOrder=desc by default (reverse order of total downloads)
+
+        // 排序参数：默认强制添加 sortField=6, sortOrder=desc（总下载量倒序）
         queryItems.append(URLQueryItem(name: "sortField", value: String(effectiveSortField)))
         queryItems.append(URLQueryItem(name: "sortOrder", value: effectiveSortOrder))
-        
-        // modLoaderTypes overrides modLoaderType
-        // API limit: maximum 5 loader types
+
+        // modLoaderTypes 会覆盖 modLoaderType
+        // API 限制：最多 5 个加载器类型
         if let modLoaderTypes = modLoaderTypes, !modLoaderTypes.isEmpty {
             let limitedModLoaderTypes = Array(modLoaderTypes.prefix(5))
             let stringTypes = limitedModLoaderTypes.map { String($0) }
-            // Use JSON array string format: ["1","4"]
+            // 使用 JSON 数组字符串格式：["1","4"]
             let data = try JSONEncoder().encode(stringTypes)
             guard let jsonArrayString = String(data: data, encoding: .utf8) else {
                 throw GlobalError.validation(
-                    i18nKey: "Encode Mod Loader Types Failed",
+                    chineseMessage: "编码 modLoaderTypes 失败",
+                    i18nKey: "error.validation.encode_mod_loader_types_failed",
                     level: .notification
                 )
             }
@@ -423,148 +291,213 @@ enum CurseForgeService {
         } else if let modLoaderType = modLoaderType {
             queryItems.append(URLQueryItem(name: "modLoaderType", value: String(modLoaderType)))
         }
-        
+
         components?.queryItems = queryItems
         guard let url = components?.url else {
             throw GlobalError.validation(
-                i18nKey: "Search URL Build Failed",
+                chineseMessage: "构建搜索URL失败",
+                i18nKey: "error.validation.search_url_build_failed",
                 level: .notification
             )
         }
-        
+
         let headers = getHeaders()
         let data = try await APIClient.get(url: url, headers: headers)
         let result = try JSONDecoder().decode(CurseForgeSearchResult.self, from: data)
-        
+
         return result
     }
-    
+
     // MARK: - Category Methods
-    
-    /// Get the category list (silent version)
-    /// - Returns: Category list, returns empty array on failure
+
+    /// 获取分类列表（静默版本）
+    /// - Returns: 分类列表，失败时返回空数组
     static func fetchCategories() async -> [CurseForgeCategory] {
         do {
             return try await fetchCategoriesThrowing()
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to get CurseForge category list: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("获取 CurseForge 分类列表失败: \(globalError.chineseMessage)")
+            AppServices.errorHandler.handle(globalError)
             return []
         }
     }
-    
-    /// Get the category list (throws exception version)
-    /// - Returns: Category list
-    /// - Throws: GlobalError when the operation fails
+
+    /// 获取分类列表（抛出异常版本）
+    /// - Returns: 分类列表
+    /// - Throws: GlobalError 当操作失败时
     static func fetchCategoriesThrowing() async throws -> [CurseForgeCategory] {
         let headers = getHeaders()
-        let data = try await APIClient.get(
-            url: URLConfig.API.CurseForge.categories(),
-            headers: headers
-        )
+        let data = try await APIClient.get(url: URLConfig.API.CurseForge.categories, headers: headers)
         let result = try JSONDecoder().decode(CurseForgeCategoriesResponse.self, from: data)
         return result.data
     }
-    
+
     // MARK: - Game Version Methods
-    
-    /// Get the game version list (silent version)
-    /// - Returns: Game version list, returns an empty array on failure
+
+    /// 获取游戏版本列表（静默版本）
+    /// - Returns: 游戏版本列表，失败时返回空数组
     static func fetchGameVersions() async -> [CurseForgeGameVersion] {
         do {
             return try await fetchGameVersionsThrowing()
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to get CurseForge game version list: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("获取 CurseForge 游戏版本列表失败: \(globalError.chineseMessage)")
+            AppServices.errorHandler.handle(globalError)
             return []
         }
     }
-    
-    /// Get the game version list (throws exception version)
-    /// - Returns: Game version list
-    /// - Throws: GlobalError when the operation fails
+
+    /// 获取游戏版本列表（抛出异常版本）
+    /// - Returns: 游戏版本列表
+    /// - Throws: GlobalError 当操作失败时
     static func fetchGameVersionsThrowing() async throws -> [CurseForgeGameVersion] {
         let headers = getHeaders()
         let data = try await APIClient.get(url: URLConfig.API.CurseForge.gameVersions, headers: headers)
         let result = try JSONDecoder().decode(CurseForgeGameVersionsResponse.self, from: data)
-        // Only approved and official versions are returned
+        // 只返回已批准且为正式版的版本
         return result.data.filter { $0.approved && $0.version_type == "release" }
     }
-    
+
     // MARK: - Project Detail Methods (as Modrinth format)
-    
-    /// Get project details (mapped to Modrinth format, silent version)
-    /// - Parameter id: project ID
-    /// - Returns: project details in Modrinth format, returns nil on failure
+
+    /// 获取项目详情（映射为 Modrinth 格式，静默版本）
+    /// - Parameter id: 项目 ID
+    /// - Returns: Modrinth 格式的项目详情，失败时返回 nil
     static func fetchProjectDetailsAsModrinth(id: String) async -> ModrinthProjectDetail? {
         do {
             return try await fetchProjectDetailsAsModrinthThrowing(id: id)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to get project details (ID: \(id)): \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("获取项目详情失败 (ID: \(id)): \(globalError.chineseMessage)")
+            AppServices.errorHandler.handle(globalError)
             return nil
         }
     }
-    
-    /// Get project details (mapped to Modrinth format, throw exception version)
-    /// - Parameter id: Project ID (may contain "cf-" prefix)
-    /// - Returns: Project details in Modrinth format
-    /// - Throws: GlobalError when the operation fails
+
+    /// 获取项目详情（映射为 Modrinth 格式，抛出异常版本）
+    /// - Parameter id: 项目 ID（可能包含 "cf-" 前缀）
+    /// - Returns: Modrinth 格式的项目详情
+    /// - Throws: GlobalError 当操作失败时
     static func fetchProjectDetailsAsModrinthThrowing(id: String) async throws -> ModrinthProjectDetail {
         let (modId, _) = try parseCurseForgeId(id)
-        
-        // Concurrently obtain project details and descriptions
+
+        // 并发获取项目详情和描述
         async let cfDetailTask = fetchModDetailThrowing(modId: modId)
         async let descriptionTask = fetchModDescriptionThrowing(modId: modId)
-        
+
         let cfDetail = try await cfDetailTask
         let description = try await descriptionTask
-        
-        guard let modrinthDetail = CurseForgeToModrinthAdapter.convert(cfDetail, description: description) else {
+
+        guard var modrinthDetail = CFToModrinthAdapter.convertProjectDetail(cfDetail, descriptionHTML: description) else {
             throw GlobalError.validation(
-                i18nKey: "Project Detail Convert Failed",
+                chineseMessage: "转换项目详情失败",
+                i18nKey: "error.validation.project_detail_convert_failed",
                 level: .notification
             )
         }
+        let releaseGameVersions = modrinthDetail.gameVersions.filter {
+            $0.range(of: #"^\d+(\.\d+)*$"#, options: .regularExpression) != nil
+        }
+        let result = CommonUtil.sortMinecraftVersions(releaseGameVersions)
+        modrinthDetail.gameVersions = CommonUtil.versionsAtLeast(result)
+
         return modrinthDetail
     }
-    
-    /// Get the project version list (mapped to Modrinth format, silent version)
-    /// - Parameter id: project ID
-    /// - Returns: Version list in Modrinth format, returning an empty array on failure
+
+    /// 通过文件 fingerprint 获取项目详情（映射为 Modrinth 格式）
+    /// - Parameter fingerprint: CurseForge file fingerprint（UInt32）
+    /// - Returns: Modrinth 格式的项目详情，如果未匹配或失败返回 nil
+    static func fetchProjectDetailsAsModrinthByFingerprint(fingerprint: UInt32) async -> ModrinthProjectDetail? {
+        do {
+            return try await fetchProjectDetailsAsModrinthByFingerprintThrowing(fingerprint: fingerprint)
+        } catch {
+            Logger.shared.error("通过 fingerprint 获取 CurseForge 项目详情失败: \(error.localizedDescription)")
+            return nil
+        }
+    }
+
+    /// 通过文件 fingerprint 获取项目详情（映射为 Modrinth 格式）
+    /// - Parameter fingerprint: CurseForge file fingerprint（UInt32）
+    /// - Returns: Modrinth 格式的项目详情
+    static func fetchProjectDetailsAsModrinthByFingerprintThrowing(fingerprint: UInt32) async throws -> ModrinthProjectDetail? {
+        let matches = try await fetchFingerprintMatchesThrowing(fingerprint: fingerprint)
+        // 仅使用 exactMatches 的第一个 modId；找不到则返回 nil
+        let modId = matches
+            .data
+            .exactMatches?
+            .compactMap { $0.file?.modId }
+            .first
+
+        guard let modId else { return nil }
+        return try await fetchProjectDetailsAsModrinthThrowing(id: "\(modId)")
+    }
+
+    /// 通过文件 fingerprint 获取 CurseForge 的 projectId/fileId
+    /// - Parameter fingerprint: CurseForge file fingerprint（UInt32）
+    /// - Returns: (projectId, fileId)，如果无精确匹配返回 nil
+    static func fetchProjectAndFileByFingerprint(fingerprint: UInt32) async -> (projectId: Int, fileId: Int)? {
+        do {
+            let matches = try await fetchFingerprintMatchesThrowing(fingerprint: fingerprint)
+            guard let match = matches.data.exactMatches?.first,
+                  let projectId = match.file?.modId,
+                  let fileId = match.file?.id else {
+                return nil
+            }
+            return (projectId, fileId)
+        } catch {
+            if error is CancellationError {
+                return nil
+            }
+            Logger.shared.warning("通过 fingerprint 获取 CurseForge 文件信息失败: \(error.localizedDescription)")
+            return nil
+        }
+    }
+
+    private static func fetchFingerprintMatchesThrowing(fingerprint: UInt32) async throws -> CurseForgeFingerprintMatchesResponse {
+        let url = URLConfig.API.CurseForge.fingerprints
+        let headers = getHeaders()
+
+        let requestBody = CurseForgeFingerprintMatchesRequest(fingerprints: [fingerprint])
+        let body = try JSONEncoder().encode(requestBody)
+
+        let data = try await APIClient.post(url: url, body: body, headers: headers)
+        return try JSONDecoder().decode(CurseForgeFingerprintMatchesResponse.self, from: data)
+    }
+
+    /// 获取项目版本列表（映射为 Modrinth 格式，静默版本）
+    /// - Parameter id: 项目 ID
+    /// - Returns: Modrinth 格式的版本列表，失败时返回空数组
     static func fetchProjectVersionsAsModrinth(id: String) async -> [ModrinthProjectDetailVersion] {
         do {
             return try await fetchProjectVersionsAsModrinthThrowing(id: id)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to get project version list (ID: \(id)): \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("获取项目版本列表失败 (ID: \(id)): \(globalError.chineseMessage)")
+            AppServices.errorHandler.handle(globalError)
             return []
         }
     }
-    
-    /// Get the project version list (mapped to Modrinth format, throw exception version)
-    /// - Parameter id: Project ID (may contain "cf-" prefix)
-    /// - Returns: version list in Modrinth format
-    /// - Throws: GlobalError when the operation fails
+
+    /// 获取项目版本列表（映射为 Modrinth 格式，抛出异常版本）
+    /// - Parameter id: 项目 ID（可能包含 "cf-" 前缀）
+    /// - Returns: Modrinth 格式的版本列表
+    /// - Throws: GlobalError 当操作失败时
     static func fetchProjectVersionsAsModrinthThrowing(id: String) async throws -> [ModrinthProjectDetailVersion] {
         let (modId, normalizedId) = try parseCurseForgeId(id)
-        
+
         let cfFiles = try await fetchProjectFilesThrowing(projectId: modId)
-        return cfFiles.compactMap { CurseForgeToModrinthAdapter.convertVersion($0, projectId: normalizedId) }
+        return cfFiles.compactMap { CFToModrinthAdapter.convertFile($0, projectId: normalizedId) }
     }
-    
-    /// Get a list of project versions (filtered versions, mapped to Modrinth format)
+
+    /// 获取项目版本列表（过滤版本，映射为 Modrinth 格式）
     /// - Parameters:
-    ///   - id: project ID (may contain "cf-" prefix)
-    ///   - selectedVersions: selected version
-    ///   - selectedLoaders: selected loaders
-    ///   - type: project type
-    /// - Returns: filtered Modrinth format version list
-    /// - Throws: GlobalError when the operation fails
+    ///   - id: 项目 ID（可能包含 "cf-" 前缀）
+    ///   - selectedVersions: 选中的版本
+    ///   - selectedLoaders: 选中的加载器
+    ///   - type: 项目类型
+    /// - Returns: 过滤后的 Modrinth 格式版本列表
+    /// - Throws: GlobalError 当操作失败时
     static func fetchProjectVersionsFilterAsModrinth(
         id: String,
         selectedVersions: [String],
@@ -572,14 +505,14 @@ enum CurseForgeService {
         type: String
     ) async throws -> [ModrinthProjectDetailVersion] {
         let (modId, normalizedId) = try parseCurseForgeId(id)
-        
-        // For light and shadow packages, resource packages, and data packages, CurseForge API does not support modLoaderType filtering
+
+        // 对于光影包、资源包、数据包，CurseForge API 不支持 modLoaderType 过滤
         let resourceTypeLowercased = type.lowercased()
-        let shouldFilterByLoader = !(resourceTypeLowercased == "shader" ||
-                                     resourceTypeLowercased == "resourcepack" ||
-                                     resourceTypeLowercased == "datapack")
-        
-        // Convert loader name to CurseForge ModLoaderType (only for resource types that require filtered loaders)
+        let shouldFilterByLoader = !(resourceTypeLowercased == ResourceType.shader.rawValue ||
+                                     resourceTypeLowercased == ResourceType.resourcepack.rawValue ||
+                                     resourceTypeLowercased == ResourceType.datapack.rawValue)
+
+        // 转换加载器名称到 CurseForge ModLoaderType（仅对需要过滤加载器的资源类型）
         var modLoaderTypes: [Int] = []
         if shouldFilterByLoader {
             for loader in selectedLoaders {
@@ -588,14 +521,14 @@ enum CurseForgeService {
                 }
             }
         }
-        
-        // Get file list
-        // Optimization: If the number of versions is small (<=3), obtain each version separately; otherwise, obtain all files at once and then filter
+
+        // 获取文件列表
+        // 优化：如果版本数量较少（<=3），为每个版本单独获取；否则一次性获取所有文件然后过滤
         var cfFiles: [CurseForgeModFileDetail] = []
         if !selectedVersions.isEmpty && selectedVersions.count <= 3 {
-            // When the number of versions is small, get files for each version (more precise)
+            // 版本数量较少时，为每个版本获取文件（更精确）
             for version in selectedVersions {
-                // For light and shadow packages, resource packages, and data packages, the modLoaderType parameter is not passed
+                // 对于光影包、资源包、数据包，不传递 modLoaderType 参数
                 let modLoaderType = shouldFilterByLoader && !modLoaderTypes.isEmpty ? modLoaderTypes.first : nil
                 let files = try await fetchProjectFilesThrowing(
                     projectId: modId,
@@ -605,15 +538,15 @@ enum CurseForgeService {
                 cfFiles.append(contentsOf: files)
             }
         } else {
-            // When the number of versions is large or empty, obtain all files at once and then filter them (reduce API calls and memory usage)
+            // 版本数量较多或为空时，一次性获取所有文件，然后进行过滤（减少API调用和内存占用）
             cfFiles = try await fetchProjectFilesThrowing(
                 projectId: modId,
                 gameVersion: nil,
                 modLoaderType: shouldFilterByLoader && !modLoaderTypes.isEmpty ? modLoaderTypes.first : nil
             )
         }
-        
-        // Deduplication: Deduplication according to fileId, keeping the first one
+
+        // 去重：按 fileId 去重，保留第一个
         var seenFileIds = Set<Int>()
         cfFiles = cfFiles.filter { file in
             if seenFileIds.contains(file.id) {
@@ -622,39 +555,39 @@ enum CurseForgeService {
             seenFileIds.insert(file.id)
             return true
         }
-        
-        // Filter files
+
+        // 过滤文件
         let filteredFiles = cfFiles.filter { file in
-            // version matching
+            // 版本匹配
             let versionMatch = selectedVersions.isEmpty || !Set(file.gameVersions).isDisjoint(with: selectedVersions)
-            
-            // For light and shadow packages, resource packages, and data packages, there is no need to check loader matching
-            // Other types need to match the loader, and the CurseForge API may not return it to simplify processing
+
+            // 对于光影包、资源包、数据包，不需要检查加载器匹配
+            // 其他类型需匹配加载器，CurseForge API 可能不返回，简化处理
             let loaderMatch = !shouldFilterByLoader || modLoaderTypes.isEmpty || true
-            
+
             return versionMatch && loaderMatch
         }
-        
-        // Convert to Modrinth format, ensuring projectId contains "cf-" prefix
-        return filteredFiles.compactMap { CurseForgeToModrinthAdapter.convertVersion($0, projectId: normalizedId) }
+
+        // 转换为 Modrinth 格式，确保 projectId 包含 "cf-" 前缀
+        return filteredFiles.compactMap { CFToModrinthAdapter.convertFile($0, projectId: normalizedId) }
     }
-    
-    /// Filter out main files
+
+    /// 过滤出主要文件
     static func filterPrimaryFiles(from files: [CurseForgeModFileDetail]?) -> CurseForgeModFileDetail? {
-        // CurseForge has no primary field and returns the first file
+        // CurseForge 没有 primary 字段，返回第一个文件
         return files?.first
     }
-    
+
     // MARK: - Dependency Methods
-    
-    /// Get project dependencies (mapped to Modrinth format, silent version)
+
+    /// 获取项目依赖（映射为 Modrinth 格式，静默版本）
     /// - Parameters:
-    ///   - type: project type
-    ///   - cachePath: cache path
-    ///   - id: project ID
-    ///   - selectedVersions: selected version
-    ///   - selectedLoaders: selected loaders
-    /// - Returns: project dependencies, empty dependencies are returned on failure
+    ///   - type: 项目类型
+    ///   - cachePath: 缓存路径
+    ///   - id: 项目 ID
+    ///   - selectedVersions: 选中的版本
+    ///   - selectedLoaders: 选中的加载器
+    /// - Returns: 项目依赖，失败时返回空依赖
     static func fetchProjectDependenciesAsModrinth(
         type: String,
         cachePath: URL,
@@ -672,21 +605,21 @@ enum CurseForgeService {
             )
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to obtain CurseForge project dependencies (ID: \(id)): \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("获取 CurseForge 项目依赖失败 (ID: \(id)): \(globalError.chineseMessage)")
+            AppServices.errorHandler.handle(globalError)
             return ModrinthProjectDependency(projects: [])
         }
     }
-    
-    /// Get project dependencies (mapped to Modrinth format, throw exception version)
+
+    /// 获取项目依赖（映射为 Modrinth 格式，抛出异常版本）
     /// - Parameters:
-    ///   - type: project type
-    ///   - cachePath: cache path
-    ///   - id: project ID
-    ///   - selectedVersions: selected version
-    ///   - selectedLoaders: selected loaders
-    /// - Returns: project dependencies
-    /// - Throws: GlobalError when the operation fails
+    ///   - type: 项目类型
+    ///   - cachePath: 缓存路径
+    ///   - id: 项目 ID
+    ///   - selectedVersions: 选中的版本
+    ///   - selectedLoaders: 选中的加载器
+    /// - Returns: 项目依赖
+    /// - Throws: GlobalError 当操作失败时
     static func fetchProjectDependenciesThrowingAsModrinth(
         type: String,
         cachePath: URL,
@@ -694,68 +627,68 @@ enum CurseForgeService {
         selectedVersions: [String],
         selectedLoaders: [String]
     ) async throws -> ModrinthProjectDependency {
-        // 1. Get all filtered versions
+        // 1. 获取所有筛选后的版本
         let versions = try await fetchProjectVersionsFilterAsModrinth(
             id: id,
             selectedVersions: selectedVersions,
             selectedLoaders: selectedLoaders,
             type: type
         )
-        
-        // Only take the first version
+
+        // 只取第一个版本
         guard let firstVersion = versions.first else {
             return ModrinthProjectDependency(projects: [])
         }
-        
-        // 2. Concurrently obtain compatible versions of all dependent projects (use batch processing to limit the number of concurrencies)
+
+        // 2. 并发获取所有依赖项目的兼容版本（使用批处理限制并发数量）
         let requiredDeps = firstVersion.dependencies.filter { $0.dependencyType == "required" && $0.projectId != nil }
-        let maxConcurrentTasks = 20 // Limit the maximum number of concurrent tasks
+        let maxConcurrentTasks = 20 // 限制最大并发任务数
         var allDependencyVersions: [ModrinthProjectDetailVersion] = []
-        
-        // Process dependencies in batches, with a maximum of maxConcurrentTasks per batch
+
+        // 分批处理依赖，每批最多 maxConcurrentTasks 个
         var currentIndex = 0
         while currentIndex < requiredDeps.count {
             let endIndex = min(currentIndex + maxConcurrentTasks, requiredDeps.count)
             let batch = Array(requiredDeps[currentIndex..<endIndex])
             currentIndex = endIndex
-            
+
             let batchResults: [ModrinthProjectDetailVersion] = await withTaskGroup(of: ModrinthProjectDetailVersion?.self) { group in
                 for dep in batch {
                     guard let projectId = dep.projectId else { continue }
                     group.addTask {
                         do {
                             let depVersion: ModrinthProjectDetailVersion
-                            
-                            // Normalize projectId: if it is purely numeric, add "cf-" prefix (CurseForge dependencies are usually purely numeric)
+
+                            // 规范化 projectId：如果是纯数字，添加 "cf-" 前缀（CurseForge 依赖通常是纯数字）
                             let normalizedProjectId: String
                             if !projectId.hasPrefix("cf-") && Int(projectId) != nil {
-                                // Pure numbers, should be the CurseForge project
+                                // 纯数字，应该是 CurseForge 项目
                                 normalizedProjectId = "cf-\(projectId)"
                             } else {
                                 normalizedProjectId = projectId
                             }
-                            
+
                             if let versionId = dep.versionId {
-                                // If there is a versionId, you need to check whether it is the CurseForge version
+                                // 如果有 versionId，需要检查是否是 CurseForge 版本
                                 if versionId.hasPrefix("cf-") {
-                                    // CurseForge version, needs to be obtained from the file ID
+                                    // CurseForge 版本，需要从文件 ID 获取
                                     let fileId = Int(versionId.replacingOccurrences(of: "cf-", with: "")) ?? 0
-                                    // Need to get modId from projectId
+                                    // 需要从 projectId 获取 modId
                                     let (modId, _) = try parseCurseForgeId(normalizedProjectId)
                                     let cfFile = try await fetchFileDetailThrowing(projectId: modId, fileId: fileId)
-                                    guard let convertedVersion = CurseForgeToModrinthAdapter.convertVersion(cfFile, projectId: normalizedProjectId) else {
+                                    guard let convertedVersion = CFToModrinthAdapter.convertFile(cfFile, projectId: normalizedProjectId) else {
                                         return nil
                                     }
                                     depVersion = convertedVersion
                                 } else {
-                                    // Modrinth version, using ModrinthService
+                                    // Modrinth 版本，使用 ModrinthService
                                     depVersion = try await ModrinthService.fetchProjectVersionThrowing(id: versionId)
                                 }
                             } else {
-                                // If there is no versionId, use filtering logic to obtain compatible versions
-                                // Check if it is a CurseForge project
+                                // 如果没有 versionId，使用过滤逻辑获取兼容版本
+                                // 检查是否是 CurseForge 项目
                                 if normalizedProjectId.hasPrefix("cf-") {
-                                    // CurseForge project
+                                    // CurseForge 项目
                                     let depVersions = try await fetchProjectVersionsFilterAsModrinth(
                                         id: normalizedProjectId,
                                         selectedVersions: selectedVersions,
@@ -767,7 +700,7 @@ enum CurseForgeService {
                                     }
                                     depVersion = firstDepVersion
                                 } else {
-                                    // modrinth project
+                                    // Modrinth 项目
                                     let depVersions = try await ModrinthService.fetchProjectVersionsFilter(
                                         id: normalizedProjectId,
                                         selectedVersions: selectedVersions,
@@ -780,113 +713,124 @@ enum CurseForgeService {
                                     depVersion = firstDepVersion
                                 }
                             }
-                            
+
                             return depVersion
                         } catch {
                             let globalError = GlobalError.from(error)
-                            Logger.shared.error("Failed to obtain dependent project version (ID: \(projectId)): \(globalError.chineseMessage)")
+                            Logger.shared.error("获取依赖项目版本失败 (ID: \(projectId)): \(globalError.chineseMessage)")
                             return nil
                         }
                     }
                 }
-                
+
                 var results: [ModrinthProjectDetailVersion] = []
                 for await result in group {
                     if let version = result {
                         results.append(version)
                     }
                 }
-                
+
                 return results
             }
-            
+
             allDependencyVersions.append(contentsOf: batchResults)
         }
-        
-        // 3. Use hash to check whether it is installed and filter out missing dependencies
-        let missingDependencyVersions = allDependencyVersions.filter { version in
-            // Get the hash of the main file
-            guard let primaryFile = ModrinthService.filterPrimaryFiles(from: version.files) else {
-                return true // If there is no main file, it is considered missing
+
+        // 3. 使用统一的哈希检测逻辑，基于「所有兼容版本」判断依赖是否已安装
+        var missingDependencyVersions: [ModrinthProjectDetailVersion] = []
+
+        for version in allDependencyVersions {
+            let isInstalled = await ModrinthService.isProjectInstalledByAnyCompatibleVersion(
+                projectId: version.projectId,
+                selectedVersions: selectedVersions,
+                selectedLoaders: selectedLoaders,
+                type: type,
+                modsDir: cachePath
+            )
+
+            if !isInstalled {
+                missingDependencyVersions.append(version)
             }
-            // Use hash to check if it is installed
-            return !ModScanner.shared.isModInstalledSync(hash: primaryFile.hashes.sha1, in: cachePath)
         }
-        
+
         return ModrinthProjectDependency(projects: missingDependencyVersions)
     }
-    
+
     // MARK: - Private Methods
-    
-    /// Attempts to obtain file details from the specified URL
+
+    /// 尝试从指定 URL 获取文件详情
     /// - Parameter urlString: API URL
-    /// - Returns: File details
-    /// - Throws: Network error or parsing error
+    /// - Returns: 文件详情
+    /// - Throws: 网络错误或解析错误
     private static func tryFetchFileDetail(from urlString: String) async throws -> CurseForgeModFileDetail {
         guard let url = URL(string: urlString) else {
             throw GlobalError.validation(
-                i18nKey: "Network URL Error",
+                chineseMessage: "无效的镜像 API URL",
+                i18nKey: "error.network.url",
                 level: .notification
             )
         }
-        
-        // Use a unified API client
+
+        // 使用统一的 API 客户端
         let headers = getHeaders()
         let data = try await APIClient.get(url: url, headers: headers)
-        
-        // Parse response
+
+        // 解析响应
         let result = try JSONDecoder().decode(CurseForgeFileResponse.self, from: data)
         return result.data
     }
-    
-    /// Attempts to obtain module details from the specified URL
+
+    /// 尝试从指定 URL 获取模组详情
     /// - Parameter urlString: API URL
-    /// - Returns: Module details
-    /// - Throws: Network error or parsing error
+    /// - Returns: 模组详情
+    /// - Throws: 网络错误或解析错误
     private static func tryFetchModDetail(from urlString: String) async throws -> CurseForgeModDetail {
         guard let url = URL(string: urlString) else {
             throw GlobalError.validation(
-                i18nKey: "Network URL Error",
+                chineseMessage: "无效的镜像 API URL",
+                i18nKey: "error.network.url",
                 level: .notification
             )
         }
-        
-        // Use a unified API client
+
+        // 使用统一的 API 客户端
         let headers = getHeaders()
         let data = try await APIClient.get(url: url, headers: headers)
-        
-        // Parse response
+
+        // 解析响应
         let result = try JSONDecoder().decode(CurseForgeModDetailResponse.self, from: data)
         return result.data
     }
-    
-    /// Attempts to obtain the mod description from the specified URL
+
+    /// 尝试从指定 URL 获取模组描述
     /// - Parameter urlString: API URL
-    /// - Returns: Description content in HTML format
-    /// - Throws: Network error or parsing error
+    /// - Returns: HTML 格式的描述内容
+    /// - Throws: 网络错误或解析错误
     private static func tryFetchModDescription(from urlString: String) async throws -> String {
         guard let url = URL(string: urlString) else {
             throw GlobalError.validation(
-                i18nKey: "Network URL Error",
+                chineseMessage: "无效的镜像 API URL",
+                i18nKey: "error.network.url",
                 level: .notification
             )
         }
-        
-        // Use a unified API client
+
+        // 使用统一的 API 客户端
         let headers = getHeaders()
         let data = try await APIClient.get(url: url, headers: headers)
-        
-        // Parse response
+
+        // 解析响应
         let result = try JSONDecoder().decode(CurseForgeModDescriptionResponse.self, from: data)
         return result.data
     }
-    
-    /// Parses CF IDs, returning pure numeric IDs and prefixed standard IDs
+
+    /// 解析 CF ID，返回纯数字 ID 与带前缀的标准 ID
     private static func parseCurseForgeId(_ id: String) throws -> (modId: Int, normalized: String) {
         let cleanId = id.replacingOccurrences(of: "cf-", with: "")
         guard let modId = Int(cleanId) else {
             throw GlobalError.validation(
-                i18nKey: "Invalid Project ID",
+                chineseMessage: "无效的项目 ID",
+                i18nKey: "error.validation.invalid_project_id",
                 level: .notification
             )
         }
@@ -894,7 +838,7 @@ enum CurseForgeService {
         return (modId, normalizedId)
     }
 }
-/// CurseForge file response
+/// CurseForge 文件响应
 private struct CurseForgeFileResponse: Codable {
     let data: CurseForgeModFileDetail
 }

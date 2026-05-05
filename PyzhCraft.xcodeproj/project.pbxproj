@@ -3,25 +3,37 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 100;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		9023D91C2E313A67005A53F1 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 9023D91B2E313A67005A53F1 /* ZIPFoundation */; };
 		9049FDB12F1151B50070A9E3 /* SkinRenderKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9049FDB02F1151B50070A9E3 /* SkinRenderKit */; };
+		90645F072F6BF80C006AD2D8 /* SwiftMarkDownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 90645F062F6BF80C006AD2D8 /* SwiftMarkDownUI */; };
+		9098463F2F688B0400D7876B /* CFModrinthAdapterKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9098463E2F688B0400D7876B /* CFModrinthAdapterKit */; };
 		90E123456789ABCD0001 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 90E123456789ABCD0002 /* Sparkle */; };
-		90E387022F28FB8100F5D101 /* SwiftMarkDownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 90E387012F28FB8100F5D101 /* SwiftMarkDownUI */; };
-		90EDAA112F9AABCD00112233 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 90EDAA102F9AABCD00112233 /* Kingfisher */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		90CE44FE2E7D65A5007C6F30 /* PyzhCraft.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PyzhCraft.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		F3277B4B2F4288120061E348 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		90CE44FE2E7D65A5007C6F30 /* Swift Craft Launcher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Swift Craft Launcher.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		90EE06B82F9A4DA800F471F5 /* Exceptions for "PyzhCraft" folder in "PyzhCraft" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 9023D8302E3139B5005A53F1 /* PyzhCraft */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		9023D8332E3139B5005A53F1 /* PyzhCraft */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				90EE06B82F9A4DA800F471F5 /* Exceptions for "PyzhCraft" folder in "PyzhCraft" target */,
+			);
 			path = PyzhCraft;
 			sourceTree = "<group>";
 		};
@@ -30,13 +42,15 @@
 /* Begin PBXFrameworksBuildPhase section */
 		9023D82E2E3139B5005A53F1 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 				9023D91C2E313A67005A53F1 /* ZIPFoundation in Frameworks */,
-				90E387022F28FB8100F5D101 /* SwiftMarkDownUI in Frameworks */,
+				9098463F2F688B0400D7876B /* CFModrinthAdapterKit in Frameworks */,
 				90E123456789ABCD0001 /* Sparkle in Frameworks */,
-				90EDAA112F9AABCD00112233 /* Kingfisher in Frameworks */,
+				90645F072F6BF80C006AD2D8 /* SwiftMarkDownUI in Frameworks */,
 				9049FDB12F1151B50070A9E3 /* SkinRenderKit in Frameworks */,
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -44,9 +58,8 @@
 		9023D8282E3139B5005A53F1 = {
 			isa = PBXGroup;
 			children = (
-				F3277B4B2F4288120061E348 /* README.md */,
 				9023D8332E3139B5005A53F1 /* PyzhCraft */,
-				90CE44FE2E7D65A5007C6F30 /* PyzhCraft.app */,
+				90CE44FE2E7D65A5007C6F30 /* Swift Craft Launcher.app */,
 			);
 			sourceTree = "<group>";
 		};
@@ -74,11 +87,11 @@
 				9023D91B2E313A67005A53F1 /* ZIPFoundation */,
 				90E123456789ABCD0002 /* Sparkle */,
 				9049FDB02F1151B50070A9E3 /* SkinRenderKit */,
-				90E387012F28FB8100F5D101 /* SwiftMarkDownUI */,
-				90EDAA102F9AABCD00112233 /* Kingfisher */,
+				9098463E2F688B0400D7876B /* CFModrinthAdapterKit */,
+				90645F062F6BF80C006AD2D8 /* SwiftMarkDownUI */,
 			);
 			productName = PyzhCraft;
-			productReference = 90CE44FE2E7D65A5007C6F30 /* PyzhCraft.app */;
+			productReference = 90CE44FE2E7D65A5007C6F30 /* Swift Craft Launcher.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -89,7 +102,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1630;
-				LastUpgradeCheck = 2630;
+				LastUpgradeCheck = 1630;
 				TargetAttributes = {
 					9023D8302E3139B5005A53F1 = {
 						CreatedOnToolsVersion = 16.3;
@@ -131,10 +144,10 @@
 				90E123456789ABCD0003 /* XCRemoteSwiftPackageReference "Sparkle" */,
 				033870FA2E6059570056BDB2 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
 				9049FDAF2F1151B50070A9E3 /* XCRemoteSwiftPackageReference "NSSkinRender" */,
-				90E387002F28FB8100F5D101 /* XCRemoteSwiftPackageReference "SwiftMarkDownUI" */,
-				90EDAA0F2F9AABCD00112233 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				9098463D2F688B0400D7876B /* XCRemoteSwiftPackageReference "CFModrinthAdapterKit" */,
+				90645F052F6BF80C006AD2D8 /* XCRemoteSwiftPackageReference "SwiftMarkDownUI" */,
 			);
-			preferredProjectObjectVersion = 100;
+			preferredProjectObjectVersion = 77;
 			productRefGroup = 9023D8282E3139B5005A53F1;
 			projectDirPath = "";
 			projectRoot = "";
@@ -147,16 +160,20 @@
 /* Begin PBXResourcesBuildPhase section */
 		9023D82F2E3139B5005A53F1 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		9023D82D2E3139B5005A53F1 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
@@ -168,7 +185,7 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		9023D83B2E3139B7005A53F1 /* Debug configuration for PBXProject "PyzhCraft" */ = {
+		9023D83B2E3139B7005A53F1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -202,9 +219,8 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COMPILATION_CACHE_ENABLE_CACHING = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 54;
+				CURRENT_PROJECT_VERSION = 73;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -225,21 +241,20 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 Su";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025-2026 Swift Craft Launcher";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.1.9;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
-		9023D83C2E3139B7005A53F1 /* Release configuration for PBXProject "PyzhCraft" */ = {
+		9023D83C2E3139B7005A53F1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -273,9 +288,8 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COMPILATION_CACHE_ENABLE_CACHING = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 54;
+				CURRENT_PROJECT_VERSION = 73;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -290,19 +304,18 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 Su";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025-2026 Swift Craft Launcher";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.1.9;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 			};
 			name = Release;
 		};
-		9023D83E2E3139B7005A53F1 /* Debug configuration for PBXNativeTarget "PyzhCraft" */ = {
+		9023D83E2E3139B7005A53F1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
@@ -313,30 +326,30 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 0;
+				CURRENT_PROJECT_VERSION = 73;
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = PyzhCraft;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PyzhCraft/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 PyzhCraft";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Microphone access is required for voice chat mods";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025-2026 Swift Craft Launcher";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Used when voice input features are enabled.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14;
-				MARKETING_VERSION = 0.1;
+				MARKETING_VERSION = 1.1.9;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "host.bisquit.Pyzh-Craft";
-				PRODUCT_NAME = PyzhCraft;
+				PRODUCT_BUNDLE_IDENTIFIER = com.su.code.PyzhCraft;
+				PRODUCT_NAME = "Swift Craft Launcher";
 				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
-		9023D83F2E3139B7005A53F1 /* Release configuration for PBXNativeTarget "PyzhCraft" */ = {
+		9023D83F2E3139B7005A53F1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
@@ -347,23 +360,23 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 0;
+				CURRENT_PROJECT_VERSION = 73;
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = PyzhCraft;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PyzhCraft/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 PyzhCraft";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Microphone access is required for voice chat mods";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025-2026 Swift Craft Launcher";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Used when voice input features are enabled.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14;
-				MARKETING_VERSION = 0.1;
+				MARKETING_VERSION = 1.1.9;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "host.bisquit.Pyzh-Craft";
-				PRODUCT_NAME = PyzhCraft;
+				PRODUCT_BUNDLE_IDENTIFIER = com.su.code.PyzhCraft;
+				PRODUCT_NAME = "Swift Craft Launcher";
 				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -376,17 +389,19 @@
 		9023D82C2E3139B5005A53F1 /* Build configuration list for PBXProject "PyzhCraft" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				9023D83B2E3139B7005A53F1 /* Debug configuration for PBXProject "PyzhCraft" */,
-				9023D83C2E3139B7005A53F1 /* Release configuration for PBXProject "PyzhCraft" */,
+				9023D83B2E3139B7005A53F1 /* Debug */,
+				9023D83C2E3139B7005A53F1 /* Release */,
 			);
+			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		9023D83D2E3139B7005A53F1 /* Build configuration list for PBXNativeTarget "PyzhCraft" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				9023D83E2E3139B7005A53F1 /* Debug configuration for PBXNativeTarget "PyzhCraft" */,
-				9023D83F2E3139B7005A53F1 /* Release configuration for PBXNativeTarget "PyzhCraft" */,
+				9023D83E2E3139B7005A53F1 /* Debug */,
+				9023D83F2E3139B7005A53F1 /* Release */,
 			);
+			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
@@ -416,28 +431,28 @@
 				kind = branch;
 			};
 		};
+		90645F052F6BF80C006AD2D8 /* XCRemoteSwiftPackageReference "SwiftMarkDownUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/suhang12332/SwiftMarkDownUI.git";
+			requirement = {
+				branch = release;
+				kind = branch;
+			};
+		};
+		9098463D2F688B0400D7876B /* XCRemoteSwiftPackageReference "CFModrinthAdapterKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/suhang12332/CFModrinthAdapterKit.git";
+			requirement = {
+				branch = release;
+				kind = branch;
+			};
+		};
 		90E123456789ABCD0003 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sparkle-project/Sparkle.git";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 2.5.0;
-			};
-		};
-		90E387002F28FB8100F5D101 /* XCRemoteSwiftPackageReference "SwiftMarkDownUI" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/suhang12332/SwiftMarkDownUI.git";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
-		90EDAA0F2F9AABCD00112233 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 8.0.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -458,20 +473,20 @@
 			package = 9049FDAF2F1151B50070A9E3 /* XCRemoteSwiftPackageReference "NSSkinRender" */;
 			productName = SkinRenderKit;
 		};
+		90645F062F6BF80C006AD2D8 /* SwiftMarkDownUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 90645F052F6BF80C006AD2D8 /* XCRemoteSwiftPackageReference "SwiftMarkDownUI" */;
+			productName = SwiftMarkDownUI;
+		};
+		9098463E2F688B0400D7876B /* CFModrinthAdapterKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9098463D2F688B0400D7876B /* XCRemoteSwiftPackageReference "CFModrinthAdapterKit" */;
+			productName = CFModrinthAdapterKit;
+		};
 		90E123456789ABCD0002 /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 90E123456789ABCD0003 /* XCRemoteSwiftPackageReference "Sparkle" */;
 			productName = Sparkle;
-		};
-		90E387012F28FB8100F5D101 /* SwiftMarkDownUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 90E387002F28FB8100F5D101 /* XCRemoteSwiftPackageReference "SwiftMarkDownUI" */;
-			productName = SwiftMarkDownUI;
-		};
-		90EDAA102F9AABCD00112233 /* Kingfisher */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 90EDAA0F2F9AABCD00112233 /* XCRemoteSwiftPackageReference "Kingfisher" */;
-			productName = Kingfisher;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

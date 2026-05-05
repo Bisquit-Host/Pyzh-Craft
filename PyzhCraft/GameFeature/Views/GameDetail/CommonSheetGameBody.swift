@@ -1,26 +1,35 @@
 import SwiftUI
 
-// MARK: - Game selection block
+// MARK: - 游戏选择区块
 struct CommonSheetGameBody: View {
     let compatibleGames: [GameVersionInfo]
     @Binding var selectedGame: GameVersionInfo?
-    
+
     var body: some View {
-        Picker(
-            "Select Game",
+        CommonMenuPicker(
             selection: $selectedGame
         ) {
-            Text("Please Select Game").tag(
+            Text("global_resource.select_game".localized())
+        } content: {
+            Text("global_resource.please_select_game".localized()).tag(
                 GameVersionInfo?(nil)
             )
             ForEach(compatibleGames, id: \.id) { game in
-                (Text("\(game.gameName)-")
-                 + Text("\(game.gameVersion)-").foregroundStyle(.secondary)
-                 + Text("\(game.modLoader)-")
-                 + Text("\(game.modVersion)").foregroundStyle(.secondary))
-                .tag(Optional(game))
+                game.displayText
+                    .tag(Optional(game))
             }
         }
-        .pickerStyle(.menu)
+    }
+}
+
+extension GameVersionInfo {
+    var displayText: Text {
+        Text(gameName)
+        + Text("-")
+        + Text(gameVersion).foregroundStyle(.secondary)
+        + Text("-")
+        + Text(modLoader)
+        + Text("-")
+        + Text(modVersion).foregroundStyle(.secondary)
     }
 }

@@ -1,73 +1,78 @@
+import Foundation
 import UniformTypeIdentifiers
 import SwiftUI
 
-/// Tool class: responsible for importing local jar/zip files into the specified resource directory
+/// 工具类：负责将本地 jar/zip 文件导入到指定资源目录
 enum LocalResourceInstaller {
-    enum ResourceType {
+    enum LocalResourceType {
         case mod, datapack, resourcepack
-        
+
         var directoryName: String {
             switch self {
-            case .mod: AppConstants.DirectoryNames.mods
-            case .datapack: AppConstants.DirectoryNames.datapacks
-            case .resourcepack: AppConstants.DirectoryNames.resourcepacks
+            case .mod: return AppConstants.DirectoryNames.mods
+            case .datapack: return AppConstants.DirectoryNames.datapacks
+            case .resourcepack: return AppConstants.DirectoryNames.resourcepacks
             }
         }
-        
-        /// Supported file extensions - jar and zip are uniformly supported
+
+        /// 支持的文件扩展名 - 统一支持 jar 和 zip
         var allowedExtensions: [String] {
-            ["jar", "zip"]
+            return ["jar", "zip"]
         }
     }
-    
-    /// Install local resource files to the specified directory
+
+    /// 安装本地资源文件到指定目录
     /// - Parameters:
-    ///   - fileURL: the local file selected by the user
-    ///   - resourceType: resource type (mods/datapacks/resourcepacks)
-    ///   - gameRoot: game root directory (such as .minecraft)
+    ///   - fileURL: 用户选中的本地文件
+    ///   - resourceType: 资源类型（mods/datapacks/resourcepacks）
+    ///   - gameRoot: 游戏根目录（如 .minecraft）
     /// - Throws: GlobalError
-    static func install(fileURL: URL, resourceType: ResourceType, gameRoot: URL) throws {
-        // Check extension
+    static func install(fileURL: URL, resourceType: LocalResourceType, gameRoot: URL) throws {
+        // 检查扩展名
         guard let ext = fileURL.pathExtension.lowercased() as String?,
               resourceType.allowedExtensions.contains(ext) else {
             throw GlobalError.resource(
-                i18nKey: "Invalid file type",
+                chineseMessage: "不支持的文件类型。请导入 .jar 或 .zip 文件。",
+                i18nKey: "error.resource.invalid_file_type",
                 level: .notification
             )
         }
-        
-        // target directory
+
+        // 目标目录
         var isDir: ObjCBool = false
         guard FileManager.default.fileExists(atPath: gameRoot.path, isDirectory: &isDir), isDir.boolValue else {
             throw GlobalError.fileSystem(
-                i18nKey: "Destination Unavailable",
+                chineseMessage: "目标文件夹不存在。",
+                i18nKey: "error.filesystem.destination_unavailable",
                 level: .notification
             )
         }
-        
-        // Handle security scope
+
+        // 处理安全作用域
         let needsSecurity = fileURL.startAccessingSecurityScopedResource()
         defer { if needsSecurity { fileURL.stopAccessingSecurityScopedResource() } }
         if !needsSecurity {
             throw GlobalError.fileSystem(
-                i18nKey: "Security Scope Failed",
+                chineseMessage: "无法访问所选文件。",
+                i18nKey: "error.filesystem.security_scope_failed",
                 level: .notification
             )
         }
-        
-        // target file path
+
+        // 目标文件路径
         let destURL = gameRoot.appendingPathComponent(fileURL.lastPathComponent)
-        
-        // If it already exists, remove it first
+
+        // 如果已存在，先移除
         if FileManager.default.fileExists(atPath: destURL.path) {
             try? FileManager.default.removeItem(at: destURL)
         }
-        
+
         do {
             try FileManager.default.copyItem(at: fileURL, to: destURL)
         } catch {
             throw GlobalError.fileSystem(
-                i18nKey: "Copy Failed",
+                chineseMessage: "文件复制失败：\(error.localizedDescription)",
+                i18nKey: "error.filesystem.copy_failed",
                 level: .notification
             )
         }
@@ -79,18 +84,29 @@ extension LocalResourceInstaller {
         let query: String
         let gameName: String
         let onResourceChanged: () -> Void
-        
+
         @State private var showImporter = false
-        @StateObject private var errorHandler = GlobalErrorHandler.shared
-        
+        @StateObject private var errorHandler: GlobalErrorHandler
+
+        init(
+            query: String,
+            gameName: String,
+            onResourceChanged: @escaping () -> Void,
+            errorHandler: GlobalErrorHandler = AppServices.errorHandler
+        ) {
+            self.query = query
+            self.gameName = gameName
+            self.onResourceChanged = onResourceChanged
+            _errorHandler = StateObject(wrappedValue: errorHandler)
+        }
+
         var body: some View {
             VStack(spacing: 8) {
                 Button {
                     showImporter = true
                 } label: {
                     // Image(systemName: "square.and.arrow.down")
-                    Text("Import")
-                        .font(.subheadline)
+                    Text("common.import".localized()).font(.subheadline)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(Color.accentColor)
@@ -99,7 +115,7 @@ extension LocalResourceInstaller {
                     isPresented: $showImporter,
                     allowedContentTypes: {
                         var types: [UTType] = []
-                        // Unified support for jar and zip files
+                        // 统一支持 jar 和 zip 文件
                         if let jarType = UTType(filenameExtension: "jar") {
                             types.append(jarType)
                         }
@@ -111,43 +127,45 @@ extension LocalResourceInstaller {
                     switch result {
                     case .success(let urls):
                         guard let fileURL = urls.first else { return }
-                        
-                        // Check if query is a valid resource type
-                        let validResourceTypes = ["mod", "datapack", "shader", "resourcepack"]
+
+                        // 检查 query 是否是有效的资源类型
                         let queryLowercased = query.lowercased()
-                        
-                        // If query is a modpack or an invalid resource type, show an error
-                        if queryLowercased == "modpack" || !validResourceTypes.contains(queryLowercased) {
+
+                        // 如果 query 是 modpack 或无效的资源类型，显示错误
+                        if queryLowercased == ResourceType.modpack.rawValue || !AppConstants.validResourceTypes.contains(queryLowercased) {
                             errorHandler.handle(GlobalError.configuration(
-                                i18nKey: "Resource Directory Not Found",
+                                chineseMessage: "不支持导入此类型的资源",
+                                i18nKey: "error.configuration.resource_directory_not_found",
                                 level: .notification
                             ))
                             return
                         }
-                        
+
                         let gameRootOpt = AppPaths.resourceDirectory(for: query, gameName: gameName)
                         guard let gameRoot = gameRootOpt else {
                             errorHandler.handle(GlobalError.fileSystem(
-                                i18nKey: "Game Directory Not Found",
+                                chineseMessage: "找不到游戏目录",
+                                i18nKey: "error.filesystem.game_directory_not_found",
                                 level: .notification
                             ))
                             return
                         }
-                        
-                        // Simplified extension verification - unified support for jar and zip
+
+                        // 简化扩展名校验 - 统一支持 jar 和 zip
                         let allowedExtensions = ["jar", "zip"]
-                        
+
                         do {
                             guard let ext = fileURL.pathExtension.lowercased() as String?, allowedExtensions.contains(ext) else {
                                 throw GlobalError.resource(
-                                    i18nKey: "Invalid file type",
+                                    chineseMessage: "不支持的文件类型。请导入 .jar 或 .zip 文件。",
+                                    i18nKey: "error.resource.invalid_file_type",
                                     level: .notification
                                 )
                             }
-                            
+
                             try LocalResourceInstaller.install(
                                 fileURL: fileURL,
-                                resourceType: .mod, // Only used for allowedExtensions verification, manually verified
+                                resourceType: .mod, // 仅用于 allowedExtensions 校验，已手动校验
                                 gameRoot: gameRoot
                             )
                             onResourceChanged()
@@ -155,9 +173,9 @@ extension LocalResourceInstaller {
                             errorHandler.handle(error)
                         }
                     case .failure(let error):
-                        Logger.shared.error("File selection failed: \(error.localizedDescription)")
                         errorHandler.handle(GlobalError.fileSystem(
-                            i18nKey: "File Selection Failed",
+                            chineseMessage: "文件选择失败：\(error.localizedDescription)",
+                            i18nKey: "error.filesystem.file_selection_failed",
                             level: .notification
                         ))
                     }

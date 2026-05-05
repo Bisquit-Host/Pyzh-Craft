@@ -1,117 +1,88 @@
+import Foundation
 import SwiftUI
 
-/// Language manager
-/// Only responsible for language list and bundle
+/// 语言管理器
+/// 只负责语言列表与当前生效语言读取（不在 App 内修改语言）
 public class LanguageManager {
-    private static let appleLanguagesKey = "AppleLanguages"
-    
-    /// The currently selected language (take the first one in the AppleLanguages ​​array)
-    public var selectedLanguage: String {
-        get {
-            UserDefaults.standard.stringArray(forKey: Self.appleLanguagesKey)?.first ?? ""
-        }
-        set {
-            if newValue.isEmpty {
-                UserDefaults.standard.set([String](), forKey: Self.appleLanguagesKey)
-            } else {
-                var langs = UserDefaults.standard.stringArray(forKey: Self.appleLanguagesKey) ?? []
-                langs.removeAll { $0 == newValue }
-                langs.insert(newValue, at: 0)
-                UserDefaults.standard.set(langs, forKey: Self.appleLanguagesKey)
-            }
-        }
-    }
-    
-    /// Singleton instance
-    public static let shared = LanguageManager()
-    
-    private init() {
-        // If it is the first startup (selectedLanguage is empty), the default language is set according to the system language
-        if selectedLanguage.isEmpty {
-            selectedLanguage = Self.getDefaultLanguage()
-        }
-    }
-    
-    /// Supported language list
-    public let languages: [(String, String)] = [
-        ("🇨🇳 简体中文", "zh-Hans"),
-        ("🇨🇳 繁體中文", "zh-Hant"),
-        // ("🇸🇦 العربية", "ar"),
-        ("🇩🇰 Dansk", "da"),
-        ("🇩🇪 Deutsch", "de"),
-        ("🇺🇸 English", "en"),
-        ("🇪🇸 Español", "es"),
-        ("🇫🇮 Suomi", "fi"),
-        ("🇫🇷 Français", "fr"),
-        ("🇮🇳 हिन्दी", "hi"),
-        ("🇮🇹 Italiano", "it"),
-        ("🇯🇵 日本語", "ja"),
-        ("🇰🇷 한국어", "ko"),
-        ("🇳🇴 Norsk Bokmål", "nb"),
-        ("🇳🇱 Nederlands", "nl"),
-        ("🇵🇱 Polski", "pl"),
-        ("🇵🇹 Português", "pt"),
-        ("🇷🇺 Русский", "ru"),
-        ("🇸🇪 Svenska", "sv"),
-        ("🇹🇭 ไทย", "th"),
-        ("🇹🇷 Türkçe", "tr"),
-        ("🇻🇳 Tiếng Việt", "vi"),
+    private static let languageFlagByCode: [String: String] = [
+        "zh-Hans": "🇨🇳",
+        "zh-Hant": "🇨🇳",
+        "ar": "🇸🇦",
+        "da": "🇩🇰",
+        "de": "🇩🇪",
+        "en": "🇺🇸/🇬🇧",
+        "es": "🇪🇸",
+        "fi": "🇫🇮",
+        "fr": "🇫🇷",
+        "hi": "🇮🇳",
+        "it": "🇮🇹",
+        "ja": "🇯🇵",
+        "ko": "🇰🇷",
+        "nb": "🇳🇴",
+        "nl": "🇳🇱",
+        "pl": "🇵🇱",
+        "pt": "🇵🇹/🇧🇷",
+        "ru": "🇷🇺",
+        "sv": "🇸🇪",
+        "th": "🇹🇭",
+        "tr": "🇹🇷",
+        "vi": "🇻🇳",
     ]
-    
-    /// Get the Bundle of the current language
-    public var bundle: Bundle {
-        if let path = Bundle.main.path(forResource: selectedLanguage, ofType: "lproj"),
-           let bundle = Bundle(path: path) {
-            return bundle
+
+    private static func flagEmoji(for code: String) -> String? {
+        if let flag = languageFlagByCode[code] { return flag }
+        if let base = code.split(separator: "-").first.map(String.init),
+           let flag = languageFlagByCode[base] {
+            return flag
         }
-        return .main
+        return nil
     }
-    
+
+    public var selectedLanguage: String {
+        Self.getDefaultLanguage()
+    }
+
+    /// 单例实例
+    public static let shared = LanguageManager()
+
+    private init() {}
+
+    /// 获取当前对本 App 生效的语言 code（系统自动匹配/回退后，并限制在 App 支持的本地化中）。
     public static func getDefaultLanguage() -> String {
-        
-        let preferredLanguages = Locale.preferredLanguages
-        
-        for preferredLanguage in preferredLanguages {
-            // Handle language code matching
-            let languageCode = preferredLanguage.prefix(2).lowercased()
-            
-            switch languageCode {
-            case "zh":
-                // Chinese: Simplified Chinese first, then Traditional Chinese
-                if preferredLanguage.contains("Hans") || preferredLanguage.contains("CN") {
-                    return "zh-Hans"
-                } else if preferredLanguage.contains("Hant") || preferredLanguage.contains("TW") || preferredLanguage.contains("HK") {
-                    return "zh-Hant"
-                } else {
-                    // Default Simplified Chinese
-                    return "zh-Hans"
-                }
-            case "ar": return "ar"
-            case "da": return "da"
-            case "de": return "de"
-            case "en": return "en"
-            case "es": return "es"
-            case "fi": return "fi"
-            case "fr": return "fr"
-            case "hi": return "hi"
-            case "it": return "it"
-            case "ja": return "ja"
-            case "ko": return "ko"
-            case "nb", "no": return "nb"  // Norwegian
-            case "nl": return "nl"
-            case "pl": return "pl"
-            case "pt": return "pt"
-            case "ru": return "ru"
-            case "sv": return "sv"
-            case "th": return "th"
-            case "tr": return "tr"
-            case "vi": return "vi"
-            default:
-                continue
-            }
+        Bundle.main.preferredLocalizations.first ?? "en"
+    }
+
+    /// 获取语言显示名称（用于 UI 展示）。
+    /// - Parameters:
+    ///   - code: 语言/地区标识（例如 "en"、"zh-Hans"、"ja"）
+    ///   - locale: 用于显示的 Locale（默认当前系统 Locale）
+    /// - Returns: 尽可能本地化的显示名；如果无法解析则回退到英语显示名。
+    public static func displayName(for code: String, locale: Locale = .current) -> String {
+        let name = locale.localizedString(forIdentifier: code)
+            ?? locale.localizedString(forIdentifier: "en")
+            ?? "English"
+
+        if let flag = flagEmoji(for: code) {
+            return "\(flag) \(name)"
         }
-        
-        // If the system language is not supported, English will be used by default
-        return "en"
+        return name
+    }
+
+    /// 当前生效语言的显示名称（用于 UI 展示）。
+    public var selectedLanguageDisplayName: String {
+        Self.displayName(for: selectedLanguage)
+    }
+}
+
+// MARK: - String Localization Extension
+
+extension String {
+    /// 获取本地化字符串
+    /// - Parameter bundle: 默认使用系统解析后的主 bundle
+    /// - Returns: 本地化后的字符串
+    public func localized(
+        _ bundle: Bundle = .main
+    ) -> String {
+        bundle.localizedString(forKey: self, value: self, table: nil)
     }
 }

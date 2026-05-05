@@ -1,11 +1,18 @@
+//
+//  LauncherImportView.swift
+//  PyzhCraft
+//
+//
+
 import SwiftUI
 import UniformTypeIdentifiers
 
 // MARK: - LauncherImportView
 struct LauncherImportView: View {
     @StateObject private var viewModel: LauncherImportViewModel
-    @EnvironmentObject var gameRepository: GameRepository
-    @EnvironmentObject var playerListViewModel: PlayerListViewModel
+    @StateObject private var folderPickerViewModel = LauncherImportFolderPickerViewModel()
+    @EnvironmentObject private var gameRepository: GameRepository
+    @EnvironmentObject private var playerListViewModel: PlayerListViewModel
 
     // Bindings from parent
     private let triggerConfirm: Binding<Bool>
@@ -13,7 +20,7 @@ struct LauncherImportView: View {
     @Environment(\.dismiss)
     private var dismiss
 
-    // File picker status
+    // 文件选择器状态
     @State private var showFolderPicker = false
 
     // MARK: - Initializer
@@ -33,16 +40,19 @@ struct LauncherImportView: View {
                 viewModel.setup(gameRepository: gameRepository, playerListViewModel: playerListViewModel)
             }
             .onDisappear {
-                // Clear cache when Sheet is closed
+                // Sheet 关闭时清理缓存
                 viewModel.cleanup()
             }
             .gameFormStateListeners(viewModel: viewModel, triggerConfirm: triggerConfirm, triggerCancel: triggerCancel)
             .onChange(of: viewModel.selectedLauncherType) { _, _ in
+                // 启动器类型改变时，清除之前的选择
                 viewModel.selectedInstancePath = nil
             }
             .onChange(of: viewModel.selectedInstancePath) { _, newValue in
+                // 当选中实例路径变化时，自动填充游戏名到输入框
                 if newValue != nil {
                     viewModel.autoFillGameNameIfNeeded()
+                    // 检查 Mod Loader 是否支持，如果不支持则显示通知
                     viewModel.checkAndNotifyUnsupportedModLoader()
                 }
             }
@@ -68,9 +78,11 @@ struct LauncherImportView: View {
             gameNameInputSection
             if viewModel.shouldShowProgress {
                 VStack(spacing: 16) {
+                    // 显示复制进度（如果正在复制）
                     if viewModel.isImporting, let progress = viewModel.importProgress {
                         importProgressSection(progress: progress)
                     }
+                    // 显示下载进度
                     downloadProgressSection
                 }
                 .padding(.top, 10)
@@ -81,18 +93,21 @@ struct LauncherImportView: View {
     private var launcherSelectionSection: some View {
         FormSection {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Select Launcher")
+                Text("launcher.import.select_launcher".localized())
                     .font(.subheadline)
                     .foregroundColor(.secondary)
 
-                Picker("", selection: $viewModel.selectedLauncherType) {
-                    ForEach(ImportLauncherType.allCases, id: \.self) {
-                        Text($0.rawValue)
-                            .tag($0)
+                CommonMenuPicker(
+                    selection: $viewModel.selectedLauncherType,
+                    hidesLabel: true
+                ) {
+                    Text("")
+                } content: {
+                    ForEach(ImportLauncherType.allCases, id: \.self) { launcherType in
+                        Text(launcherType.rawValue)
+                            .tag(launcherType)
                     }
                 }
-                .labelsHidden()
-                .pickerStyle(.menu)
             }
         }
     }
@@ -100,7 +115,7 @@ struct LauncherImportView: View {
     private var pathSelectionSection: some View {
         FormSection {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Select Instance Folder")
+                Text("launcher.import.select_instance_folder".localized())
                     .font(.subheadline)
                     .foregroundColor(.secondary)
 
@@ -108,14 +123,14 @@ struct LauncherImportView: View {
                     if let path = viewModel.selectedInstancePath?.path {
                         PathBreadcrumbView(path: path)
                     } else {
-                        Text("No path selected")
+                        Text("launcher.import.no_path_selected".localized())
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
 
                     Spacer()
 
-                    Button("Browse") {
+                    Button("common.browse".localized()) {
                         selectLauncherPath()
                     }
                 }
@@ -128,9 +143,9 @@ struct LauncherImportView: View {
             FormSection {
                 VStack(alignment: .leading, spacing: 12) {
                     VStack(alignment: .leading, spacing: 8) {
-                        // Game name
+                        // 游戏名称
                         HStack {
-                            Text("Name")
+                            Text("game.form.name".localized())
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                             Spacer()
@@ -139,9 +154,9 @@ struct LauncherImportView: View {
                                 .foregroundColor(.secondary)
                         }
 
-                        // game version
+                        // 游戏版本
                         HStack {
-                            Text("Version")
+                            Text("game.form.version".localized())
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                             Spacer()
@@ -150,10 +165,10 @@ struct LauncherImportView: View {
                                 .foregroundColor(.secondary)
                         }
 
-                        // Mod loader
-                        if !info.modLoader.isEmpty && info.modLoader != "vanilla" {
+                        // Mod 加载器
+                        if !info.modLoader.isEmpty && info.modLoader != GameLoader.vanilla.displayName {
                             HStack {
-                                Text("Mod Loader")
+                                Text("game.form.modloader".localized())
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                                 Spacer()
@@ -162,7 +177,7 @@ struct LauncherImportView: View {
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
                                     if !info.modLoaderVersion.isEmpty {
-                                        Text("(\(info.modLoaderVersion))")
+                                        Text(info.modLoaderVersion)
                                             .font(.subheadline)
                                             .foregroundColor(.secondary)
                                     }
@@ -193,12 +208,12 @@ struct LauncherImportView: View {
     }
 
     private var downloadProgressSection: some View {
-        // Get the modLoader of the selected instance, or use "vanilla" if there is none
+        // 获取选中实例的 modLoader，如果没有则使用 GameLoader.vanilla.displayName
         let selectedModLoader: String = {
             if let info = viewModel.currentInstanceInfo {
                 return info.modLoader
             }
-            return "vanilla"
+            return GameLoader.vanilla.displayName
         }()
 
         return DownloadProgressSection(
@@ -212,7 +227,7 @@ struct LauncherImportView: View {
     private func importProgressSection(progress: (fileName: String, completed: Int, total: Int)) -> some View {
         FormSection {
             DownloadProgressRow(
-                title: "Copy Files",
+                title: "launcher.import.copying_files".localized(),
                 progress: progress.total > 0 ? Double(progress.completed) / Double(progress.total) : 0.0,
                 currentFile: progress.fileName,
                 completed: progress.completed,
@@ -228,53 +243,42 @@ struct LauncherImportView: View {
         showFolderPicker = true
     }
 
-    /// Handles folders selected via fileImporter
+    /// 处理通过 fileImporter 选择的文件夹
     private func handleFolderSelection(_ result: Result<[URL], Error>) {
-        switch result {
-        case .success(let urls):
-            guard let url = urls.first else { return }
-
-            // Maintain security-scoped resource access
-            guard url.startAccessingSecurityScopedResource() else {
-                GlobalErrorHandler.shared.handle(
-                    GlobalError.fileSystem(
-                        i18nKey: "File Access Failed",
-                        level: .notification
-                    )
-                )
-                return
-            }
-
-            defer { url.stopAccessingSecurityScopedResource() }
-
-            // Verify that the selected folder is a valid instance
-            guard viewModel.validateInstance(at: url) else {
-                let launcherName = viewModel.selectedLauncherType.rawValue
-                Logger.shared.error("Invalid instance path for launcher: \(launcherName)")
-                GlobalErrorHandler.shared.handle(
-                    GlobalError.fileSystem(
-                        i18nKey: "Invalid Instance Path",
-                        level: .notification
-                    )
-                )
-                return
-            }
-
-            // Directly use the selected instance path
-            viewModel.selectedInstancePath = url
-
-            // Automatically fill in the game name into the input box
-            viewModel.autoFillGameNameIfNeeded()
-
-            Logger.shared.info("Successfully selected \(viewModel.selectedLauncherType.rawValue) instance path: \(url.path)")
-
-        case .failure(let error):
-            let globalError = GlobalError.from(error)
-            GlobalErrorHandler.shared.handle(globalError)
-        }
+        let launcherName = viewModel.selectedLauncherType.rawValue
+        folderPickerViewModel.handleFolderSelection(
+            result,
+            launcherName: launcherName,
+            validateInstance: { url in viewModel.validateInstance(at: url) },
+            setSelectedInstancePath: { url in viewModel.selectedInstancePath = url },
+            autoFillGameNameIfNeeded: { viewModel.autoFillGameNameIfNeeded() }
+        )
     }
 
     #Preview {
-        LauncherImportPreviewWrapper()
+        struct PreviewWrapper: View {
+            @State private var isDownloading = false
+            @State private var isFormValid = false
+            @State private var triggerConfirm = false
+            @State private var triggerCancel = false
+
+            var body: some View {
+                LauncherImportView(
+                    configuration: GameFormConfiguration(
+                        isDownloading: $isDownloading,
+                        isFormValid: $isFormValid,
+                        triggerConfirm: $triggerConfirm,
+                        triggerCancel: $triggerCancel,
+                        onCancel: {},
+                        onConfirm: {}
+                    )
+                )
+                .environmentObject(GameRepository())
+                .environmentObject(PlayerListViewModel())
+                .frame(width: 600, height: 500)
+                .padding()
+            }
+        }
+        return PreviewWrapper()
     }
 }

@@ -1,8 +1,13 @@
+//
+//  GenericSectionView.swift
+//  PyzhCraft
+//
+//
 import SwiftUI
 
 // MARK: - Generic Section View
 struct GenericSectionView<Item: Identifiable, ChipContent: View>: View {
-    let title: LocalizedStringKey
+    let title: String
     let items: [Item]
     let isLoading: Bool
     let maxItems: Int
@@ -14,11 +19,11 @@ struct GenericSectionView<Item: Identifiable, ChipContent: View>: View {
     let isVersionSection: Bool
     let customVisibleItems: [Item]?
     let customOverflowItems: [Item]?
-    
+
     @State private var showOverflowPopover = false
-    
+
     init(
-        title: LocalizedStringKey,
+        title: String,
         items: [Item],
         isLoading: Bool,
         maxItems: Int = SectionViewConstants.defaultMaxItems,
@@ -44,11 +49,10 @@ struct GenericSectionView<Item: Identifiable, ChipContent: View>: View {
         self.customVisibleItems = customVisibleItems
         self.customOverflowItems = customOverflowItems
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             headerView
-            
             if isLoading {
                 loadingPlaceholder
             } else {
@@ -56,44 +60,46 @@ struct GenericSectionView<Item: Identifiable, ChipContent: View>: View {
             }
         }
     }
-    
+
     // MARK: - Header View
     @ViewBuilder private var headerView: some View {
-        let overflowItems = customOverflowItems ?? items.computeVisibleAndOverflowItems(maxItems: maxItems).1
-        
-        HStack {
-            Text(title)
-                .font(.headline)
-            Spacer()
-            if !overflowItems.isEmpty {
-                OverflowButton(
-                    count: overflowItems.count,
-                    isPresented: $showOverflowPopover
-                ) {
-                    overflowPopoverContent(overflowItems: overflowItems)
+        if !title.isEmpty {
+            let overflowItems = customOverflowItems ?? items.computeVisibleAndOverflowItems(maxItems: maxItems).1
+
+            HStack {
+                Text(title.localized())
+                    .font(.headline)
+                Spacer()
+                if !overflowItems.isEmpty {
+                    OverflowButton(
+                        count: overflowItems.count,
+                        isPresented: $showOverflowPopover
+                    ) {
+                        overflowPopoverContent(overflowItems: overflowItems)
+                    }
+                }
+                if let clearAction = clearAction, shouldShowClearButton() {
+                    clearButton(action: clearAction)
                 }
             }
-            if let clearAction = clearAction, shouldShowClearButton() {
-                clearButton(action: clearAction)
-            }
+            .padding(.bottom, SectionViewConstants.defaultHeaderBottomPadding)
         }
-        .padding(.bottom, SectionViewConstants.defaultHeaderBottomPadding)
     }
-    
+
     // MARK: - Loading Placeholder
     private var loadingPlaceholder: some View {
-        LoadingPlaceholder(
+        CategorySectionSkeletonView(
             count: SectionViewConstants.defaultPlaceholderCount,
             iconName: iconName,
             maxHeight: SectionViewConstants.defaultMaxHeight,
             verticalPadding: SectionViewConstants.defaultVerticalPadding
         )
     }
-    
+
     // MARK: - Content With Overflow
     private var contentWithOverflow: some View {
         let visibleItems = customVisibleItems ?? items.computeVisibleAndOverflowItems(maxItems: maxItems).0
-        
+
         return ContentWithOverflow(
             items: visibleItems,
             maxHeight: SectionViewConstants.defaultMaxHeight,
@@ -102,7 +108,7 @@ struct GenericSectionView<Item: Identifiable, ChipContent: View>: View {
             chipBuilder(item)
         }
     }
-    
+
     // MARK: - Overflow Popover Content
     @ViewBuilder
     private func overflowPopoverContent(overflowItems: [Item]) -> some View {
@@ -118,7 +124,7 @@ struct GenericSectionView<Item: Identifiable, ChipContent: View>: View {
             }
         }
     }
-    
+
     // MARK: - Clear Button
     @ViewBuilder
     private func clearButton(action: @escaping () -> Void) -> some View {
@@ -127,13 +133,13 @@ struct GenericSectionView<Item: Identifiable, ChipContent: View>: View {
                 .foregroundColor(.secondary)
         }
         .buttonStyle(.plain)
-        .help("Clear")
+        .help("filter.clear".localized())
     }
 }
 
 // MARK: - Convenience Initializers
 extension GenericSectionView {
-    /// Create GenericSectionView from configuration
+    /// 从配置创建 GenericSectionView
     init<Config: SectionViewConfiguration>(
         configuration: Config,
         @ViewBuilder chipBuilder: @escaping (Item) -> ChipContent,

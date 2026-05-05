@@ -11,7 +11,12 @@ on:
 env:
   CLIENTID: ${{ secrets.CLIENTID }}
   CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
+  LITTLESKIN_CLIENT_SECRET: ${{ secrets.LITTLESKIN_CLIENT_SECRET }}
+  MUA_CLIENT_SECRET: ${{ secrets.MUA_CLIENT_SECRET }}
+  ELYBY_CLIENT_SECRET: ${{ secrets.ELYBY_CLIENT_SECRET }}
   SPARKLE_PUBLIC_KEY: ${{ secrets.SPARKLE_PUBLIC_KEY }}
+  SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
@@ -22,12 +27,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@v6
 
       - name: Setup Xcode
-        uses: maxim-lobanov/setup-xcode@v1
+        uses: JohnTitor/setup-xcode@v0.1.1
         with:
           xcode-version: latest-stable
 
@@ -51,21 +54,16 @@ jobs:
           echo "safe_version=$SAFE_VERSION" >> $GITHUB_OUTPUT
           echo "marketing_version=$MARKETING_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Replace Info.plist variables
+      - name: Replace AppConstants secrets
         run: |
-          # 替换 AppConstants.swift 中的 CLIENTID 变量
-          SAFE_CLIENTID=$(printf '%s' "$CLIENTID" | sed 's/[\/&]/\\&/g')
-          sed -i '' "s/\$(CLIENTID)/$SAFE_CLIENTID/g" "PyzhCraft/Common/Utils/AppConstants.swift"
-
-          echo "✅ CLIENTID 已替换到 AppConstants.swift"
-
-      - name: Replace CURSEFORGE_API_KEY
-        run: |
-          # 替换 AppConstants.swift 中的 CURSEFORGE_API_KEY 变量（GitHub Secret 中已经是加密后的值）
-          SAFE_CURSEFORGE_KEY=$(printf '%s' "$CURSEFORGE_API_KEY" | sed 's/[\/&]/\\&/g')
-          sed -i '' "s/\$(CURSEFORGE_API_KEY)/$SAFE_CURSEFORGE_KEY/g" "PyzhCraft/Common/Utils/AppConstants.swift"
-
-          echo "✅ CURSEFORGE_API_KEY 已替换到 AppConstants.swift"
+          TARGET_FILE="PyzhCraft/Common/Utils/AppConstants.swift"
+          for KEY in CLIENTID CURSEFORGE_API_KEY LITTLESKIN_CLIENT_SECRET MUA_CLIENT_SECRET ELYBY_CLIENT_SECRET; do
+            # GitHub Secret 中应存放加密后的值
+            VALUE="${!KEY}"
+            SAFE_VALUE=$(printf '%s' "$VALUE" | sed 's/[\/&]/\\&/g')
+            sed -i '' "s/\$($KEY)/$SAFE_VALUE/g" "$TARGET_FILE"
+            echo "✅ $KEY 已替换到 AppConstants.swift"
+          done
 
       - name: Build app for ${{ matrix.arch }}
         run: |
@@ -86,33 +84,9 @@ jobs:
             -derivedDataPath "$BUILD_DIR" \
             -archivePath "$ARCHIVE_PATH" \
             -skipPackagePluginValidation \
+            SPARKLE_PUBLIC_KEY="$SPARKLE_PUBLIC_KEY" \
             EXCLUDED_ARCHS="$EXCLUDED_ARCHS" \
             archive
-
-      - name: Add Sparkle public key to generated Info.plist
-        run: |
-          ARCHIVE_PATH="build_${{ matrix.arch }}/PyzhCraft.xcarchive"
-          APP_PATH="$ARCHIVE_PATH/Products/Applications/Swift Craft Launcher.app"
-          INFO_PLIST_PATH="$APP_PATH/Contents/Info.plist"
-          
-          if [[ ! -f "$INFO_PLIST_PATH" ]]; then
-            echo "❌ 未找到生成的 Info.plist: $INFO_PLIST_PATH"
-            exit 1
-          fi
-          
-          echo "📝 向生成的 Info.plist 添加 Sparkle 公钥..."
-          /usr/libexec/PlistBuddy -c "Add :SUPublicEDKey string $SPARKLE_PUBLIC_KEY" "$INFO_PLIST_PATH" 2>/dev/null || \
-          /usr/libexec/PlistBuddy -c "Set :SUPublicEDKey $SPARKLE_PUBLIC_KEY" "$INFO_PLIST_PATH"
-          
-          echo "✅ Sparkle 公钥已添加到生成的 Info.plist"
-
-          echo "📝 向生成的 Info.plist 添加 HelpBook 配置..."
-          /usr/libexec/PlistBuddy -c "Add :CFBundleHelpBookFolder string PyzhCraft.help" "$INFO_PLIST_PATH" 2>/dev/null || \
-          /usr/libexec/PlistBuddy -c "Set :CFBundleHelpBookFolder PyzhCraft.help" "$INFO_PLIST_PATH"
-          /usr/libexec/PlistBuddy -c "Add :CFBundleHelpBookName string com.su.code.PyzhCraft.help" "$INFO_PLIST_PATH" 2>/dev/null || \
-          /usr/libexec/PlistBuddy -c "Set :CFBundleHelpBookName com.su.code.PyzhCraft.help" "$INFO_PLIST_PATH"
-          
-          echo "✅ HelpBook 配置已添加到生成的 Info.plist"
 
       - name: Fetch help documentation
         run: |
@@ -157,11 +131,6 @@ jobs:
           # 验证复制是否成功
           if [[ -d "$HELP_TARGET_PATH" ]]; then
             echo "✅ 帮助文档复制成功"
-            echo "帮助文档结构:"
-            ls -la "$HELP_TARGET_PATH" || true
-            if [[ -d "$HELP_TARGET_PATH/Contents" ]]; then
-              ls -la "$HELP_TARGET_PATH/Contents" || true
-            fi
           else
             echo "❌ 帮助文档复制失败"
             exit 1
@@ -222,7 +191,6 @@ jobs:
           
             if [[ -f "$HELPINDEX_PATH" ]]; then
               echo "  ✅ 标准 helpindex 生成成功"
-              ls -lh "$HELPINDEX_PATH"
             else
               echo "  ❌ 标准 helpindex 生成失败"
               cd "$ORIGINAL_DIR"
@@ -236,7 +204,6 @@ jobs:
           
             if [[ -f "$CSHELPINDEX_PATH" ]]; then
               echo "  ✅ Core Spotlight helpindex 生成成功"
-              ls -lh "$CSHELPINDEX_PATH"
             else
               echo "  ❌ Core Spotlight helpindex 生成失败"
               cd "$ORIGINAL_DIR"
@@ -250,18 +217,6 @@ jobs:
           done
           
           echo "✅ 所有语言文件夹的 helpindex 文件生成完成"
-
-      - name: Verify build output
-        run: |
-          ARCHIVE_PATH="build_${{ matrix.arch }}/PyzhCraft.xcarchive"
-          APP_PATH="$ARCHIVE_PATH/Products/Applications/Swift Craft Launcher.app"
-          
-          if [[ ! -d "$APP_PATH" ]]; then
-            echo "❌ 未找到构建产物: $APP_PATH"
-            exit 1
-          fi
-          echo "✅ 应用构建成功: $APP_PATH"
-          file "$APP_PATH/Contents/MacOS/Swift Craft Launcher"
 
       - name: Process app with archify
         run: |
@@ -283,10 +238,6 @@ jobs:
           # Create output directory
           mkdir -p "$PROCESSED_DIR"
           
-          # Show archify help for debugging
-          echo "📋 archify 帮助信息:"
-          python3 .github/scripts/archify.py --help | head -20
-          
           # Process app with archify
           echo "🚀 执行 archify 命令..."
           python3 .github/scripts/archify.py \
@@ -302,20 +253,12 @@ jobs:
             echo "✅ archify 处理成功"
             echo "处理后的应用路径: $PROCESSED_APP"
           
-            # Show file info for comparison
-            echo "原始应用大小:"
-            du -sh "$APP_PATH"
-            echo "处理后应用大小:"
-            du -sh "$PROCESSED_APP"
-          
             # Replace original app with processed app
             rm -rf "$APP_PATH"
             cp -R "$PROCESSED_APP" "$APP_PATH"
             echo "✅ 已用处理后的应用替换原始应用"
           else
             echo "❌ archify 处理失败，使用原始应用"
-            echo "检查输出目录内容:"
-            ls -la "$PROCESSED_DIR" || echo "输出目录不存在"
           fi
 
       - name: Install create-dmg
@@ -376,8 +319,6 @@ jobs:
           
           if [[ -f "$DMG_NAME" ]]; then
             echo "✅ DMG 创建成功: $DMG_NAME"
-            # Show DMG info
-            hdiutil info "$DMG_NAME" | head -20
             echo "dmg_name=$DMG_NAME" >> $GITHUB_OUTPUT
           else
             echo "❌ DMG 创建失败"
@@ -385,7 +326,7 @@ jobs:
           fi
 
       - name: Upload DMG Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Swift-Craft-Launcher-${{ matrix.arch }}-${{ steps.version.outputs.safe_version }}
           path: Swift-Craft-Launcher-${{ matrix.arch }}-${{ steps.version.outputs.safe_version }}.dmg
@@ -405,22 +346,14 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     needs: build
     runs-on: macos-15
+    permissions:
+      contents: write
 
     steps:
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: release-artifacts
-
-      - name: Display downloaded artifacts
-        run: |
-          echo "Downloaded artifacts:"
-          find release-artifacts -type f -name "*.dmg"
-
-      - name: Setup Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '16.3'
 
       - name: setup sparkle
         run: |
@@ -431,76 +364,133 @@ jobs:
           
           if [[ -f "bin/generate_appcast" ]]; then
             echo "✅ generate_appcast binary found in bin/"
-            echo "Binary permissions:"
-            ls -la bin/generate_appcast
           else
             echo "❌ generate_appcast binary not found"
             exit 1
           fi
 
-      - name: Create private key file
+      - name: Fetch release notes (remote markdown)
         run: |
-          echo '${{ secrets.SPARKLE_PRIVATE_KEY }}' > ed25519_priv.pem
-          chmod 600 ed25519_priv.pem
-
-      - name: Generate appcast for arm64
-        run: |
-          # 获取版本信息
           VERSION=${GITHUB_REF#refs/tags/}
           echo "版本: $VERSION"
           
-          # 查找arm64 DMG文件
-          echo "查找 arm64 DMG 文件..."
-          ARM64_DMG=$(find . -name "*arm64*.dmg" 2>/dev/null | head -1)
+          NOTES_URL="https://suhang12332.github.io/Swift-Craft-Launcher-Assets/releases-notes/$VERSION.md"
+          echo "拉取 Release Notes: $NOTES_URL"
           
-          if [[ -z "$ARM64_DMG" ]]; then
-            echo "❌ 未找到 arm64 DMG 文件"
-            exit 1
-          fi
-          
-          echo "找到的 arm64 DMG 文件: $ARM64_DMG"
-          
-          # 生成arm64 appcast条目
-          ./bin/generate_appcast \
-            --ed-key-file ed25519_priv.pem \
-            --download-url-prefix "https://github.com/${{ github.repository }}/releases/download/$VERSION/" \
-            -o appcast-arm64.xml \
-            "$(dirname $ARM64_DMG)"
-          
-          echo "✅ ARM64 appcast generated successfully"
+          curl -fsSL "$NOTES_URL" -o release-notes.md
+          echo "✅ Release Notes 已保存到 release-notes.md"
 
-      - name: Generate appcast for x86_64
+      - name: Generate appcast files
         run: |
-          # 获取版本信息
           VERSION=${GITHUB_REF#refs/tags/}
           echo "版本: $VERSION"
-          
-          # 查找x86_64 DMG文件
-          echo "查找 x86_64 DMG 文件..."
-          X86_64_DMG=$(find . -name "*x86_64*.dmg" 2>/dev/null | head -1)
-          
-          if [[ -z "$X86_64_DMG" ]]; then
-            echo "❌ 未找到 x86_64 DMG 文件"
-            exit 1
-          fi
-          
-          echo "找到的 x86_64 DMG 文件: $X86_64_DMG"
-          
-          # 生成x86_64 appcast条目
-          ./bin/generate_appcast \
-            --ed-key-file ed25519_priv.pem \
-            --download-url-prefix "https://github.com/${{ github.repository }}/releases/download/$VERSION/" \
-            -o appcast-x86_64.xml \
-            "$(dirname $X86_64_DMG)"
-          
-          echo "✅ x86_64 appcast generated successfully"
+          for ARCH in arm64 x86_64; do
+            echo "查找 ${ARCH} DMG 文件..."
+            DMG_FILE=$(find . -name "*${ARCH}*.dmg" 2>/dev/null | head -1)
+            if [[ -z "$DMG_FILE" ]]; then
+              echo "❌ 未找到 ${ARCH} DMG 文件"
+              exit 1
+            fi
+
+            echo "找到的 ${ARCH} DMG 文件: $DMG_FILE"
+            ./bin/generate_appcast \
+              --ed-key-file <(printf '%s' "$SPARKLE_PRIVATE_KEY") \
+              --full-release-notes-url "https://suhang12332.github.io/Swift-Craft-Launcher-Assets/releases/${VERSION}.html" \
+              --download-url-prefix "https://github.com/${{ github.repository }}/releases/download/$VERSION/" \
+              -o "appcast-${ARCH}.xml" \
+              "$(dirname "$DMG_FILE")"
+
+            echo "✅ ${ARCH} appcast generated successfully"
+          done
+
+      - name: Fix appcast release notes link
+        run: |
+          for FILE in appcast-arm64.xml appcast-x86_64.xml; do
+            if [[ -f "$FILE" ]]; then
+              echo "🔧 修正 $FILE 中的 release notes 链接字段..."
+              sed -i '' 's/fullReleaseNotesLink/releaseNotesLink/g' "$FILE"
+            else
+              echo "⚠️ 未找到文件: $FILE"
+            fi
+          done
 
       - name: Upload to GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            release-artifacts/**/*.dmg
-            appcast-arm64.xml
-            appcast-x86_64.xml
+        shell: bash
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF#refs/tags/}"
+          assets=()
+          while IFS= read -r f; do
+            [[ -n "$f" ]] && assets+=("$f")
+          done < <(find release-artifacts -name '*.dmg' -type f | LC_ALL=C sort)
+          if [[ ${#assets[@]} -eq 0 ]]; then
+            echo "No DMG files found under release-artifacts"
+            exit 1
+          fi
+          for f in appcast-arm64.xml appcast-x86_64.xml; do
+            if [[ ! -f "$f" ]]; then
+              echo "Missing required file: $f"
+              exit 1
+            fi
+          done
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+            echo "Release $VERSION already exists; updating notes and assets..."
+            gh release edit "$VERSION" --notes-file release-notes.md
+            gh release upload "$VERSION" --clobber "${assets[@]}" appcast-arm64.xml appcast-x86_64.xml
+          else
+            gh release create "$VERSION" \
+              --title "$VERSION" \
+              --notes-file release-notes.md \
+              "${assets[@]}" \
+              appcast-arm64.xml \
+              appcast-x86_64.xml
+          fi
+
+      - name: Checkout Homebrew Cask repository
+        uses: actions/checkout@v6
+        with:
+          repository: suhang12332/homebrew-swiftcraftlauncher
+          ref: main
+          path: homebrew-swiftcraftlauncher
+          token: ${{ secrets.HOMEBREW_TOKEN }}
+
+      - name: Update Homebrew Cask version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          CASK_FILE="homebrew-swiftcraftlauncher/Casks/swift-craft-launcher.rb"
+
+          if [[ ! -f "$CASK_FILE" ]]; then
+            echo "❌ 未找到 Cask 文件: $CASK_FILE"
+            exit 1
+          fi
+
+          echo "📝 将 Homebrew Cask 版本更新为: $VERSION"
+          sed -E -i '' "s/^[[:space:]]*version \".*\"/  version \"$VERSION\"/" "$CASK_FILE"
+
+          echo "✅ 更新后的 version 行:"
+          grep -nE '^[[:space:]]*version "' "$CASK_FILE"
+
+      - name: Commit and push Homebrew Cask version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          REPO_DIR="homebrew-swiftcraftlauncher"
+          CASK_FILE="Casks/swift-craft-launcher.rb"
+
+          cd "$REPO_DIR"
+
+          if git diff --quiet -- "$CASK_FILE"; then
+            echo "ℹ️ Homebrew Cask 版本未变化，无需提交"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add "$CASK_FILE"
+          git commit -m "Update swift-craft-launcher to $VERSION"
+          git push origin HEAD:main
+        env:
+          HOMEBREW_TOKEN: ${{ secrets.HOMEBREW_TOKEN }}

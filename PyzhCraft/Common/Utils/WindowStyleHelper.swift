@@ -1,8 +1,16 @@
+//
+//  WindowStyleHelper.swift
+//  PyzhCraft
+//
+//  Created by su on 2025/1/27.
+//
+
+import AppKit
 import SwiftUI
 
-/// Window style configuration tool
+/// 窗口样式配置工具
 enum WindowStyleHelper {
-    /// Configure standard window styles (disable shrink and zoom)
+    /// 配置标准窗口样式（禁用缩小和放大）
     static func configureStandardWindow(_ window: NSWindow) {
         window.styleMask.remove([.miniaturizable, .resizable])
         window.collectionBehavior.insert(.fullScreenNone)
@@ -10,20 +18,20 @@ enum WindowStyleHelper {
     }
 }
 
-/// Window style configuration modifiers
+/// 窗口样式配置修饰符
 struct WindowStyleConfig: ViewModifier {
     let windowID: WindowID
-    
+
     func body(content: Content) -> some View {
         content
             .background(
                 WindowAccessor(synchronous: false) { window in
-                    // Make sure the window identifier is set correctly (for singleton lookup)
+                    // 确保窗口 identifier 被正确设置（用于单例查找）
                     if window.identifier?.rawValue != windowID.rawValue {
                         window.identifier = NSUserInterfaceItemIdentifier(windowID.rawValue)
                     }
-                    
-                    // Uniform use of standard window styles
+
+                    // 统一使用标准窗口样式
                     WindowStyleHelper.configureStandardWindow(window)
                 }
             )
@@ -31,26 +39,32 @@ struct WindowStyleConfig: ViewModifier {
 }
 
 extension View {
-    /// Apply window style configuration
+    /// 应用窗口样式配置
     func windowStyleConfig(for windowID: WindowID) -> some View {
         modifier(WindowStyleConfig(windowID: windowID))
     }
 }
 
-/// window cleanup modifier
+/// 窗口清理修饰符
 struct WindowCleanup: ViewModifier {
     let windowID: WindowID
-    
+    private let windowDataStore: WindowDataStore
+
+    init(windowID: WindowID, windowDataStore: WindowDataStore = AppServices.windowDataStore) {
+        self.windowID = windowID
+        self.windowDataStore = windowDataStore
+    }
+
     func body(content: Content) -> some View {
         content
             .onDisappear {
-                WindowDataStore.shared.cleanup(for: windowID)
+                windowDataStore.cleanup(for: windowID)
             }
     }
 }
 
 extension View {
-    /// Apply window cleaning configuration
+    /// 应用窗口清理配置
     func windowCleanup(for windowID: WindowID) -> some View {
         modifier(WindowCleanup(windowID: windowID))
     }

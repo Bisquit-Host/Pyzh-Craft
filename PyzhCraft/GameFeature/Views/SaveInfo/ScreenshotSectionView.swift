@@ -1,6 +1,12 @@
 import SwiftUI
+import AppKit
 
-// MARK: - Screenshot information area view
+// MARK: - Constants
+private enum ScreenshotSectionConstants {
+    static let thumbnailSize: CGFloat = 60
+}
+
+// MARK: - 截图信息区域视图
 struct ScreenshotSectionView: View {
     // MARK: - Properties
     let screenshots: [ScreenshotInfo]
@@ -12,7 +18,7 @@ struct ScreenshotSectionView: View {
     // MARK: - Body
     var body: some View {
         GenericSectionView(
-            title: "Screenshots",
+            title: "saveinfo.screenshots",
             items: screenshots,
             isLoading: isLoading,
             iconName: "photo.fill"
@@ -35,5 +41,134 @@ struct ScreenshotSectionView: View {
             isLoading: false,
             maxTextWidth: 150
         )
+    }
+}
+
+// MARK: - Screenshot Thumbnail
+struct ScreenshotThumbnail: View {
+    let screenshot: ScreenshotInfo
+    let action: () -> Void
+
+    @StateObject private var viewModel = ScreenshotThumbnailViewModel()
+
+    var body: some View {
+        Button(action: action) {
+            Group {
+                if let image = viewModel.image {
+                    Image(nsImage: image)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } else {
+                    Image(systemName: "photo.fill")
+                        .foregroundColor(.secondary)
+                }
+            }
+            .frame(
+                width: ScreenshotSectionConstants.thumbnailSize,
+                height: ScreenshotSectionConstants.thumbnailSize
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 4))
+            .overlay(
+                RoundedRectangle(cornerRadius: 4)
+                    .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .task {
+            viewModel.load(path: screenshot.path)
+        }
+        .onDisappear {
+            viewModel.reset()
+        }
+    }
+}
+
+// MARK: - Screenshot Detail View
+struct ScreenshotDetailView: View {
+    let screenshot: ScreenshotInfo
+    let gameName: String
+    @Environment(\.dismiss)
+    private var dismiss
+
+    var body: some View {
+        CommonSheetView(
+            header: { headerView },
+            body: { bodyView },
+            footer: { footerView }
+        )
+        .frame(minWidth: 600, minHeight: 400)
+    }
+
+    private var headerView: some View {
+        HStack {
+            Text(screenshot.name)
+                .font(.headline)
+            Spacer()
+            ShareLink(item: screenshot.path) {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.system(size: 14, weight: .semibold))
+            }
+            .buttonStyle(.borderless)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var bodyView: some View {
+        ScrollView {
+            ScreenshotImageView(path: screenshot.path)
+                .frame(maxWidth: .infinity)
+        }
+    }
+
+    private var footerView: some View {
+        HStack {
+            if let createdDate = screenshot.createdDate {
+                Label {
+                    Text(createdDate.formatted(date: .abbreviated, time: .standard))
+                } icon: {
+                    Image(systemName: "clock")
+                }
+                .font(.caption)
+                .foregroundColor(.secondary)
+            }
+
+            Spacer()
+            Button("common.close".localized()) {
+                dismiss()
+            }
+            .keyboardShortcut(.defaultAction)
+        }
+    }
+}
+
+// MARK: - Screenshot Image View
+struct ScreenshotImageView: View {
+    let path: URL
+    @StateObject private var viewModel = ScreenshotImageViewModel()
+
+    var body: some View {
+        Group {
+            if viewModel.isLoading {
+                ProgressView().controlSize(.small)
+            } else if viewModel.loadFailed {
+                VStack {
+                    Image(systemName: "photo.fill")
+                        .font(.largeTitle)
+                        .foregroundColor(.secondary)
+                    Text("saveinfo.screenshot.load.failed".localized())
+                        .foregroundColor(.secondary)
+                }
+            } else if let image = viewModel.image {
+                Image(nsImage: image)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+            }
+        }
+        .task {
+            viewModel.load(path: path)
+        }
+        .onDisappear {
+            viewModel.reset()
+        }
     }
 }

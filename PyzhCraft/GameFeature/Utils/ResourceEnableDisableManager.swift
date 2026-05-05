@@ -1,22 +1,29 @@
+//
+//  ResourceEnableDisableManager.swift
+//  PyzhCraft
+//
+//  Created by su on 2025/6/28.
+//
+
 import Foundation
 
-/// Resource enable/disable state manager
-/// Responsible for managing the enabled and disabled status of local resources (via the .disable suffix)
+/// 资源启用/禁用状态管理器
+/// 负责管理本地资源的启用和禁用状态（通过 .disable 后缀）
 enum ResourceEnableDisableManager {
-    /// Check if the resource is disabled
-    /// - Parameter fileName: file name
-    /// - Returns: Whether it is disabled
+    /// 检查资源是否被禁用
+    /// - Parameter fileName: 文件名
+    /// - Returns: 是否被禁用
     static func isDisabled(fileName: String?) -> Bool {
         guard let fileName = fileName else { return false }
         return fileName.hasSuffix(".disable")
     }
-    
-    /// Toggle the enabled/disabled state of a resource
+
+    /// 切换资源的启用/禁用状态
     /// - Parameters:
-    ///   - fileName: current file name
-    ///   - resourceDir: resource directory
-    /// - Returns: new file name, or nil if the operation fails
-    /// - Throws: File operation error
+    ///   - fileName: 当前文件名
+    ///   - resourceDir: 资源目录
+    /// - Returns: 新的文件名，如果操作失败则返回 nil
+    /// - Throws: 文件操作错误
     static func toggleDisableState(
         fileName: String,
         resourceDir: URL
@@ -24,23 +31,17 @@ enum ResourceEnableDisableManager {
         let fileManager = FileManager.default
         let currentURL = resourceDir.appendingPathComponent(fileName)
         let targetFileName: String
-        
+
         let isCurrentlyDisabled = fileName.hasSuffix(".disable")
         if isCurrentlyDisabled {
-            guard fileName.hasSuffix(".disable") else {
-                throw GlobalError.resource(
-                    i18nKey: "Failed to enable resource: File suffix does not contain .disable",
-                    level: .notification
-                )
-            }
             targetFileName = String(fileName.dropLast(".disable".count))
         } else {
             targetFileName = fileName + ".disable"
         }
-        
+
         let targetURL = resourceDir.appendingPathComponent(targetFileName)
         try fileManager.moveItem(at: currentURL, to: targetURL)
-        
+
         return targetFileName
     }
 }

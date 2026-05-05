@@ -1,25 +1,33 @@
+//
+//  ResourceButtonAlertType.swift
+//  PyzhCraft
+//
+//  Created by su on 2025/6/28.
+//
+
 import SwiftUI
 
-/// Alert type enumeration for resource buttons
+/// 资源按钮的 Alert 类型枚举
 enum ResourceButtonAlertType: Identifiable {
-    case noGame, noPlayer
-    
+    case noGame
+    case noPlayer
+
     var id: Self { self }
-    
-    /// Create the corresponding Alert
+
+    /// 创建对应的 Alert
     var alert: Alert {
         switch self {
         case .noGame:
-            Alert(
-                title: Text("No Local Game"),
-                message: Text("Please add a local game first before performing this operation."),
-                dismissButton: .default(Text("Confirm"))
+            return Alert(
+                title: Text("no_local_game.title".localized()),
+                message: Text("no_local_game.message".localized()),
+                dismissButton: .default(Text("common.confirm".localized()))
             )
         case .noPlayer:
-            Alert(
-                title: Text("No Players"),
-                message: Text("No player information. Please add player information first before adding games"),
-                dismissButton: .default(Text("Confirm"))
+            return Alert(
+                title: Text("sidebar.alert.no_player.title".localized()),
+                message: Text("sidebar.alert.no_player.message".localized()),
+                dismissButton: .default(Text("common.confirm".localized()))
             )
         }
     }

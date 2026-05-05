@@ -1,11 +1,17 @@
+//
+//  ImportLauncherType.swift
+//  PyzhCraft
+//
+//
+
 import Foundation
 
-/// Supported launcher types
+/// 支持的启动器类型
 enum ImportLauncherType: String, CaseIterable {
-    case multiMC = "MultiMC",
-         prismLauncher = "PrismLauncher",
-         gdLauncher = "GDLauncher",
-         hmcl = "HMCL",
-         sjmcLauncher = "SJMCLauncher",
-         xmcl = "XMCL"
+    case multiMC = "MultiMC"
+    case prismLauncher = "PrismLauncher"
+    case gdLauncher = "GDLauncher"
+    case hmcl = "HMCL"
+    case sjmcLauncher = "SJMCLauncher"
+    case xmcl = "XMCL"
 }

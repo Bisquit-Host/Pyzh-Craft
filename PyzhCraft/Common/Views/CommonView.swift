@@ -1,25 +1,22 @@
+//
+//  CommonView.swift
+//  PyzhCraft
+//
+//  Created by su on 2025/6/2.
+//
 import SwiftUI
 
-func newErrorView(_ error: GlobalError) -> some View {
+func errorView(_ error: GlobalError) -> some View {
     ContentUnavailableView {
-        Label("😩 Query error, please try again later!", systemImage: "xmark.icloud")
+        Label(error.notificationTitle, systemImage: "exclamationmark.triangle")
     } description: {
-        Text(error.notificationTitle)
-    }
-}
-
-func emptyResultView() -> some View {
-    ContentUnavailableView {
-        Label(
-            "No Results Found",
-            systemImage: "magnifyingglass"
-        )
+        Text(error.localizedDescription)
     }
 }
 
 func emptyDropBackground() -> some View {
     RoundedRectangle(cornerRadius: 12)
-        .fill(.gray.opacity(0.05))
+        .fill(Color.gray.opacity(0.05))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(style: StrokeStyle(lineWidth: 1, dash: [5, 5]))
@@ -31,22 +28,27 @@ func spacerView() -> some View {
     Spacer().frame(maxHeight: 20)
 }
 
-// path setting line
-struct DirectorySettingRow: View {
-    private let title: String
-    private let path: String
-    private let description: LocalizedStringKey?
-    private let onChoose: () -> Void
-    private let onReset: () -> Void
+// 通用说明文本样式
+struct CommonDescriptionText: View {
+    let text: String
+    var width: CGFloat = 320
 
-    init(title: String, path: String, description: LocalizedStringKey? = nil, onChoose: @escaping () -> Void, onReset: @escaping () -> Void, showPopover: Bool = false) {
-        self.title = title
-        self.path = path
-        self.description = description
-        self.onChoose = onChoose
-        self.onReset = onReset
-        self.showPopover = showPopover
+    var body: some View {
+        Text(text)
+            .foregroundStyle(.secondary)
+            .font(.subheadline)
+            .frame(width: width, alignment: .leading)
+            .fixedSize(horizontal: false, vertical: true)
     }
+}
+
+// 路径设置行
+struct DirectorySettingRow: View {
+    let title: String
+    let path: String
+    let description: String
+    let onChoose: () -> Void
+    let onReset: () -> Void
 
     @State private var showPopover = false
 
@@ -58,22 +60,105 @@ struct DirectorySettingRow: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.primary)
-                .onHover { hovering in
-                    if hovering {
-                        NSCursor.pointingHand.push()
-                    } else {
-                        NSCursor.pop()
-                    }
-                }
+                .applyPointerHandIfAvailable()
 
-                Button("Reset", action: onReset)
+                Button("common.reset".localized(), action: onReset)
                     .padding(.leading, 8)
             }
+            Text(description)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+        }
+    }
+}
+// 路径分段显示控件（Finder风格图标）
+struct PathBreadcrumbView: View {
+    let path: String
+    let maxVisible: Int = 3  // 最多显示几段（含首尾）
 
-            if let description {
-                Text(description)
-                    .font(.footnote)
-                    .foregroundColor(.secondary)
+    var body: some View {
+        let components = path.split(separator: "/").map(String.init)
+        let paths: [String] = {
+            var result: [String] = []
+            var current = path.hasPrefix("/") ? "/" : ""
+            for comp in components {
+                // 使用字符串插值而非字符串拼接
+                let separator = current == "/" ? "" : "/"
+                current = "\(current)\(separator)\(comp)"
+                result.append(current)
+            }
+            return result
+        }()
+
+        let count = components.count
+        let showEllipsis = count > maxVisible
+        let headCount = showEllipsis ? 1 : max(0, count - maxVisible)
+        let tailCount = showEllipsis ? maxVisible - 1 : count
+        let startTail = max(count - tailCount, headCount)
+
+        func segmentView(idx: Int) -> some View {
+            // 安全获取文件图标，避免 NSXPC 警告
+            let icon: NSImage = {
+                // 检查文件是否存在
+                guard FileManager.default.fileExists(atPath: paths[idx]) else {
+                    if #available(macOS 12.0, *) {
+                        return NSWorkspace.shared.icon(for: .folder)
+                    } else {
+                        return NSWorkspace.shared.icon(forFileType: NSFileTypeForHFSTypeCode(0))
+                    }
+                }
+                // 使用 try-catch 包装，避免潜在的 NSXPC 警告
+                return NSWorkspace.shared.icon(forFile: paths[idx])
+            }()
+            return HStack(spacing: 2) {
+                Image(nsImage: icon)
+                    .resizable()
+                    .frame(width: 16, height: 16)
+                    .cornerRadius(3)
+                Text(components[idx])
+                    .font(.body)
+            }
+        }
+
+        return HStack(spacing: 0) {
+            // 开头
+            ForEach(0..<headCount, id: \.self) { idx in
+                if idx > 0 {
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .bold()
+                        .foregroundColor(.primary)
+                        .padding(.horizontal, 6)
+                }
+                segmentView(idx: idx)
+            }
+            // 省略号
+            if showEllipsis {
+                if headCount > 0 {
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .bold()
+                        .foregroundColor(.primary)
+                        .padding(.horizontal, 6)
+                }
+                Text("…")
+                    .font(.body)
+                    .foregroundColor(.primary)
+            }
+            // 结尾
+            ForEach(startTail..<count, id: \.self) { idx in
+                if idx > headCount || (showEllipsis && idx == startTail) {
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .bold()
+                        .foregroundColor(.primary)
+                        .padding(.horizontal, 6)
+                }
+                if idx == count - 1 {
+                    segmentView(idx: idx)
+                } else {
+                    segmentView(idx: idx)
+                }
             }
         }
     }
@@ -89,6 +174,17 @@ extension View {
             self.contentTransition(.symbolEffect(.replace.offUp.byLayer, options: .nonRepeating))
         }
     }
+
+    /// 在支持的系统上应用手型指针样式，低版本自动降级为原样
+    @ViewBuilder
+    func applyPointerHandIfAvailable() -> some View {
+        if #available(macOS 15.0, *) {
+            self.pointerStyle(.link)
+        } else {
+            self
+        }
+    }
+
     @ViewBuilder
     func `if`<Content: View>(
         _ condition: Bool,
@@ -110,12 +206,106 @@ extension Scene {
         }
     }
 
-    /// Disable window recovery behavior (on all supported macOS versions)
+    /// 禁用窗口恢复行为（在所有支持的 macOS 版本上）
     func applyRestorationBehaviorDisabled() -> some Scene {
         if #available(macOS 15.0, *) {
             return self.restorationBehavior(.disabled)
         } else {
             return self
+        }
+    }
+}
+
+// MARK: - 通用信息图标组件（带 Popover）
+/// 一个通用的问号标记组件，鼠标悬浮时显示详细说明
+struct InfoIconWithPopover<Content: View>: View {
+    /// Popover 中显示的内容
+    let content: Content
+    /// 延迟显示时间（秒）
+    let delay: Double
+
+    @State private var isHovering = false
+    @State private var showPopover = false
+    @State private var hoverTask: Task<Void, Never>?
+
+    init(
+        iconSize: CGFloat = 14,
+        delay: Double = 0.5,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.delay = delay
+        self.content = content()
+    }
+
+    var body: some View {
+        Group {
+            HelpButton {
+                showPopover.toggle()
+            }
+        }
+        .onHover { hovering in
+            isHovering = hovering
+            // 取消之前的任务
+            hoverTask?.cancel()
+
+            if hovering {
+                // 延迟显示 popover，避免鼠标快速移动时频繁显示
+                hoverTask = Task {
+                    try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                    if !Task.isCancelled && isHovering {
+                        await MainActor.run {
+                            showPopover = true
+                        }
+                    }
+                }
+            } else {
+                showPopover = false
+            }
+        }
+        .popover(isPresented: $showPopover, arrowEdge: .trailing) {
+            ScrollView {
+                content
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+            }
+        }
+        .onDisappear {
+            hoverTask?.cancel()
+            showPopover = false
+        }
+    }
+}
+
+// MARK: - 便捷初始化方法（使用字符串）
+extension InfoIconWithPopover {
+    init(
+        text: String,
+        delay: Double = 0.5
+    ) where Content == AnyView {
+        self.init(delay: delay) {
+            AnyView(
+                Text(text)
+                    .font(.system(size: 12))
+                    .foregroundColor(.primary)
+                    .lineLimit(nil)
+                    .multilineTextAlignment(.leading)
+            )
+        }
+    }
+
+    init(
+        text: String,
+        iconSize: CGFloat = 14,
+        delay: Double = 0.5
+    ) where Content == AnyView {
+        self.init(delay: delay) {
+            AnyView(
+                Text(text)
+                    .font(.system(size: 12))
+                    .foregroundColor(.primary)
+                    .lineLimit(nil)
+                    .multilineTextAlignment(.leading)
+            )
         }
     }
 }

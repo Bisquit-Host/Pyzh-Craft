@@ -1,18 +1,24 @@
+//
+//  GDLauncherInstanceParser.swift
+//  PyzhCraft
+//
+//
+
 import Foundation
 
-/// GDLauncher instance parser
+/// GDLauncher 实例解析器
 struct GDLauncherInstanceParser: LauncherInstanceParser {
     let launcherType: ImportLauncherType = .gdLauncher
-    
+
     func isValidInstance(at instancePath: URL) -> Bool {
         let instanceJsonPath = instancePath.appendingPathComponent("instance.json")
         let fileManager = FileManager.default
-        
+
         guard fileManager.fileExists(atPath: instanceJsonPath.path) else {
             return false
         }
-        
-        // Verify that the JSON file can be parsed
+
+        // 验证 JSON 文件可以解析
         do {
             _ = try parseInstanceJson(at: instanceJsonPath)
             return true
@@ -20,27 +26,27 @@ struct GDLauncherInstanceParser: LauncherInstanceParser {
             return false
         }
     }
-    
+
     func parseInstance(at instancePath: URL, basePath: URL) throws -> ImportInstanceInfo? {
         let instanceJsonPath = instancePath.appendingPathComponent("instance.json")
         let instanceConfig = try parseInstanceJson(at: instanceJsonPath)
-        
-        // Extract game version
+
+        // 提取游戏版本
         let gameVersion = instanceConfig.gameConfiguration.version.release
-        
-        // Extract Mod loader information (take the first modloader)
-        var modLoader = "vanilla"
+
+        // 提取 Mod 加载器信息（取第一个 modloader）
+        var modLoader = GameLoader.vanilla.displayName
         var modLoaderVersion = ""
-        
+
         if let firstModLoader = instanceConfig.gameConfiguration.version.modloaders.first {
             modLoader = firstModLoader.type.lowercased()
             modLoaderVersion = firstModLoader.version
         }
-        
-        // Extract game name
+
+        // 提取游戏名称
         let gameName = instanceConfig.name
-        
-        // Extract icon path
+
+        // 提取图标路径
         var gameIconPath: URL?
         if let iconName = instanceConfig.icon {
             let iconPath = instancePath.appendingPathComponent(iconName)
@@ -49,7 +55,7 @@ struct GDLauncherInstanceParser: LauncherInstanceParser {
                 gameIconPath = iconPath
             }
         }
-        
+
         return ImportInstanceInfo(
             gameName: gameName,
             gameVersion: gameVersion,
@@ -61,10 +67,10 @@ struct GDLauncherInstanceParser: LauncherInstanceParser {
             launcherType: launcherType
         )
     }
-    
+
     // MARK: - Private Methods
-    
-    /// Parse instance.json file
+
+    /// 解析 instance.json 文件
     private func parseInstanceJson(at path: URL) throws -> GDLauncherInstanceConfig {
         let data = try Data(contentsOf: path)
         return try JSONDecoder().decode(GDLauncherInstanceConfig.self, from: data)
@@ -76,9 +82,11 @@ private struct GDLauncherInstanceConfig: Codable {
     let name: String
     let icon: String?
     let gameConfiguration: GDLauncherGameConfiguration
-    
+
     enum CodingKeys: String, CodingKey {
-        case name, icon, gameConfiguration = "game_configuration"
+        case name
+        case icon
+        case gameConfiguration = "game_configuration"
     }
 }
 

@@ -1,37 +1,53 @@
+import Foundation
 import SwiftUI
 
-/// Game log collector
-/// Collect crash logs and send to AI window
+/// 游戏日志收集器
+/// 收集崩溃日志并发送到 AI 窗口
 @MainActor
 class GameLogCollector {
     static let shared = GameLogCollector()
-    
-    private init() {}
-    
-    /// Collect game logs and open the AI ​​window
+    private let errorHandler: GlobalErrorHandler
+    private let windowManager: WindowManager
+    private let aiChatManager: AIChatManager
+    private let windowDataStore: WindowDataStore
+
+    private init(
+        errorHandler: GlobalErrorHandler = AppServices.errorHandler,
+        windowManager: WindowManager = AppServices.windowManager,
+        aiChatManager: AIChatManager = AppServices.aiChatManager,
+        windowDataStore: WindowDataStore = AppServices.windowDataStore
+    ) {
+        self.errorHandler = errorHandler
+        self.windowManager = windowManager
+        self.aiChatManager = aiChatManager
+        self.windowDataStore = windowDataStore
+    }
+
+    /// 收集游戏日志并打开 AI 窗口
     /// - Parameters:
-    ///   - gameName: game name
-    ///   - playerListViewModel: player list view model
-    ///   - gameRepository: game repository
+    ///   - gameName: 游戏名称
+    ///   - playerListViewModel: 玩家列表视图模型
+    ///   - gameRepository: 游戏仓库
     func collectAndOpenAIWindow(
         gameName: String,
         playerListViewModel: PlayerListViewModel,
         gameRepository: GameRepository
     ) async {
-        // Collect log files
+        // 收集日志文件
         let logFiles = await collectLogFiles(gameName: gameName)
-        
+
         if logFiles.isEmpty {
-            // Log file not found
+            // 没有找到日志文件
             let error = GlobalError.fileSystem(
-                i18nKey: "Game Log Files Not Found",
+                chineseMessage: "未找到游戏日志文件",
+                i18nKey: "error.filesystem.logs_not_found",
                 level: .notification
             )
-            GlobalErrorHandler.shared.handle(error)
+            errorHandler.handle(error)
             return
         }
-        
-        // Open AI window and send logs
+
+        // 打开 AI 窗口并发送日志
         await openAIWindowWithLogs(
             logFiles: logFiles,
             gameName: gameName,
@@ -39,17 +55,17 @@ class GameLogCollector {
             gameRepository: gameRepository
         )
     }
-    
-    /// Collect log files
-    /// - Parameter gameName: game name
-    /// - Returns: Log file URL array
+
+    /// 收集日志文件
+    /// - Parameter gameName: 游戏名称
+    /// - Returns: 日志文件 URL 数组
     private func collectLogFiles(gameName: String) async -> [URL] {
         let gameDirectory = AppPaths.profileDirectory(gameName: gameName)
         let fileManager = FileManager.default
-        
-        // 1. Prioritize collecting all files in the crash report folder
+
+        // 1. 优先收集崩溃报告文件夹中的所有文件
         let crashReportsDir = gameDirectory.appendingPathComponent(AppConstants.DirectoryNames.crashReports, isDirectory: true)
-        
+
         if fileManager.fileExists(atPath: crashReportsDir.path) {
             do {
                 let crashFiles = try fileManager
@@ -64,59 +80,59 @@ class GameLogCollector {
                         }
                         return resourceValues.isRegularFile ?? false
                     }
-                
+
                 if !crashFiles.isEmpty {
-                    Logger.shared.info("Found \(crashFiles.count) crash report files")
+                    Logger.shared.info("找到 \(crashFiles.count) 个崩溃报告文件")
                     return crashFiles.sorted { $0.lastPathComponent < $1.lastPathComponent }
                 }
             } catch {
-                Logger.shared.warning("Failed to read crash report folder: \(error.localizedDescription)")
+                Logger.shared.warning("读取崩溃报告文件夹失败: \(error.localizedDescription)")
             }
         }
-        
-        // 2. If there is no crash report, collect logs/latest.log
+
+        // 2. 如果没有崩溃报告，收集 logs/latest.log
         let logsDir = gameDirectory.appendingPathComponent("logs", isDirectory: true)
         let latestLog = logsDir.appendingPathComponent("latest.log")
-        
+
         if fileManager.fileExists(atPath: latestLog.path) {
-            Logger.shared.info("Find latest.log file")
+            Logger.shared.info("找到 latest.log 文件")
             return [latestLog]
         }
-        
-        Logger.shared.warning("Crash report and latest.log files not found")
+
+        Logger.shared.warning("未找到崩溃报告和 latest.log 文件")
         return []
     }
-    
-    /// Open AI window and send logs
+
+    /// 打开 AI 窗口并发送日志
     /// - Parameters:
-    ///   - logFiles: array of log file URLs
-    ///   - gameName: game name
-    ///   - playerListViewModel: player list view model
-    ///   - gameRepository: game repository
+    ///   - logFiles: 日志文件 URL 数组
+    ///   - gameName: 游戏名称
+    ///   - playerListViewModel: 玩家列表视图模型
+    ///   - gameRepository: 游戏仓库
     private func openAIWindowWithLogs(
         logFiles: [URL],
         gameName: String,
         playerListViewModel: PlayerListViewModel,
         gameRepository: GameRepository
     ) async {
-        // Create ChatState
+        // 创建 ChatState
         let chatState = ChatState()
-        
-        // Prepare attachments
+
+        // 准备附件
         var attachments: [MessageAttachmentType] = []
         for logFile in logFiles {
             attachments.append(.file(logFile, logFile.lastPathComponent))
         }
-        
-        // Store to WindowDataStore
-        WindowDataStore.shared.aiChatState = chatState
-        // open window
-        WindowManager.shared.openWindow(id: .aiChat)
-        
-        // Wait for the window to open before sending the message
-        try? await Task.sleep(nanoseconds: 100_000_000) // Wait 0.1 seconds
-        
-        // Send messages and attachments
-        await AIChatManager.shared.sendMessage("", attachments: attachments, chatState: chatState)
+
+        // 存储到 WindowDataStore
+        windowDataStore.aiChatState = chatState
+        // 打开窗口
+        windowManager.openWindow(id: .aiChat)
+
+        // 等待窗口打开后发送消息
+        try? await Task.sleep(nanoseconds: 100_000_000) // 等待 0.1 秒
+
+        // 发送消息和附件
+        await aiChatManager.sendMessage("", attachments: attachments, chatState: chatState)
     }
 }

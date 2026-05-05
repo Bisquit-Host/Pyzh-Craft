@@ -1,18 +1,16 @@
 import SwiftUI
 
 public struct AcknowledgementsView: View {
-    @State private var libraries: [OpenSourceLibrary] = []
-    @State private var isLoading = true
-    @State private var loadFailed = false
-    @State private var loadTask: Task<Void, Never>?
-    private let gitHubService = GitHubService.shared
+    @StateObject private var viewModel = AcknowledgementsViewModel()
+    private let avatarSize: CGFloat = 40
+    private let avatarCornerRadius: CGFloat = 8
 
     public init() {}
 
     public var body: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
-                if isLoading {
+                if viewModel.isLoading {
                     loadingView
                 } else {
                     librariesContent
@@ -21,11 +19,10 @@ public struct AcknowledgementsView: View {
             .padding(.vertical, 8)
         }
         .onAppear {
-            // Reload data every time you open it
-            loadLibraries()
+            viewModel.load()
         }
         .onDisappear {
-            clearAllData()
+            viewModel.clearAllData()
         }
     }
 
@@ -38,24 +35,21 @@ public struct AcknowledgementsView: View {
     }
 
     // MARK: - Libraries Content
-    private var librariesContent: some View {
-        LazyVStack(spacing: 0) {
-            if !libraries.isEmpty {
-                librariesList
-            } else if loadFailed {
-                errorView
-            }
+    @ViewBuilder private var librariesContent: some View {
+        if viewModel.loadFailed {
+            errorView
+        } else if !viewModel.libraries.isEmpty {
+            librariesList
         }
     }
 
     // MARK: - Libraries List
     private var librariesList: some View {
         VStack(spacing: 0) {
-            ForEach(libraries.indices, id: \.self) { index in
-                libraryRow(libraries[index])
-                    .id("library-\(index)")
+            ForEach(viewModel.libraries) { library in
+                libraryRow(library)
 
-                if index < libraries.count - 1 {
+                if library.id != viewModel.libraries.last?.id {
                     Divider()
                         .padding(.horizontal, 16)
                 }
@@ -79,108 +73,77 @@ public struct AcknowledgementsView: View {
     // MARK: - Library Row Content
     private func libraryRowContent(_ library: OpenSourceLibrary) -> some View {
         HStack(spacing: 12) {
-            // avatar
             libraryAvatar(library)
 
-            // Information section
             VStack(alignment: .leading, spacing: 4) {
-                // library name
                 Text(library.name)
                     .font(.body)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
 
-                // Description (with popover)
                 if let description = library.description, !description.isEmpty {
                     DescriptionTextWithPopover(description: description)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            // arrow icon
             Image(systemName: "globe")
                 .font(.system(size: 16, weight: .medium))
                 .foregroundColor(.secondary)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .contentShape(.rect)
+        .contentShape(Rectangle())
     }
 
     // MARK: - Library Avatar
+    @ViewBuilder
     private func libraryAvatar(_ library: OpenSourceLibrary) -> some View {
-        Group {
-            if let avatarURL = library.avatar {
-                // Optimized avatar URL (using thumbnail parameter)
-                let optimizedURL = optimizedAvatarURL(from: avatarURL, size: 40)
-                AsyncImage(url: optimizedURL) { phase in
-                    switch phase {
-                    case .empty:
-                        Rectangle()
-                            .foregroundColor(.gray.opacity(0.3))
-                            .overlay(
-                                ProgressView()
-                                    .scaleEffect(0.5)
-                            )
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    case .failure:
-                        Rectangle()
-                            .foregroundColor(.gray.opacity(0.3))
-                            .overlay(
-                                Image(systemName: "photo")
-                                    .foregroundColor(.gray)
-                                    .font(.caption)
-                            )
-                    @unknown default:
-                        Rectangle()
-                            .foregroundColor(.gray.opacity(0.3))
-                            .overlay(
-                                Image(systemName: "photo")
-                                    .foregroundColor(.gray)
-                                    .font(.caption)
-                            )
-                    }
-                }
-                .frame(width: 40, height: 40)
-                .cornerRadius(8)
-                .clipped()
-            } else {
-                Rectangle()
-                    .foregroundColor(.gray.opacity(0.3))
-                    .overlay(
-                        Image(systemName: "photo")
-                            .foregroundColor(.gray)
-                            .font(.caption)
-                    )
-                    .frame(width: 40, height: 40)
-                    .cornerRadius(8)
+        if let avatarURL = library.avatar,
+           let url = URL(string: avatarURL) {
+            AsyncImage(url: url) { phase in
+                avatarImage(for: phase)
             }
+            .frame(width: avatarSize, height: avatarSize)
+            .cornerRadius(avatarCornerRadius)
+            .clipped()
+            .onDisappear {
+                URLCache.shared.removeCachedResponse(
+                    for: URLRequest(url: url)
+                )
+            }
+        } else {
+            avatarPlaceholder()
+                .frame(width: avatarSize, height: avatarSize)
+                .cornerRadius(avatarCornerRadius)
         }
     }
 
-    /// Get optimized avatar URL (use thumbnail parameter to reduce download size)
-    /// - Parameters:
-    ///   - avatarURL: original avatar URL
-    ///   - size: display size (pixels)
-    /// - Returns: optimized URL
-    private func optimizedAvatarURL(from avatarURL: String, size: CGFloat) -> URL? {
-        guard let url = URL(string: avatarURL) else { return nil }
-
-        // If it is already a GitHub avatar URL, add the size parameter
-        // GitHub avatar URL format: https://avatars.githubusercontent.com/u/xxx or https://github.com/identicons/xxx.png
-        if url.host?.contains("github.com") == true || url.host?.contains("avatars.githubusercontent.com") == true {
-            // Calculate required pixel size (@2x screen requires 2x)
-            let pixelSize = Int(size * 2)
-            // Remove existing query parameters (if any)
-            var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
-            components?.queryItems = [URLQueryItem(name: "s", value: "\(pixelSize)")]
-            return components?.url
+    @ViewBuilder
+    private func avatarImage(for phase: AsyncImagePhase) -> some View {
+        switch phase {
+        case .empty:
+            avatarPlaceholder(showLoading: true)
+        case .success(let image):
+            image
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+        case .failure:
+            avatarPlaceholder()
+        @unknown default:
+            avatarPlaceholder()
         }
+    }
 
-        return url
+    private func avatarPlaceholder(showLoading: Bool = false) -> some View {
+        Rectangle()
+            .foregroundColor(.gray.opacity(0.3))
+            .overlay {
+                if showLoading {
+                    ProgressView()
+                        .controlSize(.small)
+                }
+            }
     }
 
     // MARK: - Error View
@@ -189,94 +152,11 @@ public struct AcknowledgementsView: View {
             Image(systemName: "exclamationmark.triangle")
                 .foregroundColor(.orange)
                 .font(.title2)
-            Text("Network Request Failed")
+            Text("error.download.network_request_failed".localized())
                 .foregroundColor(.secondary)
                 .font(.caption)
         }
         .frame(maxWidth: .infinity, minHeight: 100)
         .padding()
     }
-
-    // MARK: - Load Libraries
-    private func loadLibraries() {
-        // Cancel the previous task (if it exists)
-        loadTask?.cancel()
-
-        // reset state
-        isLoading = true
-        loadFailed = false
-
-        loadTask = Task {
-            do {
-                // Check cancellation status before async operation starts
-                try Task.checkCancellation()
-
-                let decodedLibraries: [OpenSourceLibrary] = try await gitHubService.fetchAcknowledgements()
-
-                // Check cancellation status again before updating UI
-                try Task.checkCancellation()
-
-                await MainActor.run {
-                    // One last check for cancellation status (because it may have been canceled during await)
-                    guard !Task.isCancelled else { return }
-
-                    libraries = decodedLibraries
-                    isLoading = false
-                    loadFailed = false
-                    Logger.shared.info(
-                        "Successfully loaded",
-                        libraries.count,
-                        "libraries from GitHubService"
-                    )
-                }
-            } catch is CancellationError {
-                // The task is canceled and processed silently (no log is required, this is normal cleanup behavior)
-            } catch {
-                // Check if the task has been canceled (avoid updating status after cancellation)
-                guard !Task.isCancelled else { return }
-
-                Logger.shared.error("Failed to load libraries from GitHubService:", error)
-                await MainActor.run {
-                    // Last check for cancellation status
-                    guard !Task.isCancelled else { return }
-
-                    loadFailed = true
-                    isLoading = false
-                }
-            }
-        }
-    }
-
-    // MARK: - Clear Libraries Data
-    private func clearLibrariesData() {
-        // Cancel a running load task
-        loadTask?.cancel()
-        loadTask = nil
-
-        libraries = []
-        isLoading = true
-        loadFailed = false
-        Logger.shared.info("Libraries data cleared")
-    }
-
-    /// Clean all data
-    private func clearAllData() {
-        clearLibrariesData()
-    }
-
-    // MARK: - JSON Data Models
-    private struct OpenSourceLibrary: Codable {
-        let name: String
-        let url: String
-        let avatar: String?
-        let description: String?
-
-        enum CodingKeys: String, CodingKey {
-            case name, url, avatar, description
-        }
-    }
-}
-
-#Preview {
-    AcknowledgementsView()
 }

@@ -1,118 +1,144 @@
 import Foundation
 
-/// game state manager
-/// Manage the game running status based on the actual process status, using gameId as the key
+/// 游戏状态管理器
+/// 基于实际进程状态管理游戏运行状态，key 为 gameId_userId 拼接，同一游戏不同玩家分别追踪
 class GameStatusManager: ObservableObject {
     static let shared = GameStatusManager()
-    /// Game running status dictionary, key is gameId, value is whether it is running
+    /// 游戏运行状态字典，key 为 processKey(gameId, userId)，value 为是否正在运行
     @Published private var gameRunningStates: [String: Bool] = [:]
-    /// Game startup status dictionary, key is gameId, value is whether it is starting (not yet in running state)
+    /// 游戏启动中状态字典，key 为 processKey(gameId, userId)，value 为是否正在启动（尚未进入运行态）
     @Published private var gameLaunchingStates: [String: Bool] = [:]
-    
+
     private init() {}
-    
-    /// Check if the specified game is running
-    /// - Parameter gameId: game ID
-    /// - Returns: Is it running?
-    func isGameRunning(gameId: String) -> Bool {
-        let actuallyRunning = GameProcessManager.shared.isGameRunning(gameId: gameId)
-        
+
+    /// 检查指定 gameId+userId 是否正在运行
+    /// - Parameters:
+    ///   - gameId: 游戏ID
+    ///   - userId: 玩家ID
+    /// - Returns: 是否正在运行
+    func isGameRunning(gameId: String, userId: String) -> Bool {
+        let actuallyRunning = AppServices.gameProcessManager.isGameRunning(gameId: gameId, userId: userId)
+        let key = GameProcessManager.processKey(gameId: gameId, userId: userId)
+
         DispatchQueue.main.async {
-            self.updateGameStatusIfNeeded(gameId: gameId, actuallyRunning: actuallyRunning)
+            self.updateGameStatusIfNeeded(key: key, actuallyRunning: actuallyRunning)
         }
-        
+
         return actuallyRunning
     }
-    /// Update game status (if needed)
+
+    /// 更新游戏状态（如果需要）
     /// - Parameters:
-    ///   - gameId: game ID
-    ///   - actuallyRunning: actual running status
-    private func updateGameStatusIfNeeded(gameId: String, actuallyRunning: Bool) {
-        if let cachedState = gameRunningStates[gameId], cachedState != actuallyRunning {
-            gameRunningStates[gameId] = actuallyRunning
-            Logger.shared.debug("Synchronous update of game status: \(gameId) -> \(actuallyRunning ? "running" : "stopped")")
-        } else if gameRunningStates[gameId] == nil {
-            gameRunningStates[gameId] = actuallyRunning
+    ///   - key: processKey(gameId, userId)
+    ///   - actuallyRunning: 实际运行状态
+    private func updateGameStatusIfNeeded(key: String, actuallyRunning: Bool) {
+        if let cachedState = gameRunningStates[key], cachedState != actuallyRunning {
+            gameRunningStates[key] = actuallyRunning
+            Logger.shared.debug("游戏状态同步更新: \(key) -> \(actuallyRunning ? "运行中" : "已停止")")
+        } else if gameRunningStates[key] == nil {
+            gameRunningStates[key] = actuallyRunning
         }
     }
-    
-    /// Force refresh the status of the specified game
-    /// - Parameter gameId: game ID
-    func refreshGameStatus(gameId: String) {
-        let actuallyRunning = GameProcessManager.shared.isGameRunning(gameId: gameId)
+
+    /// 强制刷新指定 (gameId, userId) 的状态
+    /// - Parameters:
+    ///   - gameId: 游戏ID
+    ///   - userId: 玩家ID
+    func refreshGameStatus(gameId: String, userId: String) {
+        let actuallyRunning = AppServices.gameProcessManager.isGameRunning(gameId: gameId, userId: userId)
+        let key = GameProcessManager.processKey(gameId: gameId, userId: userId)
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            self.gameRunningStates[gameId] = actuallyRunning
-            Logger.shared.debug("Force refresh of game state: \(gameId) -> \(actuallyRunning ? "running" : "stopped")")
+            self.gameRunningStates[key] = actuallyRunning
+            Logger.shared.debug("强制刷新游戏状态: \(key) -> \(actuallyRunning ? "运行中" : "已停止")")
         }
     }
-    
+
     /// - Parameters:
-    ///   - gameId: game ID
-    ///   - isRunning: whether it is running
-    func setGameRunning(gameId: String, isRunning: Bool) {
+    ///   - gameId: 游戏ID
+    ///   - userId: 玩家ID
+    ///   - isRunning: 是否正在运行
+    func setGameRunning(gameId: String, userId: String, isRunning: Bool) {
+        let key = GameProcessManager.processKey(gameId: gameId, userId: userId)
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            let currentState = self.gameRunningStates[gameId]
+            let currentState = self.gameRunningStates[key]
             if currentState != isRunning {
-                self.gameRunningStates[gameId] = isRunning
-                Logger.shared.debug("Game status update: \(gameId) -> \(isRunning ? "running" : "stopped")")
+                self.gameRunningStates[key] = isRunning
+                Logger.shared.debug("游戏状态更新: \(key) -> \(isRunning ? "运行中" : "已停止")")
             }
         }
     }
-    
-    /// Clean up stopped game state
+
+    /// 清理已停止的游戏状态
     func cleanupStoppedGames() {
-        let processManager = GameProcessManager.shared
-        
+        let processManager = AppServices.gameProcessManager
+
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            self.gameRunningStates = self.gameRunningStates.filter { gameId, _ in
-                processManager.isGameRunning(gameId: gameId)
+            self.gameRunningStates = self.gameRunningStates.filter { key, isRunning in
+                guard isRunning else { return false }
+                if let idx = key.firstIndex(of: "_") {
+                    let gameId = String(key[..<idx])
+                    let userId = String(key[key.index(after: idx)...])
+                    return processManager.isGameRunning(gameId: gameId, userId: userId)
+                }
+                return false
             }
         }
     }
-    
-    /// Get all running game IDs
-    var runningGameIds: [String] {
-        return gameRunningStates.compactMap { gameId, isRunning in
-            isRunning ? gameId : nil
+
+    /// 获取所有正在运行的 processKey 列表
+    var runningProcessKeys: [String] {
+        gameRunningStates.compactMap { key, isRunning in
+            isRunning ? key : nil
         }
     }
-    
-    /// Get all game status
+
+    /// 获取所有游戏状态（key 为 processKey）
     var allGameStates: [String: Bool] {
-        gameRunningStates
+        return gameRunningStates
     }
-    
-    // MARK: - Startup status management
-    
+
+    // MARK: - 启动中状态管理
+
     /// - Parameters:
-    ///   - gameId: game ID
-    ///   - isLaunching: whether it is launching
-    func setGameLaunching(gameId: String, isLaunching: Bool) {
+    ///   - gameId: 游戏ID
+    ///   - userId: 玩家ID
+    ///   - isLaunching: 是否正在启动
+    func setGameLaunching(gameId: String, userId: String, isLaunching: Bool) {
+        let key = GameProcessManager.processKey(gameId: gameId, userId: userId)
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            let currentState = self.gameLaunchingStates[gameId] ?? false
+            let currentState = self.gameLaunchingStates[key] ?? false
             if currentState != isLaunching {
-                self.gameLaunchingStates[gameId] = isLaunching
-                Logger.shared.debug("Game startup status update: \(gameId) -> \(isLaunching ? "launching" : "not launching")")
+                self.gameLaunchingStates[key] = isLaunching
+                Logger.shared.debug("游戏启动中状态更新: \(key) -> \(isLaunching ? "启动中" : "非启动中")")
             }
         }
     }
-    
-    /// - Parameter gameId: game ID
-    /// - Returns: Whether it is starting
-    func isGameLaunching(gameId: String) -> Bool {
-        gameLaunchingStates[gameId] ?? false
+
+    /// - Parameters:
+    ///   - gameId: 游戏ID
+    ///   - userId: 玩家ID
+    /// - Returns: 是否正在启动
+    func isGameLaunching(gameId: String, userId: String) -> Bool {
+        let key = GameProcessManager.processKey(gameId: gameId, userId: userId)
+        return gameLaunchingStates[key] ?? false
     }
-    
-    /// - Parameter gameId: game ID
+
+    /// 移除指定 gameId 下所有 userId 的状态（删除游戏时调用）
+    /// - Parameter gameId: 游戏ID
     func removeGameState(gameId: String) {
+        let prefix = "\(gameId)_"
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            self.gameRunningStates.removeValue(forKey: gameId)
-            self.gameLaunchingStates.removeValue(forKey: gameId)
+            let keysToRemove = self.gameRunningStates.keys.filter { $0.hasPrefix(prefix) }
+                + self.gameLaunchingStates.keys.filter { $0.hasPrefix(prefix) }
+            for key in keysToRemove {
+                self.gameRunningStates.removeValue(forKey: key)
+                self.gameLaunchingStates.removeValue(forKey: key)
+            }
         }
     }
 }

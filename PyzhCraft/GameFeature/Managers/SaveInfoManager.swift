@@ -1,11 +1,11 @@
 import Foundation
 import Combine
 
-// MARK: - archive information manager
+// MARK: - 存档信息管理器
 @MainActor
 final class SaveInfoManager: ObservableObject {
     // MARK: - Private Types
-    /// World information analysis results
+    /// 世界信息解析结果
     private struct WorldParseResult {
         let lastPlayed: Date?
         let gameMode: String?
@@ -13,7 +13,7 @@ final class SaveInfoManager: ObservableObject {
         let version: String?
         let seed: Int64?
     }
-    
+
     // MARK: - Published Properties
     let gameName: String
     @Published private(set) var worlds: [WorldInfo] = []
@@ -21,74 +21,81 @@ final class SaveInfoManager: ObservableObject {
     @Published private(set) var servers: [ServerAddress] = []
     @Published private(set) var litematicaFiles: [LitematicaInfo] = []
     @Published private(set) var logs: [LogInfo] = []
-    @Published private(set) var isLoading = true
-    
-    // Loading status of various types
-    @Published private(set) var isLoadingWorlds = false
-    @Published private(set) var isLoadingScreenshots = false
-    @Published private(set) var isLoadingServers = false
-    @Published private(set) var isLoadingLitematica = false
-    @Published private(set) var isLoadingLogs = false
-    
-    // Whether each type exists (whether the directory or resource exists)
-    @Published private(set) var hasWorldsType = false
-    @Published private(set) var hasScreenshotsType = false
-    @Published private(set) var hasServersType = false
-    @Published private(set) var hasLitematicaType = false
-    @Published private(set) var hasLogsType = false
-    
+    @Published private(set) var isLoading: Bool = true
+
+    // 各个类型的加载状态
+    @Published private(set) var isLoadingWorlds: Bool = false
+    @Published private(set) var isLoadingScreenshots: Bool = false
+    @Published private(set) var isLoadingServers: Bool = false
+    @Published private(set) var isLoadingLitematica: Bool = false
+    @Published private(set) var isLoadingLogs: Bool = false
+
+    // 各个类型是否存在（目录或资源是否存在）
+    @Published private(set) var hasWorldsType: Bool = false
+    @Published private(set) var hasScreenshotsType: Bool = false
+    @Published private(set) var hasLitematicaType: Bool = false
+    @Published private(set) var hasLogsType: Bool = false
+
     // MARK: - Private Properties
     private var loadTask: Task<Void, Never>?
-    
+    private let serverAddressService: ServerAddressService
+    private let litematicaService: LitematicaService
+
     // MARK: - Initialization
-    init(gameName: String) {
+    init(
+        gameName: String,
+        serverAddressService: ServerAddressService = AppServices.serverAddressService,
+        litematicaService: LitematicaService = AppServices.litematicaService
+    ) {
         self.gameName = gameName
+        self.serverAddressService = serverAddressService
+        self.litematicaService = litematicaService
     }
-    
+
     deinit {
         loadTask?.cancel()
     }
-    
+
     // MARK: - Paths
-    /// Get the game archive directory (read from the profile directory)
+    /// 获取游戏存档目录（从 profile 目录下读取）
     private var savesDirectory: URL? {
         let savesPath = AppPaths.profileDirectory(gameName: gameName)
             .appendingPathComponent(AppConstants.DirectoryNames.saves, isDirectory: true)
-        
-        // If the directory does not exist, return nil (skip)
+
+        // 如果目录不存在，返回 nil（跳过）
         guard FileManager.default.fileExists(atPath: savesPath.path) else {
             return nil
         }
-        
+
         return savesPath
     }
-    
-    /// Get the game screenshot directory (read from the profile directory)
+
+    /// 获取游戏截图目录（从 profile 目录下读取）
     private var screenshotsDirectory: URL? {
         let screenshotsPath = AppPaths.profileDirectory(gameName: gameName)
             .appendingPathComponent(AppConstants.DirectoryNames.screenshots, isDirectory: true)
-        
-        // If the directory does not exist, return nil (skip)
+
+        // 如果目录不存在，返回 nil（跳过）
         guard FileManager.default.fileExists(atPath: screenshotsPath.path) else {
             return nil
         }
-        
+
         return screenshotsPath
     }
-    
-    /// Get the game log directory (read from the profile directory)
+
+    /// 获取游戏日志目录（从 profile 目录下读取）
     private var logsDirectory: URL? {
         let logsPath = AppPaths.profileDirectory(gameName: gameName)
             .appendingPathComponent(AppConstants.DirectoryNames.logs, isDirectory: true)
-        
-        // If the directory does not exist, return nil (skip)
+
+        // 如果目录不存在，返回 nil（跳过）
         guard FileManager.default.fileExists(atPath: logsPath.path) else {
             return nil
         }
-        
+
         return logsPath
     }
-    
+
     // MARK: - Public Methods
     func loadData() async {
         loadTask?.cancel()
@@ -96,17 +103,17 @@ final class SaveInfoManager: ObservableObject {
             await fetchData()
         }
     }
-    
+
     func clearCache() {
         loadTask?.cancel()
         resetData()
     }
-    
+
     // MARK: - Private Methods
-    /// Check whether each type exists (executed in the background to avoid the main thread FileManager)
+    /// 检查各个类型是否存在（在后台执行，避免主线程 FileManager）
     private func checkTypesAvailability() async {
         let name = gameName
-        let (worlds, screenshots, servers, litematica, logs) = await Task.detached(priority: .userInitiated) {
+        let (worlds, screenshots, _, litematica, logs) = await Task.detached(priority: .userInitiated) {
             let fm = FileManager.default
             let profileDir = AppPaths.profileDirectory(gameName: name)
             let savesPath = profileDir.appendingPathComponent(AppConstants.DirectoryNames.saves, isDirectory: true)
@@ -114,8 +121,8 @@ final class SaveInfoManager: ObservableObject {
             let logsPath = profileDir.appendingPathComponent(AppConstants.DirectoryNames.logs, isDirectory: true)
             let serversDatURL = profileDir.appendingPathComponent("servers.dat")
             let schematicsDir = AppPaths.schematicsDirectory(gameName: name)
-            
-            // Check if the world directory exists and contains a world subdirectory
+
+            // 检查世界目录是否存在且包含世界子目录
             var hasWorlds = false
             if fm.fileExists(atPath: savesPath.path) {
                 do {
@@ -133,8 +140,8 @@ final class SaveInfoManager: ObservableObject {
                     hasWorlds = false
                 }
             }
-            
-            // Check whether the screenshot directory exists and contains image files
+
+            // 检查截图目录是否存在且包含图片文件
             var hasScreenshots = false
             if fm.fileExists(atPath: screenshotsPath.path) {
                 do {
@@ -153,8 +160,8 @@ final class SaveInfoManager: ObservableObject {
                     hasScreenshots = false
                 }
             }
-            
-            // Check if the Litematica directory exists and contains .litematic files
+
+            // 检查 Litematica 目录是否存在且包含 .litematic 文件
             var hasLitematicaFiles = false
             if fm.fileExists(atPath: schematicsDir.path) {
                 do {
@@ -172,8 +179,8 @@ final class SaveInfoManager: ObservableObject {
                     hasLitematicaFiles = false
                 }
             }
-            
-            // Check if the log directory exists and contains .log files
+
+            // 检查日志目录是否存在且包含 .log 文件
             var hasLogs = false
             if fm.fileExists(atPath: logsPath.path) {
                 do {
@@ -191,7 +198,7 @@ final class SaveInfoManager: ObservableObject {
                     hasLogs = false
                 }
             }
-            
+
             return (
                 hasWorlds,
                 hasScreenshots,
@@ -202,58 +209,56 @@ final class SaveInfoManager: ObservableObject {
         }.value
         hasWorldsType = worlds
         hasScreenshotsType = screenshots
-        hasServersType = servers
         hasLitematicaType = litematica
         hasLogsType = logs
     }
-    
+
     private func fetchData() async {
         await checkTypesAvailability()
-        
+
         isLoading = true
-        
+
         await withTaskGroup(of: Void.self) { group in
-            // Only load existing types
+            // 只加载存在的类型
             if hasWorldsType {
                 group.addTask { [weak self] in
                     await self?.loadWorlds()
                 }
             }
-            
+
             if hasScreenshotsType {
                 group.addTask { [weak self] in
                     await self?.loadScreenshots()
                 }
             }
-            
-            if hasServersType {
-                group.addTask { [weak self] in
-                    await self?.loadServers()
-                }
+
+            // 服务器始终加载（即使没有 servers.dat 文件也会返回空数组）
+            group.addTask { [weak self] in
+                await self?.loadServers()
             }
-            
+
             if hasLitematicaType {
                 group.addTask { [weak self] in
                     await self?.loadLitematicaFiles()
                 }
             }
-            
+
             if hasLogsType {
                 group.addTask { [weak self] in
                     await self?.loadLogs()
                 }
             }
         }
-        
+
         isLoading = false
     }
-    
+
     // MARK: - Helper (Worlds)
-    /// Load world information (directory and file I/O are performed in the background)
+    /// 加载世界信息（目录与文件 I/O 在后台执行）
     private func loadWorlds() async {
         isLoadingWorlds = true
         defer { isLoadingWorlds = false }
-        
+
         guard savesDirectory != nil else {
             worlds = []
             return
@@ -264,12 +269,12 @@ final class SaveInfoManager: ObservableObject {
         }.value
         worlds = result
     }
-    
-    /// Load screenshot information (directory and file I/O are performed in the background)
+
+    /// 加载截图信息（目录与文件 I/O 在后台执行）
     private func loadScreenshots() async {
         isLoadingScreenshots = true
         defer { isLoadingScreenshots = false }
-        
+
         guard screenshotsDirectory != nil else {
             screenshots = []
             return
@@ -280,40 +285,40 @@ final class SaveInfoManager: ObservableObject {
         }.value
         screenshots = result
     }
-    
-    /// Load server address information (only read from servers.dat)
+
+    /// 加载服务器地址信息（仅从 servers.dat 读取）
     private func loadServers() async {
         isLoadingServers = true
         defer { isLoadingServers = false }
-        
+
         do {
-            servers = try await ServerAddressService.shared.loadServerAddresses(for: gameName)
+            servers = try await serverAddressService.loadServerAddresses(for: gameName)
         } catch {
-            Logger.shared.error("Failed to load server address information: \(error.localizedDescription)")
-            // If loading fails, an empty array is returned
+            Logger.shared.error("加载服务器地址信息失败: \(error.localizedDescription)")
+            // 如果加载失败，返回空数组
             servers = []
         }
     }
-    
-    /// Load Litematica projection file information
+
+    /// 加载 Litematica 投影文件信息
     private func loadLitematicaFiles() async {
         isLoadingLitematica = true
         defer { isLoadingLitematica = false }
-        
+
         do {
-            litematicaFiles = try await LitematicaService.shared.loadLitematicaFiles(for: gameName)
+            litematicaFiles = try await litematicaService.loadLitematicaFiles(for: gameName)
         } catch {
-            Logger.shared.error("Failed to load Litematica file information: \(error.localizedDescription)")
-            // If loading fails, an empty array is returned
+            Logger.shared.error("加载 Litematica 文件信息失败: \(error.localizedDescription)")
+            // 如果加载失败，返回空数组
             litematicaFiles = []
         }
     }
-    
-    /// Load log file information (directory and file I/O are performed in the background)
+
+    /// 加载日志文件信息（目录与文件 I/O 在后台执行）
     private func loadLogs() async {
         isLoadingLogs = true
         defer { isLoadingLogs = false }
-        
+
         guard logsDirectory != nil else {
             logs = []
             return
@@ -324,7 +329,7 @@ final class SaveInfoManager: ObservableObject {
         }.value
         logs = result
     }
-    
+
     private func resetData() {
         worlds.removeAll(keepingCapacity: false)
         screenshots.removeAll(keepingCapacity: false)
@@ -332,23 +337,22 @@ final class SaveInfoManager: ObservableObject {
         litematicaFiles.removeAll(keepingCapacity: false)
         logs.removeAll(keepingCapacity: false)
         isLoading = false
-        
-        // Reset the loading status of each type
+
+        // 重置各个类型的加载状态
         isLoadingWorlds = false
         isLoadingScreenshots = false
         isLoadingServers = false
         isLoadingLitematica = false
         isLoadingLogs = false
-        
-        // Reset type existence status
+
+        // 重置类型存在状态
         hasWorldsType = false
         hasScreenshotsType = false
-        hasServersType = false
         hasLitematicaType = false
         hasLogsType = false
     }
-    
-    // MARK: - Background loading static methods (avoid main thread FileManager / Data(contentsOf:))
+
+    // MARK: - 后台加载静态方法（避免主线程 FileManager / Data(contentsOf:)）
     nonisolated private static func loadWorldsFromDirectory(gameName: String) -> [WorldInfo] {
         let savesPath = AppPaths.profileDirectory(gameName: gameName)
             .appendingPathComponent(AppConstants.DirectoryNames.saves, isDirectory: true)
@@ -383,32 +387,32 @@ final class SaveInfoManager: ObservableObject {
                         continue
                     }
                     if let ts = WorldNBTMapper.readInt64(dataTag["LastPlayed"]) {
-                        // LastPlayed is the millisecond timestamp
+                        // LastPlayed 为毫秒时间戳
                         lastPlayed = Date(timeIntervalSince1970: TimeInterval(ts) / 1000.0)
                     }
-                    
-                    // Use readInt64 uniformly, compatible with the numerical types of old versions and 26+ new version archives
+
+                    // 统一使用 readInt64，兼容旧版与 26+ 新版存档的数值类型
                     let gameMode: String? = {
                         if let v = WorldNBTMapper.readInt64(dataTag["GameType"]) {
                             return WorldNBTMapper.mapGameMode(Int(v))
                         }
                         return nil
                     }()
-                    
+
                     let difficulty: String? = {
                         if let v = WorldNBTMapper.readInt64(dataTag["Difficulty"]) {
                             return WorldNBTMapper.mapDifficulty(Int(v))
                         }
-                        // 26+ new version archive: difficulty_settings.difficulty is a string (peaceful/easy/normal/hard)
+                        // 26+ 新版存档：difficulty_settings.difficulty 为字符串（peaceful/easy/normal/hard）
                         if let ds = dataTag["difficulty_settings"] as? [String: Any],
                            let diffStr = ds["difficulty"] as? String {
                             return WorldNBTMapper.mapDifficultyString(diffStr)
                         }
                         return nil
                     }()
-                    
+
                     let version: String? = (dataTag["Version"] as? [String: Any])?["Name"] as? String
-                    // Extreme mode/Whether cheating is allowed (the field location is different in different versions)
+                    // 极限模式 / 是否允许作弊（不同版本字段位置不同）
                     let hardcore: Bool = {
                         if let ds = dataTag["difficulty_settings"] as? [String: Any] {
                             return WorldNBTMapper.readBoolFlag(ds["hardcore"])
@@ -416,10 +420,10 @@ final class SaveInfoManager: ObservableObject {
                         return WorldNBTMapper.readBoolFlag(dataTag["hardcore"])
                     }()
                     let cheats: Bool = WorldNBTMapper.readBoolFlag(dataTag["allowCommands"])
-                    
-                    // There are differences in the seed field between the old and new versions: the old version uses RandomSeed for level.dat, and the new version splits it into world_gen_settings.dat
+
+                    // 种子字段在新旧版本之间有差异：旧版 level.dat 使用 RandomSeed，新版拆到 world_gen_settings.dat
                     let seed: Int64? = WorldNBTMapper.readSeed(from: dataTag, worldPath: worldPath)
-                    
+
                     loadedWorlds.append(
                         WorldInfo(
                             name: worldName,
@@ -434,18 +438,18 @@ final class SaveInfoManager: ObservableObject {
                         )
                     )
                 } catch {
-                    Logger.shared.error("Failed to parse level.dat (\(worldName)): \(error.localizedDescription)")
+                    Logger.shared.error("解析 level.dat 失败 (\(worldName)): \(error.localizedDescription)")
                     loadedWorlds.append(WorldInfo(name: worldName, path: worldPath, lastPlayed: lastPlayed, gameMode: nil, difficulty: nil, version: nil, seed: nil))
                 }
             }
             loadedWorlds.sort { ($0.lastPlayed ?? .distantPast) > ($1.lastPlayed ?? .distantPast) }
             return loadedWorlds
         } catch {
-            Logger.shared.error("Failed to load world information: \(error.localizedDescription)")
+            Logger.shared.error("加载世界信息失败: \(error.localizedDescription)")
             return []
         }
     }
-    
+
     nonisolated private static func loadScreenshotsFromDirectory(gameName: String) -> [ScreenshotInfo] {
         let screenshotsPath = AppPaths.profileDirectory(gameName: gameName)
             .appendingPathComponent(AppConstants.DirectoryNames.screenshots, isDirectory: true)
@@ -470,11 +474,11 @@ final class SaveInfoManager: ObservableObject {
             loaded.sort { ($0.createdDate ?? .distantPast) > ($1.createdDate ?? .distantPast) }
             return loaded
         } catch {
-            Logger.shared.error("Failed to load screenshot information: \(error.localizedDescription)")
+            Logger.shared.error("加载截图信息失败: \(error.localizedDescription)")
             return []
         }
     }
-    
+
     nonisolated private static func loadLogsFromDirectory(gameName: String) -> [LogInfo] {
         let logsPath = AppPaths.profileDirectory(gameName: gameName)
             .appendingPathComponent(AppConstants.DirectoryNames.logs, isDirectory: true)
@@ -501,7 +505,7 @@ final class SaveInfoManager: ObservableObject {
             loaded.sort { if $0.isCrashLog != $1.isCrashLog { return $0.isCrashLog }; return ($0.createdDate ?? .distantPast) > ($1.createdDate ?? .distantPast) }
             return loaded
         } catch {
-            Logger.shared.error("Failed to load log information: \(error.localizedDescription)")
+            Logger.shared.error("加载日志信息失败: \(error.localizedDescription)")
             return []
         }
     }

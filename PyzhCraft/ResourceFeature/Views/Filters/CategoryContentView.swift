@@ -1,3 +1,9 @@
+//  CategoryContent.swift
+//  Launcher
+//
+//  Created by su on 2025/5/8.
+//
+
 import SwiftUI
 
 // MARK: - CategoryContent
@@ -15,7 +21,8 @@ struct CategoryContentView: View {
     let gameVersion: String?
     let gameLoader: String?
     let dataSource: DataSource
-    
+    private let errorHandler: GlobalErrorHandler
+
     // MARK: - Initialization
     init(
         project: String,
@@ -28,7 +35,8 @@ struct CategoryContentView: View {
         selectedLoaders: Binding<[String]>,
         gameVersion: String? = nil,
         gameLoader: String? = nil,
-        dataSource: DataSource
+        dataSource: DataSource,
+        errorHandler: GlobalErrorHandler = AppServices.errorHandler
     ) {
         self.project = project
         self.type = type
@@ -41,22 +49,24 @@ struct CategoryContentView: View {
         self.gameVersion = gameVersion
         self.gameLoader = gameLoader
         self.dataSource = dataSource
-        // Use globally shared ViewModel to avoid repeated creation and data loading
+        self.errorHandler = errorHandler
         self._viewModel = StateObject(
-            wrappedValue: CategoryDataCacheManager.shared.getViewModel(for: project)
+            wrappedValue: CategoryContentViewModel(project: project)
         )
     }
-    
+
     // MARK: - Body
     var body: some View {
         VStack {
             if let error = viewModel.error {
-                newErrorView(error)
+                errorView(error)
             } else {
                 if type == "resource" {
                     versionSection
                 }
-                categorySection
+                if project != ProjectType.minecraftJavaServer {
+                    categorySection
+                }
                 projectSpecificSections
             }
         }
@@ -64,51 +74,55 @@ struct CategoryContentView: View {
             await loadDataWithErrorHandling()
             setupDefaultSelections()
         }
+        .onDisappear {
+            viewModel.clearCache()
+        }
     }
-    
+
     // MARK: - Setup Methods
     private func setupDefaultSelections() {
         if let gameVersion = gameVersion {
             selectedVersions = [gameVersion]
         }
         if let gameLoader = gameLoader {
-            if project != "shader" {
+            if project != ResourceType.shader.rawValue {
                 selectedLoaders = [gameLoader]
             } else {
                 selectedLoaders = []
             }
         }
     }
-    
+
     // MARK: - Error Handling
     private func loadDataWithErrorHandling() async {
         do {
             try await loadDataThrowing()
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to load classification data: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("加载分类数据失败: \(globalError.chineseMessage)")
+            errorHandler.handle(globalError)
             await MainActor.run {
                 viewModel.setError(globalError)
             }
         }
     }
-    
+
     private func loadDataThrowing() async throws {
         guard !project.isEmpty else {
             throw GlobalError.validation(
-                i18nKey: "Project Type Empty",
+                chineseMessage: "项目类型不能为空",
+                i18nKey: "error.validation.project_type_empty",
                 level: .notification
             )
         }
-        
+
         await viewModel.loadData()
     }
-    
+
     // MARK: - Section Views
     private var categorySection: some View {
         CategorySectionView(
-            title: "Category",
+            title: "filter.category",
             items: viewModel.categories.map {
                 FilterItem(id: $0.name, name: $0.name)
             },
@@ -116,10 +130,10 @@ struct CategoryContentView: View {
             isLoading: viewModel.isLoading
         )
     }
-    
+
     private var versionSection: some View {
         CategorySectionView(
-            title: "Versions",
+            title: "filter.version",
             items: viewModel.versions.map {
                 FilterItem(id: $0.id, name: $0.id)
             },
@@ -128,10 +142,10 @@ struct CategoryContentView: View {
             isVersionSection: true
         )
     }
-    
+
     private var loaderSection: some View {
         CategorySectionView(
-            title: "Loader",
+            title: "filter.loader",
             items: filteredLoaders.map {
                 FilterItem(id: $0.name, name: $0.name)
             },
@@ -139,7 +153,7 @@ struct CategoryContentView: View {
             isLoading: viewModel.isLoading
         )
     }
-    
+
     private var projectSpecificSections: some View {
         Group {
             switch project {
@@ -148,6 +162,11 @@ struct CategoryContentView: View {
                     loaderSection
                 }
                 environmentSection
+            case ProjectType.minecraftJavaServer:
+                serverMetaSection
+                serverGameplaySection
+                serverFeaturesSection
+                serverCommunitySection
             case ProjectType.resourcepack:
                 resourcePackSections
             case ProjectType.shader:
@@ -160,20 +179,20 @@ struct CategoryContentView: View {
             }
         }
     }
-    
+
     private var environmentSection: some View {
         CategorySectionView(
-            title: "Environment",
+            title: "filter.environment",
             items: environmentItems,
             selectedItems: $selectedFeatures,
             isLoading: viewModel.isLoading
         )
     }
-    
+
     private var resourcePackSections: some View {
         Group {
             CategorySectionView(
-                title: "Behavior",
+                title: "filter.behavior",
                 items: viewModel.features.map {
                     FilterItem(id: $0.name, name: $0.name)
                 },
@@ -181,7 +200,7 @@ struct CategoryContentView: View {
                 isLoading: viewModel.isLoading
             )
             CategorySectionView(
-                title: "Resolutions",
+                title: "filter.resolutions",
                 items: viewModel.resolutions.map {
                     FilterItem(id: $0.name, name: $0.name)
                 },
@@ -190,14 +209,14 @@ struct CategoryContentView: View {
             )
         }
     }
-    
+
     private var shaderSections: some View {
-        
+
         Group {
-            // The CurseForge data source does not support performance requirements filtering and this section is not displayed under the CF tag
+            // CurseForge 数据源不支持性能要求筛选，在 CF 标签下不显示该部分
             if dataSource == .modrinth {
                 CategorySectionView(
-                    title: "Behavior",
+                    title: "filter.behavior",
                     items: viewModel.features.map {
                         FilterItem(id: $0.name, name: $0.name)
                     },
@@ -205,7 +224,7 @@ struct CategoryContentView: View {
                     isLoading: viewModel.isLoading
                 )
                 CategorySectionView(
-                    title: "Performance",
+                    title: "filter.performance",
                     items: viewModel.performanceImpacts.map {
                         FilterItem(id: $0.name, name: $0.name)
                     },
@@ -215,18 +234,63 @@ struct CategoryContentView: View {
             }
         }
     }
-    
+
+    // MARK: - Minecraft Server Specific Sections
+    private var serverMetaSection: some View {
+        CategorySectionView(
+            title: "filter.server.meta",
+            items: viewModel.metas.map {
+                FilterItem(id: $0.name, name: $0.name)
+            },
+            selectedItems: $selectedCategories,
+            isLoading: viewModel.isLoading
+        )
+    }
+
+    private var serverGameplaySection: some View {
+        CategorySectionView(
+            title: "filter.server.gameplay",
+            items: viewModel.plays.map {
+                FilterItem(id: $0.name, name: $0.name)
+            },
+            selectedItems: $selectedFeatures,
+            isLoading: viewModel.isLoading
+        )
+    }
+
+    private var serverFeaturesSection: some View {
+        CategorySectionView(
+            title: "filter.server.features",
+            items: viewModel.serverFeatures.map {
+                FilterItem(id: $0.name, name: $0.name)
+            },
+            selectedItems: $selectedResolutions,
+            isLoading: viewModel.isLoading
+        )
+    }
+
+    private var serverCommunitySection: some View {
+        CategorySectionView(
+            title: "filter.server.community",
+            items: viewModel.communitys.map {
+                FilterItem(id: $0.name, name: $0.name)
+            },
+            selectedItems: $selectedPerformanceImpacts,
+            isLoading: viewModel.isLoading
+        )
+    }
+
     // MARK: - Computed Properties
     private var filteredLoaders: [Loader] {
         viewModel.loaders.filter {
             $0.supported_project_types.contains(project)
         }
     }
-    
+
     private var environmentItems: [FilterItem] {
         [
-            FilterItem(id: AppConstants.EnvironmentTypes.client, name: String(localized: "Client")),
-            FilterItem(id: AppConstants.EnvironmentTypes.server, name: String(localized: "Server")),
+            FilterItem(id: AppConstants.EnvironmentTypes.client, name: "environment.client".localized()),
+            FilterItem(id: AppConstants.EnvironmentTypes.server, name: "environment.server".localized()),
         ]
     }
 }

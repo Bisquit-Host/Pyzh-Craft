@@ -1,3 +1,9 @@
+//
+//  DownloadProgressSection.swift
+//  PyzhCraft
+//
+//
+
 import SwiftUI
 
 // MARK: - Download Progress Section
@@ -9,7 +15,7 @@ struct DownloadProgressSection: View {
 
     init(
         gameSetupService: GameSetupUtil,
-        selectedModLoader: String = "vanilla",
+        selectedModLoader: String = GameLoader.vanilla.displayName,
         modPackViewModel: ModPackDownloadSheetViewModel? = nil,
         modPackIndexInfo: ModrinthIndexInfo? = nil
     ) {
@@ -21,11 +27,11 @@ struct DownloadProgressSection: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            // Game core download progress
+            // 游戏核心下载进度
             gameDownloadProgressView
-            // Mod loader download progress
+            // 模组加载器下载进度
             modLoaderProgressView
-            // Integration package installation progress
+            // 整合包安装进度
             if let modPackViewModel = modPackViewModel {
                 ModPackProgressView(modPackViewModel: modPackViewModel)
             }
@@ -36,12 +42,12 @@ struct DownloadProgressSection: View {
     private var gameDownloadProgressView: some View {
         VStack(spacing: 24) {
             progressSection(
-                title: "Core Files",
+                title: "download.core.title".localized(),
                 state: gameSetupService.downloadState,
                 type: .core
             )
             progressSection(
-                title: "Resource Files",
+                title: "download.resources.title".localized(),
                 state: gameSetupService.downloadState,
                 type: .resources
             )
@@ -63,11 +69,12 @@ struct DownloadProgressSection: View {
     // MARK: - Helper Methods
 
     private enum ProgressType {
-        case core, resources
+        case core
+        case resources
     }
 
     private func progressSection(
-        title: LocalizedStringKey,
+        title: String,
         state: DownloadState,
         type: ProgressType,
         version: String? = nil
@@ -85,7 +92,7 @@ struct DownloadProgressSection: View {
     }
 
     private struct LoaderProgressInfo {
-        let title: LocalizedStringKey
+        let title: String
         let state: DownloadState
         let version: String?
     }
@@ -93,7 +100,7 @@ struct DownloadProgressSection: View {
     private func getLoaderProgressInfo() -> LoaderProgressInfo? {
         let loaderType = selectedModLoader.lowercased()
 
-        // If it is integration package mode, use the loader information of the integration package
+        // 如果是整合包模式，使用整合包的加载器信息
         if let indexInfo = modPackIndexInfo {
             let loaderState = getLoaderDownloadState(for: indexInfo.loaderType)
             let title = getLoaderTitle(for: indexInfo.loaderType)
@@ -106,7 +113,7 @@ struct DownloadProgressSection: View {
                 )
             }
         } else {
-            // Normal game creation mode
+            // 普通游戏创建模式
             let state = getLoaderDownloadState(for: loaderType)
             let title = getLoaderTitle(for: loaderType)
 
@@ -124,20 +131,122 @@ struct DownloadProgressSection: View {
 
     private func getLoaderDownloadState(for loaderType: String) -> DownloadState? {
         switch loaderType.lowercased() {
-        case "fabric", "quilt": gameSetupService.fabricDownloadState
-        case "forge": gameSetupService.forgeDownloadState
-        case "neoforge": gameSetupService.neoForgeDownloadState
-        default: nil
+        case GameLoader.fabric.displayName, GameLoader.quilt.rawValue:
+            return gameSetupService.fabricDownloadState
+        case GameLoader.forge.displayName:
+            return gameSetupService.forgeDownloadState
+        case GameLoader.neoforge.displayName:
+            return gameSetupService.neoForgeDownloadState
+        default:
+            return nil
         }
     }
 
-    private func getLoaderTitle(for loaderType: String) -> LocalizedStringKey {
+    private func getLoaderTitle(for loaderType: String) -> String {
         switch loaderType.lowercased() {
-        case "fabric": "Fabric Loader"
-        case "quilt": "QuiltMC Loader"
-        case "forge": "Forge Loader"
-        case "neoforge": "NeoForge Loader"
-        default: ""
+        case GameLoader.fabric.displayName:
+            return "fabric.loader.title".localized()
+        case GameLoader.quilt.rawValue:
+            return "quilt.loader.title".localized()
+        case GameLoader.forge.displayName:
+            return "forge.loader.title".localized()
+        case GameLoader.neoforge.displayName:
+            return "neoforge.loader.title".localized()
+        default:
+            return ""
+        }
+    }
+}
+
+// MARK: - ModPack Progress View
+private struct ModPackProgressView: View {
+    @ObservedObject var modPackViewModel: ModPackDownloadSheetViewModel
+
+    var body: some View {
+        if modPackViewModel.modPackInstallState.isInstalling {
+            VStack(spacing: 24) {
+                // 显示 overrides 进度条（只有在有文件需要合并时才显示）
+                if modPackViewModel.modPackInstallState.overridesTotal > 0 {
+                    modPackProgressSection(
+                        title: "launcher.import.copying_files".localized(),
+                        state: modPackViewModel.modPackInstallState,
+                        type: .overrides
+                    )
+                }
+
+                modPackProgressSection(
+                    title: "modpack.files.title".localized(),
+                    state: modPackViewModel.modPackInstallState,
+                    type: .files
+                )
+
+                if modPackViewModel.modPackInstallState.dependenciesTotal > 0 {
+                    modPackProgressSection(
+                        title: "modpack.dependencies.title".localized(),
+                        state: modPackViewModel.modPackInstallState,
+                        type: .dependencies
+                    )
+                }
+            }
+        }
+    }
+
+    private enum ModPackProgressType {
+        case files
+        case dependencies
+        case overrides
+    }
+
+    private func modPackProgressSection(
+        title: String,
+        state: ModPackInstallState,
+        type: ModPackProgressType
+    ) -> some View {
+        FormSection {
+            DownloadProgressRow(
+                title: title,
+                progress: {
+                    switch type {
+                    case .files:
+                        return state.filesProgress
+                    case .dependencies:
+                        return state.dependenciesProgress
+                    case .overrides:
+                        return state.overridesProgress
+                    }
+                }(),
+                currentFile: {
+                    switch type {
+                    case .files:
+                        return state.currentFile
+                    case .dependencies:
+                        return state.currentDependency
+                    case .overrides:
+                        return state.currentOverride
+                    }
+                }(),
+                completed: {
+                    switch type {
+                    case .files:
+                        return state.filesCompleted
+                    case .dependencies:
+                        return state.dependenciesCompleted
+                    case .overrides:
+                        return state.overridesCompleted
+                    }
+                }(),
+                total: {
+                    switch type {
+                    case .files:
+                        return state.filesTotal
+                    case .dependencies:
+                        return state.dependenciesTotal
+                    case .overrides:
+                        return state.overridesTotal
+                    }
+                }(),
+                version: nil
+            )
         }
     }
 }

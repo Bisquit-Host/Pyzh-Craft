@@ -1,39 +1,114 @@
+//
+//  SectionViewComponents.swift
+//  PyzhCraft
+//
+//
 import SwiftUI
 
 // MARK: - Constants
 enum SectionViewConstants {
-    // Layout constants
+    // 布局常量
     static let defaultMaxHeight: CGFloat = 235
     static let defaultVerticalPadding: CGFloat = 4
     static let defaultHeaderBottomPadding: CGFloat = 4
 
-    // placeholder constant
+    // 占位符常量
     static let defaultPlaceholderCount: Int = 5
 
-    // Pop-up window constants
+    // 弹窗常量
     static let defaultPopoverWidth: CGFloat = 320
     static let defaultPopoverMaxHeight: CGFloat = 320
 
-    // Item display constants
+    // 项目显示常量
     static let defaultMaxItems: Int = 6
     static let defaultMaxWidth: CGFloat = 320
 
-    // Chip related constants (used in row calculations)
+    // Chip 相关常量（用于行计算）
     static let defaultChipPadding: CGFloat = 16
     static let defaultEstimatedCharWidth: CGFloat = 10
     static let defaultMaxRows: Int = 5
 }
 
+// MARK: - Overflow Popover Content
+struct OverflowPopoverContent<Item: Identifiable, Content: View>: View {
+    let items: [Item]
+    let maxHeight: CGFloat
+    let width: CGFloat
+    let content: (Item) -> Content
+
+    init(
+        items: [Item],
+        maxHeight: CGFloat = SectionViewConstants.defaultPopoverMaxHeight,
+        width: CGFloat = SectionViewConstants.defaultPopoverWidth,
+        @ViewBuilder content: @escaping (Item) -> Content
+    ) {
+        self.items = items
+        self.maxHeight = maxHeight
+        self.width = width
+        self.content = content
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ScrollView {
+                FlowLayout {
+                    ForEach(items) { item in
+                        content(item)
+                    }
+                }
+                .padding()
+            }
+            .frame(maxHeight: maxHeight)
+        }
+        .frame(width: width)
+    }
+}
+
+// MARK: - Content With Overflow
+struct ContentWithOverflow<Item: Identifiable, Content: View>: View {
+    let items: [Item]
+    let maxHeight: CGFloat
+    let verticalPadding: CGFloat
+    let spacing: CGFloat
+    let content: (Item) -> Content
+
+    init(
+        items: [Item],
+        maxHeight: CGFloat = SectionViewConstants.defaultMaxHeight,
+        verticalPadding: CGFloat = SectionViewConstants.defaultVerticalPadding,
+        spacing: CGFloat = 8,
+        @ViewBuilder content: @escaping (Item) -> Content
+    ) {
+        self.items = items
+        self.maxHeight = maxHeight
+        self.verticalPadding = verticalPadding
+        self.spacing = spacing
+        self.content = content
+    }
+
+    var body: some View {
+        FlowLayout(spacing: spacing) {
+            ForEach(items) { item in
+                content(item)
+            }
+        }
+        .frame(maxHeight: maxHeight)
+        .fixedSize(horizontal: false, vertical: true)
+        .padding(.vertical, verticalPadding)
+        .padding(.bottom, verticalPadding)
+    }
+}
+
 // MARK: - Array Extension
 extension Array {
-    /// Calculate visible and overflow items based on maximum number of items
+    /// 基于最大项目数计算可见和溢出项
     func computeVisibleAndOverflowItems(maxItems: Int) -> ([Element], [Element]) {
         let visibleItems = Array(prefix(maxItems))
         let overflowItems = Array(dropFirst(maxItems))
         return (visibleItems, overflowItems)
     }
 
-    /// Calculate visible and overflow items based on row count and width (for CategorySectionView)
+    /// 基于行数和宽度计算可见和溢出项（用于 CategorySectionView）
     func computeVisibleAndOverflowItemsByRows(
         maxRows: Int = SectionViewConstants.defaultMaxRows,
         maxWidth: CGFloat = SectionViewConstants.defaultMaxWidth,

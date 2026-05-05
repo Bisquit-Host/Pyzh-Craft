@@ -1,32 +1,59 @@
+//
+//  GameSetupUtil.swift
+//  PyzhCraft
+//
+//  Created by su on 2025/8/3.
+//
+
+import Foundation
 import SwiftUI
 
-/// Game setup service
-/// Responsible for handling the complete process of game download, configuration and saving
+/// 游戏设置服务
+/// 负责处理游戏下载、配置和保存的完整流程
 @MainActor
 class GameSetupUtil: ObservableObject {
-    
+
     // MARK: - Properties
     @Published var downloadState = DownloadState()
     @Published var fabricDownloadState = DownloadState()
     @Published var forgeDownloadState = DownloadState()
     @Published var neoForgeDownloadState = DownloadState()
-    
+
     private var downloadTask: Task<Void, Never>?
-    
+    private let errorHandler: GlobalErrorHandler
+    private let javaManager: JavaManager
+    private let gameSettingsManager: GameSettingsManager
+    private let modScanner: ModScanner
+    private let languageManager: LanguageManager
+
+    init(
+        errorHandler: GlobalErrorHandler = AppServices.errorHandler,
+        javaManager: JavaManager = AppServices.javaManager,
+        gameSettingsManager: GameSettingsManager = AppServices.gameSettingsManager,
+        modScanner: ModScanner = AppServices.modScanner,
+        languageManager: LanguageManager = AppServices.languageManager
+    ) {
+        self.errorHandler = errorHandler
+        self.javaManager = javaManager
+        self.gameSettingsManager = gameSettingsManager
+        self.modScanner = modScanner
+        self.languageManager = languageManager
+    }
+
     // MARK: - Public Methods
-    
-    /// Internal game save method
+
+    /// 内部游戏保存方法
     /// - Parameters:
-    ///   - gameName: game name
-    ///   - gameIcon: game icon
-    ///   - selectedGameVersion: selected game version
-    ///   - selectedModLoader: selected module loader
-    ///   - specifiedLoaderVersion: specified loader version (optional)
-    ///   - pendingIconData: icon data to be saved
-    ///   - playerListViewModel: player list view model (optional, skip player verification when nil)
-    ///   - gameRepository: game repository
-    ///   - onSuccess: success callback
-    ///   - onError: error callback
+    ///   - gameName: 游戏名称
+    ///   - gameIcon: 游戏图标
+    ///   - selectedGameVersion: 选择的游戏版本
+    ///   - selectedModLoader: 选择的模组加载器
+    ///   - specifiedLoaderVersion: 指定的加载器版本（可选）
+    ///   - pendingIconData: 待保存的图标数据
+    ///   - playerListViewModel: 玩家列表视图模型（可选，为 nil 时跳过玩家校验）
+    ///   - gameRepository: 游戏仓库
+    ///   - onSuccess: 成功回调
+    ///   - onError: 错误回调
     func saveGame( // swiftlint:disable:this function_parameter_count
         gameName: String,
         gameIcon: String,
@@ -39,28 +66,29 @@ class GameSetupUtil: ObservableObject {
         onSuccess: @escaping () -> Void,
         onError: @escaping (GlobalError, String) -> Void
     ) async {
-        // Validate the current player (only if playerListViewModel is provided)
+        // 验证当前玩家（仅在提供了 playerListViewModel 时）
         if let playerListViewModel = playerListViewModel {
             guard playerListViewModel.currentPlayer != nil else {
-                Logger.shared.error("The game cannot be saved because the current player is not selected")
+                Logger.shared.error("无法保存游戏，因为没有选择当前玩家。")
                 onError(
                     GlobalError.configuration(
-                        i18nKey: "No Current Player",
+                        chineseMessage: "没有选择当前玩家",
+                        i18nKey: "error.configuration.no_current_player",
                         level: .popup
                     ),
-                    String(localized: "No Current Player Selected")
+                    "error.no.current.player.title".localized()
                 )
                 return
             }
         }
-        
-        // Set download status
+
+        // 设置下载状态
         await MainActor.run {
             self.objectWillChange.send()
             downloadState.reset()
             downloadState.isDownloading = true
         }
-        
+
         defer {
             Task { @MainActor in
                 self.objectWillChange.send()
@@ -68,15 +96,16 @@ class GameSetupUtil: ObservableObject {
                 downloadTask = nil
             }
         }
-        
-        // save game icon
+
+        // 保存游戏图标
         await saveGameIcon(
             gameName: gameName,
+            modLoader: selectedModLoader,
             pendingIconData: pendingIconData,
             onError: onError
         )
-        
-        // Create initial game information
+
+        // 创建初始游戏信息
         var gameInfo = GameVersionInfo(
             id: UUID(),
             gameName: gameName,
@@ -85,27 +114,26 @@ class GameSetupUtil: ObservableObject {
             assetIndex: "",
             modLoader: selectedModLoader
         )
-        
+
         do {
-            // Download Mojang manifest
+            // 下载 Mojang manifest
             let downloadedManifest = try await ModrinthService.fetchVersionInfo(from: selectedGameVersion)
-            
-            // Ensure and obtain the Java path to avoid repeated verification in the future
-            let javaPath = await JavaManager.shared.ensureJavaExists(
-                version: downloadedManifest.javaVersion.component,
-                requiredMajorVersion: downloadedManifest.javaVersion.majorVersion
+
+            // 确保并获取 Java 路径，避免后续再次重复校验
+            let javaPath = await javaManager.ensureJavaExists(
+                version: downloadedManifest.javaVersion.component
             )
-            
-            // Set up file manager
+
+            // 设置文件管理器
             let fileManager = try await setupFileManager(manifest: downloadedManifest, modLoader: gameInfo.modLoader)
-            
-            // Start download process
+
+            // 开始下载过程
             try await startDownloadProcess(
                 fileManager: fileManager,
                 manifest: downloadedManifest,
                 gameName: gameName
             )
-            // Set up the mod loader
+            // 设置模组加载器
             let modLoaderResult = try await setupModLoaderIfNeeded(
                 selectedModLoader: selectedModLoader,
                 selectedGameVersion: selectedGameVersion,
@@ -113,129 +141,146 @@ class GameSetupUtil: ObservableObject {
                 gameIcon: gameIcon,
                 specifiedLoaderVersion: specifiedLoaderVersion
             )
-            // Improve game information
+            // 完善游戏信息
             gameInfo = await finalizeGameInfo(
                 gameInfo: gameInfo,
                 manifest: downloadedManifest,
                 selectedModLoader: selectedModLoader,
                 selectedGameVersion: selectedGameVersion,
                 specifiedLoaderVersion: specifiedLoaderVersion,
-                fabricResult: selectedModLoader.lowercased() == "fabric" ? modLoaderResult : nil,
-                forgeResult: selectedModLoader.lowercased() == "forge" ? modLoaderResult : nil,
-                neoForgeResult: selectedModLoader.lowercased() == "neoforge" ? modLoaderResult : nil,
-                quiltResult: selectedModLoader.lowercased() == "quilt" ? modLoaderResult : nil
+                fabricResult: selectedModLoader.lowercased() == GameLoader.fabric.displayName ? modLoaderResult : nil,
+                forgeResult: selectedModLoader.lowercased() == GameLoader.forge.displayName ? modLoaderResult : nil,
+                neoForgeResult: selectedModLoader.lowercased() == GameLoader.neoforge.displayName ? modLoaderResult : nil,
+                quiltResult: selectedModLoader.lowercased() == GameLoader.quilt.rawValue ? modLoaderResult : nil
             )
-            // Use the result returned by ensureJavaExists to avoid triggering Java verification again
+            // 使用 ensureJavaExists 返回的结果，避免再次触发 Java 校验
             gameInfo.javaPath = javaPath
-            // Save game configuration
-            
+            // 保存游戏配置
             gameRepository.addGameSilently(gameInfo)
-            
-            // Scan the game's mods directory (sync blocking)
-            ModScanner.shared.scanGameModsDirectorySync(game: gameInfo)
-            
-            // Send notification
-            NotificationManager.sendSilently(
-                title: String(localized: "Download Complete"),
-                body: String(format: String(localized: "\(gameInfo.gameName) (Version: \(gameInfo.gameVersion), Loader: \(gameInfo.modLoader)) has been successfully downloaded."))
+
+            // 根据设置决定是否为新创建的游戏写入/更新 options.txt 的语言设置
+            if gameSettingsManager.syncLanguageForNewGames {
+                configureGameLanguage(for: gameInfo.gameName)
+            }
+
+            // 扫描游戏的 mods 目录
+            Task.detached(priority: .utility) {
+                await self.modScanner.scanGameModsDirectory(game: gameInfo)
+            }
+
+            // 发送通知
+            await NotificationManager.sendSilently(
+                title: "notification.download.complete.title".localized(),
+                body: String(format: "notification.download.complete.body".localized(), gameInfo.gameName, gameInfo.gameVersion, gameInfo.modLoader)
             )
             onSuccess()
-        } catch is CancellationError {
-            Logger.shared.info("The game download task has been canceled")
-            // Clean created game folders
-            await cleanupGameDirectories(gameName: gameName)
-            await MainActor.run {
-                self.objectWillChange.send()
-                downloadState.reset()
-            }
         } catch {
-            // Clean created game folders
+            if isSaveGameDownloadCancelled(error) {
+                Logger.shared.info("游戏下载任务已取消")
+                await cleanupGameDirectories(gameName: gameName)
+                await MainActor.run {
+                    self.objectWillChange.send()
+                    self.downloadState.reset()
+                }
+                return
+            }
             await cleanupGameDirectories(gameName: gameName)
-            GlobalErrorHandler.shared.handle(error)
+            errorHandler.handle(error)
         }
         return
     }
-    
-    // MARK: - Private Methods
-    
-    /// Clean game folder
-    /// - Parameter gameName: game name
+
+    private func isSaveGameDownloadCancelled(_ error: Error) -> Bool {
+        if Task.isCancelled { return true }
+        if downloadState.isCancelled { return true }
+        if error is CancellationError { return true }
+        if let urlError = error as? URLError, urlError.code == .cancelled { return true }
+        return false
+    }
+
+    /// 清理游戏文件夹
+    /// - Parameter gameName: 游戏名称
     private func cleanupGameDirectories(gameName: String) async {
         do {
             let fileManager = MinecraftFileManager()
             try fileManager.cleanupGameDirectories(gameName: gameName)
         } catch {
-            Logger.shared.error("Failed to clean game folder: \(error.localizedDescription)")
-            // No error is thrown because this is a cleanup operation and should not affect the main process
+            Logger.shared.error("清理游戏文件夹失败: \(error.localizedDescription)")
+            // 不抛出错误，因为这是清理操作，不应该影响主流程
         }
     }
-    
+
     private func saveGameIcon(
         gameName: String,
+        modLoader: String,
         pendingIconData: Data?,
         onError: @escaping (GlobalError, String) -> Void
     ) async {
-        guard let data = pendingIconData, !gameName.isEmpty else {
+        guard !gameName.isEmpty else {
             return
         }
         let profileDir = AppPaths.profileDirectory(gameName: gameName)
         let iconURL = profileDir.appendingPathComponent(AppConstants.defaultGameIcon)
-        
+
         do {
             try FileManager.default.createDirectory(at: profileDir, withIntermediateDirectories: true)
-            try data.write(to: iconURL)
+
+            if let data = pendingIconData {
+                try data.write(to: iconURL)
+            } else {
+                let remoteIconURL = URLConfig.API.GitHub.gameIcon(modLoader)
+                _ = try await DownloadManager.downloadFile(
+                    urlString: remoteIconURL.absoluteString,
+                    destinationURL: iconURL,
+                    expectedSha1: nil
+                )
+            }
         } catch {
             onError(
                 GlobalError.fileSystem(
-                    i18nKey: "Image Save Failed",
+                    chineseMessage: "图片保存失败",
+                    i18nKey: "error.filesystem.image_save_failed",
                     level: .notification
                 ),
-                String(localized: "Failed to Save Image")
+                "error.image.save.failed".localized()
             )
         }
     }
-    
+
     private func setupFileManager(manifest: MinecraftVersionManifest, modLoader: String) async throws -> MinecraftFileManager {
         let nativesDir = AppPaths.nativesDirectory
         try FileManager.default.createDirectory(at: nativesDir, withIntermediateDirectories: true)
         return MinecraftFileManager()
     }
-    
+
     private func startDownloadProcess(
         fileManager: MinecraftFileManager,
         manifest: MinecraftVersionManifest,
         gameName: String
     ) async throws {
-        // First download the resource index to get the total number of resource files
+        // 先下载资源索引来获取资源文件总数
         let assetIndex = try await downloadAssetIndex(manifest: manifest)
         let resourceTotalFiles = assetIndex.objects.count
-        
+
         downloadState.startDownload(
             coreTotalFiles: 1 + manifest.libraries.count + 1,
             resourcesTotalFiles: resourceTotalFiles
         )
-        
+
         fileManager.onProgressUpdate = { fileName, completed, total, type in
             Task { @MainActor in
                 self.objectWillChange.send()
                 self.downloadState.updateProgress(fileName: fileName, completed: completed, total: total, type: type)
             }
         }
-        
-        // Use a silent version of the API to avoid throwing exceptions
-        let success = await fileManager.downloadVersionFiles(manifest: manifest, gameName: gameName)
-        if !success {
-            throw GlobalError.download(
-                i18nKey: "Minecraft Version Failed",
-                level: .notification
-            )
-        }
+
+        try await fileManager.downloadVersionFilesThrowing(manifest: manifest, gameName: gameName)
     }
-    
+
     private func downloadAssetIndex(manifest: MinecraftVersionManifest) async throws -> DownloadedAssetIndex {
-        
+
         let destinationURL = AppPaths.metaDirectory.appendingPathComponent("assets/indexes").appendingPathComponent("\(manifest.assetIndex.id).json")
-        
+
         do {
             _ = try await DownloadManager.downloadFile(urlString: manifest.assetIndex.url.absoluteString, destinationURL: destinationURL, expectedSha1: manifest.assetIndex.sha1)
             let assetIndexData = try await Task.detached(priority: .userInitiated) {
@@ -255,14 +300,14 @@ class GameSetupUtil: ObservableObject {
             )
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Asset index download failed: \(globalError.chineseMessage)")
             throw GlobalError.download(
-                i18nKey: "Asset Index Failed",
+                chineseMessage: "下载资源索引失败: \(globalError.chineseMessage)",
+                i18nKey: "error.download.asset_index_failed",
                 level: .notification
             )
         }
     }
-    
+
     private func setupModLoaderIfNeeded(
         selectedModLoader: String,
         selectedGameVersion: String,
@@ -272,23 +317,23 @@ class GameSetupUtil: ObservableObject {
     ) async throws -> (loaderVersion: String, classpath: String, mainClass: String)? {
         let loaderType = selectedModLoader.lowercased()
         let handler: (any ModLoaderHandler.Type)?
-        
+
         switch loaderType {
-        case "fabric":
+        case GameLoader.fabric.displayName:
             handler = FabricLoaderService.self
-        case "forge":
+        case GameLoader.forge.displayName:
             handler = ForgeLoaderService.self
-        case "neoforge":
+        case GameLoader.neoforge.displayName:
             handler = NeoForgeLoaderService.self
-        case "quilt":
+        case GameLoader.quilt.rawValue:
             handler = QuiltLoaderService.self
         default:
             handler = nil
         }
-        
+
         guard let handler else { return nil }
-        
-        // Create GameVersionInfo directly without relying on mojangVersions
+
+        // 直接创建 GameVersionInfo，不依赖 mojangVersions
         let gameInfo = GameVersionInfo(
             gameName: gameName,
             gameIcon: gameIcon,
@@ -296,27 +341,27 @@ class GameSetupUtil: ObservableObject {
             assetIndex: "",
             modLoader: selectedModLoader
         )
-        
-        // Choose a different method depending on whether a loader version is specified or not
+
+        // 根据是否指定了加载器版本来选择不同的方法
         let progressCallback: (String, Int, Int) -> Void = { [weak self] fileName, completed, total in
             Task { @MainActor in
                 guard let self = self else { return }
                 self.objectWillChange.send()
                 switch loaderType {
-                case "fabric":
+                case GameLoader.fabric.displayName:
                     self.fabricDownloadState.updateProgress(fileName: fileName, completed: completed, total: total, type: .core)
-                case "forge":
+                case GameLoader.forge.displayName:
                     self.forgeDownloadState.updateProgress(fileName: fileName, completed: completed, total: total, type: .core)
-                case "neoforge":
+                case GameLoader.neoforge.displayName:
                     self.neoForgeDownloadState.updateProgress(fileName: fileName, completed: completed, total: total, type: .core)
-                case "quilt":
+                case GameLoader.quilt.rawValue:
                     self.fabricDownloadState.updateProgress(fileName: fileName, completed: completed, total: total, type: .core)
                 default:
                     break
                 }
             }
         }
-        
+
         return await handler.setupWithSpecificVersion(
             for: selectedGameVersion,
             loaderVersion: specifiedLoaderVersion,
@@ -324,7 +369,7 @@ class GameSetupUtil: ObservableObject {
             onProgressUpdate: progressCallback
         )
     }
-    
+
     private func finalizeGameInfo(
         gameInfo: GameVersionInfo,
         manifest: MinecraftVersionManifest,
@@ -339,15 +384,15 @@ class GameSetupUtil: ObservableObject {
         var updatedGameInfo = gameInfo
         updatedGameInfo.assetIndex = manifest.assetIndex.id
         updatedGameInfo.javaVersion = manifest.javaVersion.majorVersion
-        
+
         switch selectedModLoader.lowercased() {
-        case "fabric", "quilt":
-            if let result = selectedModLoader.lowercased() == "fabric" ? fabricResult : quiltResult {
+        case GameLoader.fabric.displayName, GameLoader.quilt.rawValue:
+            if let result = selectedModLoader.lowercased() == GameLoader.fabric.displayName ? fabricResult : quiltResult {
                 updatedGameInfo.modVersion = result.loaderVersion
                 updatedGameInfo.modClassPath = result.classpath
                 updatedGameInfo.mainClass = result.mainClass
-                
-                if selectedModLoader.lowercased() == "fabric" {
+
+                if selectedModLoader.lowercased() == GameLoader.fabric.displayName {
                     if let fabricLoader = try? await FabricLoaderService.fetchSpecificLoaderVersion(for: selectedGameVersion, loaderVersion: specifiedLoaderVersion) {
                         let jvmArgs = fabricLoader.arguments.jvm ?? []
                         updatedGameInfo.modJvm = jvmArgs
@@ -363,13 +408,13 @@ class GameSetupUtil: ObservableObject {
                     }
                 }
             }
-            
-        case "forge":
+
+        case GameLoader.forge.displayName:
             if let result = forgeResult {
                 updatedGameInfo.modVersion = result.loaderVersion
                 updatedGameInfo.modClassPath = result.classpath
                 updatedGameInfo.mainClass = result.mainClass
-                
+
                 if let forgeLoader = try? await ForgeLoaderService.fetchSpecificForgeProfile(for: selectedGameVersion, loaderVersion: specifiedLoaderVersion) {
                     let gameArgs = forgeLoader.arguments.game ?? []
                     updatedGameInfo.gameArguments = gameArgs
@@ -381,19 +426,19 @@ class GameSetupUtil: ObservableObject {
                     }
                 }
             }
-            
-        case "neoforge":
+
+        case GameLoader.neoforge.displayName:
             if let result = neoForgeResult {
                 updatedGameInfo.modVersion = result.loaderVersion
                 updatedGameInfo.modClassPath = result.classpath
                 updatedGameInfo.mainClass = result.mainClass
-                
+
                 if let neoForgeLoader = try? await NeoForgeLoaderService.fetchSpecificNeoForgeProfile(for: selectedGameVersion, loaderVersion: specifiedLoaderVersion) {
                     let gameArgs = neoForgeLoader.arguments.game ?? []
                     updatedGameInfo.gameArguments = gameArgs
-                    
+
                     let jvmArgs = neoForgeLoader.arguments.jvm ?? []
-                    // Use NSMutableString to avoid chaining calls that create multiple temporary strings
+                    // 使用 NSMutableString 避免链式调用创建多个临时字符串
                     updatedGameInfo.modJvm = jvmArgs.map { arg -> String in
                         let mutableArg = NSMutableString(string: arg)
                         mutableArg.replaceOccurrences(
@@ -418,33 +463,39 @@ class GameSetupUtil: ObservableObject {
                     }
                 }
             }
-            
+
         default:
             updatedGameInfo.mainClass = manifest.mainClass
         }
-        
-        // Build startup command
+
+        // 构建启动命令
         let launcherBrand = Bundle.main.appName
         let launcherVersion = Bundle.main.fullVersion
-        
+
         updatedGameInfo.launchCommand = MinecraftLaunchCommandBuilder.build(
             manifest: manifest,
             gameInfo: updatedGameInfo,
             launcherBrand: launcherBrand,
             launcherVersion: launcherVersion
         )
-        
+
         return updatedGameInfo
     }
-    
-    /// Check if game name is duplicate
-    /// - Parameter name: game name
-    /// - Returns: Whether it is repeated
+
+    /// 检查游戏名称是否重复
+    /// - Parameter name: 游戏名称
+    /// - Returns: 是否重复
     func checkGameNameDuplicate(_ name: String) async -> Bool {
         guard !name.isEmpty else { return false }
-        
+
         let fileManager = FileManager.default
         let gameDir = AppPaths.profileRootDirectory.appendingPathComponent(name)
         return fileManager.fileExists(atPath: gameDir.path)
+    }
+
+    /// 根据启动器当前语言，为指定游戏实例写入/更新 Minecraft 的 options.txt 语言设置
+    private func configureGameLanguage(for gameName: String) {
+        let mcLang = CommonUtil.minecraftLanguageCode(from: languageManager.selectedLanguage)
+        CommonUtil.upsertOptionsEntry(gameName: gameName, key: "lang", value: mcLang)
     }
 }

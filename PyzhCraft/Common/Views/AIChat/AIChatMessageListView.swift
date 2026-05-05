@@ -1,33 +1,36 @@
+//
+//  AIChatMessageListView.swift
+//  PyzhCraft
+//
+//
+
 import SwiftUI
 
-/// AI chat message list view
+/// AI 聊天消息列表视图
 struct AIChatMessageListView: View {
     @ObservedObject var chatState: ChatState
     let currentPlayer: Player?
     let cachedAIAvatar: AnyView?
     let cachedUserAvatar: AnyView?
     let aiAvatarURL: String
-    
-    // Status used for anti-shaking and avoiding loop updates
-    @State private var lastContentLength: Int = 0
-    @State private var scrollTask: Task<Void, Never>?
-    @State private var periodicScrollTask: Task<Void, Never>?
-    
+
+    @StateObject private var scrollCoordinator = AIChatScrollCoordinatorViewModel()
+
     private enum Constants {
         static let avatarSize: CGFloat = 32
         static let messageSpacing: CGFloat = 16
         static let messageVerticalPadding: CGFloat = 2
         static let scrollDelay: TimeInterval = 0.1
         static let scrollAnimationDuration: TimeInterval = 0.3
-        static let scrollThrottleInterval: TimeInterval = 0.2 // Anti-shake interval
+        static let scrollThrottleInterval: TimeInterval = 0.2 // 防抖间隔
     }
-    
+
     var body: some View {
         GeometryReader { geometry in
             ScrollViewReader { proxy in
                 ScrollView {
                     if chatState.messages.isEmpty {
-                        // Show greeting message when empty message
+                        // 空消息时显示欢迎语
                         VStack {
                             Spacer()
                             welcomeView
@@ -37,8 +40,8 @@ struct AIChatMessageListView: View {
                     } else {
                         LazyVStack(alignment: .leading, spacing: 12) {
                             messageListView
-                            
-                            // Show "Thinking" only if sending is in progress and the last AI message was empty
+
+                            // 只有当正在发送且最后一条 AI 消息为空时，才显示"正在思考"
                             if chatState.isSending,
                                let lastMessage = chatState.messages.last,
                                lastMessage.role == .assistant,
@@ -49,67 +52,70 @@ struct AIChatMessageListView: View {
                         .padding()
                     }
                 }
-                // Scroll to the bottom: Optimization - Use anti-shake mechanism to avoid loops caused by frequent updates
+                // 滚动到底部：优化 - 使用防抖机制避免频繁更新导致的循环
                 .onChange(of: chatState.messages.count) { _, _ in
-                    // Scroll on new messages
-                    if chatState.messages.last != nil {
-                        scheduleScroll(proxy: proxy)
+                    // 新消息时滚动
+                    scrollCoordinator.onMessagesCountChanged(
+                        hasLastMessage: chatState.messages.last != nil
+                    ) {
+                        scrollToBottom(proxy: proxy)
                     }
                 }
                 .onChange(of: chatState.messages.last?.id) { _, _ in
-                    // When the ID of the last message changes (new message), reset content length tracking and scroll
+                    // 最后一条消息的 ID 变化时（新消息），重置内容长度跟踪并滚动
                     if let lastMessage = chatState.messages.last {
-                        lastContentLength = lastMessage.content.count
-                        scheduleScroll(proxy: proxy)
+                        scrollCoordinator.onLastMessageChanged(
+                            contentLength: lastMessage.content.count
+                        ) {
+                            scrollToBottom(proxy: proxy)
+                        }
                     }
                 }
                 .onChange(of: chatState.isSending) { oldValue, newValue in
-                    if !oldValue && newValue {
-                        // When sending starts, start a periodic rolling check
-                        startPeriodicScrollCheck(proxy: proxy)
-                    } else if oldValue && !newValue {
-                        // When sending is complete, stop the periodic scroll check and scroll to the bottom
-                        stopPeriodicScrollCheck()
-                        scheduleScroll(proxy: proxy)
-                    }
+                    scrollCoordinator.onSendingChanged(
+                        wasSending: oldValue,
+                        isSending: newValue,
+                        scrollToBottom: { scrollToBottom(proxy: proxy) },
+                        getLastMessageContentLength: { chatState.messages.last?.content.count }
+                    )
                 }
                 .onAppear {
-                    // When the view appears, initiate a periodic scroll check if sending
-                    if chatState.isSending {
-                        startPeriodicScrollCheck(proxy: proxy)
-                    }
+                    // 视图出现时，如果正在发送，启动定期滚动检查
+                    scrollCoordinator.onAppearIfSending(
+                        isSending: chatState.isSending,
+                        scrollToBottom: { scrollToBottom(proxy: proxy) },
+                        getLastMessageContentLength: { chatState.messages.last?.content.count }
+                    )
                 }
                 .onDisappear {
-                    // Stop all scrolling tasks when the view disappears
-                    stopPeriodicScrollCheck()
-                    scrollTask?.cancel()
+                    // 视图消失时，停止所有滚动任务
+                    scrollCoordinator.onDisappear()
                 }
             }
         }
     }
-    
+
     // MARK: - View Components
-    
+
     private var welcomeView: some View {
         VStack(spacing: 16) {
             if let player = currentPlayer {
-                Text("Hello, \(player.name)!")
+                Text(String(format: "ai.chat.welcome.message".localized(), player.name))
                     .font(.title2)
-                    .bold()
+                    .fontWeight(.bold)
                     .foregroundStyle(.primary)
             }
-            
-            Text("How can I help you today?")
+            Text("ai.chat.welcome.description".localized())
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
         .padding()
     }
-    
+
     private var messageListView: some View {
         ForEach(chatState.messages) { message in
-            // Skip empty AI messages being sent (loading indicator will be shown)
+            // 跳过正在发送的空 AI 消息（会显示加载指示器）
             if !(chatState.isSending && message.role == .assistant && message.content.isEmpty) {
                 MessageBubble(
                     message: message,
@@ -122,78 +128,34 @@ struct AIChatMessageListView: View {
             }
         }
     }
-    
+
     private var loadingIndicatorView: some View {
-        HStack(alignment: .center, spacing: Constants.messageSpacing) {
-            // Using cached avatar view
+        HStack(alignment: .firstTextBaseline, spacing: Constants.messageSpacing) {
+            // 使用缓存的头像视图
             if let cachedAvatar = cachedAIAvatar {
                 cachedAvatar
             } else {
                 AIAvatarView(size: Constants.avatarSize, url: aiAvatarURL)
             }
-            
+
             HStack(spacing: 6) {
                 ProgressView()
                     .scaleEffect(0.6)
                     .controlSize(.small)
-                
-                Text("Thinking...")
+                Text("ai.chat.thinking".localized())
                     .font(.system(size: 12))
                     .foregroundStyle(.secondary)
             }
-            
+
             Spacer(minLength: 40)
         }
         .padding(.vertical, Constants.messageVerticalPadding)
     }
-    
-    // MARK: - Methods
-    
-    /// Scheduling scroll to bottom (with anti-shake)
-    private func scheduleScroll(proxy: ScrollViewProxy) {
-        // Cancel previous task
-        scrollTask?.cancel()
-        
-        // Create a new anti-shake task
-        scrollTask = Task { @MainActor in
-            try? await Task.sleep(nanoseconds: UInt64(Constants.scrollThrottleInterval * 1_000_000_000))
-            guard !Task.isCancelled else { return }
-            scrollToBottom(proxy: proxy)
-        }
-    }
-    
-    /// Start periodic rolling checks (for streaming updates)
-    private func startPeriodicScrollCheck(proxy: ScrollViewProxy) {
-        stopPeriodicScrollCheck()
-        
-        periodicScrollTask = Task { @MainActor in
-            while !Task.isCancelled && chatState.isSending {
-                // Check if the content is updated
-                if let lastMessage = chatState.messages.last,
-                   lastMessage.content.count > lastContentLength {
-                    lastContentLength = lastMessage.content.count
-                    scrollToBottom(proxy: proxy)
-                }
-                
-                // Check every 0.3 seconds
-                try? await Task.sleep(nanoseconds: 300_000_000)
-            }
-        }
-    }
-    
-    /// Stop periodic rolling checks
-    private func stopPeriodicScrollCheck() {
-        periodicScrollTask?.cancel()
-        periodicScrollTask = nil
-    }
-    
+
     private func scrollToBottom(proxy: ScrollViewProxy) {
-        Task { @MainActor in
-            try? await Task.sleep(nanoseconds: UInt64(Constants.scrollDelay * 1_000_000_000))
-            guard let lastMessage = chatState.messages.last else { return }
-            withAnimation(.easeOut(duration: Constants.scrollAnimationDuration)) {
-                proxy.scrollTo(lastMessage.id, anchor: .bottom)
-            }
+        guard let lastMessage = chatState.messages.last else { return }
+        withAnimation(.easeOut(duration: Constants.scrollAnimationDuration)) {
+            proxy.scrollTo(lastMessage.id, anchor: .bottom)
         }
     }
 }

@@ -18,17 +18,17 @@ private enum Constants {
 // MARK: - GameCreationView
 struct GameCreationView: View {
     @StateObject private var viewModel: GameCreationViewModel
-    @EnvironmentObject var gameRepository: GameRepository
-    @EnvironmentObject var playerListViewModel: PlayerListViewModel
+    @EnvironmentObject private var gameRepository: GameRepository
+    @EnvironmentObject private var playerListViewModel: PlayerListViewModel
     @Environment(\.dismiss)
     private var dismiss
-    
+
     // Bindings from parent
     private let triggerConfirm: Binding<Bool>
     private let triggerCancel: Binding<Bool>
     private let onRequestImagePicker: () -> Void
     private let onSetImagePickerHandler: (@escaping (Result<[URL], Error>) -> Void) -> Void
-    
+
     // MARK: - Initializer
     init(
         isDownloading: Binding<Bool>,
@@ -54,66 +54,65 @@ struct GameCreationView: View {
         )
         self._viewModel = StateObject(wrappedValue: GameCreationViewModel(configuration: configuration))
     }
-    
+
     // MARK: - Body
     var body: some View {
         formContentView
-            .onAppear {
-                viewModel.setup(gameRepository: gameRepository, playerListViewModel: playerListViewModel)
-                onSetImagePickerHandler(viewModel.handleImagePickerResult)
+        .onAppear {
+            viewModel.setup(gameRepository: gameRepository, playerListViewModel: playerListViewModel)
+            onSetImagePickerHandler(viewModel.handleImagePickerResult)
+        }
+        .gameFormStateListeners(viewModel: viewModel, triggerConfirm: triggerConfirm, triggerCancel: triggerCancel)
+        .onChange(of: viewModel.selectedLoaderVersion) { oldValue, newValue in
+            // 优化：仅在值实际变化时更新
+            if oldValue != newValue {
+                viewModel.updateParentState()
             }
-            .gameFormStateListeners(viewModel: viewModel, triggerConfirm: triggerConfirm, triggerCancel: triggerCancel)
-            .onChange(of: viewModel.selectedLoaderVersion) { oldValue, newValue in
-                // Optimization: only update when the value actually changes
-                if oldValue != newValue {
-                    viewModel.updateParentState()
-                }
+        }
+        .onChange(of: viewModel.selectedModLoader) { oldValue, newLoader in
+            // 优化：仅在值实际变化时处理
+            if oldValue != newLoader {
+                viewModel.handleModLoaderChange(newLoader)
             }
-            .onChange(of: viewModel.selectedModLoader) { oldValue, newLoader in
-                // Optimization: only handle when the value actually changes
-                if oldValue != newLoader {
-                    viewModel.handleModLoaderChange(newLoader)
-                }
+        }
+        .onChange(of: viewModel.selectedGameVersion) { oldValue, newVersion in
+            // 优化：仅在值实际变化时处理
+            if oldValue != newVersion {
+                viewModel.handleGameVersionChange(newVersion)
             }
-            .onChange(of: viewModel.selectedGameVersion) { oldValue, newVersion in
-                // Optimization: only handle when the value actually changes
-                if oldValue != newVersion {
-                    viewModel.handleGameVersionChange(newVersion)
-                }
-            }
-            .onDisappear {
-                // Clear all data after closing the page
-                clearAllData()
-            }
+        }
+        .onDisappear {
+            // 页面关闭后清除所有数据
+            clearAllData()
+        }
     }
-    
-    // MARK: - clear data
-    /// Clear all data on the page
+
+    // MARK: - 清除数据
+    /// 清除页面所有数据
     private func clearAllData() {
-        // If downloading is in progress, cancel the download task
+        // 如果正在下载，取消下载任务
         if viewModel.isDownloading {
             viewModel.handleCancel()
         }
-        // The data of ViewModel will be re-initialized the next time it is opened. Here we mainly clean up temporary files
-        // Does not reset ViewModel state, may be using
+        viewModel.clearLoadedVersionsOnClose()
     }
-    
+
     // MARK: - View Components
-    
+
     private var formContentView: some View {
         VStack {
             gameIconAndVersionSection
-            if viewModel.selectedModLoader != "vanilla" {
+            if viewModel.selectedModLoader != GameLoader.vanilla.displayName {
                 loaderVersionPicker
             }
             gameNameSection
-            
+
             if viewModel.shouldShowProgress {
                 downloadProgressSection
             }
         }
     }
-    
+
     private var gameIconAndVersionSection: some View {
         FormSection {
             HStack(alignment: .top, spacing: Constants.formSpacing) {
@@ -123,14 +122,14 @@ struct GameCreationView: View {
             }
         }
     }
-    
+
     private var gameIconView: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Icon")
-                .font(.subheadline)
+            Text("game.form.icon".localized())
                 .foregroundColor(.primary)
-            
-            iconContainer
+
+                iconContainer
+                .applyPointerHandIfAvailable()
                 .onTapGesture {
                     if !viewModel.gameSetupService.downloadState.isDownloading {
                         onRequestImagePicker()
@@ -138,15 +137,15 @@ struct GameCreationView: View {
                 }
                 .onDrop(of: [UTType.image.identifier], isTargeted: nil) { providers in
                     if !viewModel.gameSetupService.downloadState.isDownloading {
-                        viewModel.handleImageDrop(providers)
+                        return viewModel.handleImageDrop(providers)
                     } else {
-                        false
+                        return false
                     }
                 }
         }
         .disabled(viewModel.gameSetupService.downloadState.isDownloading)
     }
-    
+
     private var iconContainer: some View {
         ZStack {
             if let url = viewModel.pendingIconURLForDisplay {
@@ -154,6 +153,7 @@ struct GameCreationView: View {
                     switch phase {
                     case .empty:
                         ProgressView()
+                            .controlSize(.small)
                     case .success(let image):
                         image
                             .resizable()
@@ -168,85 +168,108 @@ struct GameCreationView: View {
                                     cornerRadius: Constants.cornerRadius
                                 )
                             )
-                            .contentShape(.rect)
+                            .contentShape(Rectangle())
                     case .failure:
-                        RoundedRectangle(cornerRadius: Constants.cornerRadius)
-                            .stroke(
-                                Color.accentColor.opacity(0.3),
-                                lineWidth: 1
-                            )
-                            .background(.gray.opacity(0.08))
+                        iconPlaceholderView
                     @unknown default:
                         EmptyView()
                     }
                 }
-            } else {
-                VStack(spacing: 12) {
-                    Image(systemName: "photo.badge.plus")
-                        .symbolRenderingMode(.multicolor)
-                        .symbolVariant(.none)
-                        .fontWeight(.regular)
-                        .font(.system(size: 16))
+                .id(url.absoluteString)
+                .onDisappear {
+                    URLCache.shared.removeCachedResponse(
+                        for: URLRequest(url: url)
+                    )
                 }
-                .frame(maxWidth: .infinity, minHeight: 80)
-                .background(emptyDropBackground())
+            } else {
+                iconPlaceholderView
             }
         }
         .frame(width: Constants.iconSize, height: Constants.iconSize)
     }
-    
+
+    private var iconPlaceholderView: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "photo.badge.plus")
+                .symbolRenderingMode(.multicolor)
+                .symbolVariant(.none)
+                .fontWeight(.regular)
+                .font(.system(size: 16))
+        }
+        .frame(maxWidth: .infinity, minHeight: 80)
+        .background(emptyDropBackground())
+    }
+
     private var gameVersionAndLoaderView: some View {
         VStack(alignment: .leading, spacing: Constants.formSpacing) {
             modLoaderPicker
             versionPicker
         }
     }
-    
+
     private var versionPicker: some View {
         CustomVersionPicker(
             selected: $viewModel.selectedGameVersion,
             availableVersions: viewModel.availableVersions,
             time: $viewModel.versionTime
-        ) {
-            await ModrinthService.queryVersionTime(from: $0)
+        ) { version in
+            await ModrinthService.queryVersionTime(from: version)
         }
         .disabled(viewModel.gameSetupService.downloadState.isDownloading)
     }
-    
+
     private var modLoaderPicker: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Mod Loader")
-                .font(.subheadline)
+            Text("game.form.modloader".localized())
                 .foregroundColor(.primary)
-            Picker("", selection: $viewModel.selectedModLoader) {
-                ForEach(AppConstants.modLoaders, id: \.self) {
-                    Text($0)
-                        .tag($0)
+            CommonMenuPicker(
+                selection: $viewModel.selectedModLoader,
+                hidesLabel: true
+            ) {
+                Text("")
+            } content: {
+                ForEach(AppConstants.modLoaders, id: \.self) { loader in
+                    switch loader {
+                    case GameLoader.vanilla.displayName:
+                        Text("modloader.vanilla.text".localized()).tag(loader)
+                    case GameLoader.fabric.displayName:
+                        Text("modloader.fabric.text".localized()).tag(loader)
+                    case GameLoader.forge.displayName:
+                        Text("modloader.forge.text".localized()).tag(loader)
+                    case GameLoader.neoforge.displayName:
+                        Text("modloader.neoforge.text".localized()).tag(loader)
+                    case GameLoader.quilt.rawValue:
+                        Text("modloader.quilt.text".localized()).tag(loader)
+                    default:
+                        Text(loader.capitalized).tag(loader)
+                    }
                 }
             }
-            .labelsHidden()
-            .pickerStyle(.menu)
             .disabled(viewModel.gameSetupService.downloadState.isDownloading)
         }
+        .onChange(of: viewModel.selectedModLoader) { _, _ in
+            viewModel.availableLoaderVersions = []
+        }
     }
-    
+
     private var loaderVersionPicker: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Loader Version")
-                .font(.subheadline)
+            Text("game.form.loader.version".localized())
                 .foregroundColor(.primary)
-            Picker("", selection: $viewModel.selectedLoaderVersion) {
-                ForEach(viewModel.availableLoaderVersions, id: \.self) {
-                    Text($0)
-                        .tag($0)
+            CommonMenuPicker(
+                selection: $viewModel.selectedLoaderVersion,
+                hidesLabel: true
+            ) {
+                Text("")
+            } content: {
+                ForEach(viewModel.availableLoaderVersions, id: \.self) { version in
+                    Text(version).tag(version)
                 }
             }
-            .labelsHidden()
-            .pickerStyle(.menu)
             .disabled(viewModel.gameSetupService.downloadState.isDownloading || viewModel.availableLoaderVersions.isEmpty)
         }
     }
-    
+
     private var gameNameSection: some View {
         FormSection {
             GameNameInputView(
@@ -263,7 +286,7 @@ struct GameCreationView: View {
             )
         }
     }
-    
+
     private var downloadProgressSection: some View {
         DownloadProgressSection(
             gameSetupService: viewModel.gameSetupService,

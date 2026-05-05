@@ -2,15 +2,36 @@ import SwiftUI
 import Combine
 
 struct GameHeaderListRow: View {
+    private static let iconSize: CGFloat = 80
+    private static let iconPaddingRatio: CGFloat = 0.125
+    private static let iconCornerRadiusRatio: CGFloat = 0.2
+
     let game: GameVersionInfo
     let cacheInfo: CacheInfo
     let query: String
     let onImport: () -> Void
     var onIconTap: (() -> Void)?
-    
-    @State private var refreshTrigger = UUID()
+    private let iconRefreshNotifier: IconRefreshNotifier
+
+    @State private var refreshTrigger: UUID = UUID()
     @State private var cancellable: AnyCancellable?
-    
+
+    init(
+        game: GameVersionInfo,
+        cacheInfo: CacheInfo,
+        query: String,
+        onImport: @escaping () -> Void,
+        onIconTap: (() -> Void)? = nil,
+        iconRefreshNotifier: IconRefreshNotifier = AppServices.iconRefreshNotifier
+    ) {
+        self.game = game
+        self.cacheInfo = cacheInfo
+        self.query = query
+        self.onImport = onImport
+        self.onIconTap = onIconTap
+        self.iconRefreshNotifier = iconRefreshNotifier
+    }
+
     var body: some View {
         HStack {
             gameIcon
@@ -23,7 +44,6 @@ struct GameHeaderListRow: View {
                         .lineLimit(1)
                         .frame(minWidth: 0, maxWidth: 200)
                         .fixedSize(horizontal: true, vertical: false)
-                    
                     HStack {
                         Label("\(cacheInfo.fileCount)", systemImage: "text.document")
                         Divider().frame(height: 16)
@@ -33,7 +53,7 @@ struct GameHeaderListRow: View {
                     .font(.headline)
                     .padding(.leading, 6)
                 }
-                
+
                 HStack(spacing: 8) {
                     Label(game.gameVersion, systemImage: "gamecontroller.fill")
                         .font(.subheadline)
@@ -41,8 +61,8 @@ struct GameHeaderListRow: View {
                     Divider().frame(height: 14)
                     Label(
                         game.modVersion.isEmpty
-                        ? game.modLoader
-                        : "\(game.modLoader)-\(game.modVersion)",
+                            ? game.modLoader
+                            : "\(game.modLoader)-\(game.modVersion)",
                         systemImage: "puzzlepiece.extension.fill"
                     )
                     .font(.subheadline)
@@ -68,44 +88,64 @@ struct GameHeaderListRow: View {
             EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 8)
         )
     }
-    
-    /// Icon file URL (the path is fixed; refresh only relies on notifications to trigger .id reconstruction)
-    private var iconURL: URL {
-        profileDir.appendingPathComponent(game.gameIcon)
+
+    /// 图标文件 URL（基础路径）
+    private var iconFileURL: URL? {
+        let trimmed = game.gameIcon.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        let url = profileDir.appendingPathComponent(trimmed)
+        var isDirectory: ObjCBool = false
+        guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory),
+              !isDirectory.boolValue
+        else { return nil }
+        return url
     }
-    
+
+    /// 带刷新参数的 URL，用于绕过 AsyncImage 的缓存命中
+    private var iconDisplayURL: URL? {
+        guard let baseURL = iconFileURL else { return nil }
+        var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)
+        components?.queryItems = [URLQueryItem(name: "refresh", value: refreshTrigger.uuidString)]
+        return components?.url ?? baseURL
+    }
+
     private var gameIcon: some View {
         Group {
-            if FileManager.default.fileExists(atPath: profileDir.appendingPathComponent(game.gameIcon).path) {
+            if let iconURL = iconDisplayURL {
                 AsyncImage(url: iconURL) { phase in
                     switch phase {
                     case .empty:
                         ProgressView()
-                            .controlSize(.regular)
-                            .frame(width: 80, height: 80)
+                            .controlSize(.small)
+                            .frame(width: Self.iconSize, height: Self.iconSize)
                     case .success(let image):
-                        styledIcon(image, size: 80)
+                        styledIcon(image, size: Self.iconSize)
                     case .failure:
                         defaultIcon
                     @unknown default:
                         defaultIcon
                     }
                 }
-                // Extra layer of insurance: force AsyncImage rebuild even if URL splicing/caching does not behave as expected
                 .id(refreshTrigger)
+                .onDisappear {
+                    URLCache.shared.removeCachedResponse(
+                        for: URLRequest(url: iconURL)
+                    )
+                }
             } else {
                 defaultIcon
             }
         }
-        .contentShape(.rect)
+        .contentShape(Rectangle())
         .onTapGesture {
             onIconTap?()
         }
         .onAppear {
-            // Listen for icon refresh notifications
-            cancellable = IconRefreshNotifier.shared.refreshPublisher
+            // 监听图标刷新通知
+            cancellable = iconRefreshNotifier.refreshPublisher
                 .sink { refreshedGameName in
-                    // Refresh if the notification's game name matches, or if the notification is nil (refresh all)
+                    // 如果通知的游戏名称匹配，或者通知为 nil（刷新所有），则刷新
                     if refreshedGameName == nil || refreshedGameName == game.gameName {
                         refreshTrigger = UUID()
                     }
@@ -114,27 +154,41 @@ struct GameHeaderListRow: View {
         .onDisappear {
             cancellable?.cancel()
         }
+        .applyPointerHandIfAvailable()
     }
-    
+
     private var profileDir: URL {
         AppPaths.profileDirectory(gameName: game.gameName)
     }
-    
+
     private var defaultIcon: some View {
-        Image(nsImage: NSImage(named: "AppIcon") ?? NSImage())
-            .resizable()
-            .interpolation(.none)
-            .frame(width: 80, height: 80)
-            .cornerRadius(16)
+        let padding = Self.iconSize * Self.iconPaddingRatio
+        let innerSize = Self.iconSize - padding * 2
+        let innerCornerRadius = innerSize * Self.iconCornerRadiusRatio
+        let outerCornerRadius = Self.iconSize * Self.iconCornerRadiusRatio
+
+        return RoundedRectangle(cornerRadius: innerCornerRadius, style: .continuous)
+            .fill(Color.secondary.opacity(0.12))
+            .overlay {
+                Image(systemName: "photo.badge.plus")
+                    .symbolRenderingMode(.multicolor)
+                    .symbolVariant(.none)
+                    .font(.system(size: 18, weight: .regular))
+                    .foregroundColor(.secondary)
+            }
+            .frame(width: innerSize, height: innerSize)
+            .padding(padding)
+            .frame(width: Self.iconSize, height: Self.iconSize)
+            .clipShape(RoundedRectangle(cornerRadius: outerCornerRadius, style: .continuous))
     }
-    
+
     @ViewBuilder
-    private func styledIcon(_ image: Image, size: Int) -> some View {
-        let padding: CGFloat = CGFloat(size) * 0.125 // padding is 12.5% ​​of size (10 at 80)
-        let innerSize = CGFloat(size) - padding * 2
-        let innerCornerRadius = innerSize * 0.2 // The inner fillet is 20% of the inner size
-        let outerCornerRadius = CGFloat(size) * 0.2 // The outer fillet is 20% of the outer size
-        
+    private func styledIcon(_ image: Image, size: CGFloat) -> some View {
+        let padding = size * Self.iconPaddingRatio // padding 为 size 的 12.5%（80 时是 10）
+        let innerSize = size - padding * 2
+        let innerCornerRadius = innerSize * Self.iconCornerRadiusRatio // 内层圆角为内层尺寸的 20%
+        let outerCornerRadius = size * Self.iconCornerRadiusRatio // 外层圆角为外层尺寸的 20%
+
         image
             .resizable()
             .interpolation(.none)
@@ -142,10 +196,10 @@ struct GameHeaderListRow: View {
             .frame(width: innerSize, height: innerSize)
             .clipShape(RoundedRectangle(cornerRadius: innerCornerRadius, style: .continuous))
             .padding(padding)
-            .frame(width: CGFloat(size), height: CGFloat(size))
+            .frame(width: size, height: size)
             .clipShape(RoundedRectangle(cornerRadius: outerCornerRadius, style: .continuous))
     }
-    
+
     private var importButton: some View {
         LocalResourceInstaller.ImportButton(
             query: query,

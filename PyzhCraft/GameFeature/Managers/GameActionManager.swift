@@ -1,38 +1,46 @@
-import SwiftUI
+//
+//  GameActionManager.swift
+//  PyzhCraft
+//
+//  Created by su on 2025/1/27.
+//
 
-/// Game Operation Manager
-/// Provides general game-related operations, such as displaying in Finder, deleting games, etc
+import SwiftUI
+import AppKit
+
+/// 游戏操作管理器
+/// 提供游戏相关的通用操作，如显示在访达、删除游戏等
 @MainActor
 class GameActionManager: ObservableObject {
-    
+
     static let shared = GameActionManager()
-    
+
     private init() {}
-    
+
     // MARK: - Public Methods
-    
-    /// Show game directory in Finder
-    /// - Parameter game: game version information
+
+    /// 在访达中显示游戏目录
+    /// - Parameter game: 游戏版本信息
     func showInFinder(game: GameVersionInfo) {
         let gameDirectory = AppPaths.profileDirectory(gameName: game.gameName)
-        
-        // Check if directory exists
+
+        // 检查目录是否存在
         guard FileManager.default.fileExists(atPath: gameDirectory.path) else {
-            Logger.shared.warning("Game directory does not exist: \(gameDirectory.path)")
+            Logger.shared.warning("游戏目录不存在: \(gameDirectory.path)")
             return
         }
-        
-        // Show directory in Finder
+
+        // 在访达中显示目录
         NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: gameDirectory.path)
-        Logger.shared.info("Show game directory in Finder: \(game.gameName)")
+        Logger.shared.info("在访达中显示游戏目录: \(game.gameName)")
     }
-    
-    /// Delete the game and its folder
+
+    /// 删除游戏及其文件夹
     /// - Parameters:
-    ///   - game: game version information to be deleted
-    ///   - gameRepository: game repository
-    ///   - selectedItem: currently selected sidebar item (for switching after deletion)
-    ///   - gameType: game type binding (set to true when switching to the resource page)
+    ///   - game: 要删除的游戏版本信息
+    ///   - gameRepository: 游戏仓库
+    ///   - selectedItem: 当前选中的侧边栏项目（用于删除后切换）
+    ///   - gameType: 游戏类型绑定（用于切换到资源页面时设置为 true）
     func deleteGame(
         game: GameVersionInfo,
         gameRepository: GameRepository,
@@ -41,17 +49,23 @@ class GameActionManager: ObservableObject {
     ) {
         Task {
             do {
-                // Deletion is not allowed while the game is running
-                if GameProcessManager.shared.isGameRunning(gameId: game.id) {
+                let gameProcessManager = AppServices.gameProcessManager
+                let gameStatusManager = AppServices.gameStatusManager
+                let gameIconCache = AppServices.gameIconCache
+                let modScanner = AppServices.modScanner
+
+                // 游戏运行中不允许删除（任意玩家下该游戏在运行即不允许）
+                if gameProcessManager.isGameRunningForAnyUser(gameId: game.id) {
                     let error = GlobalError.validation(
-                        i18nKey: "Game is running, cannot delete",
+                        chineseMessage: "游戏运行中，无法删除",
+                        i18nKey: "error.validation.game_running_cannot_delete",
                         level: .notification
                     )
-                    GlobalErrorHandler.shared.handle(error)
+                    AppServices.errorHandler.handle(error)
                     return
                 }
-                
-                // Switch to other games or resource pages first to avoid page reloading after deletion
+
+                // 先切换到其他游戏或资源页面，避免删除后页面重新加载
                 if let selectedItem = selectedItem {
                     await MainActor.run {
                         if let firstGame = gameRepository.games.first(where: {
@@ -60,66 +74,81 @@ class GameActionManager: ObservableObject {
                             selectedItem.wrappedValue = .game(firstGame.id)
                         } else {
                             selectedItem.wrappedValue = .resource(.mod)
-                            // When switching to the resource page, set gameType to true
+                            // 切换到资源页面时，将 gameType 设置为 true
                             gameType?.wrappedValue = true
                         }
                     }
                 }
-                
-                // Clear the residual status of the game in the process/state manager (to avoid invalid keys after deletion)
-                GameProcessManager.shared.removeGameState(gameId: game.id)
-                GameStatusManager.shared.removeGameState(gameId: game.id)
-                
-                // Delete the game folder first (if it does not exist, skip but continue deleting records)
+
+                // 清除该游戏在进程/状态管理器中的残留状态（删除后避免无效 key）
+                gameProcessManager.removeGameState(gameId: game.id)
+                gameStatusManager.removeGameState(gameId: game.id)
+
+                // 先删除游戏文件夹（若不存在则跳过但继续删记录）
                 let profileDir = AppPaths.profileDirectory(gameName: game.gameName)
                 if FileManager.default.fileExists(atPath: profileDir.path) {
                     try FileManager.default.removeItem(at: profileDir)
                 } else {
-                    Logger.shared.warning("Game directory not found when deleting game, file deletion skipped: \(profileDir.path)")
+                    Logger.shared.warning("删除游戏时未找到游戏目录，跳过文件删除: \(profileDir.path)")
                 }
-                
-                // Clear all memory cache related to this game (icons, paths, mod scan results)
-                GameIconCache.shared.invalidateCache(for: game.gameName)
+
+                // 清除该游戏相关的所有内存缓存（图标、路径、mod 扫描结果）
+                gameIconCache.invalidateCache(for: game.gameName)
                 AppPaths.invalidatePaths(forGameName: game.gameName)
-                await ModScanner.shared.clearModCache(for: game.gameName)
-                
-                // Delete game history
+                await modScanner.clearModCache(for: game.gameName)
+
+                // 删除游戏记录
                 try await gameRepository.deleteGame(id: game.id)
-                
-                Logger.shared.info("Game deleted successfully: \(game.gameName)")
+
+                Logger.shared.info("成功删除游戏: \(game.gameName)")
             } catch {
                 let globalError = GlobalError.fileSystem(
-                    i18nKey: "Game Deletion Failed",
+                    chineseMessage: "删除游戏失败: \(error.localizedDescription)",
+                    i18nKey: "error.filesystem.game_deletion_failed",
                     level: .notification
                 )
-                Logger.shared.error("Failed to delete game: \(globalError.chineseMessage)")
-                GlobalErrorHandler.shared.handle(globalError)
+                Logger.shared.error("删除游戏失败: \(globalError.chineseMessage)")
+                AppServices.errorHandler.handle(globalError)
             }
         }
     }
-    
-    /// Delete only corrupted game records in database
+
+    /// 删除损坏游戏（只知道游戏名称，可能只有数据库记录或只有本地目录）
     /// - Parameters:
-    ///   - game: corrupted game record
-    ///   - gameRepository: game repository
+    ///   - name: 游戏名称
+    ///   - gameRepository: 游戏仓库
     func deleteCorruptedGame(
-        game: GameVersionInfo,
+        name: String,
         gameRepository: GameRepository
     ) {
         Task {
             do {
-                try await gameRepository.deleteCorruptedGame(gameName: game.gameName)
-                GameIconCache.shared.invalidateCache(for: game.gameName)
-                AppPaths.invalidatePaths(forGameName: game.gameName)
-                await ModScanner.shared.clearModCache(for: game.gameName)
-                Logger.shared.info("Corrupted game record deleted successfully: \(game.gameName)")
+                let gameIconCache = AppServices.gameIconCache
+                let modScanner = AppServices.modScanner
+
+                // 删除目录（若存在）：可能是“只有目录”的损坏情况
+                let profileDir = AppPaths.profileDirectory(gameName: name)
+                if FileManager.default.fileExists(atPath: profileDir.path) {
+                    try FileManager.default.removeItem(at: profileDir)
+                }
+
+                // 清除缓存
+                gameIconCache.invalidateCache(for: name)
+                AppPaths.invalidatePaths(forGameName: name)
+                await modScanner.clearModCache(for: name)
+
+                // 删除当前工作路径下该名称的所有数据库记录
+                try await gameRepository.deleteGamesByName(name)
+
+                Logger.shared.info("成功删除损坏游戏（目录 + 数据库）: \(name)")
             } catch {
                 let globalError = GlobalError.fileSystem(
-                    i18nKey: "Game Deletion Failed",
+                    chineseMessage: "删除损坏游戏失败: \(error.localizedDescription)",
+                    i18nKey: "error.filesystem.game_deletion_failed",
                     level: .notification
                 )
-                Logger.shared.error("Failed to delete corrupted game record: \(globalError.chineseMessage)")
-                GlobalErrorHandler.shared.handle(globalError)
+                Logger.shared.error("删除损坏游戏失败: \(globalError.chineseMessage)")
+                AppServices.errorHandler.handle(globalError)
             }
         }
     }

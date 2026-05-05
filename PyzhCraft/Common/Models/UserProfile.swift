@@ -1,30 +1,30 @@
 import Foundation
 
-/// User basic information model
-/// Stored in plist file
+/// 用户基本信息模型
+/// 存储在 plist 文件中
 struct UserProfile: Identifiable, Codable, Equatable {
-    /// user unique identifier
+    /// 用户唯一标识符
     let id: String
-    
-    /// Username
+
+    /// 用户名称
     let name: String
-    
-    /// Avatar name or path
+
+    /// 头像名称或路径
     let avatar: String
-    
-    /// last play time
+
+    /// 最后游玩时间
     var lastPlayed: Date
-    
-    /// Is it the currently selected user?
+
+    /// 是否为当前选中的用户
     var isCurrent: Bool
-    
-    /// Initialize basic user information
+
+    /// 初始化用户基本信息
     /// - Parameters:
-    ///   - id: user’s unique identifier
-    ///   - name: user name
-    ///   - avatar: avatar name or path
-    ///   - lastPlayed: last play time, default is current time
-    ///   - isCurrent: whether it is the currently selected user, default false
+    ///   - id: 用户唯一标识符
+    ///   - name: 用户名称
+    ///   - avatar: 头像名称或路径
+    ///   - lastPlayed: 最后游玩时间，默认当前时间
+    ///   - isCurrent: 是否为当前选中的用户，默认 false
     init(
         id: String,
         name: String,

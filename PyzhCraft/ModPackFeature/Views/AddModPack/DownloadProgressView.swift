@@ -16,12 +16,12 @@ struct DownloadProgressView: View {
     private var gameDownloadProgress: some View {
         Group {
             progressRow(
-                title: "Core Files",
+                title: "download.core.title".localized(),
                 state: gameSetupService.downloadState,
                 type: .core
             )
             progressRow(
-                title: "Resource Files",
+                title: "download.resources.title".localized(),
                 state: gameSetupService.downloadState,
                 type: .resources
             )
@@ -34,21 +34,21 @@ struct DownloadProgressView: View {
                 let loaderType = indexInfo.loaderType.lowercased()
                 let title = getLoaderTitle(for: indexInfo.loaderType)
 
-                if loaderType == "fabric" || loaderType == "quilt" {
+                if loaderType == GameLoader.fabric.displayName || loaderType == GameLoader.quilt.rawValue {
                     progressRow(
                         title: title,
                         state: gameSetupService.fabricDownloadState,
                         type: .core,
                         version: indexInfo.loaderVersion
                     )
-                } else if loaderType == "forge" {
+                } else if loaderType == GameLoader.forge.displayName {
                     progressRow(
                         title: title,
                         state: gameSetupService.forgeDownloadState,
                         type: .core,
                         version: indexInfo.loaderVersion
                     )
-                } else if loaderType == "neoforge" {
+                } else if loaderType == GameLoader.neoforge.displayName {
                     progressRow(
                         title: title,
                         state: gameSetupService.neoForgeDownloadState,
@@ -63,23 +63,24 @@ struct DownloadProgressView: View {
     private var modPackInstallProgress: some View {
         Group {
             if modPackInstallState.isInstalling {
+                // 显示 overrides 进度条（只有在有文件需要合并时才显示）
                 if modPackInstallState.overridesTotal > 0 {
                     progressRow(
-                        title: "Copy Files",
+                        title: "launcher.import.copying_files".localized(),
                         installState: modPackInstallState,
                         type: .overrides
                     )
                 }
 
                 progressRow(
-                    title: "Modpack Files",
+                    title: "modpack.files.title".localized(),
                     installState: modPackInstallState,
                     type: .files
                 )
 
                 if modPackInstallState.dependenciesTotal > 0 {
                     progressRow(
-                        title: "Modpack Dependencies",
+                        title: "modpack.dependencies.title".localized(),
                         installState: modPackInstallState,
                         type: .dependencies
                     )
@@ -89,7 +90,7 @@ struct DownloadProgressView: View {
     }
 
     private func progressRow(
-        title: LocalizedStringKey,
+        title: String,
         state: DownloadState,
         type: ProgressType,
         version: String? = nil
@@ -105,7 +106,7 @@ struct DownloadProgressView: View {
     }
 
     private func progressRow(
-        title: LocalizedStringKey,
+        title: String,
         installState: ModPackInstallState,
         type: InstallProgressType
     ) -> some View {
@@ -157,21 +158,50 @@ struct DownloadProgressView: View {
         }
     }
 
-    private func getLoaderTitle(for loaderType: String) -> LocalizedStringKey {
+    private func getLoaderTitle(for loaderType: String) -> String {
         switch loaderType.lowercased() {
-        case "fabric": "Fabric Loader"
-        case "quilt": "QuiltMC Loader"
-        case "forge": "Forge Loader"
-        case "neoforge": "NeoForge Loader"
-        default: ""
+        case GameLoader.fabric.displayName:
+            return "fabric.loader.title".localized()
+        case GameLoader.quilt.rawValue:
+            return "quilt.loader.title".localized()
+        case GameLoader.forge.displayName:
+            return "forge.loader.title".localized()
+        case GameLoader.neoforge.displayName:
+            return "neoforge.loader.title".localized()
+        default:
+            return ""
         }
     }
 }
 
-enum ProgressType {
+// MARK: - Supporting Types
+private enum ProgressType {
     case core, resources
 }
 
-enum InstallProgressType {
+private enum InstallProgressType {
     case files, dependencies, overrides
+}
+
+// MARK: - Progress Row Wrapper
+private struct ProgressRowWrapper: View {
+    let title: String
+    @ObservedObject var state: DownloadState
+    let type: ProgressType
+    let version: String?
+
+    var body: some View {
+        DownloadProgressRow(
+            title: title,
+            progress: type == .core
+                ? state.coreProgress : state.resourcesProgress,
+            currentFile: type == .core
+                ? state.currentCoreFile : state.currentResourceFile,
+            completed: type == .core
+                ? state.coreCompletedFiles : state.resourcesCompletedFiles,
+            total: type == .core
+                ? state.coreTotalFiles : state.resourcesTotalFiles,
+            version: version
+        )
+    }
 }

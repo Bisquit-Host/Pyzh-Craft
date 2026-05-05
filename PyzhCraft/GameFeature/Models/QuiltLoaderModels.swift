@@ -1,9 +1,9 @@
 import Foundation
 
-struct QuiltLoaderResponse: Codable {
-    struct Loader: Codable {
+struct QuiltLoaderResponse: Codable, Sendable {
+    struct Loader: Codable, Sendable {
         let version: String
     }
-    
+
     let loader: Loader
 }

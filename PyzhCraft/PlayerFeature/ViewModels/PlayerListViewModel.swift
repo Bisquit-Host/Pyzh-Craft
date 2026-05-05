@@ -1,15 +1,18 @@
+import Foundation
 import SwiftUI
 
 /// A view model that manages the list of players and interacts with PlayerDataManager.
 class PlayerListViewModel: ObservableObject {
     @Published var players: [Player] = []
     @Published var currentPlayer: Player?
-    
+
     private let dataManager = PlayerDataManager()
+    private let errorHandler: GlobalErrorHandler
     private var notificationObserver: NSObjectProtocol?
-    
-    init() {
-        loadPlayersSafely()
+    private var hasLoadedPlayers = false
+
+    init(errorHandler: GlobalErrorHandler = AppServices.errorHandler) {
+        self.errorHandler = errorHandler
         setupNotifications()
     }
     deinit {
@@ -19,7 +22,7 @@ class PlayerListViewModel: ObservableObject {
     }
     private func setupNotifications() {
         notificationObserver = NotificationCenter.default.addObserver(
-            forName: PlayerSkinService.playerUpdatedNotification,
+            forName: .playerUpdated,
             object: nil,
             queue: .main
         ) { [weak self] notification in
@@ -28,81 +31,87 @@ class PlayerListViewModel: ObservableObject {
             }
         }
     }
-    
+
     // MARK: - Public Methods
-    
-    /// Load player list (silent version)
+
+    func loadPlayersIfNeeded() {
+        guard !hasLoadedPlayers else { return }
+        loadPlayersSafely()
+    }
+
+    /// 加载玩家列表（静默版本）
     func loadPlayers() {
         loadPlayersSafely()
     }
-    
-    /// Loading player list (throws exception version)
-    /// - Throws: GlobalError when the operation fails
+
+    /// 加载玩家列表（抛出异常版本）
+    /// - Throws: GlobalError 当操作失败时
     func loadPlayersThrowing() throws {
         players = try dataManager.loadPlayersThrowing()
         currentPlayer = players.first { $0.isCurrent }
-        Logger.shared.debug("Player list loaded, quantity: \(players.count)")
-        Logger.shared.debug("Current player (after loading): \(currentPlayer?.name ?? "none")")
+        Logger.shared.debug("玩家列表已加载，数量: \(players.count)")
+        Logger.shared.debug("当前玩家 (加载后): \(currentPlayer?.name ?? "无")")
     }
-    
-    /// Safely load player lists
+
+    /// 安全地加载玩家列表
     private func loadPlayersSafely() {
         do {
             try loadPlayersThrowing()
+            hasLoadedPlayers = true
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to load player list: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
-            // keep current status
+            Logger.shared.error("加载玩家列表失败: \(globalError.chineseMessage)")
+            errorHandler.handle(globalError)
+            // 保持现有状态
         }
     }
-    
-    /// Add new players (silent version)
-    /// - Parameter name: The name of the player to be added
-    /// - Returns: Whether added successfully
+
+    /// 添加新玩家（静默版本）
+    /// - Parameter name: 要添加的玩家名称
+    /// - Returns: 是否成功添加
     func addPlayer(name: String) -> Bool {
         do {
             try addPlayerThrowing(name: name)
             return true
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to add player: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("添加玩家失败: \(globalError.chineseMessage)")
+            errorHandler.handle(globalError)
             return false
         }
     }
-    
-    /// Add new player (throws exception version)
-    /// - Parameter name: The name of the player to be added
-    /// - Throws: GlobalError when the operation fails
+
+    /// 添加新玩家（抛出异常版本）
+    /// - Parameter name: 要添加的玩家名称
+    /// - Throws: GlobalError 当操作失败时
     func addPlayerThrowing(name: String) throws {
         try dataManager.addPlayer(name: name, isOnline: false, avatarName: "")
         try loadPlayersThrowing()
-        Logger.shared.debug("Player \(name) was added successfully and the list has been updated")
-        Logger.shared.debug("Current player (after addition): \(currentPlayer?.name ?? "none")")
+        Logger.shared.debug("玩家 \(name) 添加成功，列表已更新。")
+        Logger.shared.debug("当前玩家 (添加后): \(currentPlayer?.name ?? "无")")
     }
-    
-    /// Add online players (silent version)
-    /// - Parameter profile: Minecraft configuration file
-    /// - Returns: Whether added successfully
+
+    /// 添加在线玩家（静默版本）
+    /// - Parameter profile: Minecraft 配置文件
+    /// - Returns: 是否成功添加
     func addOnlinePlayer(profile: MinecraftProfileResponse) -> Bool {
         do {
             try addOnlinePlayerThrowing(profile: profile)
             return true
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to add online player: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("添加在线玩家失败: \(globalError.chineseMessage)")
+            errorHandler.handle(globalError)
             return false
         }
     }
-    
-    /// Add online player (throws exception version)
-    /// - Parameter profile: Minecraft configuration file
-    /// - Throws: GlobalError when the operation fails
+
+    /// 添加在线玩家（抛出异常版本）
+    /// - Parameter profile: Minecraft 配置文件
+    /// - Throws: GlobalError 当操作失败时
     func addOnlinePlayerThrowing(profile: MinecraftProfileResponse) throws {
         let avatarUrl =
-        profile.skins.isEmpty ? "" : profile.skins[0].url.httpToHttps()
+            profile.skins.isEmpty ? "" : profile.skins[0].url.httpToHttps()
         try dataManager.addPlayer(
             name: profile.name,
             uuid: profile.id,
@@ -113,105 +122,141 @@ class PlayerListViewModel: ObservableObject {
             xuid: profile.authXuid
         )
         try loadPlayersThrowing()
-        Logger.shared.debug("Player \(profile.name) was added successfully and the list has been updated")
-        Logger.shared.debug("Current player (after addition): \(currentPlayer?.name ?? "none")")
+        Logger.shared.debug("玩家 \(profile.name) 添加成功，列表已更新。")
+        Logger.shared.debug("当前玩家 (添加后): \(currentPlayer?.name ?? "无")")
     }
-    
-    /// Remove player (silent version)
-    /// - Parameter id: Player ID to be deleted
-    /// - Returns: Whether the deletion was successful
+
+    /// 添加 Yggdrasil 在线玩家（静默版本）
+    /// - Parameter profile: Yggdrasil 玩家资料
+    /// - Returns: 是否成功添加
+    func addOnlinePlayer(profile: YggdrasilProfile) -> Bool {
+        do {
+            try addOnlinePlayerThrowing(profile: profile)
+            return true
+        } catch {
+            let globalError = GlobalError.from(error)
+            Logger.shared.error("添加 Yggdrasil 玩家失败: \(globalError.chineseMessage)")
+            errorHandler.handle(globalError)
+            return false
+        }
+    }
+
+    /// 添加 Yggdrasil 在线玩家（抛出异常版本）
+    /// - Parameter profile: Yggdrasil 玩家资料
+    /// - Throws: GlobalError 当操作失败时
+    func addOnlinePlayerThrowing(profile: YggdrasilProfile) throws {
+        let avatarUrl = profile.skins.isEmpty ? "" : profile.skins[0].url.httpToHttps()
+        try dataManager.addPlayer(
+            name: profile.name,
+            uuid: profile.id,
+            isOnline: false,
+            avatarName: avatarUrl,
+            accToken: profile.accessToken,
+            refreshToken: profile.refreshToken,
+            xuid: ""
+        )
+        try loadPlayersThrowing()
+        Logger.shared.debug("Yggdrasil 玩家 \(profile.name) 添加成功，列表已更新。")
+    }
+
+    /// 删除玩家（静默版本）
+    /// - Parameter id: 要删除的玩家ID
+    /// - Returns: 是否成功删除
     func deletePlayer(byID id: String) -> Bool {
         do {
             try deletePlayerThrowing(byID: id)
             return true
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to delete player: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("删除玩家失败: \(globalError.chineseMessage)")
+            errorHandler.handle(globalError)
             return false
         }
     }
-    
-    /// Remove player (throws exception version)
-    /// - Parameter id: Player ID to be deleted
-    /// - Throws: GlobalError when the operation fails
+
+    /// 删除玩家（抛出异常版本）
+    /// - Parameter id: 要删除的玩家ID
+    /// - Throws: GlobalError 当操作失败时
     func deletePlayerThrowing(byID id: String) throws {
         try dataManager.deletePlayer(byID: id)
         try loadPlayersThrowing()
-        Logger.shared.debug("Player (ID: \(id)) was deleted successfully and the list has been updated")
-        Logger.shared.debug("Current player (after deletion): \(currentPlayer?.name ?? "none")")
+        Logger.shared.debug("玩家 (ID: \(id)) 删除成功，列表已更新。")
+        Logger.shared.debug("当前玩家 (删除后): \(currentPlayer?.name ?? "无")")
     }
-    
-    /// Set current player (silent version)
-    /// - Parameter playerId: To be set as the ID of the current player
+
+    /// 设置当前玩家（静默版本）
+    /// - Parameter playerId: 要设置为当前玩家的ID
     func setCurrentPlayer(byID playerId: String) {
-        do {
-            try setCurrentPlayerThrowing(byID: playerId)
-        } catch {
-            let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to set current player: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+        if playerId != currentPlayer?.id {
+            do {
+                try setCurrentPlayerThrowing(byID: playerId)
+            } catch {
+                let globalError = GlobalError.from(error)
+                Logger.shared.error("设置当前玩家失败: \(globalError.chineseMessage)")
+                errorHandler.handle(globalError)
+            }
         }
     }
-    
-    /// Set current player (throws exception version)
-    /// - Parameter playerId: To be set as the ID of the current player
-    /// - Throws: GlobalError when the operation fails
+
+    /// 设置当前玩家（抛出异常版本）
+    /// - Parameter playerId: 要设置为当前玩家的ID
+    /// - Throws: GlobalError 当操作失败时
     func setCurrentPlayerThrowing(byID playerId: String) throws {
         guard let index = players.firstIndex(where: { $0.id == playerId })
         else {
             throw GlobalError.player(
-                i18nKey: "Not Found",
+                chineseMessage: "玩家不存在: \(playerId)",
+                i18nKey: "error.player.not_found",
                 level: .notification
             )
         }
-        
+
         for i in 0..<players.count {
             players[i].isCurrent = (i == index)
         }
         currentPlayer = players[index]
-        
+
         try dataManager.savePlayersThrowing(players)
         Logger.shared.debug(
-            "Current player set (ID: \(playerId), Name: \(currentPlayer?.name ?? "unknown")), data saved"
+            "已设置玩家 (ID: \(playerId), 姓名: \(currentPlayer?.name ?? "未知")) 为当前玩家，数据已保存。"
         )
     }
-    
-    /// Check if player exists
-    /// - Parameter name: The name to check
-    /// - Returns: Returns true if there is a player with the same name, otherwise returns false
+
+    /// 检查玩家是否存在
+    /// - Parameter name: 要检查的名称
+    /// - Returns: 如果存在同名玩家则返回 true，否则返回 false
     func playerExists(name: String) -> Bool {
         dataManager.playerExists(name: name)
     }
-    
-    /// Update the specified player information in the player list
-    /// - Parameter updatedPlayer: updated player object
+
+    /// 更新玩家列表中的指定玩家信息
+    /// - Parameter updatedPlayer: 更新后的玩家对象
     func updatePlayerInList(_ updatedPlayer: Player) {
         do {
             try updatePlayerInListThrowing(updatedPlayer)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to update player list: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("更新玩家列表失败: \(globalError.chineseMessage)")
+            errorHandler.handle(globalError)
         }
     }
-    
-    /// Update the specified player information in the player list (throws exception version)
-    /// - Parameter updatedPlayer: updated player object
-    /// - Throws: GlobalError when the operation fails
+
+    /// 更新玩家列表中的指定玩家信息（抛出异常版本）
+    /// - Parameter updatedPlayer: 更新后的玩家对象
+    /// - Throws: GlobalError 当操作失败时
     func updatePlayerInListThrowing(_ updatedPlayer: Player) throws {
-        // Record current player information before update
-        Logger.shared.info("[updatePlayerInListThrowing] Current player information before update:")
-        // Update local player list
+        // 记录更新前的当前玩家信息
+        Logger.shared.info("[updatePlayerInListThrowing] 更新前当前玩家信息:")
+        // 更新本地玩家列表
         if let index = players.firstIndex(where: { $0.id == updatedPlayer.id }) {
             players[index] = updatedPlayer
-            
-            // If the current player is updated, currentPlayer must also be updated
+
+            // 如果更新的是当前玩家，也要更新 currentPlayer
             if let currentPlayer = currentPlayer, currentPlayer.id == updatedPlayer.id {
                 self.currentPlayer = updatedPlayer
             }
-            
-            Logger.shared.debug("Player information in the player list has been updated: \(updatedPlayer.name)")
+
+            Logger.shared.debug("玩家列表中的玩家信息已更新: \(updatedPlayer.name)")
         }
     }
 }

@@ -1,3 +1,10 @@
+//
+//  GameNameInputView.swift
+//  PyzhCraft
+//
+//  Created by su on 2025/1/27.
+//
+
 import SwiftUI
 
 // MARK: - GameNameInputView
@@ -5,17 +12,16 @@ struct GameNameInputView: View {
     @Binding var gameName: String
     @Binding var isGameNameDuplicate: Bool
     @FocusState private var isGameNameFocused: Bool
-    @State private var showErrorPopover = false
+    @State private var showErrorPopover: Bool = false
     let isDisabled: Bool
     let gameSetupService: GameSetupUtil
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Name")
-                .font(.subheadline)
+            Text("game.form.name".localized())
                 .foregroundColor(.primary)
             TextField(
-                "Enter game name",
+                "game.form.name.placeholder".localized(),
                 text: $gameName
             )
             .textFieldStyle(.roundedBorder)
@@ -25,7 +31,7 @@ struct GameNameInputView: View {
             .disabled(isDisabled)
             .popover(isPresented: $showErrorPopover, arrowEdge: .trailing) {
                 if isGameNameDuplicate {
-                    Text("Duplicate")
+                    Text("game.form.name.duplicate".localized())
                         .padding()
                         .presentationCompactAdaptation(.popover)
                 }

@@ -1,8 +1,8 @@
 import Foundation
-import OSLog
+import os
 
 enum ModrinthDependencyDownloader {
-    /// Download all dependencies recursively (based on official dependency API)
+    /// 递归下载所有依赖（基于官方依赖API）
     static func downloadAllDependenciesRecursive(
         for projectId: String,
         gameInfo: GameVersionInfo,
@@ -11,99 +11,98 @@ enum ModrinthDependencyDownloader {
         actuallyDownloaded: inout [ModrinthProjectDetail],
         visited: inout Set<String>
     ) async {
-        // Check if query is a valid resource type
-        let validResourceTypes = ["mod", "datapack", "shader", "resourcepack"]
+        // 检查 query 是否是有效的资源类型
         let queryLowercased = query.lowercased()
-        
-        // If query is modpack or an invalid resource type, return directly
-        if queryLowercased == "modpack" || !validResourceTypes.contains(queryLowercased) {
-            Logger.shared.error("Downloading this type of resource is not supported: \(query)")
+
+        // 如果 query 是 modpack 或无效的资源类型，直接返回
+        if queryLowercased == ResourceType.modpack.rawValue || !AppConstants.validResourceTypes.contains(queryLowercased) {
+            Logger.shared.error("不支持下载此类型的资源: \(query)")
             return
         }
-        
+
         do {
             let resourceDir = AppPaths.resourceDirectory(
                 for: query,
                 gameName: gameInfo.gameName
             )
             guard let resourceDirUnwrapped = resourceDir else { return }
-            // 1. Get all dependencies
-            
-            // New logic: Use ModScanner to determine whether the corresponding resource directory has been installed
+            // 1. 获取所有依赖
+
+            // 新逻辑：用ModScanner判断对应资源目录下是否已安装
             let dependencies =
-            await ModrinthService.fetchProjectDependencies(
-                type: query,
-                cachePath: resourceDirUnwrapped,
-                id: projectId,
-                selectedVersions: [gameInfo.gameVersion],
-                selectedLoaders: [gameInfo.modLoader]
-            )
-            
-            // 2. Get main mod details
+                await ModrinthService.fetchProjectDependencies(
+                    type: query,
+                    cachePath: resourceDirUnwrapped,
+                    id: projectId,
+                    selectedVersions: [gameInfo.gameVersion],
+                    selectedLoaders: [gameInfo.modLoader]
+                )
+
+            // 2. 获取主mod详情
             guard
                 await ModrinthService.fetchProjectDetails(id: projectId) != nil
             else {
-                Logger.shared.error("Unable to get main project details (ID: \(projectId))")
+                Logger.shared.error("无法获取主项目详情 (ID: \(projectId))")
                 return
             }
-            
-            // 3. The maximum number of concurrent reads, at least 1
+
+            // 3. 读取最大并发数，最少为1
             let semaphore = AsyncSemaphore(
-                value: GeneralSettingsManager.shared.concurrentDownloads
-            )  // Control the maximum number of concurrencies
-            
-            // 4. Download all dependencies and main mod concurrently and collect the results
+                value: AppServices.generalSettingsManager.concurrentDownloads
+            )  // 控制最大并发数
+
+            // 4. 并发下载所有依赖和主mod，收集结果
             let allDownloaded: [ModrinthProjectDetail] = await withTaskGroup(
                 of: ModrinthProjectDetail?.self
             ) { group in
-                // rely
+                // 依赖
                 for depVersion in dependencies.projects {
                     group.addTask {
-                        await semaphore.wait()  // Limit concurrency
+                        await semaphore.wait()  // 限制并发
                         defer { Task { await semaphore.signal() } }
-                        
-                        // Get project details
+
+                        // 获取项目详情
                         guard
                             let projectDetail =
                                 await ModrinthService.fetchProjectDetails(
                                     id: depVersion.projectId
                                 )
                         else {
-                            
+
                             Logger.shared.error(
-                                "Unable to obtain dependent project details (ID: \(depVersion.projectId))"
+                                "无法获取依赖项目详情 (ID: \(depVersion.projectId))"
                             )
                             Logger.shared.error(
-                                "Unable to obtain sss project details (ID: \(depVersion.projectId))"
+                                "无法获取sss项目详情 (ID: \(depVersion.projectId))"
                             )
                             return nil
                         }
-                        
-                        // Use file information from version
+
+                        // 使用版本中的文件信息
                         let result = ModrinthService.filterPrimaryFiles(
                             from: depVersion.files
                         )
                         if let file = result {
                             let fileURL =
-                            try? await DownloadManager.downloadResource(
-                                for: gameInfo,
-                                urlString: file.url,
-                                resourceType: query,
-                                expectedSha1: file.hashes.sha1
-                            )
+                                try? await DownloadManager.downloadResource(
+                                    for: gameInfo,
+                                    urlString: file.url,
+                                    resourceType: query,
+                                    expectedSha1: file.hashes.sha1
+                                )
                             var detailWithFile = projectDetail
                             detailWithFile.fileName = file.filename
                             detailWithFile.type = query
-                            // Add cache
+                            // 新增缓存
                             if let fileURL = fileURL,
-                               let hash = ModScanner.sha1Hash(of: fileURL) {
-                                ModScanner.shared.saveToCache(
+                                let hash = ModScanner.sha1Hash(of: fileURL) {
+                                AppServices.modScanner.saveToCache(
                                     hash: hash,
                                     detail: detailWithFile
                                 )
-                                // If it is a mod, add it to the installation cache
-                                if query.lowercased() == "mod" {
-                                    ModScanner.shared.addModHash(
+                                // 如果是 mod，添加到安装缓存
+                                if query.lowercased() == ResourceType.mod.rawValue {
+                                    AppServices.modScanner.addModHash(
                                         hash,
                                         to: gameInfo.gameName
                                     )
@@ -114,11 +113,11 @@ enum ModrinthDependencyDownloader {
                         return nil
                     }
                 }
-                // main mod
+                // 主mod
                 group.addTask {
-                    await semaphore.wait()  // Limit concurrency
+                    await semaphore.wait()  // 限制并发
                     defer { Task { await semaphore.signal() } }
-                    
+
                     do {
                         guard
                             var mainProjectDetail =
@@ -126,39 +125,39 @@ enum ModrinthDependencyDownloader {
                                     id: projectId
                                 )
                         else {
-                            Logger.shared.error("Unable to get main project details (ID: \(projectId))")
+                            Logger.shared.error("无法获取主项目详情 (ID: \(projectId))")
                             return nil
                         }
                         let filteredVersions =
-                        try await ModrinthService.fetchProjectVersionsFilter(
-                            id: projectId,
-                            selectedVersions: [gameInfo.gameVersion],
-                            selectedLoaders: [gameInfo.modLoader],
-                            type: query
-                        )
+                            try await ModrinthService.fetchProjectVersionsFilter(
+                                id: projectId,
+                                selectedVersions: [gameInfo.gameVersion],
+                                selectedLoaders: [gameInfo.modLoader],
+                                type: query
+                            )
                         let result = ModrinthService.filterPrimaryFiles(
                             from: filteredVersions.first?.files
                         )
                         if let file = result {
                             let fileURL =
-                            try? await DownloadManager.downloadResource(
-                                for: gameInfo,
-                                urlString: file.url,
-                                resourceType: query,
-                                expectedSha1: file.hashes.sha1
-                            )
+                                try? await DownloadManager.downloadResource(
+                                    for: gameInfo,
+                                    urlString: file.url,
+                                    resourceType: query,
+                                    expectedSha1: file.hashes.sha1
+                                )
                             mainProjectDetail.fileName = file.filename
                             mainProjectDetail.type = query
-                            // Add cache
+                            // 新增缓存
                             if let fileURL = fileURL,
-                               let hash = ModScanner.sha1Hash(of: fileURL) {
-                                ModScanner.shared.saveToCache(
+                                let hash = ModScanner.sha1Hash(of: fileURL) {
+                                AppServices.modScanner.saveToCache(
                                     hash: hash,
                                     detail: mainProjectDetail
                                 )
-                                // If it is a mod, add it to the installation cache
-                                if query.lowercased() == "mod" {
-                                    ModScanner.shared.addModHash(
+                                // 如果是 mod，添加到安装缓存
+                                if query.lowercased() == ResourceType.mod.rawValue {
+                                    AppServices.modScanner.addModHash(
                                         hash,
                                         to: gameInfo.gameName
                                     )
@@ -170,13 +169,13 @@ enum ModrinthDependencyDownloader {
                     } catch {
                         let globalError = GlobalError.from(error)
                         Logger.shared.error(
-                            "Download main resource \(projectId) failed: \(globalError.chineseMessage)"
+                            "下载主资源 \(projectId) 失败: \(globalError.chineseMessage)"
                         )
-                        GlobalErrorHandler.shared.handle(globalError)
+                        AppServices.errorHandler.handle(globalError)
                         return nil
                     }
                 }
-                // Collect all download results
+                // 收集所有下载结果
                 var localResults: [ModrinthProjectDetail] = []
                 for await result in group {
                     if let project = result {
@@ -185,23 +184,23 @@ enum ModrinthDependencyDownloader {
                 }
                 return localResults
             }
-            
+
             actuallyDownloaded.append(contentsOf: allDownloaded)
         }
     }
-    
-    /// Get missing dependencies (with version information)
+
+    /// 获取缺失的依赖项（包含版本信息）
     static func getMissingDependenciesWithVersions(
         for projectId: String,
         gameInfo: GameVersionInfo
     ) async -> [(
         detail: ModrinthProjectDetail, versions: [ModrinthProjectDetailVersion]
     )] {
-        let query = "mod"
+        let query = ResourceType.mod.rawValue
         let resourceDir = AppPaths.modsDirectory(
             gameName: gameInfo.gameName
         )
-        
+
         let dependencies = await ModrinthService.fetchProjectDependencies(
             type: query,
             cachePath: resourceDir,
@@ -209,14 +208,14 @@ enum ModrinthDependencyDownloader {
             selectedVersions: [gameInfo.gameVersion],
             selectedLoaders: [gameInfo.modLoader]
         )
-        
-        // Concurrently obtain details and version information of all dependent projects
+
+        // 并发获取所有依赖项目的详情和版本信息
         return await withTaskGroup(
             of: (ModrinthProjectDetail, [ModrinthProjectDetailVersion])?.self
         ) { group in
             for depVersion in dependencies.projects {
                 group.addTask {
-                    // Get project details
+                    // 获取项目详情
                     guard
                         let projectDetail =
                             await ModrinthService.fetchProjectDetails(
@@ -225,53 +224,53 @@ enum ModrinthDependencyDownloader {
                     else {
                         return nil
                     }
-                    
-                    // Use server-side filtering method, consistent with global resource installation logic
-                    // Preset game versions and loaders
-                    // fetchProjectVersionsFilter internally handles CurseForge projects
+
+                    // 使用服务端的过滤方法，和全局资源安装逻辑一致
+                    // 预置游戏版本和加载器
+                    // fetchProjectVersionsFilter 内部处理 CurseForge 项目
                     let filteredVersions: [ModrinthProjectDetailVersion]
                     do {
                         filteredVersions = try await ModrinthService.fetchProjectVersionsFilter(
                             id: depVersion.projectId,
                             selectedVersions: [gameInfo.gameVersion],
                             selectedLoaders: [gameInfo.modLoader],
-                            type: "mod"
+                            type: ResourceType.mod.rawValue
                         )
                     } catch {
-                        // If version acquisition fails, an empty list is returned
-                        Logger.shared.error("Failed to get version of dependency \(projectDetail.title): \(error.localizedDescription)")
+                        // 如果版本获取失败，返回空列表
+                        Logger.shared.error("获取依赖 \(projectDetail.title) 的版本失败: \(error.localizedDescription)")
                         filteredVersions = []
                     }
-                    
+
                     return (projectDetail, filteredVersions)
                 }
             }
-            
+
             var results:
-            [(
-                detail: ModrinthProjectDetail,
-                versions: [ModrinthProjectDetailVersion]
-            )] = []
+                [(
+                    detail: ModrinthProjectDetail,
+                    versions: [ModrinthProjectDetailVersion]
+                )] = []
             for await result in group {
                 if let (detail, versions) = result {
                     results.append((detail, versions))
                 }
             }
-            
+
             return results
         }
     }
-    
-    /// Get missing dependencies
+
+    /// 获取缺失的依赖项
     static func getMissingDependencies(
         for projectId: String,
         gameInfo: GameVersionInfo
     ) async -> [ModrinthProjectDetail] {
-        let query = "mod"
+        let query = ResourceType.mod.rawValue
         let resourceDir = AppPaths.modsDirectory(
             gameName: gameInfo.gameName
         )
-        
+
         let dependencies = await ModrinthService.fetchProjectDependencies(
             type: query,
             cachePath: resourceDir,
@@ -279,8 +278,8 @@ enum ModrinthDependencyDownloader {
             selectedVersions: [gameInfo.gameVersion],
             selectedLoaders: [gameInfo.modLoader]
         )
-        
-        // Convert ModrinthProjectDetailVersion to ModrinthProjectDetail
+
+        // 将 ModrinthProjectDetailVersion 转换为 ModrinthProjectDetail
         var projectDetails: [ModrinthProjectDetail] = []
         for depVersion in dependencies.projects {
             if let projectDetail = await ModrinthService.fetchProjectDetails(
@@ -289,11 +288,11 @@ enum ModrinthDependencyDownloader {
                 projectDetails.append(projectDetail)
             }
         }
-        
+
         return projectDetails
     }
-    
-    // Manually download dependencies and main mod (not recursive, only current dependencies and main mod)
+
+    // 手动下载依赖和主mod（不递归，仅当前依赖和主mod）
     // swiftlint:disable:next function_parameter_count
     static func downloadManualDependenciesAndMain(
         dependencies: [ModrinthProjectDetail],
@@ -310,17 +309,17 @@ enum ModrinthDependencyDownloader {
         var resourcesToAdd: [ModrinthProjectDetail] = []
         var allSuccess = true
         let semaphore = AsyncSemaphore(
-            value: GeneralSettingsManager.shared.concurrentDownloads
+            value: AppServices.generalSettingsManager.concurrentDownloads
         )
-        
+
         await withTaskGroup(of: (String, Bool, ModrinthProjectDetail?).self) { group in
             for dep in dependencies {
                 guard let versionId = selectedVersions[dep.id],
-                      let versions = dependencyVersions[dep.id],
-                      let version = versions.first(where: { $0.id == versionId }),
-                      let primaryFile = ModrinthService.filterPrimaryFiles(
+                    let versions = dependencyVersions[dep.id],
+                    let version = versions.first(where: { $0.id == versionId }),
+                    let primaryFile = ModrinthService.filterPrimaryFiles(
                         from: version.files
-                      )
+                    )
                 else {
                     allSuccess = false
                     Task { @MainActor in
@@ -328,35 +327,35 @@ enum ModrinthDependencyDownloader {
                     }
                     continue
                 }
-                
+
                 group.addTask {
                     var depCopy = dep
                     let depId = depCopy.id
                     await MainActor.run { onDependencyDownloadStart(depId) }
                     await semaphore.wait()
                     defer { Task { await semaphore.signal() } }
-                    
+
                     var success = false
                     do {
                         let fileURL =
-                        try await DownloadManager.downloadResource(
-                            for: gameInfo,
-                            urlString: primaryFile.url,
-                            resourceType: query,
-                            expectedSha1: primaryFile.hashes.sha1
-                        )
+                            try await DownloadManager.downloadResource(
+                                for: gameInfo,
+                                urlString: primaryFile.url,
+                                resourceType: query,
+                                expectedSha1: primaryFile.hashes.sha1
+                            )
                         depCopy.fileName = primaryFile.filename
                         depCopy.type = query
                         success = true
-                        // Add cache
+                        // 新增缓存
                         if let hash = ModScanner.sha1Hash(of: fileURL) {
-                            ModScanner.shared.saveToCache(
+                            AppServices.modScanner.saveToCache(
                                 hash: hash,
                                 detail: depCopy
                             )
-                            // If it is a mod, add it to the installation cache
-                            if query.lowercased() == "mod" {
-                                ModScanner.shared.addModHash(
+                            // 如果是 mod，添加到安装缓存
+                            if query.lowercased() == ResourceType.mod.rawValue {
+                                AppServices.modScanner.addModHash(
                                     hash,
                                     to: gameInfo.gameName
                                 )
@@ -365,16 +364,16 @@ enum ModrinthDependencyDownloader {
                     } catch {
                         let globalError = GlobalError.from(error)
                         Logger.shared.error(
-                            "Download dependency \(depId) failed: \(globalError.chineseMessage)"
+                            "下载依赖 \(depId) 失败: \(globalError.chineseMessage)"
                         )
-                        GlobalErrorHandler.shared.handle(globalError)
+                        AppServices.errorHandler.handle(globalError)
                         success = false
                     }
                     let depCopyFinal = depCopy
                     return (depId, success, success ? depCopyFinal : nil)
                 }
             }
-            
+
             for await (depId, success, depCopy) in group {
                 await MainActor.run {
                     onDependencyDownloadFinish(depId, success)
@@ -386,54 +385,54 @@ enum ModrinthDependencyDownloader {
                 }
             }
         }
-        
+
         guard allSuccess else {
-            // If the dependency download fails, it will not continue to download the main mod and will directly return failure
+            // 如果依赖下载失败，就不再继续下载主mod，直接返回失败
             return false
         }
-        
-        // All dependencies are successful, now download the main mod
+
+        // 所有依赖都成功了，现在下载主 mod
         do {
             guard
                 var mainProjectDetail =
                     await ModrinthService.fetchProjectDetails(id: mainProjectId)
             else {
-                Logger.shared.error("Unable to get main project details (ID: \(mainProjectId))")
+                Logger.shared.error("无法获取主项目详情 (ID: \(mainProjectId))")
                 return false
             }
-            
+
             let selectedLoaders = [gameInfo.modLoader]
             let filteredVersions =
-            try await ModrinthService.fetchProjectVersionsFilter(
-                id: mainProjectId,
-                selectedVersions: [gameInfo.gameVersion],
-                selectedLoaders: selectedLoaders,
-                type: query
-            )
-            
-            // If a version ID is specified, use the specified version; otherwise use the latest version
+                try await ModrinthService.fetchProjectVersionsFilter(
+                    id: mainProjectId,
+                    selectedVersions: [gameInfo.gameVersion],
+                    selectedLoaders: selectedLoaders,
+                    type: query
+                )
+
+            // 如果指定了版本ID，使用指定版本；否则使用最新版本
             let targetVersion: ModrinthProjectDetailVersion
             if let mainProjectVersionId = mainProjectVersionId,
-               let specifiedVersion = filteredVersions.first(where: {
-                   $0.id == mainProjectVersionId
-               }) {
+                let specifiedVersion = filteredVersions.first(where: {
+                    $0.id == mainProjectVersionId
+                }) {
                 targetVersion = specifiedVersion
             } else if let latestVersion = filteredVersions.first {
                 targetVersion = latestVersion
             } else {
-                Logger.shared.error("Unable to find suitable version")
+                Logger.shared.error("无法找到合适的版本")
                 return false
             }
-            
+
             guard
                 let primaryFile = ModrinthService.filterPrimaryFiles(
                     from: targetVersion.files
                 )
             else {
-                Logger.shared.error("Unable to find main file")
+                Logger.shared.error("无法找到主文件")
                 return false
             }
-            
+
             let fileURL = try await DownloadManager.downloadResource(
                 for: gameInfo,
                 urlString: primaryFile.url,
@@ -442,15 +441,15 @@ enum ModrinthDependencyDownloader {
             )
             mainProjectDetail.fileName = primaryFile.filename
             mainProjectDetail.type = query
-            // Add cache
+            // 新增缓存
             if let hash = ModScanner.sha1Hash(of: fileURL) {
-                ModScanner.shared.saveToCache(
+                AppServices.modScanner.saveToCache(
                     hash: hash,
                     detail: mainProjectDetail
                 )
-                // If it is a mod, add it to the installation cache
-                if query.lowercased() == "mod" {
-                    ModScanner.shared.addModHash(
+                // 如果是 mod，添加到安装缓存
+                if query.lowercased() == ResourceType.mod.rawValue {
+                    AppServices.modScanner.addModHash(
                         hash,
                         to: gameInfo.gameName
                     )
@@ -460,14 +459,14 @@ enum ModrinthDependencyDownloader {
         } catch {
             let globalError = GlobalError.from(error)
             Logger.shared.error(
-                "Download main resource \(mainProjectId) failed: \(globalError.chineseMessage)"
+                "下载主资源 \(mainProjectId) 失败: \(globalError.chineseMessage)"
             )
-            GlobalErrorHandler.shared.handle(globalError)
+            AppServices.errorHandler.handle(globalError)
             return false
         }
     }
-    
-    /// - Returns: (success, fileName, hash), fileName and hash have values ​​when successful, and (false, nil, nil) when failed
+
+    /// - Returns: (success, fileName, hash)，成功时 fileName 与 hash 有值，失败为 (false, nil, nil)
     static func downloadMainResourceOnly(
         mainProjectId: String,
         gameInfo: GameVersionInfo,
@@ -480,25 +479,25 @@ enum ModrinthDependencyDownloader {
                 var mainProjectDetail =
                     await ModrinthService.fetchProjectDetails(id: mainProjectId)
             else {
-                Logger.shared.error("Unable to get main project details (ID: \(mainProjectId))")
+                Logger.shared.error("无法获取主项目详情 (ID: \(mainProjectId))")
                 return (false, nil, nil)
             }
             let selectedLoaders = filterLoader ? [gameInfo.modLoader] : []
             let filteredVersions =
-            try await ModrinthService.fetchProjectVersionsFilter(
-                id: mainProjectId,
-                selectedVersions: [gameInfo.gameVersion],
-                selectedLoaders: selectedLoaders,
-                type: query
-            )
+                try await ModrinthService.fetchProjectVersionsFilter(
+                    id: mainProjectId,
+                    selectedVersions: [gameInfo.gameVersion],
+                    selectedLoaders: selectedLoaders,
+                    type: query
+                )
             guard let latestVersion = filteredVersions.first,
-                  let primaryFile = ModrinthService.filterPrimaryFiles(
+                let primaryFile = ModrinthService.filterPrimaryFiles(
                     from: latestVersion.files
-                  )
+                )
             else {
                 return (false, nil, nil)
             }
-            
+
             let fileURL = try await DownloadManager.downloadResource(
                 for: gameInfo,
                 urlString: primaryFile.url,
@@ -507,18 +506,18 @@ enum ModrinthDependencyDownloader {
             )
             mainProjectDetail.fileName = primaryFile.filename
             mainProjectDetail.type = query
-            
+
             var hash: String?
-            // Add cache
+            // 新增缓存
             if let h = ModScanner.sha1Hash(of: fileURL) {
                 hash = h
-                ModScanner.shared.saveToCache(
+                AppServices.modScanner.saveToCache(
                     hash: h,
                     detail: mainProjectDetail
                 )
-                // If it is a mod, add it to the installation cache
-                if query.lowercased() == "mod" {
-                    ModScanner.shared.addModHash(
+                // 如果是 mod，添加到安装缓存
+                if query.lowercased() == ResourceType.mod.rawValue {
+                    AppServices.modScanner.addModHash(
                         h,
                         to: gameInfo.gameName
                     )
@@ -528,9 +527,9 @@ enum ModrinthDependencyDownloader {
         } catch {
             let globalError = GlobalError.from(error)
             Logger.shared.error(
-                "Downloading only main resource \(mainProjectId) failed: \(globalError.chineseMessage)"
+                "仅下载主资源 \(mainProjectId) 失败: \(globalError.chineseMessage)"
             )
-            GlobalErrorHandler.shared.handle(globalError)
+            AppServices.errorHandler.handle(globalError)
             return (false, nil, nil)
         }
     }

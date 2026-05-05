@@ -1,21 +1,26 @@
+//
+//  MultiMCInstanceParser.swift
+//  PyzhCraft
+//
+//
+
 import Foundation
 
-/// MultiMC/PrismLauncher instance parser
+/// MultiMC/PrismLauncher 实例解析器
 struct MultiMCInstanceParser: LauncherInstanceParser {
     let launcherType: ImportLauncherType
-    
+
     func isValidInstance(at instancePath: URL) -> Bool {
         let instanceCfgPath = instancePath.appendingPathComponent("instance.cfg")
         let mmcPackPath = instancePath.appendingPathComponent("mmc-pack.json")
-        
-        guard
-            FileManager.default.fileExists(atPath: instanceCfgPath.path),
-            FileManager.default.fileExists(atPath: mmcPackPath.path)
-        else {
+
+        let fileManager = FileManager.default
+        guard fileManager.fileExists(atPath: instanceCfgPath.path),
+              fileManager.fileExists(atPath: mmcPackPath.path) else {
             return false
         }
-        
-        // Verify file can be parsed
+
+        // 验证文件可以解析
         do {
             _ = try parseInstanceCfg(at: instanceCfgPath)
             _ = try parseMMCPack(at: mmcPackPath)
@@ -24,24 +29,24 @@ struct MultiMCInstanceParser: LauncherInstanceParser {
             return false
         }
     }
-    
+
     func parseInstance(at instancePath: URL, basePath: URL) throws -> ImportInstanceInfo? {
         let instanceCfgPath = instancePath.appendingPathComponent("instance.cfg")
         let mmcPackPath = instancePath.appendingPathComponent("mmc-pack.json")
-        
-        // Parse configuration file
+
+        // 解析配置文件
         let instanceCfg = try parseInstanceCfg(at: instanceCfgPath)
         let mmcPack = try parseMMCPack(at: mmcPackPath)
-        
-        // Extract game version
+
+        // 提取游戏版本
         let gameVersion = extractGameVersion(from: mmcPack)
-        
-        // Extract Mod Loader Information
+
+        // 提取 Mod 加载器信息
         let (modLoader, modLoaderVersion) = extractModLoader(from: mmcPack)
-        
-        // Extract game name
+
+        // 提取游戏名称
         let gameName = instanceCfg["name"] ?? instancePath.lastPathComponent
-        
+
         return ImportInstanceInfo(
             gameName: gameName,
             gameVersion: gameVersion,
@@ -53,61 +58,61 @@ struct MultiMCInstanceParser: LauncherInstanceParser {
             launcherType: launcherType
         )
     }
-    
+
     // MARK: - Private Methods
-    
-    /// Parse instance.cfg file (INI format)
+
+    /// 解析 instance.cfg 文件（INI 格式）
     private func parseInstanceCfg(at path: URL) throws -> [String: String] {
         let content = try String(contentsOf: path, encoding: .utf8)
         var config: [String: String] = [:]
-        
+
         for line in content.components(separatedBy: .newlines) {
             let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
             if trimmed.isEmpty || trimmed.hasPrefix("#") {
                 continue
             }
-            
+
             if let equalIndex = trimmed.firstIndex(of: "=") {
                 let key = String(trimmed[..<equalIndex]).trimmingCharacters(in: .whitespacesAndNewlines)
                 let value = String(trimmed[trimmed.index(after: equalIndex)...]).trimmingCharacters(in: .whitespacesAndNewlines)
                 config[key] = value
             }
         }
-        
+
         return config
     }
-    
-    /// Parse mmc-pack.json file
+
+    /// 解析 mmc-pack.json 文件
     private func parseMMCPack(at path: URL) throws -> MMCPack {
         let data = try Data(contentsOf: path)
         return try JSONDecoder().decode(MMCPack.self, from: data)
     }
-    
-    /// Extract game version from mmc-pack.json
+
+    /// 从 mmc-pack.json 提取游戏版本
     private func extractGameVersion(from pack: MMCPack) -> String {
         for component in pack.components where component.uid == "net.minecraft" {
             return component.version
         }
         return ""
     }
-    
-    /// Extract Mod Loader information from mmc-pack.json
+
+    /// 从 mmc-pack.json 提取 Mod 加载器信息
     private func extractModLoader(from pack: MMCPack) -> (loader: String, version: String) {
         for component in pack.components {
             switch component.uid {
             case "net.fabricmc.fabric-loader":
-                return ("fabric", component.version)
+                return (GameLoader.fabric.displayName, component.version)
             case "net.minecraftforge":
-                return ("forge", component.version)
+                return (GameLoader.forge.displayName, component.version)
             case "net.neoforged":
-                return ("neoforge", component.version)
+                return (GameLoader.neoforge.displayName, component.version)
             case "org.quiltmc.quilt-loader":
-                return ("quilt", component.version)
+                return (GameLoader.quilt.rawValue, component.version)
             default:
                 continue
             }
         }
-        return ("vanilla", "")
+        return (GameLoader.vanilla.displayName, "")
     }
 }
 
@@ -125,20 +130,27 @@ private struct MMCPackComponent: Codable {
 // MARK: - Import Error
 
 enum ImportError: LocalizedError {
-    case gameDirectoryNotFound(instancePath: String),
-         invalidConfiguration(message: String),
-         fileNotFound(path: String)
-    
+    case gameDirectoryNotFound(instancePath: String)
+    case invalidConfiguration(message: String)
+    case fileNotFound(path: String)
+
     var errorDescription: String? {
         switch self {
         case .gameDirectoryNotFound(let path):
-            String(format: String(localized: "Game directory not found: \(path)"))
-            
+            return String(
+                format: "launcher.import.error.game_directory_not_found".localized(),
+                path
+            )
         case .invalidConfiguration(let message):
-            String(format: String(localized: "Invalid configuration: \(message)"))
-            
+            return String(
+                format: "launcher.import.error.invalid_configuration".localized(),
+                message
+            )
         case .fileNotFound(let path):
-            String(format: String(localized: "File not found: \(path)"))
+            return String(
+                format: "launcher.import.error.file_not_found".localized(),
+                path
+            )
         }
     }
 }

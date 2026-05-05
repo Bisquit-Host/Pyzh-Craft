@@ -2,12 +2,12 @@ import Foundation
 
 enum AppPaths {
     // MARK: - Path Cache
-    /// Path caching to avoid repeatedly creating the same URL object
+    /// 路径缓存，避免重复创建相同的 URL 对象
     private static let pathCache = NSCache<NSString, NSURL>()
-    private static let cacheQueue = DispatchQueue(label: "com.pyzhcraft.apppaths.cache", attributes: .concurrent)
-    
+    private static let cacheQueue = DispatchQueue(label: "com.swiftcraftlauncher.apppaths.cache", attributes: .concurrent)
+
     // MARK: - Cached Path Helper
-    /// Get the cached URL path, create and cache it if it does not exist
+    /// 获取缓存的 URL 路径，如果不存在则创建并缓存
     private static func cachedURL(key: String, factory: () -> URL) -> URL {
         return cacheQueue.sync {
             if let cached = pathCache.object(forKey: key as NSString) {
@@ -18,24 +18,32 @@ enum AppPaths {
             return url
         }
     }
-    
+
     static var launcherSupportDirectory: URL {
-        // guard let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
-        //     return nil
-        // }
+    // guard let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+    //     return nil
+    // }
         return cachedURL(key: "launcherSupportDirectory") {
             .applicationSupportDirectory.appendingPathComponent(Bundle.main.appName)
         }
     }
+
+    /// 认证相关文件根目录（Application Support/.../auth）
+    static var authDirectory: URL {
+        cachedURL(key: "authDirectory") {
+            launcherSupportDirectory.appendingPathComponent(AppConstants.DirectoryNames.auth, isDirectory: true)
+        }
+    }
+
     static var runtimeDirectory: URL {
         launcherSupportDirectory.appendingPathComponent(AppConstants.DirectoryNames.runtime)
     }
-    
-    /// Path to the Java executable file of the specified version (jre.bundle in the runtime directory)
+
+    /// 指定版本的 Java 可执行文件路径（runtime 目录下的 jre.bundle）
     static func javaExecutablePath(version: String) -> String {
         runtimeDirectory.appendingPathComponent(version).appendingPathComponent("jre.bundle/Contents/Home/bin/java").path
     }
-    
+
     static var metaDirectory: URL {
         launcherSupportDirectory.appendingPathComponent(AppConstants.DirectoryNames.meta)
     }
@@ -52,51 +60,58 @@ enum AppPaths {
         metaDirectory.appendingPathComponent(AppConstants.DirectoryNames.versions)
     }
     static var profileRootDirectory: URL {
-        let customPath = GeneralSettingsManager.shared.launcherWorkingDirectory
+        let customPath = AppServices.generalSettingsManager.launcherWorkingDirectory
         let workingDirectory = customPath.isEmpty ? launcherSupportDirectory.path : customPath
-        
+
         let baseURL = URL(fileURLWithPath: workingDirectory, isDirectory: true)
         return baseURL.appendingPathComponent(AppConstants.DirectoryNames.profiles, isDirectory: true)
     }
-    
+
     static func profileDirectory(gameName: String) -> URL {
         cachedURL(key: "profileDirectory:\(gameName)") {
             profileRootDirectory.appendingPathComponent(gameName)
         }
     }
-    
+
+    /// 某个游戏实例的 options.txt 路径
+    static func optionsFile(gameName: String) -> URL {
+        cachedURL(key: "optionsFile:\(gameName)") {
+            profileDirectory(gameName: gameName).appendingPathComponent(AppConstants.DirectoryNames.option)
+        }
+    }
+
     static func modsDirectory(gameName: String) -> URL {
         cachedURL(key: "modsDirectory:\(gameName)") {
             profileDirectory(gameName: gameName).appendingPathComponent(AppConstants.DirectoryNames.mods)
         }
     }
-    
+
     static func datapacksDirectory(gameName: String) -> URL {
         cachedURL(key: "datapacksDirectory:\(gameName)") {
             profileDirectory(gameName: gameName).appendingPathComponent(AppConstants.DirectoryNames.datapacks)
         }
     }
-    
+
     static func shaderpacksDirectory(gameName: String) -> URL {
         cachedURL(key: "shaderpacksDirectory:\(gameName)") {
             profileDirectory(gameName: gameName).appendingPathComponent(AppConstants.DirectoryNames.shaderpacks)
         }
     }
-    
+
     static func resourcepacksDirectory(gameName: String) -> URL {
         cachedURL(key: "resourcepacksDirectory:\(gameName)") {
             profileDirectory(gameName: gameName).appendingPathComponent(AppConstants.DirectoryNames.resourcepacks)
         }
     }
-    
+
     static func schematicsDirectory(gameName: String) -> URL {
         cachedURL(key: "schematicsDirectory:\(gameName)") {
             profileDirectory(gameName: gameName).appendingPathComponent(AppConstants.DirectoryNames.schematics, isDirectory: true)
         }
     }
-    
-    /// Clear the path cache related to the specified game (called when deleting the game)
-    /// - Parameter gameName: game name
+
+    /// 清除指定游戏相关的路径缓存（删除游戏时调用）
+    /// - Parameter gameName: 游戏名称
     static func invalidatePaths(forGameName gameName: String) {
         let keys = [
             "profileDirectory:\(gameName)",
@@ -112,7 +127,7 @@ enum AppPaths {
             }
         }
     }
-    
+
     static let profileSubdirectories = [
         AppConstants.DirectoryNames.shaderpacks,
         AppConstants.DirectoryNames.resourcepacks,
@@ -120,14 +135,14 @@ enum AppPaths {
         AppConstants.DirectoryNames.datapacks,
         AppConstants.DirectoryNames.crashReports,
     ]
-    
-    /// Log file directory - use the system standard log directory and fall back to the application support directory in case of failure
+
+    /// 日志文件目录 - 使用系统标准日志目录，失败时回退到应用支持目录
     static var logsDirectory: URL {
         if let libraryDirectory = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first {
             return libraryDirectory.appendingPathComponent("Logs", isDirectory: true)
                 .appendingPathComponent(Bundle.main.appName, isDirectory: true)
         }
-        // Alternate solution: Use the logs subdirectory under your application's support directory
+        // 备用方案：使用应用支持目录下的 logs 子目录
         return launcherSupportDirectory.appendingPathComponent(AppConstants.DirectoryNames.logs, isDirectory: true)
     }
 }
@@ -135,31 +150,57 @@ enum AppPaths {
 extension AppPaths {
     static func resourceDirectory(for type: String, gameName: String) -> URL? {
         switch type.lowercased() {
-        case "mod": modsDirectory(gameName: gameName)
-        case "datapack": datapacksDirectory(gameName: gameName)
-        case "shader": shaderpacksDirectory(gameName: gameName)
-        case "resourcepack": resourcepacksDirectory(gameName: gameName)
-        default: nil
+        case ResourceType.mod.rawValue: return modsDirectory(gameName: gameName)
+        case ResourceType.datapack.rawValue: return datapacksDirectory(gameName: gameName)
+        case ResourceType.shader.rawValue: return shaderpacksDirectory(gameName: gameName)
+        case ResourceType.resourcepack.rawValue: return resourcepacksDirectory(gameName: gameName)
+        default: return nil
         }
     }
-    /// Global cache file path - use the system standard cache directory, fall back to the Cache in the application support directory in case of exceptions
+
+    /// 根据本地文件所在目录名推断资源类型（mod / shader / resourcepack / datapack）
+    /// - Parameter fileURL: 本地资源文件路径
+    /// - Returns: 资源类型字符串，或 nil 表示无法推断
+    static func resourceType(for fileURL: URL) -> String? {
+        let parentDirName = fileURL.deletingLastPathComponent().lastPathComponent.lowercased()
+
+        switch parentDirName {
+        case AppConstants.DirectoryNames.mods.lowercased():
+            return ResourceType.mod.rawValue
+        case AppConstants.DirectoryNames.shaderpacks.lowercased():
+            return ResourceType.shader.rawValue
+        case AppConstants.DirectoryNames.resourcepacks.lowercased():
+            return ResourceType.resourcepack.rawValue
+        case AppConstants.DirectoryNames.datapacks.lowercased():
+            return ResourceType.datapack.rawValue
+        default:
+            return nil
+        }
+    }
+    /// 全局缓存文件路径 - 使用系统标准缓存目录，异常时回退到应用支持目录下的 Cache
     static var appCache: URL {
         if let cachesDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first {
             return cachesDirectory.appendingPathComponent(Bundle.main.identifier)
         }
-        
-        Logger.shared.error("Unable to obtain the system cache directory, use the Cache in the application support directory")
+        Logger.shared.error("无法获取系统缓存目录，使用应用支持目录下的 Cache")
         return launcherSupportDirectory.appendingPathComponent("Cache", isDirectory: true)
     }
-    
-    /// Data directory path
+
+    /// 数据目录路径
     static var dataDirectory: URL {
         cachedURL(key: "dataDirectory") {
             launcherSupportDirectory.appendingPathComponent(AppConstants.DirectoryNames.data, isDirectory: true)
         }
     }
-    
-    /// Game version database path
+
+    /// 本地皮肤库存储目录
+    static var skinsDirectory: URL {
+        cachedURL(key: "skinsDirectory") {
+            dataDirectory.appendingPathComponent("skins", isDirectory: true)
+        }
+    }
+
+    /// 游戏版本数据库路径
     static var gameVersionDatabase: URL {
         dataDirectory.appendingPathComponent("data.db")
     }

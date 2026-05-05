@@ -71,6 +71,11 @@ struct ModrinthProjectDetailView: View {
                 .frame(width: ModrinthProjectDetailConstants.iconSize, height: ModrinthProjectDetailConstants.iconSize)
                 .cornerRadius(ModrinthProjectDetailConstants.cornerRadius)
                 .clipped()
+                .onDisappear {
+                    URLCache.shared.removeCachedResponse(
+                        for: URLRequest(url: url)
+                    )
+                }
             }
         }
     }

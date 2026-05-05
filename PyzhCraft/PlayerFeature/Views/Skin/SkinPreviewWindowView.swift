@@ -1,21 +1,27 @@
+//
+//  SkinPreviewWindowView.swift
+//  PyzhCraft
+//
+//  Created by su on 2025/1/27.
+//
+
+import Foundation
 import SwiftUI
+import AppKit
 import SkinRenderKit
 
-/// Skin preview window view
+/// 皮肤预览窗口视图
 struct SkinPreviewWindowView: View {
-    @Environment(\.accessibilityReduceMotion)
-    private var reduceMotion
-    
     let skinImage: NSImage?
     let skinPath: String?
     let capeImage: NSImage?
     let playerModel: PlayerModel
-    
+
     @State private var capeBinding: NSImage?
-    // Use @State to manage data so it can be cleaned up when the window is closed
+    // 使用 @State 管理数据，以便在窗口关闭时清理
     @State private var currentSkinImage: NSImage?
     @State private var currentSkinPath: String?
-    
+
     init(
         skinImage: NSImage?,
         skinPath: String?,
@@ -27,11 +33,11 @@ struct SkinPreviewWindowView: View {
         self.capeImage = capeImage
         self.playerModel = playerModel
         self._capeBinding = State(initialValue: capeImage)
-        // Set the current value during initialization
+        // 初始化时设置当前值
         self._currentSkinImage = State(initialValue: skinImage)
         self._currentSkinPath = State(initialValue: skinPath)
     }
-    
+
     var body: some View {
         VStack(spacing: 16) {
             if currentSkinImage != nil || currentSkinPath != nil {
@@ -44,56 +50,24 @@ struct SkinPreviewWindowView: View {
             clearAllData()
         }
     }
-    
+
     @ViewBuilder private var previewContent: some View {
         if let image = currentSkinImage {
-            if reduceMotion {
-                StaticSkinRenderView(
-                    skinImage: image,
-                    capeImage: $capeBinding,
-                    playerModel: playerModel,
-                    rotationDuration: 0,
-                    backgroundColor: NSColor.clear
-                )
-                .frame(minWidth: 400, minHeight: 300)
-            } else {
-                SkinRenderView(
-                    skinImage: image,
-                    capeImage: $capeBinding,
-                    playerModel: playerModel,
-                    rotationDuration: 0,
-                    backgroundColor: NSColor.clear,
-                    onSkinDropped: { _ in },
-                    onCapeDropped: { _ in }
-                )
-            }
-        } else if let skinPath = currentSkinPath {
-            if reduceMotion {
-                StaticSkinRenderView(
-                    texturePath: skinPath,
-                    capeImage: $capeBinding,
-                    playerModel: playerModel,
-                    rotationDuration: 0,
-                    backgroundColor: NSColor.clear
-                )
-                .frame(minWidth: 400, minHeight: 300)
-            } else {
-                SkinRenderView(
-                    texturePath: skinPath,
-                    capeImage: $capeBinding,
-                    playerModel: playerModel,
-                    rotationDuration: 0,
-                    backgroundColor: NSColor.clear,
-                    onSkinDropped: { _ in },
-                    onCapeDropped: { _ in }
-                )
-            }
+            SkinRenderView(
+                skinImage: image,
+                capeImage: $capeBinding,
+                playerModel: playerModel,
+                rotationDuration: 0,
+                backgroundColor: NSColor.clear,
+                onSkinDropped: { _ in },
+                onCapeDropped: { _ in }
+            )
         }
     }
-    
-    /// Clean all data
+
+    /// 清理所有数据
     private func clearAllData() {
-        // Clear the skin data, which will cause the SkinRenderView to be removed, triggering its cleanup logic
+        // 清空皮肤数据，这会导致 SkinRenderView 被移除，从而触发其清理逻辑
         currentSkinImage = nil
         currentSkinPath = nil
         capeBinding = nil

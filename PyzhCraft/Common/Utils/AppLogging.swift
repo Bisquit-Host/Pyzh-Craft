@@ -1,6 +1,14 @@
+//
+//  AppLogging.swift
+//  PyzhCraft
+//
+//  日志协议与 Environment 注入，便于测试与替换实现。
+//
+
+import Foundation
 import SwiftUI
 
-/// Apply logging protocol to facilitate injection and mocking
+/// 应用日志协议，便于注入与 Mock
 public protocol AppLogging: AnyObject {
     func logInfo(_ items: Any..., file: String, function: String, line: Int)
     func logWarning(_ items: Any..., file: String, function: String, line: Int)

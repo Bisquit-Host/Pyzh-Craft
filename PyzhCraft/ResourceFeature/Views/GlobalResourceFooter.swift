@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - Footer button block
+// MARK: - Footer 按钮区块
 struct GlobalResourceFooter: View {
     let project: ModrinthProject
     let resourceType: String
@@ -13,45 +13,116 @@ struct GlobalResourceFooter: View {
     @Binding var isDownloadingMainOnly: Bool
     let gameRepository: GameRepository
     let loadDependencies:
-    (ModrinthProjectDetailVersion, GameVersionInfo) -> Void
+        (ModrinthProjectDetailVersion, GameVersionInfo) -> Void
     @Binding var mainVersionId: String
     let compatibleGames: [GameVersionInfo]
-    
+
+    @StateObject private var viewModel: GlobalResourceFooterViewModel
+
+    init(
+        project: ModrinthProject,
+        resourceType: String,
+        isPresented: Binding<Bool>,
+        projectDetail: ModrinthProjectDetail?,
+        selectedGame: GameVersionInfo?,
+        selectedVersion: ModrinthProjectDetailVersion?,
+        dependencyState: DependencyState,
+        isDownloadingAll: Binding<Bool>,
+        isDownloadingMainOnly: Binding<Bool>,
+        gameRepository: GameRepository,
+        loadDependencies: @escaping (ModrinthProjectDetailVersion, GameVersionInfo) -> Void,
+        mainVersionId: Binding<String>,
+        compatibleGames: [GameVersionInfo]
+    ) {
+        self.project = project
+        self.resourceType = resourceType
+        self._isPresented = isPresented
+        self.projectDetail = projectDetail
+        self.selectedGame = selectedGame
+        self.selectedVersion = selectedVersion
+        self.dependencyState = dependencyState
+        self._isDownloadingAll = isDownloadingAll
+        self._isDownloadingMainOnly = isDownloadingMainOnly
+        self.gameRepository = gameRepository
+        self.loadDependencies = loadDependencies
+        self._mainVersionId = mainVersionId
+        self.compatibleGames = compatibleGames
+
+        self._viewModel = StateObject(
+            wrappedValue: GlobalResourceFooterViewModel(
+                project: project,
+                resourceType: resourceType,
+                isPresented: isPresented,
+                isDownloadingAll: isDownloadingAll,
+                isDownloadingMainOnly: isDownloadingMainOnly,
+                gameRepository: gameRepository
+            )
+        )
+    }
+
     var body: some View {
         Group {
             if projectDetail != nil {
                 if compatibleGames.isEmpty {
                     HStack {
                         Spacer()
-                        Button("Close") { isPresented = false }
+                        Button("common.close".localized()) { isPresented = false }
                     }
                 } else {
                     HStack {
-                        Button("Close") { isPresented = false }
+                        Button("common.close".localized()) { isPresented = false }
                         Spacer()
-                        if resourceType == "mod" {
+                        if resourceType == ResourceType.mod.rawValue {
                             if !dependencyState.isLoading {
                                 if selectedVersion != nil {
-                                    Button(action: downloadAllManual) {
+                                    Button(action: {
+                                        viewModel.downloadAllManual(
+                                            selectedGame: selectedGame,
+                                            dependencyState: dependencyState,
+                                            mainVersionId: mainVersionId
+                                        )
+                                    }, label: {
                                         if isDownloadingAll {
                                             ProgressView().controlSize(.small)
                                         } else {
-                                            Text("Download All")
+                                            Text(
+                                                "global_resource.download_all"
+                                                    .localized()
+                                            )
                                         }
-                                    }
+                                    })
                                     .disabled(isDownloadingAll)
                                     .keyboardShortcut(.defaultAction)
                                 }
                             }
-                        } else {
-                            if selectedVersion != nil {
-                                Button(action: downloadResource) {
+                        } else if resourceType == ResourceType.minecraftJavaServer.rawValue {
+                            if selectedGame != nil {
+                                Button(action: {
+                                    viewModel.addServerResource(
+                                        selectedGame: selectedGame,
+                                        projectDetail: projectDetail
+                                    )
+                                }, label: {
                                     if isDownloadingAll {
                                         ProgressView().controlSize(.small)
                                     } else {
-                                        Text("Download")
+                                        Text("saveinfo.server.add".localized())
                                     }
-                                }
+                                })
+                                .disabled(isDownloadingAll)
+                                .keyboardShortcut(.defaultAction)
+                            }
+                        } else {
+                            if selectedVersion != nil {
+                                Button(action: {
+                                    viewModel.downloadResource(selectedGame: selectedGame)
+                                }, label: {
+                                    if isDownloadingAll {
+                                        ProgressView().controlSize(.small)
+                                    } else {
+                                        Text("global_resource.download".localized())
+                                    }
+                                })
                                 .disabled(isDownloadingAll)
                                 .keyboardShortcut(.defaultAction)
                             }
@@ -61,149 +132,9 @@ struct GlobalResourceFooter: View {
             } else {
                 HStack {
                     Spacer()
-                    Button("Close") { isPresented = false }
+                    Button("common.close".localized()) { isPresented = false }
                 }
             }
-        }
-    }
-    
-    private func downloadMainOnly() {
-        guard let game = selectedGame, selectedVersion != nil else { return }
-        isDownloadingMainOnly = true
-        Task {
-            do {
-                try await downloadMainOnlyThrowing(game: game)
-            } catch {
-                let globalError = GlobalError.from(error)
-                Logger.shared.error("Failed to download main resource: \(globalError.chineseMessage)")
-                GlobalErrorHandler.shared.handle(globalError)
-            }
-            
-            _ = await MainActor.run {
-                isDownloadingMainOnly = false
-                isPresented = false
-            }
-        }
-    }
-    
-    private func downloadMainOnlyThrowing(game: GameVersionInfo) async throws {
-        guard !project.projectId.isEmpty else {
-            throw GlobalError.validation(
-                i18nKey: "Project ID Empty",
-                level: .notification
-            )
-        }
-        
-        let (success, _, _) =
-        await ModrinthDependencyDownloader.downloadMainResourceOnly(
-            mainProjectId: project.projectId,
-            gameInfo: game,
-            query: resourceType,
-            gameRepository: gameRepository,
-            filterLoader: true
-        )
-        
-        if !success {
-            throw GlobalError.download(
-                i18nKey: "Main Resource Failed",
-                level: .notification
-            )
-        }
-    }
-    
-    private func downloadAllManual() {
-        guard let game = selectedGame, selectedVersion != nil else { return }
-        isDownloadingAll = true
-        Task {
-            do {
-                try await downloadAllManualThrowing(game: game)
-            } catch {
-                let globalError = GlobalError.from(error)
-                Logger.shared.error(
-                    "Manual download of all dependencies failed: \(globalError.chineseMessage)"
-                )
-                GlobalErrorHandler.shared.handle(globalError)
-            }
-            _ = await MainActor.run {
-                isDownloadingAll = false
-                isPresented = false
-            }
-        }
-    }
-    
-    private func downloadAllManualThrowing(game: GameVersionInfo) async throws {
-        guard !project.projectId.isEmpty else {
-            throw GlobalError.validation(
-                i18nKey: "Project ID Empty",
-                level: .notification
-            )
-        }
-        
-        let success =
-        await ModrinthDependencyDownloader.downloadManualDependenciesAndMain(
-            dependencies: dependencyState.dependencies,
-            selectedVersions: dependencyState.selected.compactMapValues {
-                $0?.id
-            },
-            dependencyVersions: dependencyState.versions,
-            mainProjectId: project.projectId,
-            mainProjectVersionId: mainVersionId.isEmpty
-            ? nil : mainVersionId,
-            gameInfo: game,
-            query: resourceType,
-            gameRepository: gameRepository,
-            onDependencyDownloadStart: { _ in },
-            onDependencyDownloadFinish: { _, _ in }
-        )
-        
-        if !success {
-            throw GlobalError.download(
-                i18nKey: "Manual Dependencies Failed",
-                level: .notification
-            )
-        }
-    }
-    
-    private func downloadResource() {
-        guard let game = selectedGame, selectedVersion != nil else { return }
-        isDownloadingAll = true
-        Task {
-            do {
-                try await downloadResourceThrowing(game: game)
-            } catch {
-                let globalError = GlobalError.from(error)
-                Logger.shared.error("Failed to download resource: \(globalError.chineseMessage)")
-                GlobalErrorHandler.shared.handle(globalError)
-            }
-            _ = await MainActor.run {
-                isDownloadingAll = false
-                isPresented = false
-            }
-        }
-    }
-    
-    private func downloadResourceThrowing(game: GameVersionInfo) async throws {
-        guard !project.projectId.isEmpty else {
-            throw GlobalError.validation(
-                i18nKey: "Project ID Empty",
-                level: .notification
-            )
-        }
-        
-        let (success, _, _) =
-        await ModrinthDependencyDownloader.downloadMainResourceOnly(
-            mainProjectId: project.projectId,
-            gameInfo: game,
-            query: resourceType,
-            gameRepository: gameRepository,
-            filterLoader: true
-        )
-        
-        if !success {
-            throw GlobalError.download(
-                i18nKey: "Resource Download Failed",
-                level: .notification
-            )
         }
     }
 }

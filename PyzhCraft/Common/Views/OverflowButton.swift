@@ -1,3 +1,8 @@
+//
+//  OverflowButton.swift
+//  PyzhCraft
+//
+//
 import SwiftUI
 
 // MARK: - Overflow Button
@@ -5,7 +10,7 @@ struct OverflowButton<Content: View>: View {
     let count: Int
     @Binding var isPresented: Bool
     let popoverContent: () -> Content
-    
+
     init(
         count: Int,
         isPresented: Binding<Bool>,
@@ -15,7 +20,7 @@ struct OverflowButton<Content: View>: View {
         self._isPresented = isPresented
         self.popoverContent = popoverContent
     }
-    
+
     var body: some View {
         Button {
             isPresented = true
@@ -24,7 +29,7 @@ struct OverflowButton<Content: View>: View {
                 .font(.caption)
                 .padding(.horizontal, 4)
                 .padding(.vertical, 2)
-                .background(.gray.opacity(0.15))
+                .background(Color.gray.opacity(0.15))
                 .cornerRadius(4)
         }
         .buttonStyle(.plain)

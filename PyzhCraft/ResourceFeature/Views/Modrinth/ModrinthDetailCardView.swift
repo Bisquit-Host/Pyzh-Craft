@@ -1,5 +1,5 @@
+import Foundation
 import SwiftUI
-import Kingfisher
 
 struct ModrinthDetailCardView: View {
     // MARK: - Properties
@@ -11,90 +11,116 @@ struct ModrinthDetailCardView: View {
     let type: Bool  // false = local, true = server
     @Binding var selectedItem: SidebarItem
     var onResourceChanged: (() -> Void)?
-    /// Local resource enable/disable state change callback (only used by local list)
+    /// 本地资源启用/禁用状态变更回调（仅 local 列表使用）
     var onLocalDisableStateChanged: ((ModrinthProject, Bool) -> Void)?
-    /// Update success callback: Only the hash and list items of the current entry are updated, and no global scan is performed. Parameters (projectId, oldFileName, newFileName, newHash)
+    /// 更新成功回调：仅更新当前条目的 hash 与列表项，不全局扫描。参数 (projectId, oldFileName, newFileName, newHash)
     var onResourceUpdated: ((String, String, String, String?) -> Void)?
-    @Binding var scannedDetailIds: Set<String> // detailId Set of scanned resources for quick lookup
+    @Binding var scannedDetailIds: Set<String> // 已扫描资源的 detailId Set，用于快速查找
     @State private var addButtonState: AddButtonState = .idle
     @State private var showDeleteAlert = false
-    @State private var isResourceDisabled = false  // Whether the resource is disabled (for graying effect)
+    @State private var isResourceDisabled: Bool = false  // 资源是否被禁用（用于置灰效果）
     @EnvironmentObject private var gameRepository: GameRepository
-    
+
     // MARK: - Enums
     enum AddButtonState {
-        case idle, loading, installed,
-             update  // A new version is available
+        case idle
+        case loading
+        case installed
+        case update  // 有新版本可用
     }
-    
+
     // MARK: - Body
     var body: some View {
         HStack(spacing: ModrinthConstants.UIConstants.contentSpacing) {
-            iconView
-            VStack(alignment: .leading, spacing: ModrinthConstants.UIConstants.spacing) {
-                titleView
-                descriptionView
-                tagsView
+            Group {
+                iconView
+                VStack(alignment: .leading, spacing: ModrinthConstants.UIConstants.spacing) {
+                    titleView
+                    descriptionView
+                    tagsView
+                }
             }
+            .opacity(isResourceDisabled ? 0.5 : 1.0)  // 禁用时置灰
             Spacer(minLength: 8)
             infoView
         }
         .frame(maxWidth: .infinity)
-        .opacity(isResourceDisabled ? 0.5 : 1.0)  // Grayed out when disabled
         .onAppear {
+            // 从数据源同步禁用状态，避免列表滚动复用行时显示错误
             isResourceDisabled = ResourceEnableDisableManager.isDisabled(fileName: project.fileName)
         }
         .onChange(of: project.fileName) { _, newFileName in
             isResourceDisabled = ResourceEnableDisableManager.isDisabled(fileName: newFileName)
         }
     }
-    
+
     // MARK: - View Components
     private var iconView: some View {
         Group {
+            // 使用 id 前缀判断本地资源，更可靠
             if project.projectId.hasPrefix("local_") || project.projectId.hasPrefix("file_") {
+                // 本地资源显示 questionmark.circle 图标
                 localResourceIcon
-            } else if let iconUrl = project.iconUrl, let url = URL(string: iconUrl) {
-                KFImage(url)
-                    .placeholder {
+            } else if let iconUrl = project.iconUrl,
+                let url = URL(string: iconUrl) {
+                AsyncImage(
+                    url: url,
+                    transaction: Transaction(
+                        animation: .easeInOut(duration: 0.2)
+                    )
+                ) { phase in
+                    switch phase {
+                    case .empty:
+                        placeholderIcon
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .transition(.opacity)
+                    case .failure:
+                        placeholderIcon
+                    @unknown default:
                         placeholderIcon
                     }
-                    .cancelOnDisappear(true)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(
-                        width: ModrinthConstants.UIConstants.iconSize,
-                        height: ModrinthConstants.UIConstants.iconSize
+                }
+                .frame(
+                    width: ModrinthConstants.UIConstants.iconSize,
+                    height: ModrinthConstants.UIConstants.iconSize
+                )
+                .cornerRadius(ModrinthConstants.UIConstants.cornerRadius)
+                .clipped()
+                .onDisappear {
+                    URLCache.shared.removeCachedResponse(
+                        for: URLRequest(url: url)
                     )
-                    .clipShape(.rect(cornerRadius: ModrinthConstants.UIConstants.cornerRadius))
-                    .clipped()
+                }
             } else {
                 placeholderIcon
             }
         }
     }
-    
+
     private var placeholderIcon: some View {
         Color.gray.opacity(0.2)
             .frame(
                 width: ModrinthConstants.UIConstants.iconSize,
                 height: ModrinthConstants.UIConstants.iconSize
             )
-            .clipShape(.rect(cornerRadius: ModrinthConstants.UIConstants.cornerRadius))
+            .cornerRadius(ModrinthConstants.UIConstants.cornerRadius)
     }
-    
+
     private var localResourceIcon: some View {
         Image(systemName: "questionmark.circle")
             .font(.system(size: ModrinthConstants.UIConstants.iconSize * 0.6))
-            .foregroundStyle(.secondary)
+            .foregroundColor(.secondary)
             .frame(
                 width: ModrinthConstants.UIConstants.iconSize,
                 height: ModrinthConstants.UIConstants.iconSize
             )
-            .background(.gray.opacity(0.2))
-            .clipShape(.rect(cornerRadius: ModrinthConstants.UIConstants.cornerRadius))
+            .background(Color.gray.opacity(0.2))
+            .cornerRadius(ModrinthConstants.UIConstants.cornerRadius)
     }
-    
+
     private var titleView: some View {
         HStack(spacing: 4) {
             Text(project.title)
@@ -103,26 +129,26 @@ struct ModrinthDetailCardView: View {
             if type == true {
                 Text("by \(project.author)")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundColor(.secondary)
                     .lineLimit(1)
             }
             if type == false, let fileName = project.fileName {
                 Text(fileName)
                     .font(.subheadline)
                     .bold()
-                    .foregroundStyle(.secondary)
+                    .foregroundColor(.secondary)
                     .lineLimit(1)
             }
         }
     }
-    
+
     private var descriptionView: some View {
         Text(project.description)
             .font(.subheadline)
             .lineLimit(ModrinthConstants.UIConstants.descriptionLineLimit)
-            .foregroundStyle(.secondary)
+            .foregroundColor(.secondary)
     }
-    
+
     private var tagsView: some View {
         HStack(spacing: ModrinthConstants.UIConstants.spacing) {
             ForEach(
@@ -132,19 +158,19 @@ struct ModrinthDetailCardView: View {
                     )
                 ),
                 id: \.self
-            ) {
-                TagView(text: $0)
+            ) { tag in
+                TagView(text: tag)
             }
             if project.displayCategories.count > ModrinthConstants.UIConstants.maxTags {
                 Text(
                     "+\(project.displayCategories.count - ModrinthConstants.UIConstants.maxTags)"
                 )
                 .font(.caption2)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.secondary)
             }
         }
     }
-    
+
     private var infoView: some View {
         VStack(alignment: .trailing, spacing: ModrinthConstants.UIConstants.spacing) {
             downloadInfoView
@@ -167,29 +193,58 @@ struct ModrinthDetailCardView: View {
             .environmentObject(gameRepository)
         }
     }
-    
+
     private var downloadInfoView: some View {
         InfoRowView(
             icon: "arrow.down.circle",
             text: Self.formatNumber(project.downloads)
         )
     }
-    
+
     private var followerInfoView: some View {
         InfoRowView(
             icon: "heart",
             text: Self.formatNumber(project.follows)
         )
     }
-    
+
     // MARK: - Helper Methods
     static func formatNumber(_ num: Int) -> String {
         if num >= 1_000_000 {
-            String(format: "%.1fM", Double(num) / 1_000_000)
+            return String(format: "%.1fM", Double(num) / 1_000_000)
         } else if num >= 1_000 {
-            String(format: "%.1fk", Double(num) / 1_000)
+            return String(format: "%.1fk", Double(num) / 1_000)
         } else {
-            "\(num)"
+            return "\(num)"
         }
+    }
+}
+
+// MARK: - Supporting Views
+private struct TagView: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(.caption2)
+            .padding(.horizontal, ModrinthConstants.UIConstants.tagHorizontalPadding)
+            .padding(.vertical, ModrinthConstants.UIConstants.tagVerticalPadding)
+            .background(Color.gray.opacity(0.15))
+            .cornerRadius(ModrinthConstants.UIConstants.tagCornerRadius)
+    }
+}
+
+private struct InfoRowView: View {
+    let icon: String
+    let text: String
+
+    var body: some View {
+        HStack(spacing: 2) {
+            Image(systemName: icon)
+                .imageScale(.small)
+            Text(text)
+        }
+        .font(.caption2)
+        .foregroundColor(.secondary)
     }
 }

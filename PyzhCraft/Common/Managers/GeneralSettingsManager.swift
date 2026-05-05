@@ -1,78 +1,81 @@
-import SwiftUI
 import Combine
+import Foundation
+import SwiftUI
 
-/// Main interface layout style: Classic (list on the left, content on the right) / Focus (content on the left, list on the right)
+/// 主界面布局风格：经典（列表在左、内容在右）/ 聚焦（内容在左、列表在右）
 public enum InterfaceLayoutStyle: String, CaseIterable {
-    case classic,   // classic
-         focused  // focus
-    
-    public var localizedName: LocalizedStringKey {
-        switch self {
-        case .classic: "Classic"
-        case .focused: "Focused"
-        }
+    case classic = "classic"   // 经典
+    case focused = "focused"  // 聚焦
+
+    public var localizedName: String {
+        "settings.interface_style.\(rawValue)".localized()
     }
 }
 
 public enum ThemeMode: String, CaseIterable {
-    case light, dark, system
-    
-    public var localizedName: LocalizedStringKey {
-        switch self {
-        case .light: "Light"
-        case .dark: "Dark"
-        case .system: "Follow System"
-        }
+    case light = "light"
+    case dark = "dark"
+    case system = "system"
+
+    public var localizedName: String {
+        "settings.theme.\(rawValue)".localized()
     }
-    
+
     public var effectiveColorScheme: ColorScheme {
         switch self {
         case .light:
             return .light
-            
         case .dark:
             return .dark
-            
         case .system:
-            // Safely access system skins on the main thread
+            // 在主线程上安全访问系统外观
             if Thread.isMainThread {
-                // Use NSApplication.shared instead of NSApp, safer
+                // 使用 NSApplication.shared 而不是 NSApp，更安全
                 let appearance = NSApplication.shared.effectiveAppearance
                 let bestMatch = appearance.bestMatch(from: [.aqua, .darkAqua])
                 return bestMatch == .darkAqua ? .dark : .light
             } else {
-                // If not in the main thread, return to the default light theme
+                // 如果不在主线程，返回默认的 light 主题
                 return .light
             }
         }
     }
-    
-    /// Corresponding AppKit skin, used to affect AppKit-based UI (such as Sparkle)
+
+    /// 对应的 AppKit 外观，用于影响基于 AppKit 的 UI（如 Sparkle）
     public var nsAppearance: NSAppearance? {
         switch self {
-        case .light: NSAppearance(named: .aqua)
-        case .dark: NSAppearance(named: .darkAqua)
-        case .system: nil
+        case .light:
+            return NSAppearance(named: .aqua)
+        case .dark:
+            return NSAppearance(named: .darkAqua)
+        case .system:
+            return nil
         }
     }
 }
 
 class GeneralSettingsManager: ObservableObject, WorkingPathProviding {
     static let shared = GeneralSettingsManager()
-    
-    /// Whether to enable GitHub proxy (disabled by default)
-    @AppStorage("enableGitHubProxy")
-    var enableGitHubProxy = false {
+
+    /// 是否启用 GitHub 代理（默认开启）
+    @AppStorage(AppConstants.UserDefaultsKeys.enableGitHubProxy)
+    var enableGitHubProxy: Bool = true {
         didSet { objectWillChange.send() }
     }
-    
-    @AppStorage("gitProxyURL")
-    var gitProxyURL = "https://gh-proxy.com" {
+
+    @AppStorage(AppConstants.UserDefaultsKeys.gitProxyURL)
+    var gitProxyURL: String = "https://gh-proxy.com" {
         didSet { objectWillChange.send() }
     }
-    
-    // MARK: - Apply settings properties
-    @AppStorage("concurrentDownloads")
+
+    /// 是否限制通用 Sheet 高度（默认关闭）
+    @AppStorage(AppConstants.UserDefaultsKeys.limitCommonSheetHeight)
+    var limitCommonSheetHeight: Bool = false {
+        didSet { objectWillChange.send() }
+    }
+
+    // MARK: - 应用设置属性
+    @AppStorage(AppConstants.UserDefaultsKeys.concurrentDownloads)
     var concurrentDownloads: Int = 64 {
         didSet {
             if concurrentDownloads < 1 {
@@ -81,27 +84,27 @@ class GeneralSettingsManager: ObservableObject, WorkingPathProviding {
             objectWillChange.send()
         }
     }
-    
-    // New: Launcher working directory
-    @AppStorage("launcherWorkingDirectory")
+
+    // 新增：启动器工作目录
+    @AppStorage(AppConstants.UserDefaultsKeys.launcherWorkingDirectory)
     var launcherWorkingDirectory: String = AppPaths.launcherSupportDirectory.path {
         didSet { objectWillChange.send() }
     }
-    
-    /// Interface style: Classic (list | content) / Focus (content | list)
-    @AppStorage("interfaceLayoutStyle")
+
+    /// 界面风格：经典（列表 | 内容）/ 聚焦（内容 | 列表）
+    @AppStorage(AppConstants.UserDefaultsKeys.interfaceLayoutStyle)
     var interfaceLayoutStyle: InterfaceLayoutStyle = .classic {
         didSet { objectWillChange.send() }
     }
-    
+
     private init() {}
-    
-    /// Current launcher working directory (WorkingPathProviding)
-    /// Use default support directory when empty
+
+    /// 当前启动器工作目录（WorkingPathProviding）
+    /// 空时使用默认支持目录
     var currentWorkingPath: String {
         launcherWorkingDirectory.isEmpty ? AppPaths.launcherSupportDirectory.path : launcherWorkingDirectory
     }
-    
+
     var workingPathWillChange: AnyPublisher<Void, Never> {
         objectWillChange.map { _ in () }.eraseToAnyPublisher()
     }

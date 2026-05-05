@@ -6,7 +6,7 @@ enum GameFormMode {
     case creation
     case modPackImport(file: URL, shouldProcess: Bool)
     case launcherImport
-    
+
     var isImportMode: Bool {
         switch self {
         case .creation:
@@ -19,16 +19,17 @@ enum GameFormMode {
 
 // MARK: - GameFormView
 struct GameFormView: View {
-    @EnvironmentObject var gameRepository: GameRepository
-    @EnvironmentObject var playerListViewModel: PlayerListViewModel
+    @EnvironmentObject private var gameRepository: GameRepository
+    @EnvironmentObject private var playerListViewModel: PlayerListViewModel
     @Environment(\.dismiss)
     private var dismiss
-    
+
     // MARK: - File Picker Type
     enum FilePickerType {
-        case modPack, gameIcon
+        case modPack
+        case gameIcon
     }
-    
+
     // MARK: - State
     @State private var isDownloading = false
     @State private var isFormValid = false
@@ -36,17 +37,22 @@ struct GameFormView: View {
     @State private var triggerCancel = false
     @State private var showFilePicker = false
     @State private var filePickerType: FilePickerType = .modPack
-    @State private var mode: GameFormMode = .creation
+    @State private var mode: GameFormMode
     @State private var isModPackParsed = false
     @State private var imagePickerHandler: ((Result<[URL], Error>) -> Void)?
     @State private var showImportPicker = false
-    
+    @StateObject private var importViewModel = GameFormImportViewModel()
+
+    init(initialMode: GameFormMode = .creation) {
+        _mode = State(initialValue: initialMode)
+    }
+
     // MARK: - Body
     @ViewBuilder var body: some View {
         let content = CommonSheetView(
             header: { headerView },
             body: {
-                
+
                 VStack {
                     switch mode {
                     case .creation:
@@ -85,6 +91,7 @@ struct GameFormView: View {
                                 isModPackParsed = true
                             }
                         }
+                        .id(file)
                     case .launcherImport:
                         LauncherImportView(
                             configuration: GameFormConfiguration(
@@ -101,9 +108,9 @@ struct GameFormView: View {
             },
             footer: { footerView }
         )
-        
-        // When in "Import Launcher" mode, avoid hanging another fileImporter in the parent view
-        // Make the subview's fileImporter work properly
+
+        // 当处于“导入启动器”模式时，避免在父视图再挂一个 fileImporter，
+        // 让子视图的 fileImporter 正常工作
         if case .launcherImport = mode {
             content
         } else {
@@ -114,9 +121,9 @@ struct GameFormView: View {
                         switch filePickerType {
                         case .modPack:
                             return [
-                                UTType(filenameExtension: "mrpack") ?? UTType.data,
+                                UTType(filenameExtension: AppConstants.FileExtensions.mrpack) ?? UTType.data,
                                 .zip,
-                                UTType(filenameExtension: "zip") ?? UTType.zip,
+                                UTType(filenameExtension: AppConstants.FileExtensions.zip) ?? UTType.zip,
                             ]
                         case .gameIcon:
                             return [.png, .jpeg, .gif]
@@ -126,14 +133,19 @@ struct GameFormView: View {
                 ) { result in
                     switch filePickerType {
                     case .modPack:
-                        handleModPackFileSelection(result)
+                        Task {
+                            if let newMode = await importViewModel.prepareModPackImportMode(from: result) {
+                                mode = newMode
+                                isModPackParsed = false
+                            }
+                        }
                     case .gameIcon:
                         imagePickerHandler?(result)
                     }
                 }
         }
     }
-    
+
     // MARK: - View Components
     private var headerView: some View {
         VStack(spacing: 12) {
@@ -145,52 +157,52 @@ struct GameFormView: View {
             }
         }
     }
-    
-    private var currentModeTitle: LocalizedStringKey {
+
+    private var currentModeTitle: String {
         switch mode {
         case .creation:
-            return LocalizedStringKey("New")
+            return "game.form.mode.manual".localized()
         case .modPackImport:
-            return LocalizedStringKey("Import Modpack")
+            return "modpack.import.title".localized()
         case .launcherImport:
-            return LocalizedStringKey("Import Launcher")
+            return "launcher.import.title".localized()
         }
     }
-    
+
     private var importModePicker: some View {
         Menu {
             Button {
                 mode = .creation
             } label: {
-                Label("New", systemImage: "square.and.pencil")
+                Label("game.form.mode.manual".localized(), systemImage: "square.and.pencil")
             }
-            
+
             Button {
-                // First switch to non-launcherImport mode
+                // 先切换到非 launcherImport 模式
                 if case .launcherImport = mode {
                     mode = .creation
                 }
                 filePickerType = .modPack
-                // Asynchronously wait for view updates
+                // 异步等待视图更新
                 DispatchQueue.main.async {
                     showFilePicker = true
                 }
             } label: {
-                Label("Import Modpack", systemImage: "square.and.arrow.up")
+                Label("modpack.import.title".localized(), systemImage: "square.and.arrow.up")
             }
-            
+
             Button {
                 mode = .launcherImport
             } label: {
-                Label("Import Launcher", systemImage: "arrow.down.doc")
+                Label("launcher.import.title".localized(), systemImage: "arrow.down.doc")
             }
         } label: {
             Text(currentModeTitle)
         }
         .fixedSize()
-        .help("Import Modpack")
+        .help("game.form.mode.import".localized())
     }
-    
+
     private var footerView: some View {
         HStack {
             cancelButton
@@ -198,26 +210,22 @@ struct GameFormView: View {
             confirmButton
         }
     }
-    
+
     private var cancelButton: some View {
         Button {
             if isDownloading {
-                // When downloading, trigger cancellation processing logic
+                // 当正在下载时，触发取消处理逻辑
                 triggerCancel = true
             } else {
-                // Directly close the window when not downloading
+                // 非下载状态直接关闭窗口
                 dismiss()
             }
         } label: {
-            Text(
-                isDownloading
-                ? LocalizedStringKey("Stop")
-                : LocalizedStringKey("Cancel")
-            )
+            Text(isDownloading ? "common.stop".localized() : "common.cancel".localized())
         }
         .keyboardShortcut(.cancelAction)
     }
-    
+
     private var confirmButton: some View {
         Button {
             triggerConfirm = true
@@ -227,14 +235,14 @@ struct GameFormView: View {
                     ProgressView()
                         .controlSize(.small)
                 } else {
-                    let buttonText: LocalizedStringKey = {
+                    let buttonText: String = {
                         switch mode {
                         case .modPackImport:
-                            return LocalizedStringKey("Import")
+                            return "modpack.import.button".localized()
                         case .launcherImport:
-                            return LocalizedStringKey("Import")
+                            return "launcher.import.button".localized()
                         case .creation:
-                            return LocalizedStringKey("Confirm")
+                            return "common.confirm".localized()
                         }
                     }()
                     Text(buttonText)
@@ -244,59 +252,8 @@ struct GameFormView: View {
         .keyboardShortcut(.defaultAction)
         .disabled(!isFormValid || isDownloading)
     }
-    
+
     // MARK: - Helper Methods
-    
-    private func handleModPackFileSelection(_ result: Result<[URL], Error>) {
-        switch result {
-        case .success(let urls):
-            guard let url = urls.first else { return }
-            
-            guard url.startAccessingSecurityScopedResource() else {
-                let globalError = GlobalError.fileSystem(
-                    i18nKey: "File Access Failed",
-                    level: .notification
-                )
-                GlobalErrorHandler.shared.handle(globalError)
-                return
-            }
-            
-            let urlForBackground = url
-            Task {
-                let tempFileResult: Result<URL, Error> = await Task.detached(priority: .userInitiated) {
-                    do {
-                        let tempDir = FileManager.default.temporaryDirectory
-                            .appendingPathComponent("modpack_import")
-                            .appendingPathComponent(UUID().uuidString)
-                        try FileManager.default.createDirectory(
-                            at: tempDir,
-                            withIntermediateDirectories: true
-                        )
-                        let tempFile = tempDir.appendingPathComponent(urlForBackground.lastPathComponent)
-                        try FileManager.default.copyItem(at: urlForBackground, to: tempFile)
-                        return .success(tempFile)
-                    } catch {
-                        return .failure(error)
-                    }
-                }.value
-                urlForBackground.stopAccessingSecurityScopedResource()
-                
-                await MainActor.run {
-                    switch tempFileResult {
-                    case .success(let tempFile):
-                        mode = .modPackImport(file: tempFile, shouldProcess: true)
-                        isModPackParsed = false
-                    case .failure(let error):
-                        GlobalErrorHandler.shared.handle(GlobalError.from(error))
-                    }
-                }
-            }
-            
-        case .failure(let error):
-            let globalError = GlobalError.from(error)
-            GlobalErrorHandler.shared.handle(globalError)
-        }
-    }
 }
 
 #Preview {

@@ -1,7 +1,15 @@
+//
+//  WindowDataStore.swift
+//  PyzhCraft
+//
+//  Created by su on 2025/1/27.
+//
+
 import SwiftUI
+import AppKit
 import SkinRenderKit
 
-/// Skin preview data
+/// 皮肤预览数据
 struct SkinPreviewData {
     let skinImage: NSImage?
     let skinPath: String?
@@ -9,33 +17,33 @@ struct SkinPreviewData {
     let playerModel: PlayerModel
 }
 
-/// Window data storage, used to transfer data between windows
+/// 窗口数据存储，用于在窗口间传递数据
 @MainActor
 class WindowDataStore: ObservableObject {
     static let shared = WindowDataStore()
-    
+
     private init() {}
-    
-    // AI Chat window data
+
+    // AI Chat 窗口数据
     @Published var aiChatState: ChatState?
-    
-    // Skin Preview window data
+
+    // Skin Preview 窗口数据
     @Published var skinPreviewData: SkinPreviewData?
-    
-    /// Clear the data of the specified window
+
+    /// 清理指定窗口的数据
     func cleanup(for windowID: WindowID) {
         switch windowID {
         case .aiChat:
-            // Clean AI Chat data
+            // 清理 AI Chat 数据
             if let chatState = aiChatState {
                 chatState.clear()
             }
             aiChatState = nil
         case .skinPreview:
-            // Clean Skin Preview data
+            // 清理 Skin Preview 数据
             skinPreviewData = nil
         default:
-            // Other windows do not need to clean up WindowDataStore
+            // 其他窗口不需要清理 WindowDataStore
             break
         }
     }

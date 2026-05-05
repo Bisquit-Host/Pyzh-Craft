@@ -1,43 +1,52 @@
+//
+//  AIChatWindow.swift
+//  PyzhCraft
+//
+//
+
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// AI conversation window view
+/// AI 对话窗口视图
 struct AIChatWindowView: View {
     @ObservedObject var chatState: ChatState
-    @EnvironmentObject var playerListViewModel: PlayerListViewModel
-    @EnvironmentObject var gameRepository: GameRepository
-    @StateObject private var aiSettings = AISettingsManager.shared
+    @EnvironmentObject private var playerListViewModel: PlayerListViewModel
+    @EnvironmentObject private var gameRepository: GameRepository
+    @StateObject private var aiSettings: AISettingsManager
+    private let aiChatManager: AIChatManager
+    private let errorHandler: GlobalErrorHandler
     @StateObject private var attachmentManager = AIChatAttachmentManager()
+    @StateObject private var viewModel = AIChatWindowViewModel()
     @State private var inputText = ""
     @FocusState private var isInputFocused: Bool
-    @State private var selectedGameId: String?
-    @State private var modelOptions: [String] = []
-    @State private var isLoadingModels = false
     @State private var showFilePicker = false
-    
-    // Cache avatar view to avoid reloading every time message is updated
-    @State private var cachedAIAvatar: AnyView?
-    @State private var cachedUserAvatar: AnyView?
-    
-    // MARK: - Constants
-    private enum Constants {
-        static let avatarSize: CGFloat = 32
+
+    init(
+        chatState: ChatState,
+        aiSettings: AISettingsManager = AppServices.aiSettingsManager,
+        aiChatManager: AIChatManager = AppServices.aiChatManager,
+        errorHandler: GlobalErrorHandler = AppServices.errorHandler
+    ) {
+        self.chatState = chatState
+        _aiSettings = StateObject(wrappedValue: aiSettings)
+        self.aiChatManager = aiChatManager
+        self.errorHandler = errorHandler
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
-            // Message list
+            // 消息列表
             AIChatMessageListView(
                 chatState: chatState,
                 currentPlayer: playerListViewModel.currentPlayer,
-                cachedAIAvatar: cachedAIAvatar,
-                cachedUserAvatar: cachedUserAvatar,
+                cachedAIAvatar: viewModel.cachedAIAvatar,
+                cachedUserAvatar: viewModel.cachedUserAvatar,
                 aiAvatarURL: aiSettings.aiAvatarURL
             )
-            
+
             Divider()
-            
-            // Preview of attachments to be sent
+
+            // 待发送附件预览
             if !attachmentManager.pendingAttachments.isEmpty {
                 AIChatAttachmentPreviewView(
                     attachments: attachmentManager.pendingAttachments
@@ -45,17 +54,13 @@ struct AIChatWindowView: View {
                     attachmentManager.removeAttachment(at: index)
                 }
             }
-            
-            // input area
+
+            // 输入区域
             AIChatInputAreaView(
                 inputText: $inputText,
-                selectedGameId: $selectedGameId,
-                selectedModel: $chatState.selectedModel,
+                selectedGameId: $viewModel.selectedGameId,
                 isInputFocused: $isInputFocused,
                 games: gameRepository.games,
-                modelOptions: modelOptions,
-                defaultModel: aiSettings.getDefaultModel(),
-                isLoadingModels: isLoadingModels,
                 isSending: chatState.isSending,
                 canSend: canSend,
                 onSend: sendMessage
@@ -76,156 +81,81 @@ struct AIChatWindowView: View {
         )
         .onAppear {
             isInputFocused = true
-            // The first game is selected by default
-            if selectedGameId == nil && !gameRepository.games.isEmpty {
-                selectedGameId = gameRepository.games.first?.id
-            }
-            // Initialize avatar cache
-            initializeAvatarCache()
-            
-            Task {
-                await refreshModelOptions()
+            viewModel.onAppear(
+                games: gameRepository.games,
+                currentPlayer: playerListViewModel.currentPlayer,
+                aiAvatarURL: aiSettings.aiAvatarURL
+            )
+        }
+        .onChange(of: chatState.isSending) { wasSending, isSendingNow in
+            if wasSending, !isSendingNow {
+                isInputFocused = true
             }
         }
         .onChange(of: gameRepository.games) { _, newGames in
-            // When the game list is loaded and no game is selected, the first game is automatically selected
-            if selectedGameId == nil && !newGames.isEmpty {
-                selectedGameId = newGames.first?.id
-            }
+            // 当游戏列表加载完成且未选择游戏时，自动选择第一个游戏
+            viewModel.onGamesChanged(newGames)
         }
         .onChange(of: playerListViewModel.currentPlayer?.id) { _, _ in
-            // When the current player changes, update the user avatar cache (only monitor ID changes to reduce unnecessary updates)
-            updateUserAvatarCache()
+            // 当当前玩家变化时，更新用户头像缓存（仅监听 ID 变化，减少不必要的更新）
+            viewModel.onPlayerChanged(playerListViewModel.currentPlayer)
         }
         .onChange(of: aiSettings.aiAvatarURL) { oldValue, newValue in
-            // Update the AI ​​avatar cache when the AI ​​avatar URL changes (only updates when the URL actually changes)
+            // 当 AI 头像 URL 变化时，更新 AI 头像缓存（仅在 URL 实际变化时更新）
             if oldValue != newValue {
-                updateAIAvatarCache()
-            }
-        }
-        .onChange(of: aiSettings.selectedProvider) {
-            chatState.selectedModel = ""
-            Task {
-                await refreshModelOptions()
-            }
-        }
-        .onChange(of: aiSettings.openAIBaseURL) {
-            Task {
-                await refreshModelOptions()
+                viewModel.onAIAvatarURLChanged(newValue)
             }
         }
         .onDisappear {
-            // Clear all data after closing the page
+            // 页面关闭后清除所有数据
             clearAllData()
         }
     }
-    
+
     // MARK: - Computed Properties
-    
+
     private var selectedGame: GameVersionInfo? {
-        guard let selectedGameId = selectedGameId else { return nil }
+        guard let selectedGameId = viewModel.selectedGameId else { return nil }
         return gameRepository.games.first { $0.id == selectedGameId }
     }
-    
+
     private var canSend: Bool {
         !chatState.isSending && (!inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !attachmentManager.pendingAttachments.isEmpty)
     }
-    
+
     // MARK: - Methods
-    
-    /// Initialize avatar cache
-    private func initializeAvatarCache() {
-        // Initialize AI avatar (using URL from settings)
-        updateAIAvatarCache()
-        
-        // Initialize user avatar
-        updateUserAvatarCache()
-    }
-    
-    /// Update AI avatar cache
-    private func updateAIAvatarCache() {
-        cachedAIAvatar = AnyView(
-            AIAvatarView(size: Constants.avatarSize, url: aiSettings.aiAvatarURL)
-        )
-    }
-    
-    /// Update user avatar cache
-    private func updateUserAvatarCache() {
-        if let player = playerListViewModel.currentPlayer {
-            cachedUserAvatar = AnyView(
-                MinecraftSkinUtils(
-                    type: player.isOnlineAccount ? .url : .asset,
-                    src: player.avatarName,
-                    size: Constants.avatarSize
-                )
-            )
-        } else {
-            cachedUserAvatar = AnyView(
-                Image(systemName: "person.fill")
-                    .font(.system(size: Constants.avatarSize))
-                    .foregroundStyle(.secondary)
-            )
-        }
-    }
-    
-    /// Clear avatar cache
-    private func clearAvatarCache() {
-        cachedAIAvatar = nil
-        cachedUserAvatar = nil
-    }
-    
-    /// Clear all data on the page
+
+    /// 清除页面所有数据
     private func clearAllData() {
-        // Clear avatar cache
-        clearAvatarCache()
-        // Clean input text and attachments
+        viewModel.clearAllData()
+        // 清理输入文本和附件
         inputText = ""
         attachmentManager.clearAll()
-        // Reset focus state
+        // 重置焦点状态
         isInputFocused = false
-        // Clear selected games
-        selectedGameId = nil
-        chatState.selectedModel = ""
     }
-    
+
     private func sendMessage() {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard canSend else { return }
-        
+
         let attachments = attachmentManager.pendingAttachments
         inputText = ""
         attachmentManager.clearAll()
-        
+
         Task {
-            await AIChatManager.shared.sendMessage(
-                text,
-                attachments: attachments,
-                selectedModel: chatState.selectedModel,
-                chatState: chatState
-            )
+            await aiChatManager.sendMessage(text, attachments: attachments, chatState: chatState)
         }
     }
-    
-    private func refreshModelOptions() async {
-        isLoadingModels = true
-        let fetchedModels = await aiSettings.fetchModelOptions()
-        modelOptions = fetchedModels
-        
-        if !chatState.selectedModel.isEmpty && !fetchedModels.contains(chatState.selectedModel) {
-            chatState.selectedModel = ""
-        }
-        
-        isLoadingModels = false
-    }
-    
-    /// Process file selection results
+
+    /// 处理文件选择结果
     private func handleFileSelection(_ result: Result<[URL], Error>) {
         switch result {
         case .success(let urls):
             attachmentManager.handleFileSelection(urls)
         case .failure(let error):
             let globalError = GlobalError.from(error)
-            GlobalErrorHandler.shared.handle(globalError)
+            errorHandler.handle(globalError)
         }
     }
 }

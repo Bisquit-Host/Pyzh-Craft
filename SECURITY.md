@@ -1,51 +1,51 @@
-# Security Policy 🔒
+# 安全策略 🔒
+*[English](./doc/SECURITY_en.md)*
 
-Thank you for your interest in the security of **PyzhCraft**
-Although this project is primarily for development and learning, we still treat security seriously
-
----
-
-## Supported Versions ✅
-
-Security updates are currently provided for:
-
-- `dev`
-- `main`
+感谢你关注 **PyzhCraft** 的安全！  
+本项目虽然主要面向开发与学习，但我们仍然重视安全问题。  
 
 ---
 
-## Reporting a Vulnerability 🐞
+## 支持的版本 ✅
 
-Do not report security vulnerabilities in public GitHub issues
-Use private reporting channels instead:
-
-- Email: `swiftcraftlauncher@outlook.com`
-- GitHub Security Advisories
-- Contact a repository maintainer directly
+我们当前仅对以下分支提供安全更新：
+- dev
+- main
 
 ---
 
-## What to Include in a Report 📋
+## 如何报告漏洞 🐞
 
-Please include as much of the following as possible:
+⚠️ **请不要在公共 Issue 中直接报告安全漏洞！**  
+这样可能会让其他用户暴露在风险之中。  
 
-1. Vulnerability description and potential impact
-2. Steps to reproduce
-3. Environment details (OS version and PyzhCraft version)
-4. Relevant logs or screenshots
-
----
-
-## Our Commitment 🤝
-
-- We acknowledge reports as quickly as possible
-- We work to fix issues within a reasonable timeframe
-- We publish fixes in updates and changelogs
-- We avoid public disclosure before a fix is available
+如果你发现了漏洞，请通过以下方式私下联系：  
+- ✨最推荐：进入我们的QQ群跟群主反馈 或 使用Swift Craft Launcher官方邮箱：`swiftcraftlauncher@outlook.com`
+- 或使用 GitHub 的 **Security Advisories** 功能提交报告
+- 提交给仓库贡献者
 
 ---
 
-## Acknowledgments 💖
+## 报告内容建议 📋
 
-Security improvements rely on community reports
-Thank you for helping keep PyzhCraft safe
+为了帮助我们快速修复，请尽可能提供：  
+1. **漏洞描述**：问题是什么，潜在影响是什么  
+2. **复现步骤**：怎样触发漏洞（如果能稳定复现更好）  
+3. **运行环境**：操作系统版本、PyzhCraft 版本  
+4. **日志/截图**：有助于理解问题的相关信息  
+
+---
+
+## 我们的承诺 🤝
+
+- 我们会尽快确认收到你的报告  
+- 会在合理的时间范围内修复漏洞  
+- 修复完成后，会发布更新并在变更日志中说明  
+- 在没有修复前，我们不会公开披露细节  
+
+---
+
+## 致谢 💖
+
+安全依赖于每一位用户的帮助！  
+感谢你为 PyzhCraft 的安全做出的贡献 🙏。

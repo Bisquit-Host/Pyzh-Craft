@@ -1,3 +1,10 @@
+//
+//  ModrinthLoaderModels.swift
+//  PyzhCraft
+//
+//  Created by su on 2025/7/27.
+//
+
 import Foundation
 
 // MARK: - SidedDataEntry
@@ -13,7 +20,7 @@ struct Processor: Codable {
     let classpath: [String]?
     let args: [String]?
     let outputs: [String: String]?
-    
+
     enum CodingKeys: String, CodingKey {
         case sides, jar, classpath, args, outputs
     }
@@ -46,11 +53,11 @@ struct ModrinthLoader: Codable {
     var version: String?
     let processors: [Processor]?
     let data: [String: SidedDataEntry]?
-    
+
     enum CodingKeys: String, CodingKey {
         case mainClass, arguments, libraries, version, processors, data
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         mainClass = try container.decode(String.self, forKey: .mainClass)
@@ -78,8 +85,8 @@ struct ModrinthLoaderLibrary: Codable {
     var includeInClasspath: Bool
     var downloadable: Bool
     var url: URL?
-    
-    // Custom initializer for creating instances directly
+
+    // 自定义初始化器，用于直接创建实例
     init(
         downloads: LibraryDownloads?,
         name: String,
@@ -91,12 +98,12 @@ struct ModrinthLoaderLibrary: Codable {
         self.includeInClasspath = includeInClasspath
         self.downloadable = downloadable
     }
-    
+
     enum CodingKeys: String, CodingKey {
         case name, downloadable, downloads, url
         case includeInClasspath = "include_in_classpath"
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         name = try container.decode(String.self, forKey: .name)

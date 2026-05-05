@@ -1,48 +1,37 @@
+//
+//  AIChatInputAreaView.swift
+//  PyzhCraft
+//
+//
+
 import SwiftUI
 
-/// AI chat input area view
+/// AI 聊天输入区域视图
 struct AIChatInputAreaView: View {
     @Binding var inputText: String
     @Binding var selectedGameId: String?
-    @Binding var selectedModel: String
     @FocusState.Binding var isInputFocused: Bool
     let games: [GameVersionInfo]
-    let modelOptions: [String]
-    let defaultModel: String
-    let isLoadingModels: Bool
     let isSending: Bool
     let canSend: Bool
     let onSend: () -> Void
     let onAttachFile: () -> Void
-    
+
     private enum Constants {
         static let inputFontSize: CGFloat = 14
         static let inputHorizontalPadding: CGFloat = 16
         static let inputVerticalPadding: CGFloat = 12
         static let messageSpacing: CGFloat = 16
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
-            // game selector
+            // 游戏选择器
             HStack(spacing: Constants.messageSpacing) {
-                // Show Picker only if game list is not empty
+                // 只有当游戏列表不为空时才显示 Picker
                 if !games.isEmpty {
                     gameSelector
                 }
-                Picker("", selection: $selectedModel) {
-                    Text("Default (\(defaultModel))")
-                        .tag("")
-                    
-                    ForEach(modelOptions, id: \.self) {
-                        Text($0)
-                            .tag($0)
-                    }
-                }
-                .labelsHidden()
-                .pickerStyle(.menu)
-                .disabled(isSending || isLoadingModels)
-                .frame(maxWidth: 140)
                 attachFileButton
                 textField
                 sendButton
@@ -51,20 +40,22 @@ struct AIChatInputAreaView: View {
             .padding(.vertical, Constants.inputVerticalPadding)
         }
     }
-    
+
     // MARK: - View Components
-    
+
     private var selectedGame: GameVersionInfo? {
         guard let selectedGameId = selectedGameId else { return nil }
         return games.first { $0.id == selectedGameId }
     }
-    
+
     private var gameSelector: some View {
         Menu {
             ForEach(games) { game in
-                Button(game.gameName) {
+                Button(action: {
                     selectedGameId = game.id
-                }
+                }, label: {
+                    Text(game.gameName)
+                })
             }
         } label: {
             HStack(spacing: 4) {
@@ -79,7 +70,7 @@ struct AIChatInputAreaView: View {
         .menuStyle(.borderlessButton)
         .frame(maxWidth: 50)
     }
-    
+
     private var attachFileButton: some View {
         Button(action: onAttachFile) {
             Image(systemName: "paperclip")
@@ -89,9 +80,9 @@ struct AIChatInputAreaView: View {
         .buttonStyle(.plain)
         .disabled(isSending)
     }
-    
+
     private var textField: some View {
-        TextField("Type your message here...", text: $inputText, axis: .vertical)
+        TextField("ai.chat.input.placeholder".localized(), text: $inputText, axis: .vertical)
             .textFieldStyle(.plain)
             .focused($isInputFocused)
             .lineLimit(1...6)
@@ -102,7 +93,7 @@ struct AIChatInputAreaView: View {
             }
             .disabled(isSending)
     }
-    
+
     private var sendButton: some View {
         Button(action: onSend) {
             Image(systemName: "arrow.up.circle")

@@ -1,29 +1,38 @@
+//
+//  PlaceholderInstanceParser.swift
+//  PyzhCraft
+//
+//
+
 import Foundation
 
-/// Placeholder instance parser
-/// For starters that have not yet implemented parsing logic
+/// 占位符实例解析器
+/// 用于尚未实现解析逻辑的启动器
 struct PlaceholderInstanceParser: LauncherInstanceParser {
     let launcherType: ImportLauncherType
-    
+
     func isValidInstance(at instancePath: URL) -> Bool {
-        // Not implemented yet, returns false
+        // 暂未实现，返回 false
         return false
     }
-    
+
     func parseInstance(at instancePath: URL, basePath: URL) throws -> ImportInstanceInfo? {
-        // Not implemented yet, throws an error
+        // 暂未实现，抛出错误
         throw LauncherImportError.parserNotImplemented(launcherType: launcherType.rawValue)
     }
 }
 
-/// Launcher import error
+/// 启动器导入错误
 enum LauncherImportError: LocalizedError {
     case parserNotImplemented(launcherType: String)
-    
+
     var errorDescription: String? {
         switch self {
         case .parserNotImplemented(let launcherType):
-            String(format: String(localized: "\(launcherType) launcher parser is not implemented yet"))
+            return String(
+                format: "launcher.import.error.parser_not_implemented".localized(),
+                launcherType
+            )
         }
     }
 }

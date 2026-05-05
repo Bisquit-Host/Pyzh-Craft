@@ -1,15 +1,14 @@
 import SwiftUI
 
-// MARK: - Description Text With Popover
 struct DescriptionTextWithPopover: View {
+    private static let hoverDelayNanoseconds: UInt64 = 500_000_000
+
     let description: String
-    @State private var isHovering = false
     @State private var showPopover = false
     @State private var hoverTask: Task<Void, Never>?
 
     var body: some View {
         Button {
-            // Also show popover when clicked
             showPopover.toggle()
         } label: {
             Text(description)
@@ -20,26 +19,15 @@ struct DescriptionTextWithPopover: View {
         }
         .buttonStyle(.plain)
         .onHover { hovering in
-            isHovering = hovering
-            // Cancel previous task
-            hoverTask?.cancel()
-
             if hovering {
-                // Delay the display of popover to avoid frequent display when the mouse moves quickly
-                hoverTask = Task {
-                    try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
-                    if !Task.isCancelled && isHovering {
-                        await MainActor.run {
-                            showPopover = true
-                        }
-                    }
-                }
+                schedulePopover()
             } else {
+                cancelHoverTask()
                 showPopover = false
             }
         }
         .popover(isPresented: $showPopover, arrowEdge: .top) {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading) {
                 Text(description)
                     .font(.system(size: 12))
                     .foregroundColor(.secondary)
@@ -47,13 +35,29 @@ struct DescriptionTextWithPopover: View {
                     .lineLimit(nil)
                     .multilineTextAlignment(.leading)
             }
-            .padding(10)
-            .frame(minWidth: 200, maxWidth: 500)
+            .padding()
+            .frame(maxWidth: 500)
             .fixedSize(horizontal: true, vertical: false)
         }
         .onDisappear {
-            hoverTask?.cancel()
+            cancelHoverTask()
             showPopover = false
         }
+    }
+
+    private func schedulePopover() {
+        cancelHoverTask()
+        hoverTask = Task {
+            try? await Task.sleep(nanoseconds: Self.hoverDelayNanoseconds)
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                showPopover = true
+            }
+        }
+    }
+
+    private func cancelHoverTask() {
+        hoverTask?.cancel()
+        hoverTask = nil
     }
 }

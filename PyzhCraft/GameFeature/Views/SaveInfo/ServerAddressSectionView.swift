@@ -1,39 +1,26 @@
 import SwiftUI
+import AppKit
 
-// MARK: - Constants
-private enum ServerAddressSectionConstants {
-    static let maxHeight = 235.0
-    static let verticalPadding = 4.0
-    static let headerBottomPadding = 4.0
-    static let placeholderCount = 5
-    static let popoverWidth = 320.0
-    static let popoverMaxHeight = 320.0
-    static let chipPadding = 16.0
-    static let estimatedCharWidth = 10.0
-    static let maxItems = 4 // Display up to 4
-    static let maxWidth = 320.0
-}
-
-// MARK: - Server address area view
+    // MARK: - 服务器地址区域视图
 struct ServerAddressSectionView: View {
     // MARK: - Properties
     let servers: [ServerAddress]
     let isLoading: Bool
     let gameName: String
     let onRefresh: (() -> Void)?
-    
+
+    @StateObject private var viewModel = ServerAddressSectionViewModel()
     @State private var showOverflowPopover = false
     @State private var selectedServer: ServerAddress?
     @State private var showAddServer = false
-    @State private var serverStatuses: [String: ServerConnectionStatus] = [:]
-    
+
     init(servers: [ServerAddress], isLoading: Bool, gameName: String, onRefresh: (() -> Void)? = nil) {
         self.servers = servers
         self.isLoading = isLoading
         self.gameName = gameName
         self.onRefresh = onRefresh
     }
-    
+
     // MARK: - Body
     var body: some View {
         VStack {
@@ -44,32 +31,33 @@ struct ServerAddressSectionView: View {
                 contentWithOverflow
             }
         }
-        .sheet(item: $selectedServer) {
-            ServerAddressEditView(server: $0, gameName: gameName, onRefresh: onRefresh)
+        .sheet(item: $selectedServer) { server in
+            ServerAddressEditView(
+                server: server,
+                gameName: gameName,
+                serverInfo: viewModel.serverInfos[server.id],
+                onRefresh: onRefresh
+            )
         }
         .sheet(isPresented: $showAddServer) {
             ServerAddressEditView(gameName: gameName, onRefresh: onRefresh)
         }
         .onAppear {
-            checkAllServers()
+            viewModel.checkAllServers(for: servers)
         }
-        .onChange(of: servers) {
-            checkAllServers()
+        .onChange(of: servers) { _, _ in
+            viewModel.checkAllServers(for: servers)
         }
     }
-    
+
     // MARK: - Header Views
     private var headerView: some View {
-        let (_, overflowItems) = computeVisibleAndOverflowItems()
-        
+        let (_, overflowItems) = viewModel.computeVisibleAndOverflowItems(from: servers)
         return HStack {
             headerTitle
-            
             Spacer()
-            
             HStack(spacing: 8) {
                 addServerButton
-                
                 if !overflowItems.isEmpty {
                     overflowButton
                 }
@@ -77,7 +65,7 @@ struct ServerAddressSectionView: View {
         }
         .padding(.bottom, ServerAddressSectionConstants.headerBottomPadding)
     }
-    
+
     private var addServerButton: some View {
         Button {
             showAddServer = true
@@ -86,15 +74,14 @@ struct ServerAddressSectionView: View {
         }
         .buttonStyle(.plain)
     }
-    
+
     private var headerTitle: some View {
-        Text("Servers")
+        Text("saveinfo.servers".localized())
             .font(.headline)
     }
-    
+
     private var overflowButton: some View {
-        let (_, overflowItems) = computeVisibleAndOverflowItems()
-        
+        let (_, overflowItems) = viewModel.computeVisibleAndOverflowItems(from: servers)
         return Button {
             showOverflowPopover = true
         } label: {
@@ -102,7 +89,7 @@ struct ServerAddressSectionView: View {
                 .font(.caption)
                 .padding(.horizontal, 4)
                 .padding(.vertical, 2)
-                .background(.gray.opacity(0.15))
+                .background(Color.gray.opacity(0.15))
                 .cornerRadius(4)
         }
         .buttonStyle(.plain)
@@ -110,19 +97,19 @@ struct ServerAddressSectionView: View {
             overflowPopoverContent
         }
     }
-    
+
     private var overflowPopoverContent: some View {
         VStack(alignment: .leading, spacing: 0) {
             ScrollView {
                 FlowLayout {
-                    // Show all servers
+                    // 显示所有服务器
                     ForEach(servers) { server in
                         ServerAddressChip(
                             title: server.name,
                             address: server.address,
                             port: server.port,
                             isLoading: false,
-                            connectionStatus: serverStatuses[server.id] ?? .unknown
+                            connectionStatus: viewModel.serverStatuses[server.id] ?? .unknown
                         ) {
                             selectedServer = server
                         }
@@ -134,7 +121,7 @@ struct ServerAddressSectionView: View {
         }
         .frame(width: ServerAddressSectionConstants.popoverWidth)
     }
-    
+
     // MARK: - Content Views
     private var loadingPlaceholder: some View {
         ScrollView {
@@ -144,7 +131,7 @@ struct ServerAddressSectionView: View {
                     id: \.self
                 ) { _ in
                     ServerAddressChip(
-                        title: "Loading",
+                        title: "common.loading".localized(),
                         address: "",
                         port: nil,
                         isLoading: true,
@@ -158,13 +145,13 @@ struct ServerAddressSectionView: View {
         .fixedSize(horizontal: false, vertical: true)
         .padding(.vertical, ServerAddressSectionConstants.verticalPadding)
     }
-    
+
     private var contentWithOverflow: some View {
-        let (visibleItems, _) = computeVisibleAndOverflowItems()
-        
+        let (visibleItems, _) = viewModel.computeVisibleAndOverflowItems(from: servers)
+
         return Group {
             if servers.isEmpty {
-                Text("No servers")
+                Text("saveinfo.server.empty".localized())
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -178,7 +165,7 @@ struct ServerAddressSectionView: View {
                             address: server.address,
                             port: server.port,
                             isLoading: false,
-                            connectionStatus: serverStatuses[server.id] ?? .unknown
+                            connectionStatus: viewModel.serverStatuses[server.id] ?? .unknown
                         ) {
                             selectedServer = server
                         }
@@ -188,52 +175,6 @@ struct ServerAddressSectionView: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.vertical, ServerAddressSectionConstants.verticalPadding)
                 .padding(.bottom, ServerAddressSectionConstants.verticalPadding)
-            }
-        }
-    }
-    
-    // MARK: - Helper Methods
-    private func computeVisibleAndOverflowItems() -> (
-        [ServerAddress], [ServerAddress]
-    ) {
-        // Display up to 4
-        let visibleItems = Array(servers.prefix(ServerAddressSectionConstants.maxItems))
-        let overflowItems = Array(servers.dropFirst(ServerAddressSectionConstants.maxItems))
-        
-        return (visibleItems, overflowItems)
-    }
-    
-    /// Concurrently detect the connection status of all servers
-    private func checkAllServers() {
-        guard !servers.isEmpty else { return }
-        
-        // Initialize all server status to detecting
-        var initialStatuses: [String: ServerConnectionStatus] = [:]
-        for server in servers {
-            initialStatuses[server.id] = .checking
-        }
-        serverStatuses = initialStatuses
-        
-        // Concurrent detection of all servers
-        Task {
-            await withTaskGroup(of: (String, ServerConnectionStatus).self) { group in
-                for server in servers {
-                    group.addTask {
-                        let status = await NetworkUtils.checkServerConnectionStatus(
-                            address: server.address,
-                            port: server.port,
-                            timeout: 5
-                        )
-                        
-                        return (server.id, status)
-                    }
-                }
-                
-                for await (serverId, status) in group {
-                    await MainActor.run {
-                        serverStatuses[serverId] = status
-                    }
-                }
             }
         }
     }

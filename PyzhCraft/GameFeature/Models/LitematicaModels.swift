@@ -1,6 +1,13 @@
+//
+//  LitematicaModels.swift
+//  PyzhCraft
+//
+//  Created by su on 2025/1/20.
+//
+
 import Foundation
 
-/// Litematica projected file information model
+/// Litematica 投影文件信息模型
 struct LitematicaInfo: Identifiable, Equatable {
     let id: String
     let name: String
@@ -12,7 +19,7 @@ struct LitematicaInfo: Identifiable, Equatable {
     let version: String?
     let regionCount: Int?
     let totalBlocks: Int?
-    
+
     init(
         name: String,
         path: URL,
@@ -37,7 +44,7 @@ struct LitematicaInfo: Identifiable, Equatable {
     }
 }
 
-/// Litematica projection metadata structure (for list display)
+/// Litematica 投影元数据结构（用于列表显示）
 struct LitematicaMetadata {
     let author: String?
     let description: String?
@@ -46,7 +53,7 @@ struct LitematicaMetadata {
     let totalBlocks: Int?
 }
 
-/// Litematica projects the complete metadata structure (for detailed display)
+/// Litematica 投影完整元数据结构（用于详情显示）
 struct LitematicMetadata {
     let name: String
     let author: String
@@ -59,7 +66,7 @@ struct LitematicMetadata {
     let regionCount: Int32
 }
 
-/// Dimensional structure
+/// 尺寸结构
 struct Size {
     let x: Int32
     let y: Int32

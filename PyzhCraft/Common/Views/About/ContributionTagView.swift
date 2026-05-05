@@ -1,9 +1,15 @@
+//
+//  ContributionTagView.swift
+//  PyzhCraft
+//
+//
+
 import SwiftUI
 
-/// Contribution type label view
+/// 贡献类型标签视图
 struct ContributionTagView: View {
     let contribution: Contribution
-    
+
     var body: some View {
         Text(contribution.localizedString)
             .font(.caption)

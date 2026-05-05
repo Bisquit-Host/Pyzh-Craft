@@ -1,10 +1,16 @@
+//
+//  AIChatAttachmentPreviewView.swift
+//  PyzhCraft
+//
+//
+
 import SwiftUI
 
-/// AI chat attachment preview area view
+/// AI 聊天附件预览区域视图
 struct AIChatAttachmentPreviewView: View {
     let attachments: [MessageAttachmentType]
     let onRemove: (Int) -> Void
-    
+
     var body: some View {
         VStack(spacing: 0) {
             ScrollView(.horizontal, showsIndicators: false) {
@@ -18,7 +24,6 @@ struct AIChatAttachmentPreviewView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
             }
-            
             Divider()
         }
     }

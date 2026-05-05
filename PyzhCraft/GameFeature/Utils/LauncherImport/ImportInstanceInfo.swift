@@ -1,29 +1,35 @@
+//
+//  ImportInstanceInfo.swift
+//  PyzhCraft
+//
+//
+
 import Foundation
 
-/// Import instance information
-/// Contains all necessary information parsed from other launchers
+/// 导入实例信息
+/// 包含从其他启动器解析出的所有必要信息
 struct ImportInstanceInfo {
-    /// Game name
+    /// 游戏名称
     let gameName: String
-    
-    /// game version
+
+    /// 游戏版本
     let gameVersion: String
-    
-    /// Mod loader types (vanilla, fabric, forge, neoforge, quilt)
+
+    /// Mod加载器类型（vanilla, fabric, forge, neoforge, quilt）
     let modLoader: String
-    
-    /// Mod loader version
+
+    /// Mod加载器版本
     let modLoaderVersion: String
-    
-    /// Game icon path (if any)
+
+    /// 游戏图标路径（如果有）
     let gameIconPath: URL?
-    
-    /// Icon download URL (if you need to download from the Internet)
+
+    /// 图标下载 URL（如果需要从网络下载）
     let iconDownloadUrl: String?
-    
-    /// Source game directory path (where the .minecraft folder is located)
+
+    /// 源游戏目录路径（.minecraft 文件夹所在位置）
     let sourceGameDirectory: URL
-    
-    /// Launcher type
+
+    /// 启动器类型
     let launcherType: ImportLauncherType
 }

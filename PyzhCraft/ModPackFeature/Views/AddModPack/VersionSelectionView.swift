@@ -3,15 +3,15 @@ import SwiftUI
 struct VersionSelectionView: View {
     @Binding var selectedGameVersion: String
     @Binding var selectedModPackVersion: ModrinthProjectDetailVersion?
-    
+
     let availableGameVersions: [String]
     let filteredModPackVersions: [ModrinthProjectDetailVersion]
     let isLoadingModPackVersions: Bool
     let isProcessing: Bool
-    
+
     let onGameVersionChange: (String) -> Void
     let onModPackVersionAppear: () -> Void
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             gameVersionPicker
@@ -20,56 +20,60 @@ struct VersionSelectionView: View {
             }
         }
     }
-    
+
     private var gameVersionPicker: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Game Version")
+            Text("modpack.game.version".localized())
                 .foregroundColor(.primary)
-            
-            Picker(
-                "",
-                selection: $selectedGameVersion
+            CommonMenuPicker(
+                selection: $selectedGameVersion,
+                hidesLabel: true
             ) {
-                Text("Select game version").tag("")
-                
-                ForEach(availableGameVersions, id: \.self) {
-                    Text($0)
-                        .tag($0)
+                Text("")
+            } content: {
+                if availableGameVersions.isEmpty {
+                    Text(String(format: "error.resource.modpack_game_version_unsupported".localized(), AppConstants.MinecraftVersions.featureBaseline))
+                        .tag("")
+                } else {
+                    Text("modpack.game.version.placeholder".localized())
+                        .tag("")
+                    ForEach(availableGameVersions, id: \.self) { version in
+                        Text(version).tag(version)
+                    }
                 }
             }
-            .pickerStyle(.menu)
-            .font(.subheadline)
-            .labelsHidden()
+            .disabled(availableGameVersions.isEmpty) // 没有版本时禁用
             .onChange(of: selectedGameVersion) { _, newValue in
                 onGameVersionChange(newValue)
             }
         }
     }
-    
+
     private var modPackVersionPicker: some View {
         VStack(alignment: .leading, spacing: 8) {
             if isLoadingModPackVersions {
-                Text("Modpack Version")
+                Text("modpack.version".localized())
                     .foregroundColor(.primary)
                 HStack {
                     ProgressView()
-                        .controlSize(.small).frame(maxWidth: .infinity)
+                        .controlSize(.small)
+                        .frame(maxWidth: .infinity)
                 }
             } else if !selectedGameVersion.isEmpty {
-                Text("Modpack Version")
+                Text("modpack.version".localized())
                     .foregroundColor(.primary)
-                Picker(
-                    "",
-                    selection: $selectedModPackVersion
+                CommonMenuPicker(
+                    selection: $selectedModPackVersion,
+                    hidesLabel: true
                 ) {
-                    ForEach(filteredModPackVersions, id: \.id) {
-                        Text($0.name)
-                            .tag($0 as ModrinthProjectDetailVersion?)
+                    Text("")
+                } content: {
+                    ForEach(filteredModPackVersions, id: \.id) { version in
+                        Text(version.name).tag(
+                            version as ModrinthProjectDetailVersion?
+                        )
                     }
                 }
-                .labelsHidden()
-                .font(.subheadline)
-                .pickerStyle(.menu)
                 .onAppear {
                     onModPackVersionAppear()
                 }

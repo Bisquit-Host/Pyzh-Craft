@@ -1,36 +1,46 @@
+//
+//  ModPackExportSheet.swift
+//  PyzhCraft
+//
+//  Created by Auto on 2025/01/XX.
+//
+
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Integration package document type, used for file export
+/// 整合包文档类型，用于文件导出
 struct ModPackDocument: FileDocument {
     static var readableContentTypes: [UTType] {
-        [UTType(filenameExtension: "mrpack") ?? UTType.zip]
+        [
+            UTType(filenameExtension: AppConstants.FileExtensions.mrpack) ?? UTType.zip,
+            UTType.zip,
+        ]
     }
-    
+
     var data: Data
-    
+
     init(data: Data) {
         self.data = data
     }
-    
+
     init(configuration: ReadConfiguration) throws {
         guard let data = configuration.file.regularFileContents else {
             throw CocoaError(.fileReadCorruptFile)
         }
         self.data = data
     }
-    
+
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
         FileWrapper(regularFileWithContents: data)
     }
 }
 
-/// Integration package export Sheet view
-/// Provides integration package export functions, including:
-/// - Export form (name, version, description)
-/// - Export progress display
-/// - Export completion prompt
-/// - File save dialog
+/// 整合包导出 Sheet 视图
+/// 提供整合包导出功能，包括：
+/// - 导出表单（名称、版本、描述）
+/// - 导出进度显示
+/// - 导出完成提示
+/// - 文件保存对话框
 struct ModPackExportSheet: View {
     // MARK: - Properties
     let gameInfo: GameVersionInfo
@@ -38,20 +48,17 @@ struct ModPackExportSheet: View {
     private var dismiss
     @StateObject private var viewModel: ModPackExportViewModel
     @State private var showSaveErrorAlert = false
-    @State private var isExporting = false
-    @State private var exportDocument: ModPackDocument?
-    
+    @StateObject private var coordinator = ModPackExportSheetCoordinatorViewModel()
+
     // MARK: - Initialization
     init(gameInfo: GameVersionInfo) {
         self.gameInfo = gameInfo
         let viewModel = ModPackExportViewModel()
-        // Set default value on initialization
-        if viewModel.modPackName.isEmpty {
-            viewModel.modPackName = gameInfo.gameName
-        }
+        // 导出包名固定使用当前游戏名
+        viewModel.modPackName = gameInfo.gameName
         _viewModel = StateObject(wrappedValue: viewModel)
     }
-    
+
     // MARK: - Body
     var body: some View {
         CommonSheetView(
@@ -67,30 +74,28 @@ struct ModPackExportSheet: View {
                 handleExportCompleted(tempFilePath: tempPath)
             }
         }
-        .onChange(of: isExporting) { oldValue, newValue in
-            if oldValue && !newValue && exportDocument != nil {
-                exportDocument = nil
-            }
+        .onChange(of: coordinator.isExporting) { oldValue, newValue in
+            coordinator.cleanupExporterStateIfNeeded(oldValue: oldValue, newValue: newValue)
         }
         .fileExporter(
-            isPresented: $isExporting,
-            document: exportDocument,
-            contentType: UTType(filenameExtension: "mrpack") ?? UTType.zip,
-            defaultFilename: viewModel.modPackName.isEmpty ? "modpack" : viewModel.modPackName
+            isPresented: $coordinator.isExporting,
+            document: coordinator.exportDocument,
+            contentType: exportContentType,
+            defaultFilename: exportDefaultFilename
         ) { result in
             switch result {
             case .success(let url):
-                Logger.shared.info("The integration package has been saved to: \(url.path)")
+                Logger.shared.info("整合包已保存到: \(url.path)")
                 viewModel.handleSaveSuccess()
                 dismiss()
             case .failure(let error):
-                Logger.shared.error("Failed to save file: \(error.localizedDescription)")
+                Logger.shared.error("保存文件失败: \(error.localizedDescription)")
                 viewModel.handleSaveFailure(error: error.localizedDescription)
             }
-            exportDocument = nil
+            coordinator.reset()
         }
-        .alert("Error", isPresented: $showSaveErrorAlert) {
-            Button("OK", role: .cancel) {
+        .alert("common.error".localized(), isPresented: $showSaveErrorAlert) {
+            Button("common.ok".localized(), role: .cancel) {
                 viewModel.saveError = nil
             }
         } message: {
@@ -102,13 +107,25 @@ struct ModPackExportSheet: View {
             showSaveErrorAlert = error != nil
         }
     }
-    
+
     private var headerView: some View {
-        Text("Export Modpack")
-            .font(.headline)
-            .frame(maxWidth: .infinity, alignment: .leading)
+        HStack(alignment: .center, spacing: 12) {
+            Text("modpack.export.title".localized())
+                .font(.headline)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Picker("", selection: $viewModel.currentExportFormat) {
+                ForEach(ModPackExportFormat.allCases, id: \.self) { format in
+                    Text(format.displayName).tag(format)
+                }
+            }
+            .labelsHidden()
+            .pickerStyle(.menu)
+            .fixedSize()
+            .disabled(viewModel.isExporting)
+        }
     }
-    
+
     @ViewBuilder private var bodyView: some View {
         switch viewModel.exportState {
         case .idle:
@@ -118,9 +135,9 @@ struct ModPackExportSheet: View {
             exportProgressView
         }
     }
-    
+
     // MARK: - State Views
-    
+
     @ViewBuilder private var idleStateView: some View {
         if let error = viewModel.exportError {
             errorView(error: error)
@@ -128,94 +145,124 @@ struct ModPackExportSheet: View {
             exportFormView
         }
     }
-    
+
     private var exportFormView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Integrated package name
+            // 整合包版本
             VStack(alignment: .leading, spacing: 8) {
-                Text("Modpack Name")
+                Text("modpack.export.version".localized())
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-                TextField("Enter modpack name", text: $viewModel.modPackName)
+                TextField("modpack.export.version.placeholder".localized(), text: $viewModel.modPackVersion)
+                    .textFieldStyle(.roundedBorder)
+                    .focusable(false)
+            }
+
+            // 整合包描述（Summary）
+            VStack(alignment: .leading, spacing: 8) {
+                Text("modpack.export.summary".localized())
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                TextField("modpack.export.summary.placeholder".localized(), text: $viewModel.summary)
                     .textFieldStyle(.roundedBorder)
             }
-            
-            // Integrated package version
+
+            // 版本目录
             VStack(alignment: .leading, spacing: 8) {
-                Text("Modpack Version")
+                Text("version.directory.tree".localized())
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-                TextField("1.0.0", text: $viewModel.modPackVersion)
-                    .textFieldStyle(.roundedBorder)
-            }
-            
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Description")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                TextEditor(text: $viewModel.summary)
-                    .font(.subheadline)
-                    .frame(minHeight: 88)
-                    .padding(6)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(.quaternary, lineWidth: 1)
-                    )
+                FileTreeView(
+                    rootURL: AppPaths.profileDirectory(gameName: gameInfo.gameName)
+                ) { urls in
+                    if viewModel.selectedFileURLs != urls {
+                        DispatchQueue.main.async {
+                            viewModel.selectedFileURLs = urls
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 300)
             }
         }
     }
-    
+
     private var exportProgressView: some View {
         VStack(alignment: .leading, spacing: 16) {
             exportFormView
-            progressItemsView
-                .padding(.top, 8)
+            if viewModel.exportProgress.scanProgress != nil || viewModel.exportProgress.copyProgress != nil {
+                progressItemsView
+                    .padding(.top, 8)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
     }
-    
+
     private var footerView: some View {
         HStack {
-            Button("Cancel") {
+            Button("common.cancel".localized()) {
                 if viewModel.isExporting {
+                    coordinator.reset()
                     viewModel.cancelExport()
+                    viewModel.resetToInitial(gameInfo: gameInfo)
+                } else {
+                    dismiss()
                 }
-                dismiss()
             }
             .keyboardShortcut(.cancelAction)
-            
+
             Spacer()
-            
-            Button("Export") {
+
+            Button {
                 if viewModel.exportState == .completed, let tempPath = viewModel.tempExportPath {
                     handleExportCompleted(tempFilePath: tempPath)
                 } else {
                     viewModel.startExport(gameInfo: gameInfo)
                 }
+            } label: {
+                if viewModel.isExporting {
+                    ProgressView()
+                        .controlSize(.small)
+                } else {
+                    Text("modpack.export.button".localized())
+                }
             }
             .keyboardShortcut(.defaultAction)
-            .disabled(viewModel.modPackName.isEmpty || viewModel.isExporting)
+            .disabled(viewModel.isExporting)
         }
     }
-    
+
+    private var exportContentType: UTType {
+        switch viewModel.currentExportFormat {
+        case .modrinth:
+            return UTType(filenameExtension: AppConstants.FileExtensions.mrpack) ?? UTType.zip
+        case .curseforge:
+            return UTType.zip
+        }
+    }
+
+    private var exportDefaultFilename: String {
+        "\(gameInfo.gameName).\(viewModel.currentExportFormat.fileExtension)"
+    }
+
     // MARK: - Reusable Components
-    
+
     private var progressItemsView: some View {
         VStack(spacing: 16) {
-            // Scan resource progress bar (always shown because scanning is inevitable)
+            // 扫描资源进度条
             if let scanProgress = viewModel.exportProgress.scanProgress {
                 progressRow(progress: scanProgress)
                     .id("scan-\(scanProgress.completed)-\(scanProgress.total)")
             }
-            
-            // Copy file progress bar (only displayed when there is a copy task, no placeholder is displayed)
+
+            // 复制文件进度条
             if let copyProgress = viewModel.exportProgress.copyProgress {
                 progressRow(progress: copyProgress)
                     .id("copy-\(copyProgress.completed)-\(copyProgress.total)")
             }
         }
     }
-    
+
     private func progressRow(progress: ModPackExporter.ExportProgress.ProgressItem) -> some View {
         FormSection {
             DownloadProgressRow(
@@ -229,16 +276,16 @@ struct ModPackExportSheet: View {
         }
         .frame(minHeight: 70)
     }
-    
+
     private func errorView(error: String) -> some View {
         VStack(spacing: 16) {
             Image(systemName: "xmark.circle.fill")
                 .foregroundColor(.red)
                 .font(.system(size: 48))
-            
-            Text("Export Failed")
+
+            Text("modpack.export.failed".localized())
                 .font(.headline)
-            
+
             Text(error)
                 .font(.caption)
                 .foregroundColor(.secondary)
@@ -247,28 +294,17 @@ struct ModPackExportSheet: View {
         .padding()
         .frame(maxWidth: .infinity)
     }
-    
+
     // MARK: - Actions
-    
-    /// The export process is completed and the save dialog box is displayed
+
+    /// 处理导出完成，显示保存对话框
     private func handleExportCompleted(tempFilePath: URL) {
         if viewModel.shouldShowSaveDialog {
             viewModel.markSaveDialogShown()
         }
-        
-        Task {
-            do {
-                let fileData = try await Task.detached(priority: .userInitiated) {
-                    try Data(contentsOf: tempFilePath)
-                }.value
-                await MainActor.run {
-                    self.exportDocument = ModPackDocument(data: fileData)
-                    self.isExporting = true
-                }
-            } catch {
-                Logger.shared.error("Failed to read temporary file: \(error.localizedDescription)")
-                viewModel.handleSaveFailure(error: error.localizedDescription)
-            }
+        coordinator.prepareExportDocument(from: tempFilePath) { errorMessage in
+            Logger.shared.error("读取临时文件失败: \(errorMessage)")
+            viewModel.handleSaveFailure(error: errorMessage)
         }
     }
 }

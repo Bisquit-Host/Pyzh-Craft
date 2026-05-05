@@ -1,47 +1,54 @@
 import SwiftUI
 
 struct MinecraftAuthView: View {
-    @StateObject private var authService = MinecraftAuthService.shared
+    @StateObject private var authService: MinecraftAuthService
     var onLoginSuccess: ((MinecraftProfileResponse) -> Void)?
-    
+
+    init(
+        authService: MinecraftAuthService = AppServices.minecraftAuthService,
+        onLoginSuccess: ((MinecraftProfileResponse) -> Void)? = nil
+    ) {
+        _authService = StateObject(wrappedValue: authService)
+        self.onLoginSuccess = onLoginSuccess
+    }
+
     var body: some View {
         VStack(spacing: 20) {
-            // Authentication status display
+            // 认证状态显示
             switch authService.authState {
             case .notAuthenticated:
                 notAuthenticatedView
-                //                waitingForBrowserAuthView
             case .waitingForBrowserAuth:
                 waitingForBrowserAuthView
-                
+
             case .processingAuthCode:
                 processingAuthCodeView
-                
+
             case .authenticated(let profile):
                 authenticatedView(profile: profile)
-                
+
             case .error(let message):
                 errorView(message: message)
             }
         }
         .padding()
         .onDisappear {
-            // Clear all data after closing the page
+            // 页面关闭后清除所有数据
             clearAllData()
         }
     }
-    
-    // MARK: - clear data
-    /// Clear all data on the page
+
+    // MARK: - 清除数据
+    /// 清除页面所有数据
     private func clearAllData() {
-        // Reset authentication service status (if authentication is not completed)
+        // 重置认证服务状态（如果未完成认证）
         if case .notAuthenticated = authService.authState {
             authService.isLoading = false
         }
-        // The status is not cleared when authentication is successful, and authentication information may still be required
+        // 认证成功时不清除状态，可能仍需认证信息
     }
-    
-    // MARK: - Uncertified status
+
+    // MARK: - 未认证状态
     private var notAuthenticatedView: some View {
         VStack(spacing: 16) {
             Image(systemName: "person.crop.circle.badge.plus")
@@ -49,74 +56,63 @@ struct MinecraftAuthView: View {
                 .symbolRenderingMode(.multicolor)
                 .symbolVariant(.none)
                 .foregroundColor(.secondary)
-            Text("Login to Minecraft with Microsoft Account")
+            Text("minecraft.auth.title".localized())
                 .font(.headline)
                 .multilineTextAlignment(.center)
-            
-            Text("Please click the \"Start Login\" button below to begin authentication")
+
+            Text("minecraft.auth.subtitle".localized())
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
         }
     }
-    
-    // MARK: - Wait for browser authorization status
+
+    // MARK: - 等待浏览器授权状态
     private var waitingForBrowserAuthView: some View {
         VStack(spacing: 16) {
-            // browser icon
+            // 浏览器图标
             Image(systemName: "person.crop.circle.badge.clock")
                 .font(.system(size: 46))
                 .foregroundColor(.secondary)
-            
-            Text("Waiting for authorization")
+
+            Text("minecraft.auth.waiting_browser".localized())
                 .font(.headline)
                 .multilineTextAlignment(.center)
-            
-            Text("Please complete the authorization in the browser window that has opened")
+
+            Text("minecraft.auth.waiting_browser.subtitle".localized())
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-            
-            if let deviceCode = authService.deviceCodeInfo {
-                Text(deviceCode.displayVerificationURL)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .textSelection(.enabled)
-                
-                Text(deviceCode.userCode)
-                    .font(.system(.title3, design: .monospaced))
-                    .bold()
-                    .textSelection(.enabled)
-            }
         }
     }
-    
-    // MARK: - Handle authorization code status
+
+    // MARK: - 处理授权码状态
     private var processingAuthCodeView: some View {
         VStack(spacing: 16) {
             ProgressView().controlSize(.small)
-            
-            Text("Verifying account information")
+
+            Text("minecraft.auth.processing.title".localized())
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-            
-            Text("Completing the authentication process, please wait...")
+            Text("minecraft.auth.processing.subtitle".localized())
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
         }
     }
-    
-    // MARK: - Authentication success status
-    private func authenticatedView(profile: MinecraftProfileResponse) -> some View {
+
+    // MARK: - 认证成功状态
+    private func authenticatedView(
+        profile: MinecraftProfileResponse
+    ) -> some View {
         VStack(spacing: 20) {
-            // User avatar
+            // 用户头像
             if let skinUrl = profile.skins.first?.url {
                 MinecraftSkinUtils(type: .url, src: skinUrl.httpToHttps())
             } else {
                 Circle()
-                    .fill(.gray.opacity(0.3))
+                    .fill(Color.gray.opacity(0.3))
                     .frame(width: 80, height: 80)
                     .overlay(
                         Image(systemName: "person.fill")
@@ -124,46 +120,51 @@ struct MinecraftAuthView: View {
                             .foregroundColor(.gray)
                     )
             }
-            
+
             VStack(spacing: 8) {
-                Text("Login Successful!")
+                Text("minecraft.auth.success".localized())
                     .font(.title2)
-                    .bold()
+                    .fontWeight(.bold)
                     .foregroundColor(.green)
-                
+
                 Text(profile.name)
                     .font(.headline)
-                
-                Text("UUID: \(profile.id)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .textSelection(.enabled)
+
+                Text(
+                    String(
+                        format: "minecraft.auth.uuid".localized(),
+                        profile.id
+                    )
+                )
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .textSelection(.enabled)
             }
-            
-            Text("Please click the \"Add\" button below to confirm using this account")
+
+            Text("minecraft.auth.confirm_login".localized())
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
         }
     }
-    
-    // MARK: - error status
+
+    // MARK: - 错误状态
     private func errorView(message: String) -> some View {
         VStack(spacing: 16) {
             Image(systemName: "exclamationmark.triangle")
                 .font(.system(size: 60))
                 .foregroundColor(.red)
-            
-            Text("Login Failed")
+
+            Text("minecraft.auth.failed".localized())
                 .font(.headline)
                 .foregroundColor(.red)
-            
+
             Text(message)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-            
-            Text("Please click the \"Retry\" button below to restart authentication")
+
+            Text("minecraft.auth.retry_message".localized())
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

@@ -1,12 +1,19 @@
+//
+//  AppWindowGroups.swift
+//  PyzhCraft
+//
+//  Created by su on 2025/1/27.
+//
+
 import SwiftUI
 
-/// Apply window group definition
+/// 应用窗口组定义
 extension PyzhCraftApp {
-    /// Create all application window groups
+    /// 创建所有应用窗口组
     @SceneBuilder
     func appWindowGroups() -> some Scene {
-        // Contributor window
-        Window("Contributors", id: WindowID.contributors.rawValue) {
+        // 贡献者窗口
+        Window("about.contributors".localized(), id: WindowID.contributors.rawValue) {
             AboutView(showingAcknowledgements: false)
                 .environmentObject(generalSettingsManager)
                 .preferredColorScheme(themeManager.currentColorScheme)
@@ -14,9 +21,9 @@ extension PyzhCraftApp {
                 .windowCleanup(for: .contributors)
         }
         .defaultSize(width: 280, height: 600)
-        
-        // acknowledgment window
-        Window("Acknowledgements", id: WindowID.acknowledgements.rawValue) {
+
+        // 致谢窗口
+        Window("about.acknowledgements".localized(), id: WindowID.acknowledgements.rawValue) {
             AboutView(showingAcknowledgements: true)
                 .environmentObject(generalSettingsManager)
                 .preferredColorScheme(themeManager.currentColorScheme)
@@ -24,42 +31,95 @@ extension PyzhCraftApp {
                 .windowCleanup(for: .acknowledgements)
         }
         .defaultSize(width: 280, height: 600)
-        
-        // AI chat window
-        Window("AI Assistant", id: WindowID.aiChat.rawValue) {
+
+        // AI 聊天窗口
+        Window("ai.assistant.title".localized(), id: WindowID.aiChat.rawValue) {
             AIChatWindowContent()
                 .environmentObject(playerListViewModel)
                 .environmentObject(gameRepository)
                 .environmentObject(generalSettingsManager)
+                .preferredColorScheme(themeManager.currentColorScheme)
                 .windowStyleConfig(for: .aiChat)
                 .windowCleanup(for: .aiChat)
         }
         .defaultSize(width: 500, height: 600)
-        
-        // Java download window
-        Window("Download", id: WindowID.javaDownload.rawValue) {
-            JavaDownloadProgressWindow(downloadState: JavaDownloadManager.shared.downloadState)
+
+        // Java 下载窗口
+        Window("global_resource.download".localized(), id: WindowID.javaDownload.rawValue) {
+            JavaDownloadWindowContent()
+                .preferredColorScheme(themeManager.currentColorScheme)
                 .windowStyleConfig(for: .javaDownload)
                 .windowCleanup(for: .javaDownload)
         }
         .defaultSize(width: 400, height: 100)
-        
-        // Skin preview window
-        Window("Skin Preview", id: WindowID.skinPreview.rawValue) {
+
+        // 皮肤预览窗口
+        Window("skin.preview".localized(), id: WindowID.skinPreview.rawValue) {
             SkinPreviewWindowContent()
+                .preferredColorScheme(themeManager.currentColorScheme)
                 .windowStyleConfig(for: .skinPreview)
                 .windowCleanup(for: .skinPreview)
         }
         .defaultSize(width: 1200, height: 800)
-        
-        // Server settings window
-        Window("Settings", id: WindowID.serverSettings.rawValue) {
-            ServerSettingsWindowView()
-                .environmentObject(gameRepository)
-                .preferredColorScheme(themeManager.currentColorScheme)
-                .windowStyleConfig(for: .serverSettings)
-                .windowCleanup(for: .serverSettings)
+    }
+}
+
+// MARK: - 窗口内容视图
+
+private struct JavaDownloadWindowContent: View {
+    @ObservedObject private var javaDownloadManager: JavaDownloadManager
+
+    init(javaDownloadManager: JavaDownloadManager = AppServices.javaDownloadManager) {
+        _javaDownloadManager = ObservedObject(wrappedValue: javaDownloadManager)
+    }
+
+    var body: some View {
+        JavaDownloadProgressWindow(downloadState: javaDownloadManager.downloadState)
+    }
+}
+
+/// AI 聊天窗口内容视图（用于观察 WindowDataStore 变化）
+private struct AIChatWindowContent: View {
+    @ObservedObject private var windowDataStore: WindowDataStore
+    @EnvironmentObject private var playerListViewModel: PlayerListViewModel
+    @EnvironmentObject private var gameRepository: GameRepository
+    @EnvironmentObject private var generalSettingsManager: GeneralSettingsManager
+
+    init(windowDataStore: WindowDataStore = AppServices.windowDataStore) {
+        _windowDataStore = ObservedObject(wrappedValue: windowDataStore)
+    }
+
+    var body: some View {
+        Group {
+            if let chatState = windowDataStore.aiChatState {
+                AIChatWindowView(chatState: chatState)
+            } else {
+                EmptyView()
+            }
         }
-        .defaultSize(width: 800, height: 640)
+    }
+}
+
+/// 皮肤预览窗口内容视图（用于观察 WindowDataStore 变化）
+private struct SkinPreviewWindowContent: View {
+    @ObservedObject private var windowDataStore: WindowDataStore
+
+    init(windowDataStore: WindowDataStore = AppServices.windowDataStore) {
+        _windowDataStore = ObservedObject(wrappedValue: windowDataStore)
+    }
+
+    var body: some View {
+        Group {
+            if let data = windowDataStore.skinPreviewData {
+                SkinPreviewWindowView(
+                    skinImage: data.skinImage,
+                    skinPath: data.skinPath,
+                    capeImage: data.capeImage,
+                    playerModel: data.playerModel
+                )
+            } else {
+                EmptyView()
+            }
+        }
     }
 }

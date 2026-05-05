@@ -1,102 +1,107 @@
 import Foundation
 
-/// game process manager
+/// 游戏进程管理器
 final class GameProcessManager: ObservableObject, @unchecked Sendable {
     static let shared = GameProcessManager()
-    
+
+    /// 进程存储的 key：gameId + userId 拼接，同一游戏不同玩家分别追踪
+    static func processKey(gameId: String, userId: String) -> String {
+        "\(gameId)_\(userId)"
+    }
+
     private var gameProcesses: [String: Process] = [:]
-    
-    // Mark actively stopped games to distinguish between user-initiated shutdowns and real crashes
+
+    // 标记主动停止的游戏，用于区分用户主动关闭和真正的崩溃
     private var manuallyStoppedGames: Set<String> = []
-    private let queue = DispatchQueue(label: "com.pyzhcraft.gameprocessmanager")
-    
-    private init() {}
-    
-    func storeProcess(gameId: String, process: Process) {
-        // Set process termination handler (set before startup)
-        // Not executed on the main thread: database and file scanning are placed in the background, and only the UI status is updated back to the main thread
+    private let queue = DispatchQueue(label: "com.swiftcraftlauncher.gameprocessmanager")
+    private let gameDatabase = GameVersionDatabase(dbPath: AppPaths.gameVersionDatabase.path)
+    private let gameSettingsManager: GameSettingsManager
+
+    private init(gameSettingsManager: GameSettingsManager = AppServices.gameSettingsManager) {
+        self.gameSettingsManager = gameSettingsManager
+    }
+
+    func storeProcess(gameId: String, userId: String, process: Process) {
+        let key = Self.processKey(gameId: gameId, userId: userId)
+        // 设置进程终止处理器（在启动前设置）
+        // 不在主线程执行：数据库与文件扫描放到后台，仅 UI 状态更新回主线程
         process.terminationHandler = { [weak self] process in
             Task {
-                await self?.handleProcessTermination(gameId: gameId, process: process)
+                await self?.handleProcessTermination(gameId: gameId, userId: userId, process: process)
             }
         }
-        
+
         queue.async { [weak self] in
-            self?.gameProcesses[gameId] = process
+            self?.gameProcesses[key] = process
         }
-        
-        Logger.shared.debug("Store game process: \(gameId)")
+        Logger.shared.debug("存储游戏进程: \(key)")
     }
-    
-    // Unified processing of all cleaning logic
-    private func handleProcessTermination(gameId: String, process: Process) async {
-        let wasManuallyStopped = queue.sync { manuallyStoppedGames.contains(gameId) }
-        
+
+    private func handleProcessTermination(gameId: String, userId: String, process: Process) async {
+        let key = Self.processKey(gameId: gameId, userId: userId)
+        let wasManuallyStopped = queue.sync { manuallyStoppedGames.contains(key) }
+
         handleProcessExit(gameId: gameId, wasManuallyStopped: wasManuallyStopped)
-        
+
         if !wasManuallyStopped {
             let isCrash = await checkIfCrash(gameId: gameId, process: process)
-            
+
             if isCrash {
-                await MainActor.run {
-                    GlobalErrorHandler.shared.handle(
-                        GlobalError.gameLaunch(
-                            i18nKey: "Game crashed unexpectedly",
-                            level: .popup
-                        )
-                    )
-                }
-                
-                let gameSettings = GameSettingsManager.shared
+                let gameSettings = self.gameSettingsManager
                 if gameSettings.enableAICrashAnalysis {
-                    Logger.shared.info("Game crash detected, AI analysis enabled: \(gameId)")
+                    Logger.shared.info("检测到游戏崩溃，启用AI分析: \(gameId)")
                     await collectLogsForGameImmediately(gameId: gameId)
+                } else {
+                    // 游戏崩溃时通过通知告知前端，由 SwiftUI 视图决定如何展示
+                    let gameDirectory = CommonUtil.gameDirectory(for: gameId)
+                    await MainActor.run {
+                        NotificationCenter.default.post(
+                            name: .gameCrashed,
+                            object: nil,
+                            userInfo: ["directory": gameDirectory as Any]
+                        )
+                    }
                 }
             } else {
-                Logger.shared.debug("The game exits normally without triggering AI analysis: \(gameId)")
+                Logger.shared.debug("游戏正常退出，不触发AI分析: \(gameId)")
             }
         }
-        
+
         await MainActor.run {
-            GameStatusManager.shared.setGameRunning(gameId: gameId, isRunning: false)
+            AppServices.gameStatusManager.setGameRunning(gameId: gameId, userId: userId, isRunning: false)
         }
         queue.async { [weak self] in
-            self?.gameProcesses.removeValue(forKey: gameId)
-            self?.manuallyStoppedGames.remove(gameId)
+            self?.gameProcesses.removeValue(forKey: key)
+            self?.manuallyStoppedGames.remove(key)
         }
     }
-    
+
     private func checkIfCrash(gameId: String, process: Process) async -> Bool {
-        // 1. Check the exit code: normal exit is usually 0, crash is usually non-0
-        // The exit code of a process stopped by terminate() may be 15, which has been excluded by wasManuallyStopped
+        // 1. 检查退出码：正常退出通常是0，崩溃通常是非0
+        // terminate() 停止的进程退出码可能为15，已通过 wasManuallyStopped 排除
         let exitCode = process.terminationStatus
         if exitCode == 0 {
-            // The exit code is 0, which may be a normal exit, but you also need to check whether there is a crash report
-            Logger.shared.debug("The game exit code is 0: \(gameId)")
+            // 退出码为0，可能是正常退出，但还需要检查是否有崩溃报告
+            Logger.shared.debug("游戏退出码为0: \(gameId)")
         } else {
-            // If the exit code is non-0, it is likely a crash
-            Logger.shared.info("The game exit code is non-0 (\(exitCode)), it may crash: \(gameId)")
+            // 退出码非0，很可能是崩溃
+            Logger.shared.info("游戏退出码非0 (\(exitCode))，可能是崩溃: \(gameId)")
             return true
         }
-        
-        // 2. Check whether a crash report file is generated (more accurate judgment)
-        // Query game information from database to get game name
-        let dbPath = AppPaths.gameVersionDatabase.path
-        let database = GameVersionDatabase(dbPath: dbPath)
-        
+
         do {
-            try? database.initialize()
-            guard let game = try database.getGame(by: gameId) else {
-                Logger.shared.warning("Unable to find game from database, unable to check crash report: \(gameId)")
-                // If game information cannot be queried and the exit code is non-0, it is considered a crash
+            try? gameDatabase.initialize()
+            guard let game = try gameDatabase.getGame(by: gameId) else {
+                Logger.shared.warning("无法从数据库找到游戏，无法检查崩溃报告: \(gameId)")
+                // 如果无法查询游戏信息，且退出码非0，则认为是崩溃
                 return exitCode != 0
             }
-            
-            // Check the crash report folder
+
+            // 检查崩溃报告文件夹
             let gameDirectory = AppPaths.profileDirectory(gameName: game.gameName)
             let crashReportsDir = gameDirectory.appendingPathComponent(AppConstants.DirectoryNames.crashReports, isDirectory: true)
             let fileManager = FileManager.default
-            
+
             if fileManager.fileExists(atPath: crashReportsDir.path) {
                 do {
                     let crashFiles = try fileManager
@@ -111,172 +116,203 @@ final class GameProcessManager: ObservableObject, @unchecked Sendable {
                             }
                             return resourceValues.isRegularFile ?? false
                         }
-                    
-                    // Check if there are any recently generated crash reports (within the last 5 minutes)
+
+                    // 检查是否有最近生成的崩溃报告（最近5分钟内）
                     let now = Date()
                     let fiveMinutesAgo = now.addingTimeInterval(-300)
-                    
+
                     for crashFile in crashFiles {
                         if let creationDate = try? crashFile.resourceValues(forKeys: [.creationDateKey]).creationDate,
                            creationDate >= fiveMinutesAgo {
-                            Logger.shared.info("Find the most recently generated crash report: \(crashFile.lastPathComponent)")
+                            Logger.shared.info("找到最近生成的崩溃报告: \(crashFile.lastPathComponent)")
                             return true
                         }
                     }
-                    
-                    // If the exit code is 0 but there is no recent crash report, it is considered a normal exit
-                    // (The case of non-0 exit code has been dealt with above)
+
+                    // 如果退出码为0但没有最近的崩溃报告，则认为是正常退出
+                    // （退出码非0的情况已经在上面处理了）
                 } catch {
-                    Logger.shared.warning("Failed to read crash report folder: \(error.localizedDescription)")
+                    Logger.shared.warning("读取崩溃报告文件夹失败: \(error.localizedDescription)")
                 }
             }
-            
-            // If the exit code is 0 and no crash is reported, it is considered a normal exit
+
+            // 如果退出码为0且没有崩溃报告，则认为是正常退出
             return false
         } catch {
-            Logger.shared.error("Querying game from database failed: \(error.localizedDescription)")
-            // If it cannot be queried and the exit code is non-0, it is considered a crash
+            Logger.shared.error("从数据库查询游戏失败: \(error.localizedDescription)")
+            // 如果无法查询，且退出码非0，则认为是崩溃
             return exitCode != 0
         }
     }
-    
-    /// Collect logs for the game (can be used for process-based crash detection)
-    /// - Parameter gameId: Game ID
+
+    /// 为游戏收集日志（可用于基于进程的崩溃检测）
+    /// - Parameter gameId: 游戏 ID
     func collectLogsForGameImmediately(gameId: String) async {
-        // Query game information from SQL database
-        let dbPath = AppPaths.gameVersionDatabase.path
-        let database = GameVersionDatabase(dbPath: dbPath)
-        
         do {
-            // Initialize the database (if it has not been initialized, it may fail, you can continue to try to query)
-            try? database.initialize()
-            
-            // Query games from database
-            guard let game = try database.getGame(by: gameId) else {
-                Logger.shared.warning("Unable to find game from database: \(gameId)")
+            // 初始化数据库（如果尚未初始化，可能会失败，可以继续尝试查询）
+            try? gameDatabase.initialize()
+
+            // 从数据库查询游戏
+            guard let game = try gameDatabase.getGame(by: gameId) else {
+                Logger.shared.warning("无法从数据库找到游戏: \(gameId)")
                 return
             }
-            
-            // Create temporary view models and warehouse instances for AI windows
+
+            // 创建临时的视图模型和仓库实例用于 AI 窗口
             let playerListViewModel = PlayerListViewModel()
             let gameRepository = GameRepository()
-            
-            await GameLogCollector.shared.collectAndOpenAIWindow(
+
+            await AppServices.gameLogCollector.collectAndOpenAIWindow(
                 gameName: game.gameName,
                 playerListViewModel: playerListViewModel,
                 gameRepository: gameRepository
             )
         } catch {
-            Logger.shared.error("Querying game from database failed: \(error.localizedDescription)")
+            Logger.shared.error("从数据库查询游戏失败: \(error.localizedDescription)")
         }
     }
-    
-    /// Handling process exit situations
+
+    /// 处理进程退出情况
     private func handleProcessExit(gameId: String, wasManuallyStopped: Bool) {
         if wasManuallyStopped {
-            Logger.shared.debug("The game was actively stopped by the user: \(gameId)")
+            Logger.shared.debug("游戏被用户主动停止: \(gameId)")
         } else {
-            Logger.shared.info("Game process has exited: \(gameId)")
+            Logger.shared.info("游戏进程已退出: \(gameId)")
         }
     }
-    
-    /// Get game progress
-    /// - Parameter gameId: Game ID
-    /// - Returns: process object, returns nil if it does not exist
-    func getProcess(for gameId: String) -> Process? {
-        queue.sync { gameProcesses[gameId] }
+
+    /// 获取游戏进程
+    /// - Parameters:
+    ///   - gameId: 游戏 ID
+    ///   - userId: 玩家 ID
+    /// - Returns: 进程对象，如果不存在则返回 nil
+    func getProcess(for gameId: String, userId: String) -> Process? {
+        let key = Self.processKey(gameId: gameId, userId: userId)
+        return queue.sync { gameProcesses[key] }
     }
-    
-    /// Stop the game process (not waiting for the process to exit on the main thread to avoid stuck UI)
-    /// - Parameter gameId: Game ID
-    /// - Returns: Whether the stop was initiated successfully
-    func stopProcess(for gameId: String) -> Bool {
+
+    /// 停止游戏进程（不在主线程等待进程退出，避免卡 UI）
+    /// - Parameters:
+    ///   - gameId: 游戏 ID
+    ///   - userId: 玩家 ID
+    /// - Returns: 是否成功发起停止
+    func stopProcess(for gameId: String, userId: String) -> Bool {
+        let key = Self.processKey(gameId: gameId, userId: userId)
         let process: Process? = queue.sync {
-            guard let proc = gameProcesses[gameId] else { return nil }
-            manuallyStoppedGames.insert(gameId)
+            guard let proc = gameProcesses[key] else { return nil }
+            manuallyStoppedGames.insert(key)
             return proc
         }
         guard let process = process else { return false }
-        
+
         if process.isRunning {
             process.terminate()
-            // Wait for exit in the background to avoid the main thread calling waitUntilExit() and blocking the UI
+            // 在后台等待退出，避免主线程调用 waitUntilExit() 卡住 UI
             DispatchQueue.global(qos: .utility).async {
                 process.waitUntilExit()
             }
         }
-        
-        Logger.shared.debug("Stop game process: \(gameId)")
+
+        Logger.shared.debug("停止游戏进程: \(key)")
         return true
     }
-    
-    /// Check if the game is running
-    /// - Parameter gameId: Game ID
-    /// - Returns: Is it running?
-    func isGameRunning(gameId: String) -> Bool {
-        queue.sync { gameProcesses[gameId]?.isRunning ?? false }
+
+    /// 检查指定 gameId+userId 是否正在运行
+    /// - Parameters:
+    ///   - gameId: 游戏 ID
+    ///   - userId: 玩家 ID
+    /// - Returns: 是否正在运行
+    func isGameRunning(gameId: String, userId: String) -> Bool {
+        let key = Self.processKey(gameId: gameId, userId: userId)
+        return queue.sync { gameProcesses[key]?.isRunning ?? false }
     }
-    
-    // Clean up processes that did not trigger terminationHandler correctly
+
+    /// 检查该游戏是否有任意玩家的实例正在运行（用于删除前校验）
+    /// - Parameter gameId: 游戏 ID
+    /// - Returns: 是否有任意 userId 下该游戏在运行
+    func isGameRunningForAnyUser(gameId: String) -> Bool {
+        let prefix = "\(gameId)_"
+        return queue.sync {
+            gameProcesses.contains { key, proc in key.hasPrefix(prefix) && proc.isRunning }
+        }
+    }
+
+    // 清理没有正确触发 terminationHandler 的进程
     func cleanupTerminatedProcesses() {
-        let terminatedGameIds: [String] = queue.sync {
-            let ids = gameProcesses.compactMap { gameId, process in
-                !process.isRunning ? gameId : nil
+        let terminatedKeys: [String] = queue.sync {
+            let keys = gameProcesses.compactMap { key, process in
+                !process.isRunning ? key : nil
             }
-            guard !ids.isEmpty else { return [] }
-            for gameId in ids {
-                gameProcesses.removeValue(forKey: gameId)
-                manuallyStoppedGames.remove(gameId)
+            guard !keys.isEmpty else { return [] }
+            for key in keys {
+                gameProcesses.removeValue(forKey: key)
+                manuallyStoppedGames.remove(key)
             }
-            return ids
+            return keys
         }
-        
-        guard !terminatedGameIds.isEmpty else { return }
-        
-        for gameId in terminatedGameIds {
-            Logger.shared.debug("Clean up terminated processes: \(gameId)")
+
+        guard !terminatedKeys.isEmpty else { return }
+
+        for key in terminatedKeys {
+            Logger.shared.debug("清理已终止的进程: \(key)")
         }
-        
+
         Task { @MainActor in
-            for gameId in terminatedGameIds {
-                GameStatusManager.shared.setGameRunning(gameId: gameId, isRunning: false)
+            for key in terminatedKeys {
+                // key 格式为 "gameId_userId"
+                if let idx = key.firstIndex(of: "_") {
+                    let gameId = String(key[..<idx])
+                    let userId = String(key[key.index(after: idx)...])
+                    AppServices.gameStatusManager.setGameRunning(gameId: gameId, userId: userId, isRunning: false)
+                }
             }
         }
     }
-    
-    /// Check whether the game was actively stopped
-    /// - Parameter gameId: Game ID
-    /// - Returns: Whether it was stopped actively
-    func isManuallyStopped(gameId: String) -> Bool {
-        queue.sync { manuallyStoppedGames.contains(gameId) }
+
+    /// 检查游戏是否是被主动停止的
+    /// - Parameters:
+    ///   - gameId: 游戏 ID
+    ///   - userId: 玩家 ID
+    /// - Returns: 是否是被主动停止的
+    func isManuallyStopped(gameId: String, userId: String) -> Bool {
+        let key = Self.processKey(gameId: gameId, userId: userId)
+        return queue.sync { manuallyStoppedGames.contains(key) }
     }
-    
-    /// Remove the process and status of the specified game (called when deleting the game)
-    /// If the game is running, the process will be terminated first, wait in the background for exit, and then be removed from the memory without blocking the calling thread
-    /// - Parameter gameId: Game ID
+
+    /// 移除指定游戏的所有进程与状态（删除游戏时调用）
+    /// 若某 (gameId, userId) 正在运行会先终止进程，在后台等待退出后从内存移除，不阻塞调用线程
+    /// - Parameter gameId: 游戏 ID（会移除该 gameId 下所有 userId 的进程）
     func removeGameState(gameId: String) {
-        let process: Process? = queue.sync {
-            let proc = gameProcesses[gameId]
-            if proc?.isRunning == true {
-                manuallyStoppedGames.insert(gameId)
+        let prefix = "\(gameId)_"
+        let toRemove: [(String, Process)] = queue.sync {
+            let pairs = gameProcesses.filter { key, _ in key.hasPrefix(prefix) }
+            for (key, proc) in pairs {
+                gameProcesses.removeValue(forKey: key)
+                if proc.isRunning {
+                    manuallyStoppedGames.insert(key)
+                }
             }
-            return proc
+            return pairs.map { ($0.key, $0.value) }
         }
-        
-        if let process = process, process.isRunning {
+
+        for (key, process) in toRemove where process.isRunning {
             process.terminate()
-            
             DispatchQueue.global(qos: .utility).async { [weak self] in
                 process.waitUntilExit()
                 self?.queue.async {
-                    self?.gameProcesses.removeValue(forKey: gameId)
-                    self?.manuallyStoppedGames.remove(gameId)
+                    self?.gameProcesses.removeValue(forKey: key)
+                    self?.manuallyStoppedGames.remove(key)
                 }
             }
-        } else {
-            queue.async { [weak self] in
-                self?.gameProcesses.removeValue(forKey: gameId)
-                self?.manuallyStoppedGames.remove(gameId)
+        }
+
+        Task { @MainActor in
+            for (key, process) in toRemove where !process.isRunning {
+                if let idx = key.firstIndex(of: "_") {
+                    let gameId = String(key[..<idx])
+                    let userId = String(key[key.index(after: idx)...])
+                    AppServices.gameStatusManager.setGameRunning(gameId: gameId, userId: userId, isRunning: false)
+                }
             }
         }
     }

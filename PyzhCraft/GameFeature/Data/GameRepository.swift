@@ -1,117 +1,161 @@
-import Foundation
 import Combine
+import Foundation
 
-/// Game version information warehouse
+/// 游戏版本信息仓库
 class GameRepository: ObservableObject {
     // MARK: - Properties
-    
-    /// A list of games grouped by working path, where the key is the working path and the value is an array of games
+
+    /// 按工作路径分组的游戏列表，键为工作路径，值为游戏数组
     @Published private(set) var gamesByWorkingPath: [String: [GameVersionInfo]] = [:]
-    @Published private(set) var corruptedGamesByWorkingPath: [String: [GameVersionInfo]] = [:]
-    
+
+    /// 按工作路径分组的损坏游戏名称列表（数据库或文件夹缺失）
+    @Published private(set) var corruptedGamesByWorkingPath: [String: [String]] = [:]
+
+    /// 数据库中所有工作路径及对应游戏数量（用于设置页快速切换）
+    @Published private(set) var workingPathOptions: [(path: String, count: Int)] = []
+
     var games: [GameVersionInfo] {
         gamesByWorkingPath[currentWorkingPath] ?? []
     }
-    
-    var corruptedGames: [GameVersionInfo] {
+
+    /// 当前工作路径下的损坏游戏名称列表
+    var corruptedGames: [String] {
         corruptedGamesByWorkingPath[currentWorkingPath] ?? []
     }
-    
+
     private var currentWorkingPath: String {
         workingPathProvider.currentWorkingPath
     }
-    
+
     private let workingPathProvider: WorkingPathProviding
     private let database: GameVersionDatabase
+    private let errorHandler: GlobalErrorHandler
+    private let modScanner: ModScanner
     private var workingPathCancellable: AnyCancellable?
-    private var lastWorkingPath = ""
-    
-    @Published var workingPathChanged = false
-    
+    private var lastWorkingPath: String = ""
+    private var initialLoadTask: Task<Void, Never>?
+    private var hasLoadedInitialData = false
+
+    @Published var workingPathChanged: Bool = false
+
     // MARK: - Initialization
-    
-    init(workingPathProvider: WorkingPathProviding = GeneralSettingsManager.shared) {
+
+    init(
+        workingPathProvider: WorkingPathProviding = AppServices.generalSettingsManager,
+        errorHandler: GlobalErrorHandler = AppServices.errorHandler,
+        modScanner: ModScanner = AppServices.modScanner
+    ) {
         self.workingPathProvider = workingPathProvider
+        self.errorHandler = errorHandler
+        self.modScanner = modScanner
         let dbPath = AppPaths.gameVersionDatabase.path
         self.database = GameVersionDatabase(dbPath: dbPath)
-        
+
         lastWorkingPath = currentWorkingPath
-        
-        // Initialize database
-        Task {
-            do {
-                try await initializeDatabase()
-                loadGamesSafely()
-            } catch {
-                GlobalErrorHandler.shared.handle(error)
-            }
-        }
-        
+
         DispatchQueue.main.async { [weak self] in
             self?.setupWorkingPathObserver()
         }
     }
-    
-    /// Initialize database
+
+    /// 初始化数据库
     private func initializeDatabase() async throws {
-        // Create database directory
+        // 创建数据库目录
         let dataDir = AppPaths.dataDirectory
         try? FileManager.default.createDirectory(at: dataDir, withIntermediateDirectories: true)
-        
-        // Initialize database
+
+        // 初始化数据库
         try database.initialize()
     }
-    
+
     deinit {
         workingPathCancellable?.cancel()
     }
-    
-    /// Set up work path change observer
+
+    /// 设置工作路径变化观察者
     private func setupWorkingPathObserver() {
         lastWorkingPath = currentWorkingPath
-        
-        // Use injected WorkingPathProviding to monitor working path changes
-        // Use debounce to avoid frequent triggering
-        // Use skip(1) to skip the initial value when subscribing and only respond to subsequent changes
+
+        // 使用注入的 WorkingPathProviding 监听工作路径变化
+        // 使用 debounce 避免频繁触发
+        // 使用 skip(1) 跳过订阅时的初始值，只响应后续的变化
         workingPathCancellable = workingPathProvider.workingPathWillChange
             .debounce(for: .milliseconds(100), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self = self else { return }
-                // Check if the working path has actually changed
+                // 检查工作路径是否真的改变了
                 let newPath = self.currentWorkingPath
                 if newPath != self.lastWorkingPath {
                     self.lastWorkingPath = newPath
-                    // Notify that the working path has changed (used to trigger UI switching)
+                    // 通知工作路径已改变（用于触发UI切换）
                     self.workingPathChanged = true
-                    // When the working path changes, reload the game for the current working path
+                    // 当工作路径改变时，重新加载当前工作路径的游戏并扫描 mods 目录
                     Task { @MainActor in
                         do {
                             try await self.loadGamesThrowing()
-                            // Reset notification flag
+                            await self.scanAllGamesModsDirectory()
+                            // 重置通知标志
                             self.workingPathChanged = false
                         } catch {
-                            GlobalErrorHandler.shared.handle(error)
-                            // Reset flag even if error occurs
+                            self.errorHandler.handle(error)
+                            // 即使出错也要重置标志
                             self.workingPathChanged = false
                         }
                     }
                 }
             }
     }
-    
+
     // MARK: - Public Methods
-    
+
+    @MainActor
+    func loadInitialDataIfNeeded() async {
+        if hasLoadedInitialData {
+            return
+        }
+        if let initialLoadTask {
+            await initialLoadTask.value
+            return
+        }
+
+        let task = Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await self.initializeDatabase()
+                try await self.loadGamesThrowing()
+                await self.scanAllGamesModsDirectory()
+                await self.refreshWorkingPathOptions()
+                self.hasLoadedInitialData = true
+            } catch {
+                self.errorHandler.handle(error)
+                await MainActor.run {
+                    self.gamesByWorkingPath = [:]
+                }
+            }
+        }
+
+        initialLoadTask = task
+        await task.value
+        initialLoadTask = nil
+    }
+
+    /// 重新加载所有工作路径及其游戏数量
+    func refreshWorkingPathOptions() async {
+        let options = await fetchAllWorkingPathsWithCounts()
+        await MainActor.run {
+            self.workingPathOptions = options
+        }
+    }
+
     func addGame(_ game: GameVersionInfo) async throws {
         let workingPath = currentWorkingPath
-        let dbPath = AppPaths.gameVersionDatabase.path
         let gameToSave = game
-        
+
         try await Task.detached(priority: .userInitiated) {
-            let db = GameVersionDatabase(dbPath: dbPath)
-            try? db.initialize()
-            try db.saveGame(gameToSave, workingPath: workingPath)
+            try? self.database.initialize()
+            try self.database.saveGame(gameToSave, workingPath: workingPath)
         }.value
-        
+
         await MainActor.run {
             if gamesByWorkingPath[workingPath] == nil {
                 gamesByWorkingPath[workingPath] = []
@@ -121,95 +165,85 @@ class GameRepository: ObservableObject {
             } else {
                 gamesByWorkingPath[workingPath]?.append(game)
             }
-            corruptedGamesByWorkingPath[workingPath]?.removeAll {
-                $0.id == game.id || $0.gameName == game.gameName
-            }
         }
-        
-        Logger.shared.info("Game added successfully: \(game.gameName) (working path: \(workingPath))")
+
+        Logger.shared.info("成功添加游戏: \(game.gameName) (工作路径: \(workingPath))")
     }
-    
+
     func addGameSilently(_ game: GameVersionInfo) {
         Task {
             do {
                 try await addGame(game)
             } catch {
-                GlobalErrorHandler.shared.handle(error)
+                self.errorHandler.handle(error)
             }
         }
     }
-    
+
     func deleteGame(id: String) async throws {
         let workingPath = currentWorkingPath
         guard let game = getGame(by: id) else {
             throw GlobalError.validation(
-                i18nKey: "Game Not Found Delete",
+                chineseMessage: "找不到要删除的游戏：\(id)",
+                i18nKey: "error.validation.game_not_found_delete",
                 level: .notification
             )
         }
-        let dbPath = AppPaths.gameVersionDatabase.path
-        
         try await Task.detached(priority: .userInitiated) {
-            let db = GameVersionDatabase(dbPath: dbPath)
-            try? db.initialize()
-            try db.deleteGame(id: id)
+            try? self.database.initialize()
+            try self.database.deleteGame(id: id)
         }.value
-        
+
         await MainActor.run {
             gamesByWorkingPath[workingPath]?.removeAll { $0.id == id }
-            corruptedGamesByWorkingPath[workingPath]?.removeAll { $0.id == id }
         }
-        
-        Logger.shared.info("Successfully deleted game: \(game.gameName) (working path: \(workingPath))")
+
+        Logger.shared.info("成功删除游戏: \(game.gameName) (工作路径: \(workingPath))")
     }
-    
+
     func deleteGameSilently(id: String) {
         Task {
             do {
                 try await deleteGame(id: id)
             } catch {
-                GlobalErrorHandler.shared.handle(error)
+                self.errorHandler.handle(error)
             }
         }
     }
-    
-    func deleteCorruptedGame(gameName: String) async throws {
+
+    /// 删除当前工作路径下指定名称的所有游戏（用于删除损坏游戏）
+    func deleteGamesByName(_ gameName: String) async throws {
         let workingPath = currentWorkingPath
-        let dbPath = AppPaths.gameVersionDatabase.path
-        
         try await Task.detached(priority: .userInitiated) {
-            let db = GameVersionDatabase(dbPath: dbPath)
-            try? db.initialize()
-            try db.deleteGame(gameName: gameName, workingPath: workingPath)
+            try? self.database.initialize()
+            try self.database.deleteGames(workingPath: workingPath, gameName: gameName)
         }.value
-        
+
         await MainActor.run {
-            corruptedGamesByWorkingPath[workingPath]?.removeAll { $0.gameName == gameName }
             gamesByWorkingPath[workingPath]?.removeAll { $0.gameName == gameName }
+            corruptedGamesByWorkingPath[workingPath]?.removeAll { $0 == gameName }
         }
-        
-        Logger.shared.info("Successfully deleted corrupted game record: \(gameName) (working path: \(workingPath))")
+
+        Logger.shared.info("成功删除名称为 \(gameName) 的游戏记录（工作路径: \(workingPath)）")
     }
-    
+
     func getGame(by id: String) -> GameVersionInfo? {
         return games.first { $0.id == id }
     }
-    
+
     func getGameByName(by gameName: String) -> GameVersionInfo? {
         return games.first { $0.gameName == gameName }
     }
-    
+
     func updateGame(_ game: GameVersionInfo) async throws {
         let workingPath = currentWorkingPath
-        let dbPath = AppPaths.gameVersionDatabase.path
         let gameToSave = game
-        
+
         try await Task.detached(priority: .userInitiated) {
-            let db = GameVersionDatabase(dbPath: dbPath)
-            try? db.initialize()
-            try db.saveGame(gameToSave, workingPath: workingPath)
+            try? self.database.initialize()
+            try self.database.saveGame(gameToSave, workingPath: workingPath)
         }.value
-        
+
         await MainActor.run {
             if let index = gamesByWorkingPath[workingPath]?.firstIndex(where: { $0.id == game.id }) {
                 gamesByWorkingPath[workingPath]?[index] = game
@@ -219,41 +253,36 @@ class GameRepository: ObservableObject {
                 }
                 gamesByWorkingPath[workingPath]?.append(game)
             }
-            corruptedGamesByWorkingPath[workingPath]?.removeAll {
-                $0.id == game.id || $0.gameName == game.gameName
-            }
         }
-        
-        Logger.shared.info("Successfully updated game: \(game.gameName) (working path: \(workingPath))")
+
+        Logger.shared.info("成功更新游戏: \(game.gameName) (工作路径: \(workingPath))")
     }
-    
+
     func updateGameSilently(_ game: GameVersionInfo) -> Bool {
         Task {
             do {
                 try await updateGame(game)
             } catch {
-                GlobalErrorHandler.shared.handle(error)
+                self.errorHandler.handle(error)
             }
         }
         return true // Note: This will always return true since the operation is async
     }
-    
+
     func updateGameLastPlayed(id: String, lastPlayed: Date = Date()) async throws {
         let workingPath = currentWorkingPath
         guard var game = getGame(by: id) else {
             throw GlobalError.validation(
-                i18nKey: "Game Not Found Status",
+                chineseMessage: "找不到要更新状态的游戏：\(id)",
+                i18nKey: "error.validation.game_not_found_status",
                 level: .notification
             )
         }
-        let dbPath = AppPaths.gameVersionDatabase.path
-        
         try await Task.detached(priority: .userInitiated) {
-            let db = GameVersionDatabase(dbPath: dbPath)
-            try? db.initialize()
-            try db.updateLastPlayed(id: id, lastPlayed: lastPlayed)
+            try? self.database.initialize()
+            try self.database.updateLastPlayed(id: id, lastPlayed: lastPlayed)
         }.value
-        
+
         game.lastPlayed = lastPlayed
         let updatedGame = game
         await MainActor.run {
@@ -261,153 +290,174 @@ class GameRepository: ObservableObject {
                 gamesByWorkingPath[workingPath]?[index] = updatedGame
             }
         }
-        
-        Logger.shared.info("Successfully updated game last play time: \(game.gameName) (working path: \(workingPath))")
+
+        Logger.shared.info("成功更新游戏最后游玩时间: \(game.gameName) (工作路径: \(workingPath))")
     }
-    
+
     func updateGameLastPlayedSilently(id: String, lastPlayed: Date = Date()) -> Bool {
         Task {
             do {
                 try await updateGameLastPlayed(id: id, lastPlayed: lastPlayed)
             } catch {
-                GlobalErrorHandler.shared.handle(error)
+                self.errorHandler.handle(error)
             }
         }
         return true // Note: This will always return true since the operation is async
     }
-    
+
     func updateJavaPath(id: String, javaPath: String) async throws {
         guard var game = getGame(by: id) else {
             throw GlobalError.validation(
-                i18nKey: "Game Not Found Java",
+                chineseMessage: "找不到要更新 Java 路径的游戏：\(id)",
+                i18nKey: "error.validation.game_not_found_java",
                 level: .notification
             )
         }
-        
+
         game.javaPath = javaPath
         try await updateGame(game)
-        Logger.shared.info("Successfully updated game Java path: \(game.gameName)")
+        Logger.shared.info("成功更新游戏 Java 路径: \(game.gameName)")
     }
-    
+
     func updateJavaPathSilently(id: String, javaPath: String) -> Bool {
         Task {
             do {
                 try await updateJavaPath(id: id, javaPath: javaPath)
             } catch {
-                GlobalErrorHandler.shared.handle(error)
+                self.errorHandler.handle(error)
             }
         }
         return true // Note: This will always return true since the operation is async
     }
-    
+
     func updateJvmArguments(id: String, jvmArguments: String) async throws {
         guard var game = getGame(by: id) else {
             throw GlobalError.validation(
-                i18nKey: "Game Not Found JVM",
+                chineseMessage: "找不到要更新 JVM 参数的游戏：\(id)",
+                i18nKey: "error.validation.game_not_found_jvm",
                 level: .notification
             )
         }
-        
+
         game.jvmArguments = jvmArguments
         try await updateGame(game)
-        Logger.shared.info("Successfully updated game JVM parameters: \(game.gameName)")
+        Logger.shared.info("成功更新游戏 JVM 参数: \(game.gameName)")
     }
-    
+
     func updateJvmArgumentsSilently(id: String, jvmArguments: String) -> Bool {
         Task {
             do {
                 try await updateJvmArguments(id: id, jvmArguments: jvmArguments)
             } catch {
-                GlobalErrorHandler.shared.handle(error)
+                self.errorHandler.handle(error)
             }
         }
         return true // Note: This will always return true since the operation is async
     }
-    
+
     func updateMemorySize(id: String, xms: Int, xmx: Int) async throws {
         guard var game = getGame(by: id) else {
             throw GlobalError.validation(
-                i18nKey: "Game Not Found Memory",
+                chineseMessage: "找不到要更新内存大小的游戏：\(id)",
+                i18nKey: "error.validation.game_not_found_memory",
                 level: .notification
             )
         }
-        
-        // Verify memory parameters
+
+        // 验证内存参数
         guard xms > 0 && xmx > 0 && xms <= xmx else {
             throw GlobalError.validation(
-                i18nKey: "Invalid Memory Params",
+                chineseMessage: "无效的内存参数：xms=\(xms), xmx=\(xmx)",
+                i18nKey: "error.validation.invalid_memory_params",
                 level: .notification
             )
         }
-        
+
         game.xms = xms
         game.xmx = xmx
         try await updateGame(game)
-        Logger.shared.info("Successfully updated game memory size: \(game.gameName)")
+        Logger.shared.info("成功更新游戏内存大小: \(game.gameName)")
     }
-    
+
     func updateMemorySizeSilently(id: String, xms: Int, xmx: Int) -> Bool {
         Task {
             do {
                 try await updateMemorySize(id: id, xms: xms, xmx: xmx)
             } catch {
-                GlobalErrorHandler.shared.handle(error)
+                self.errorHandler.handle(error)
             }
         }
         return true // Note: This will always return true since the operation is async
     }
-    
+
     // MARK: - Private Methods
-    
-    /// Load game list from UserDefaults (silent version)
+
+    /// 从 UserDefaults 加载游戏列表（静默版本）
     func loadGames() {
         loadGamesSafely()
     }
-    
-    /// Load game list from UserDefaults (silent version)
+
+    /// 从 UserDefaults 加载游戏列表（静默版本）
     private func loadGamesSafely() {
         Task {
             do {
                 try await loadGamesThrowing()
-                
-                // After loading, scan the mods directory of all games
+
+                // 加载完成后，扫描所有游戏的 mods 目录
                 await scanAllGamesModsDirectory()
             } catch {
-                GlobalErrorHandler.shared.handle(error)
+                self.errorHandler.handle(error)
                 await MainActor.run {
                     gamesByWorkingPath = [:]
-                    corruptedGamesByWorkingPath = [:]
                 }
             }
         }
     }
-    
-    // Asynchronously scan the mods directory of all games
+
+    // 异步扫描所有游戏的 mods 目录
     private func scanAllGamesModsDirectory() async {
         let games = games
-        Logger.shared.info("Start scanning the mods directories of \(games.count) games")
-        
-        // Scan all games concurrently
+        Logger.shared.info("开始扫描 \(games.count) 个游戏的 mods 目录")
+
+        // 并发扫描所有游戏
         await withTaskGroup(of: Void.self) { group in
             for game in games {
                 group.addTask {
-                    await ModScanner.shared.scanGameModsDirectory(game: game)
+                    await self.modScanner.scanGameModsDirectory(game: game)
                 }
             }
         }
-        
-        Logger.shared.info("Complete mods directory scan for all games")
+
+        Logger.shared.info("完成所有游戏的 mods 目录扫描")
     }
-    
-    // Only load games in the current working path (database and directory scanning are performed in the background to avoid blocking the main thread)
+
+    /// 获取数据库中所有工作路径及其游戏数量（用于设置页快速切换，SQL GROUP BY 实现）
+    func fetchAllWorkingPathsWithCounts() async -> [(path: String, count: Int)] {
+        let currentPath = currentWorkingPath
+        let rows: [(path: String, count: Int)]
+        do {
+            rows = try await Task.detached(priority: .userInitiated) {
+                try? self.database.initialize()
+                return try self.database.loadWorkingPathsWithCounts()
+            }.value
+        } catch {
+            return [(currentPath, 0)]
+        }
+        var result = rows
+        if !result.contains(where: { $0.path == currentPath }) {
+            result.append((currentPath, 0))
+        }
+        result.sort { $0.path.localizedStandardCompare($1.path) == .orderedAscending }
+        return result
+    }
+
+    // 只加载当前工作路径的游戏（数据库与目录扫描在后台执行，避免主线程阻塞）
     func loadGamesThrowing() async throws {
         let workingPath = currentWorkingPath
-        let dbPath = AppPaths.gameVersionDatabase.path
-        
-        let (validGames, corruptedGames, pathForLog): ([GameVersionInfo], [GameVersionInfo], String) = try await Task.detached(priority: .userInitiated) {
-            let db = GameVersionDatabase(dbPath: dbPath)
-            try? db.initialize()
-            let games = try db.loadGames(workingPath: workingPath)
+
+        let (validGames, corruptedNames, pathForLog): ([GameVersionInfo], [String], String) = try await Task.detached(priority: .userInitiated) {
+            try? self.database.initialize()
+            let games = try self.database.loadGames(workingPath: workingPath)
             let fm = FileManager.default
             let baseURL = URL(fileURLWithPath: workingPath, isDirectory: true)
             let profileRootDir = baseURL.appendingPathComponent(AppConstants.DirectoryNames.profiles, isDirectory: true)
@@ -415,27 +465,31 @@ class GameRepository: ObservableObject {
             do {
                 if fm.fileExists(atPath: profileRootDir.path) {
                     let contents = try fm.contentsOfDirectory(atPath: profileRootDir.path)
-                    localGameNames = Set(contents)
+                    // 过滤掉 .DS_Store 等隐藏文件，避免被当成游戏目录
+                    let filtered = contents.filter { !$0.hasPrefix(".") }
+                    localGameNames = Set(filtered)
                 } else {
                     localGameNames = []
                 }
             } catch {
-                Logger.shared.warning("Unable to read game directory from working path: \(workingPath), error: \(error.localizedDescription)")
+                Logger.shared.warning("无法读取工作路径的游戏目录: \(workingPath), 错误: \(error.localizedDescription)")
                 localGameNames = []
             }
             let valid = games.filter { localGameNames.contains($0.gameName) }
-            let corrupted = games.filter { !localGameNames.contains($0.gameName) }
+            let dbGameNames = Set(games.map { $0.gameName })
+            // 数据库存在但文件夹不存在
+            let missingFolders = dbGameNames.subtracting(localGameNames)
+            // 文件夹存在但数据库不存在
+            let missingDatabase = localGameNames.subtracting(dbGameNames)
+            let corrupted = Array(missingFolders.union(missingDatabase)).sorted()
             return (valid, corrupted, workingPath)
         }.value
-        
+
         await MainActor.run {
-            gamesByWorkingPath = [workingPath: validGames]
-            corruptedGamesByWorkingPath = [workingPath: corruptedGames]
+            gamesByWorkingPath[workingPath] = validGames
+            corruptedGamesByWorkingPath[workingPath] = corruptedNames
         }
-        
-        Logger.shared.info("Successfully loaded \(validGames.count) games (working path: \(pathForLog))")
-        if !corruptedGames.isEmpty {
-            Logger.shared.warning("Detected \(corruptedGames.count) corrupted game records (working path: \(pathForLog))")
-        }
+
+        Logger.shared.info("成功加载 \(validGames.count) 个游戏（工作路径: \(pathForLog)）")
     }
 }

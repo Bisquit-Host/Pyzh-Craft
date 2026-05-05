@@ -1,13 +1,14 @@
 import SwiftUI
 
+// MARK: - Server Address Chip
 struct ServerAddressChip: View {
-    private let title: String
-    private let address: String
-    private let port: Int?
-    private let isLoading: Bool
-    private let connectionStatus: ServerConnectionStatus
-    private let action: (() -> Void)?
-    
+    let title: String
+    let address: String
+    let port: Int?
+    let isLoading: Bool
+    let connectionStatus: ServerConnectionStatus
+    let action: (() -> Void)?
+
     init(
         title: String,
         address: String,
@@ -23,25 +24,23 @@ struct ServerAddressChip: View {
         self.connectionStatus = connectionStatus
         self.action = action
     }
-    
+
     var body: some View {
         Button(action: action ?? {}) {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 4) {
                     Image(systemName: "server.rack")
                         .font(.caption)
-                        .foregroundColor(iconColor)
-                    
+                        .foregroundColor(connectionStatus.statusColor)
                     Text(title)
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .lineLimit(1)
                         .frame(maxWidth: 150)
                 }
-                
                 if !address.isEmpty {
-                    if let port = port, port > 0 {
-                        Text("\(address):\(String(port))")
+                    if let port, port > 0 {
+                        Text(address + ":" + String(port))
                             .font(.caption2)
                             .foregroundColor(.secondary)
                             .lineLimit(1)
@@ -59,25 +58,17 @@ struct ServerAddressChip: View {
             .padding(.vertical, 6)
             .background(
                 RoundedRectangle(cornerRadius: 4)
-                    .fill(.clear)
+                    .fill(Color.clear)
             )
             .foregroundStyle(.primary)
             .overlay(
                 RoundedRectangle(cornerRadius: 4)
-                    .stroke(.secondary.opacity(0.2), lineWidth: 1)
+                    .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
         .disabled(isLoading)
-    }
-    
-    private var iconColor: Color {
-        switch connectionStatus {
-        case .success: .green
-        case .timeout: .yellow
-        case .failed: .red
-        case .checking: .blue.opacity(0.5)
-        case .unknown: .secondary
-        }
+        .frame(maxWidth: 160, alignment: .leading)
+        .lineLimit(1)
     }
 }

@@ -1,130 +1,130 @@
 import Foundation
 
-/// JWT decoder tool class
-/// Parse the JWT and extract the expiration time
+/// JWT解码器工具类
+/// 解析 JWT 并提取过期时间
 enum JWTDecoder {
-    /// Parse JWT token and extract expiration time
-    /// - Parameter jwt: JWT token string
-    /// - Returns: expiration time, if parsing fails, nil is returned
+    /// 解析JWT token并提取过期时间
+    /// - Parameter jwt: JWT token字符串
+    /// - Returns: 过期时间，如果解析失败则返回nil
     static func extractExpirationTime(from jwt: String) -> Date? {
-        // JWT format: header.payload.signature
+        // JWT格式：header.payload.signature
         let components = jwt.components(separatedBy: ".")
-        
-        // Make sure there are 3 parts
+
+        // 确保有3个部分
         guard components.count == 3 else {
-            Logger.shared.warning("Invalid JWT format: not a standard 3-part format")
+            Logger.shared.warning("JWT格式无效：不是标准的3部分格式")
             return nil
         }
-        
-        // Parse the payload part (Part 2)
+
+        // 解析payload部分（第二部分）
         let payload = components[1]
-        
-        // Add padding to ensure base64 decoding is correct
+
+        // 添加padding以确保base64解码正确
         let paddedPayload = addPadding(to: payload)
-        
+
         guard let payloadData = Data(base64Encoded: paddedPayload) else {
-            Logger.shared.warning("JWT payload base64 decoding failed")
+            Logger.shared.warning("JWT payload base64解码失败")
             return nil
         }
-        
+
         do {
             let payloadJSON = try JSONSerialization.jsonObject(with: payloadData) as? [String: Any]
-            
-            // Extract exp field (expiration timestamp)
+
+            // 提取exp字段（过期时间戳）
             if let exp = payloadJSON?["exp"] as? TimeInterval {
                 let expirationDate = Date(timeIntervalSince1970: exp)
-                Logger.shared.debug("Parse the expiration time from the JWT: \(expirationDate)")
+                Logger.shared.debug("从JWT中解析到过期时间：\(expirationDate)")
                 return expirationDate
             } else {
-                Logger.shared.warning("exp field not found in JWT payload")
+                Logger.shared.warning("JWT payload中未找到exp字段")
                 return nil
             }
         } catch {
-            Logger.shared.warning("JWT payload JSON parsing failed: \(error.localizedDescription)")
+            Logger.shared.warning("JWT payload JSON解析失败：\(error.localizedDescription)")
             return nil
         }
     }
-    
-    /// Parse the JWT token and extract all available information
-    /// - Parameter jwt: JWT token string
-    /// - Returns: Dictionary containing JWT information, nil is returned if parsing fails
+
+    /// 解析JWT token并提取所有可用信息
+    /// - Parameter jwt: JWT token字符串
+    /// - Returns: 包含JWT信息的字典，如果解析失败则返回nil
     static func extractAllInfo(from jwt: String) -> [String: Any]? {
         let components = jwt.components(separatedBy: ".")
-        
+
         guard components.count == 3 else {
-            Logger.shared.warning("Invalid JWT format: not a standard 3-part format")
+            Logger.shared.warning("JWT格式无效：不是标准的3部分格式")
             return nil
         }
-        
+
         let payload = components[1]
         let paddedPayload = addPadding(to: payload)
-        
+
         guard let payloadData = Data(base64Encoded: paddedPayload) else {
-            Logger.shared.warning("JWT payload base64 decoding failed")
+            Logger.shared.warning("JWT payload base64解码失败")
             return nil
         }
-        
+
         do {
             let payloadJSON = try JSONSerialization.jsonObject(with: payloadData) as? [String: Any]
             return payloadJSON
         } catch {
-            Logger.shared.warning("JWT payload JSON parsing failed: \(error.localizedDescription)")
+            Logger.shared.warning("JWT payload JSON解析失败：\(error.localizedDescription)")
             return nil
         }
     }
-    
-    /// Add necessary padding to base64 string
-    /// - Parameter base64String: original base64 string
-    /// - Returns: base64 string with added padding
+
+    /// 为base64字符串添加必要的padding
+    /// - Parameter base64String: 原始base64字符串
+    /// - Returns: 添加了padding的base64字符串
     private static func addPadding(to base64String: String) -> String {
         var padded = base64String
-        
-        // Calculate the amount of padding that needs to be added
+
+        // 计算需要添加的padding数量
         let remainder = padded.count % 4
         if remainder > 0 {
             let paddingNeeded = 4 - remainder
-            // Use string interpolation instead of string concatenation
+            // 使用字符串插值而非字符串拼接
             padded = "\(padded)\(String(repeating: "=", count: paddingNeeded))"
         }
-        
+
         return padded
     }
-    
-    /// Check if JWT token is about to expire
+
+    /// 检查JWT token是否即将过期
     /// - Parameters:
-    ///   - jwt: JWT token string
-    ///   - bufferTime: buffering time (seconds), default 5 minutes
-    /// - Returns: Whether it is about to expire
+    ///   - jwt: JWT token字符串
+    ///   - bufferTime: 缓冲时间（秒），默认5分钟
+    /// - Returns: 是否即将过期
     static func isTokenExpiringSoon(_ jwt: String, bufferTime: TimeInterval = 300) -> Bool {
         guard let expirationTime = extractExpirationTime(from: jwt) else {
-            // If the expiration time cannot be parsed, it is considered to have expired
+            // 如果无法解析过期时间，认为已过期
             return true
         }
-        
+
         let currentTime = Date()
         let expirationTimeWithBuffer = expirationTime.addingTimeInterval(-bufferTime)
-        
+
         return currentTime >= expirationTimeWithBuffer
     }
 }
 
 // MARK: - Minecraft Token Constants
 extension JWTDecoder {
-    /// Default expiration time for Minecraft tokens (24 hours)
-    /// Used when the expiration time cannot be parsed from the JWT
-    static let defaultMinecraftTokenExpiration: TimeInterval = 24 * 60 * 60 // 24 hours
-    
-    /// Get the expiration time of Minecraft token
-    /// Prefer parsing from JWT, using default value if failed
-    /// - Parameter minecraftToken: Minecraft access token
-    /// - Returns: Expiration time
+    /// Minecraft token的默认过期时间（24小时）
+    /// 当无法从JWT中解析过期时间时使用
+    static let defaultMinecraftTokenExpiration: TimeInterval = 24 * 60 * 60 // 24小时
+
+    /// 获取Minecraft token的过期时间
+    /// 优先从JWT中解析，如果失败则使用默认值
+    /// - Parameter minecraftToken: Minecraft访问令牌
+    /// - Returns: 过期时间
     static func getMinecraftTokenExpiration(from minecraftToken: String) -> Date {
         if let expirationTime = extractExpirationTime(from: minecraftToken) {
-            Logger.shared.debug("Minecraft token expiration time parsed using JWT: \(expirationTime)")
+            Logger.shared.debug("使用JWT解析的Minecraft token过期时间：\(expirationTime)")
             return expirationTime
         } else {
             let defaultExpiration = Date().addingTimeInterval(defaultMinecraftTokenExpiration)
-            Logger.shared.debug("Use the default Minecraft token expiration time: \(defaultExpiration)")
+            Logger.shared.debug("使用默认的Minecraft token过期时间：\(defaultExpiration)")
             return defaultExpiration
         }
     }

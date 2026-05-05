@@ -1,6 +1,13 @@
+//
+//  NBTParser.swift
+//  PyzhCraft
+//
+//  Created by su on 2025/1/20.
+//
+
 import Foundation
 
-/// NBT tag type
+/// NBT 标签类型
 private enum NBTType: UInt8 {
     case end = 0
     case byte = 1
@@ -17,94 +24,94 @@ private enum NBTType: UInt8 {
     case longArray = 12
 }
 
-/// NBT parser
-/// Used to parse and generate Minecraft NBT format files (such as servers.dat)
+/// NBT 解析器
+/// 用于解析和生成 Minecraft 的 NBT 格式文件（如 servers.dat）
 class NBTParser {
     private var data: Data
     private var offset: Int = 0
-    private var outputData = Data()
-    
+    private var outputData: Data = Data()
+
     init(data: Data) {
         self.data = data
     }
-    
-    /// Create an NBT parser for writing
+
+    /// 创建用于写入的 NBT 解析器
     private init() {
         self.data = Data()
     }
-    
-    /// Parse NBT data (supports GZIP compression)
-    /// - Returns: parsed dictionary
-    /// - Throws: Parsing errors
+
+    /// 解析 NBT 数据（支持 GZIP 压缩）
+    /// - Returns: 解析后的字典
+    /// - Throws: 解析错误
     func parse() throws -> [String: Any] {
-        // Check if it is GZIP compression
+        // 检查是否是 GZIP 压缩
         if data.count >= 2 && data[0] == 0x1F && data[1] == 0x8B {
-            // GZIP compression, decompress first
+            // GZIP 压缩，先解压
             data = try decompressGzip(data: data)
             offset = 0
         }
-        
-        // Read the root tag type (should be TAG_Compound)
+
+        // 读取根标签类型（应该是 TAG_Compound）
         guard !data.isEmpty else {
-            throw GlobalError(
-                type: .fileSystem,
-                i18nKey: "NBT Empty Data",
+            throw GlobalError.fileSystem(
+                chineseMessage: "NBT 数据为空",
+                i18nKey: "error.filesystem.nbt_empty_data",
                 level: .notification
             )
         }
-        
+
         let tagType = NBTType(rawValue: data[offset]) ?? .end
         guard tagType == .compound else {
-            throw GlobalError(
-                type: .fileSystem,
-                i18nKey: "NBT Invalid Root",
+            throw GlobalError.fileSystem(
+                chineseMessage: "NBT 根标签不是 Compound 类型",
+                i18nKey: "error.filesystem.nbt_invalid_root",
                 level: .notification
             )
         }
-        
+
         offset += 1
-        
-        // Read tag name (root tag name may be empty)
+
+        // 读取标签名称（根标签名称可能为空）
         _ = try readString()
-        
-        // Read Compound content
+
+        // 读取 Compound 内容
         return try readCompound() as [String: Any]
     }
-    
-    /// Read string
+
+    /// 读取字符串
     private func readString() throws -> String {
         guard offset + 2 <= data.count else {
-            throw GlobalError(
-                type: .fileSystem,
-                i18nKey: "NBT Insufficient Data",
+            throw GlobalError.fileSystem(
+                chineseMessage: "NBT 数据不足，无法读取字符串长度",
+                i18nKey: "error.filesystem.nbt_insufficient_data",
                 level: .notification
             )
         }
-        
+
         let length = Int(readShort())
         guard offset + length <= data.count else {
-            throw GlobalError(
-                type: .fileSystem,
-                i18nKey: "NBT String Out Of Range",
+            throw GlobalError.fileSystem(
+                chineseMessage: "NBT 字符串长度超出数据范围",
+                i18nKey: "error.filesystem.nbt_string_out_of_range",
                 level: .notification
             )
         }
-        
+
         let stringData = data.subdata(in: offset..<(offset + length))
         offset += length
-        
+
         return String(data: stringData, encoding: .utf8) ?? ""
     }
-    
-    /// Read short integer (2 bytes, big endian)
+
+    /// 读取短整型（2 字节，大端序）
     private func readShort() -> UInt16 {
         guard offset + 2 <= data.count else { return 0 }
         let value = (UInt16(data[offset]) << 8) | UInt16(data[offset + 1])
         offset += 2
         return value
     }
-    
-    /// Read integer (4 bytes, big endian)
+
+    /// 读取整型（4 字节，大端序）
     private func readInt() -> Int32 {
         guard offset + 4 <= data.count else { return 0 }
         var value: Int32 = 0
@@ -114,36 +121,36 @@ class NBTParser {
         offset += 4
         return value
     }
-    
-    /// Read bytes
+
+    /// 读取字节
     private func readByte() -> UInt8 {
         guard offset < data.count else { return 0 }
         let value = data[offset]
         offset += 1
         return value
     }
-    
-    /// Read the Compound tag
+
+    /// 读取 Compound 标签
     private func readCompound() throws -> [String: Any] {
         var result: [String: Any] = [:]
-        
+
         while offset < data.count {
             let tagType = NBTType(rawValue: data[offset]) ?? .end
             offset += 1
-            
+
             if tagType == .end {
                 break
             }
-            
+
             let name = try readString()
             let value = try readTagValue(type: tagType)
             result[name] = value
         }
-        
+
         return result
     }
-    
-    /// Read tag value
+
+    /// 读取标签值
     private func readTagValue(type: NBTType) throws -> Any {
         switch type {
         case .byte:
@@ -167,7 +174,11 @@ class NBTParser {
         case .byteArray:
             let length = Int(readInt())
             guard offset + length <= data.count else {
-                throw GlobalError(type: .fileSystem, i18nKey: "NBT Byte Array Out Of Range", level: .notification)
+                throw GlobalError.fileSystem(
+                    chineseMessage: "NBT 字节数组长度超出数据范围",
+                    i18nKey: "error.filesystem.nbt_byte_array_out_of_range",
+                    level: .notification
+                )
             }
             let array = Array(data.subdata(in: offset..<(offset + length)))
             offset += length
@@ -187,15 +198,15 @@ class NBTParser {
             }
             return array
         case .end:
-            throw GlobalError(
-                type: .fileSystem,
-                i18nKey: "NBT Unexpected End Tag",
+            throw GlobalError.fileSystem(
+                chineseMessage: "NBT 解析遇到 End 标签",
+                i18nKey: "error.filesystem.nbt_unexpected_end_tag",
                 level: .notification
             )
         }
     }
-    
-    /// Read long integer (8 bytes, big endian)
+
+    /// 读取长整型（8 字节，大端序）
     private func readLong() -> Int64 {
         guard offset + 8 <= data.count else { return 0 }
         var value: Int64 = 0
@@ -205,161 +216,161 @@ class NBTParser {
         offset += 8
         return value
     }
-    
-    /// Read floating point number (4 bytes, IEEE 754)
+
+    /// 读取浮点数（4 字节，IEEE 754）
     private func readFloat() -> Float {
         guard offset + 4 <= data.count else { return 0 }
         let intValue = readInt()
         return Float(bitPattern: UInt32(bitPattern: intValue))
     }
-    
-    /// Read double-precision floating point number (8 bytes, IEEE 754)
+
+    /// 读取双精度浮点数（8 字节，IEEE 754）
     private func readDouble() -> Double {
         guard offset + 8 <= data.count else { return 0 }
         let longValue = readLong()
         return Double(bitPattern: UInt64(bitPattern: longValue))
     }
-    
-    /// Read list
+
+    /// 读取列表
     private func readList() throws -> [Any] {
         guard offset < data.count else {
-            throw GlobalError(
-                type: .fileSystem,
-                i18nKey: "NBT Insufficient Data For List",
+            throw GlobalError.fileSystem(
+                chineseMessage: "NBT 数据不足，无法读取列表类型",
+                i18nKey: "error.filesystem.nbt_insufficient_data_for_list",
                 level: .notification
             )
         }
-        
+
         let listType = NBTType(rawValue: data[offset]) ?? .end
         offset += 1
-        
+
         let length = Int(readInt())
         var result: [Any] = []
-        
+
         for _ in 0..<length {
             let value = try readTagValue(type: listType)
             result.append(value)
         }
-        
+
         return result
     }
-    
-    /// Decompress GZIP data (using system commands)
+
+    /// 解压 GZIP 数据（使用系统命令）
     private func decompressGzip(data: Data) throws -> Data {
         guard !data.isEmpty else {
-            throw GlobalError(
-                type: .fileSystem,
-                i18nKey: "NBT GZIP Empty Data",
+            throw GlobalError.fileSystem(
+                chineseMessage: "NBT GZIP 数据为空",
+                i18nKey: "error.filesystem.nbt_gzip_empty_data",
                 level: .notification
             )
         }
-        
-        // Create temporary files to store compressed data
+
+        // 创建临时文件用于存储压缩数据
         let tempDir = FileManager.default.temporaryDirectory
         let tempInputFile = tempDir.appendingPathComponent(UUID().uuidString + ".gz")
         let tempOutputFile = tempDir.appendingPathComponent(UUID().uuidString)
-        
+
         defer {
-            // Clean temporary files
+            // 清理临时文件
             try? FileManager.default.removeItem(at: tempInputFile)
             try? FileManager.default.removeItem(at: tempOutputFile)
         }
-        
-        // Write compressed data to temporary file
+
+        // 写入压缩数据到临时文件
         try data.write(to: tempInputFile)
-        
-        // Unzip using the system gzip command
+
+        // 使用系统 gzip 命令解压
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/gunzip")
         process.arguments = ["-c", tempInputFile.path]
-        
+
         let pipe = Pipe()
         process.standardOutput = pipe
         process.standardError = Pipe()
-        
+
         do {
             try process.run()
         } catch {
-            throw GlobalError(
-                type: .fileSystem,
-                i18nKey: "NBT GZIP Process Start Failed",
+            throw GlobalError.fileSystem(
+                chineseMessage: "无法启动 gzip 解压进程: \(error.localizedDescription)",
+                i18nKey: "error.filesystem.nbt_gzip_process_start_failed",
                 level: .notification
             )
         }
-        
-        // Read decompressed data
+
+        // 读取解压后的数据
         let fileHandle = pipe.fileHandleForReading
         let decompressedData = fileHandle.readDataToEndOfFile()
         process.waitUntilExit()
-        
+
         guard process.terminationStatus == 0 else {
-            throw GlobalError(
-                type: .fileSystem,
-                i18nKey: "NBT GZIP Decompress Failed",
+            throw GlobalError.fileSystem(
+                chineseMessage: "GZIP 解压失败，退出状态: \(process.terminationStatus)",
+                i18nKey: "error.filesystem.nbt_gzip_decompress_failed",
                 level: .notification
             )
         }
-        
+
         guard !decompressedData.isEmpty else {
-            throw GlobalError(
-                type: .fileSystem,
-                i18nKey: "NBT GZIP Decompressed Empty",
+            throw GlobalError.fileSystem(
+                chineseMessage: "GZIP 解压后数据为空",
+                i18nKey: "error.filesystem.nbt_gzip_decompressed_empty",
                 level: .notification
             )
         }
-        
+
         return decompressedData
     }
-    
-    // MARK: - NBT writing method
-    
-    /// Encode dictionary data into NBT format (supports GZIP compression)
+
+    // MARK: - NBT 写入方法
+
+    /// 将字典数据编码为 NBT 格式（支持 GZIP 压缩）
     /// - Parameters:
-    ///   - data: dictionary data to be encoded
-    ///   - compress: whether to use GZIP compression, default true
-    /// - Returns: encoded NBT data
-    /// - Throws: Encoding error
+    ///   - data: 要编码的字典数据
+    ///   - compress: 是否使用 GZIP 压缩，默认 true
+    /// - Returns: 编码后的 NBT 数据
+    /// - Throws: 编码错误
     static func encode(_ data: [String: Any], compress: Bool = true) throws -> Data {
         let parser = NBTParser()
         parser.outputData = Data()
-        
-        // Write root tag type (TAG_Compound)
+
+        // 写入根标签类型（TAG_Compound）
         parser.writeByte(NBTType.compound.rawValue)
-        
-        // Write root tag name (empty string)
+
+        // 写入根标签名称（空字符串）
         parser.writeString("")
-        
-        // Write Compound content
+
+        // 写入 Compound 内容
         try parser.writeCompound(data)
-        
-        // If compression is enabled, use gzip compression
+
+        // 如果启用压缩，使用 gzip 压缩
         if compress {
             return try parser.compressGzip(data: parser.outputData)
         }
-        
+
         return parser.outputData
     }
-    
-    /// write bytes
+
+    /// 写入字节
     private func writeByte(_ value: UInt8) {
         outputData.append(value)
     }
-    
-    /// Write short integer (2 bytes, big endian)
+
+    /// 写入短整型（2 字节，大端序）
     private func writeShort(_ value: UInt16) {
         outputData.append(UInt8((value >> 8) & 0xFF))
         outputData.append(UInt8(value & 0xFF))
     }
-    
-    /// Write integer (4 bytes, big endian)
+
+    /// 写入整型（4 字节，大端序）
     private func writeInt(_ value: Int32) {
         outputData.append(UInt8((value >> 24) & 0xFF))
         outputData.append(UInt8((value >> 16) & 0xFF))
         outputData.append(UInt8((value >> 8) & 0xFF))
         outputData.append(UInt8(value & 0xFF))
     }
-    
-    /// Write long (8 bytes, big endian)
+
+    /// 写入长整型（8 字节，大端序）
     private func writeLong(_ value: Int64) {
         outputData.append(UInt8((value >> 56) & 0xFF))
         outputData.append(UInt8((value >> 48) & 0xFF))
@@ -370,32 +381,32 @@ class NBTParser {
         outputData.append(UInt8((value >> 8) & 0xFF))
         outputData.append(UInt8(value & 0xFF))
     }
-    
-    /// write string
+
+    /// 写入字符串
     private func writeString(_ value: String) {
         let stringData = value.data(using: .utf8) ?? Data()
         let length = UInt16(stringData.count)
         writeShort(length)
         outputData.append(stringData)
     }
-    
-    /// Write floating point number (4 bytes, IEEE 754)
+
+    /// 写入浮点数（4 字节，IEEE 754）
     private func writeFloat(_ value: Float) {
         let bitPattern = value.bitPattern
-        // Convert the bit pattern of a UInt32 to an Int32 (leaving the bit pattern unchanged)
+        // 将 UInt32 的位模式转换为 Int32（保持位模式不变）
         let intValue = Int32(bitPattern: bitPattern)
         writeInt(intValue)
     }
-    
-    /// Write a double-precision floating point number (8 bytes, IEEE 754)
+
+    /// 写入双精度浮点数（8 字节，IEEE 754）
     private func writeDouble(_ value: Double) {
         let bitPattern = value.bitPattern
-        // Convert the bit pattern of UInt64 to Int64 (leaving the bit pattern unchanged)
+        // 将 UInt64 的位模式转换为 Int64（保持位模式不变）
         let longValue = Int64(bitPattern: bitPattern)
         writeLong(longValue)
     }
-    
-    /// Write Compound tag
+
+    /// 写入 Compound 标签
     private func writeCompound(_ compound: [String: Any]) throws {
         for (name, value) in compound {
             let tagType = try inferNBTType(from: value)
@@ -403,11 +414,11 @@ class NBTParser {
             writeString(name)
             try writeTagValue(type: tagType, value: value)
         }
-        // Write End tag
+        // 写入 End 标签
         writeByte(NBTType.end.rawValue)
     }
-    
-    /// Write tag value
+
+    /// 写入标签值
     private func writeTagValue(type: NBTType, value: Any) throws {
         switch type {
         case .byte:
@@ -418,9 +429,9 @@ class NBTParser {
             } else if let boolValue = value as? Bool {
                 writeByte(boolValue ? 1 : 0)
             } else {
-                throw GlobalError(
-                    type: .fileSystem,
-                    i18nKey: "NBT Invalid Byte Value",
+                throw GlobalError.fileSystem(
+                    chineseMessage: "无法将值转换为 Byte 类型",
+                    i18nKey: "error.filesystem.nbt_invalid_byte_value",
                     level: .notification
                 )
             }
@@ -431,9 +442,9 @@ class NBTParser {
             } else if let int16Value = value as? Int16 {
                 shortValue = int16Value
             } else {
-                throw GlobalError(
-                    type: .fileSystem,
-                    i18nKey: "NBT Invalid Short Value",
+                throw GlobalError.fileSystem(
+                    chineseMessage: "无法将值转换为 Short 类型",
+                    i18nKey: "error.filesystem.nbt_invalid_short_value",
                     level: .notification
                 )
             }
@@ -445,9 +456,9 @@ class NBTParser {
             } else if let int32Value = value as? Int32 {
                 intValue = int32Value
             } else {
-                throw GlobalError(
-                    type: .fileSystem,
-                    i18nKey: "NBT Invalid Int Value",
+                throw GlobalError.fileSystem(
+                    chineseMessage: "无法将值转换为 Int 类型",
+                    i18nKey: "error.filesystem.nbt_invalid_int_value",
                     level: .notification
                 )
             }
@@ -459,27 +470,27 @@ class NBTParser {
             } else if let int64Value = value as? Int64 {
                 longValue = int64Value
             } else {
-                throw GlobalError(
-                    type: .fileSystem,
-                    i18nKey: "NBT Invalid Long Value",
+                throw GlobalError.fileSystem(
+                    chineseMessage: "无法将值转换为 Long 类型",
+                    i18nKey: "error.filesystem.nbt_invalid_long_value",
                     level: .notification
                 )
             }
             writeLong(longValue)
         case .float:
             guard let floatValue = value as? Float else {
-                throw GlobalError(
-                    type: .fileSystem,
-                    i18nKey: "NBT Invalid Float Value",
+                throw GlobalError.fileSystem(
+                    chineseMessage: "无法将值转换为 Float 类型",
+                    i18nKey: "error.filesystem.nbt_invalid_float_value",
                     level: .notification
                 )
             }
             writeFloat(floatValue)
         case .double:
             guard let doubleValue = value as? Double else {
-                throw GlobalError(
-                    type: .fileSystem,
-                    i18nKey: "NBT Invalid Double Value",
+                throw GlobalError.fileSystem(
+                    chineseMessage: "无法将值转换为 Double 类型",
+                    i18nKey: "error.filesystem.nbt_invalid_double_value",
                     level: .notification
                 )
             }
@@ -496,18 +507,18 @@ class NBTParser {
             try writeList(value)
         case .compound:
             guard let compoundValue = value as? [String: Any] else {
-                throw GlobalError(
-                    type: .fileSystem,
-                    i18nKey: "NBT Invalid Compound Value",
+                throw GlobalError.fileSystem(
+                    chineseMessage: "无法将值转换为 Compound 类型",
+                    i18nKey: "error.filesystem.nbt_invalid_compound_value",
                     level: .notification
                 )
             }
             try writeCompound(compoundValue)
         case .byteArray:
             guard let array = value as? [UInt8] else {
-                throw GlobalError(
-                    type: .fileSystem,
-                    i18nKey: "NBT Invalid Byte Array Value",
+                throw GlobalError.fileSystem(
+                    chineseMessage: "无法将值转换为 ByteArray 类型",
+                    i18nKey: "error.filesystem.nbt_invalid_byte_array_value",
                     level: .notification
                 )
             }
@@ -515,9 +526,9 @@ class NBTParser {
             outputData.append(contentsOf: array)
         case .intArray:
             guard let array = value as? [Int32] else {
-                throw GlobalError(
-                    type: .fileSystem,
-                    i18nKey: "NBT Invalid Int Array Value",
+                throw GlobalError.fileSystem(
+                    chineseMessage: "无法将值转换为 IntArray 类型",
+                    i18nKey: "error.filesystem.nbt_invalid_int_array_value",
                     level: .notification
                 )
             }
@@ -527,9 +538,9 @@ class NBTParser {
             }
         case .longArray:
             guard let array = value as? [Int64] else {
-                throw GlobalError(
-                    type: .fileSystem,
-                    i18nKey: "NBT Invalid Long Array Value",
+                throw GlobalError.fileSystem(
+                    chineseMessage: "无法将值转换为 LongArray 类型",
+                    i18nKey: "error.filesystem.nbt_invalid_long_array_value",
                     level: .notification
                 )
             }
@@ -541,27 +552,27 @@ class NBTParser {
             break
         }
     }
-    
-    /// write list
+
+    /// 写入列表
     private func writeList(_ value: Any) throws {
         guard let array = value as? [Any], !array.isEmpty else {
-            // Empty list, write type is End, length is 0
+            // 空列表，写入类型为 End，长度为 0
             writeByte(NBTType.end.rawValue)
             writeInt(0)
             return
         }
-        
-        // Infer list element type
+
+        // 推断列表元素类型
         let elementType = try inferNBTType(from: array[0])
         writeByte(elementType.rawValue)
         writeInt(Int32(array.count))
-        
+
         for item in array {
             try writeTagValue(type: elementType, value: item)
         }
     }
-    
-    /// Infer NBT type from value
+
+    /// 从值推断 NBT 类型
     private func inferNBTType(from value: Any) throws -> NBTType {
         switch value {
         case is Bool, is Int8:
@@ -589,75 +600,75 @@ class NBTParser {
         case is [String: Any]:
             return .compound
         default:
-            // Default converted to string
+            // 默认转换为字符串
             return .string
         }
     }
-    
-    /// Compress GZIP data (using system commands)
+
+    /// 压缩 GZIP 数据（使用系统命令）
     private func compressGzip(data: Data) throws -> Data {
         guard !data.isEmpty else {
-            throw GlobalError(
-                type: .fileSystem,
-                i18nKey: "NBT Empty Data For Compress",
+            throw GlobalError.fileSystem(
+                chineseMessage: "NBT 数据为空，无法压缩",
+                i18nKey: "error.filesystem.nbt_empty_data_for_compress",
                 level: .notification
             )
         }
-        
-        // Create temporary files to store uncompressed data
+
+        // 创建临时文件用于存储未压缩数据
         let tempDir = FileManager.default.temporaryDirectory
         let tempInputFile = tempDir.appendingPathComponent(UUID().uuidString)
         let tempOutputFile = tempDir.appendingPathComponent(UUID().uuidString + ".gz")
-        
+
         defer {
-            // Clean temporary files
+            // 清理临时文件
             try? FileManager.default.removeItem(at: tempInputFile)
             try? FileManager.default.removeItem(at: tempOutputFile)
         }
-        
-        // Write uncompressed data to temporary file
+
+        // 写入未压缩数据到临时文件
         try data.write(to: tempInputFile)
-        
-        // Compress using the system gzip command
+
+        // 使用系统 gzip 命令压缩
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/gzip")
         process.arguments = ["-c", tempInputFile.path]
-        
+
         let pipe = Pipe()
         process.standardOutput = pipe
         process.standardError = Pipe()
-        
+
         do {
             try process.run()
         } catch {
-            throw GlobalError(
-                type: .fileSystem,
-                i18nKey: "NBT GZIP Compress Process Start Failed",
+            throw GlobalError.fileSystem(
+                chineseMessage: "无法启动 gzip 压缩进程: \(error.localizedDescription)",
+                i18nKey: "error.filesystem.nbt_gzip_compress_process_start_failed",
                 level: .notification
             )
         }
-        
-        // Read compressed data
+
+        // 读取压缩后的数据
         let fileHandle = pipe.fileHandleForReading
         let compressedData = fileHandle.readDataToEndOfFile()
         process.waitUntilExit()
-        
+
         guard process.terminationStatus == 0 else {
-            throw GlobalError(
-                type: .fileSystem,
-                i18nKey: "NBT GZIP Compress Failed",
+            throw GlobalError.fileSystem(
+                chineseMessage: "GZIP 压缩失败，退出状态: \(process.terminationStatus)",
+                i18nKey: "error.filesystem.nbt_gzip_compress_failed",
                 level: .notification
             )
         }
-        
+
         guard !compressedData.isEmpty else {
-            throw GlobalError(
-                type: .fileSystem,
-                i18nKey: "NBT GZIP Compressed Empty",
+            throw GlobalError.fileSystem(
+                chineseMessage: "GZIP 压缩后数据为空",
+                i18nKey: "error.filesystem.nbt_gzip_compressed_empty",
                 level: .notification
             )
         }
-        
+
         return compressedData
     }
 }

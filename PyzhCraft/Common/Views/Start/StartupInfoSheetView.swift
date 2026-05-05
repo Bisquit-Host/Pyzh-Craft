@@ -1,30 +1,39 @@
+//
+//  StartupInfoSheetView.swift
+//  PyzhCraft
+//
+//  Created by su on 2025/1/12.
+//
+
+import SwiftMarkDownUI
 import SwiftUI
 
-/// Start information prompt Sheet view
+/// 启动信息提示Sheet视图
 struct StartupInfoSheetView: View {
-    
+
     // MARK: - Properties
     @Environment(\.dismiss)
     private var dismiss
-    
+
     let announcementData: AnnouncementData?
-    
+
     // MARK: - Body
     var body: some View {
         CommonSheetView(
             header: {
                 VStack(spacing: 12) {
-                    // title
+                    // 标题
                     if let title = announcementData?.title {
                         Text(title)
                             .font(.title2)
                             .fontWeight(.semibold)
                     }
                 }
-            }, body: {
+            },
+            body: {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        // application icon
+                        // 应用图标
                         HStack {
                             Spacer()
                             if let appIcon = NSApplication.shared.applicationIconImage {
@@ -36,41 +45,33 @@ struct StartupInfoSheetView: View {
                             Spacer()
                         }
                         .padding(.bottom, 8)
-                        
-                        // Main information content
+
+                        // 主要信息内容
                         if let announcementData = announcementData {
-                            // Display announcement content obtained from API
-                            Text(
-                                String.localizedStringWithFormat(
-                                    announcementData.content,
-                                    Bundle.main.appName,
-                                    Bundle.main.appName,
-                                    Bundle.main.appName
-                                )
+                            let placeholderPattern = /%(\d+\$)?@/
+                            let localizedContent = announcementData.content.replacing(
+                                placeholderPattern,
+                                with: Bundle.main.appName
                             )
-                            .font(.body)
-                            .multilineTextAlignment(.leading)
-                            .lineSpacing(4)
-                            .fixedSize(horizontal: false, vertical: true)
-                            
-                            // Author information
-                            if !announcementData.author.isEmpty {
-                                Text(announcementData.author)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                    .padding(.top, 8)
-                            }
+                            MixedMarkdownView(localizedContent)
+                                .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 4)  // Leave space for scrollbar
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 4)  // 为滚动条留出空间
                 }
             },
             footer: {
                 HStack {
+                    if let author = announcementData?.author, !author.isEmpty {
+                        Text(author)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                     Spacer()
-                    
-                    Button("I Understand") {
+
+                    Button("startup.info.understand".localized()) {
+                        AppServices.announcementStateManager.markAnnouncementAcknowledgedForCurrentVersion()
                         dismiss()
                     }
                     .buttonStyle(.borderedProminent)
@@ -78,18 +79,5 @@ struct StartupInfoSheetView: View {
                 }
             }
         )
-        //        .frame(width: 600, height: 500)
-        .onAppear {
-            // Set window properties
-            if let window = NSApplication.shared.windows.last {
-                window.level = .floating
-                window.center()
-            }
-        }
     }
-}
-
-// MARK: - Preview
-#Preview {
-    StartupInfoSheetView(announcementData: nil)
 }

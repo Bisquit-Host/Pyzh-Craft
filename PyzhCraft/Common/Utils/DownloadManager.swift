@@ -4,59 +4,60 @@ import CommonCrypto
 enum DownloadManager {
     enum ResourceType: String {
         case mod, datapack, shader, resourcepack
-        
+
         var folderName: String {
             switch self {
-            case .mod: AppConstants.DirectoryNames.mods
-            case .datapack: AppConstants.DirectoryNames.datapacks
-            case .shader: AppConstants.DirectoryNames.shaderpacks
-            case .resourcepack: AppConstants.DirectoryNames.resourcepacks
+            case .mod: return AppConstants.DirectoryNames.mods
+            case .datapack: return AppConstants.DirectoryNames.datapacks
+            case .shader: return AppConstants.DirectoryNames.shaderpacks
+            case .resourcepack: return AppConstants.DirectoryNames.resourcepacks
             }
         }
-        
+
         init?(from string: String) {
-            // Optimization: Use caseInsensitiveCompare to avoid creating temporary lowercase strings
+            // 优化：使用 caseInsensitiveCompare 避免创建临时小写字符串
             let lowercased = string.lowercased()
             switch lowercased {
-            case "mod": self = .mod
-            case "datapack": self = .datapack
-            case "shader": self = .shader
-            case "resourcepack": self = .resourcepack
+            case Self.mod.rawValue: self = .mod
+            case Self.datapack.rawValue: self = .datapack
+            case Self.shader.rawValue: self = .shader
+            case Self.resourcepack.rawValue: self = .resourcepack
             default: return nil
             }
         }
     }
-    
-    /// Download resource file
+
+    /// 下载资源文件
     /// - Parameters:
-    ///   - game: game information
-    ///   - urlString: download address
-    ///   - resourceType: resource type (such as "mod", "datapack", "shader", "resourcepack")
-    ///   - expectedSha1: expected SHA1 value
-    /// - Returns: Downloaded local file URL
-    /// - Throws: GlobalError when the operation fails
+    ///   - game: 游戏信息
+    ///   - urlString: 下载地址
+    ///   - resourceType: 资源类型（如 "mod", "datapack", "shader", "resourcepack"）
+    ///   - expectedSha1: 预期 SHA1 值
+    /// - Returns: 下载到的本地文件 URL
+    /// - Throws: GlobalError 当操作失败时
     static func downloadResource(for game: GameVersionInfo, urlString: String, resourceType: String, expectedSha1: String? = nil) async throws -> URL {
         guard let url = URL(string: urlString) else {
             throw GlobalError.validation(
-                i18nKey: "Invalid Download URL",
+                chineseMessage: "无效的下载地址",
+                i18nKey: "error.validation.invalid_download_url",
                 level: .notification
             )
         }
-        
+
         guard let type = ResourceType(from: resourceType) else {
-            throw GlobalError(
-                type: .resource,
-                i18nKey: "Unknown resource type",
+            throw GlobalError.resource(
+                chineseMessage: "未知的资源类型",
+                i18nKey: "error.resource.unknown_type",
                 level: .notification
             )
         }
-        
+
         let resourceDir: URL? = {
             switch type {
             case .mod:
                 return AppPaths.modsDirectory(gameName: game.gameName)
             case .datapack:
-                // Optimization: cache lowercase path components to avoid repeated creation
+                // 优化：缓存小写路径组件，避免重复创建
                 let lowercasedPath = url.lastPathComponent.lowercased()
                 if lowercasedPath.hasSuffix(".\(AppConstants.FileExtensions.jar)") {
                     return AppPaths.modsDirectory(gameName: game.gameName)
@@ -65,7 +66,7 @@ enum DownloadManager {
             case .shader:
                 return AppPaths.shaderpacksDirectory(gameName: game.gameName)
             case .resourcepack:
-                // Optimization: cache lowercase path components to avoid repeated creation
+                // 优化：缓存小写路径组件，避免重复创建
                 let lowercasedPath = url.lastPathComponent.lowercased()
                 if lowercasedPath.hasSuffix(".\(AppConstants.FileExtensions.jar)") {
                     return AppPaths.modsDirectory(gameName: game.gameName)
@@ -73,179 +74,142 @@ enum DownloadManager {
                 return AppPaths.resourcepacksDirectory(gameName: game.gameName)
             }
         }()
-        
+
         guard let resourceDirUnwrapped = resourceDir else {
             throw GlobalError.resource(
-                i18nKey: "Directory Not Found",
+                chineseMessage: "无法获取资源目录",
+                i18nKey: "error.resource.directory_not_found",
                 level: .notification
             )
         }
-        
+
         let destURL = resourceDirUnwrapped.appendingPathComponent(url.lastPathComponent)
-        // Optimization: Pass the created URL directly to avoid repeated creation in downloadFile
+        // 优化：直接传递已创建的 URL，避免在 downloadFile 中重复创建
         return try await downloadFile(url: url, destinationURL: destURL, expectedSha1: expectedSha1)
     }
-    
-    // Constant string to avoid repeated creation
-    private static let githubPrefix = "https://github.com/"
-    private static let rawGithubPrefix = "https://raw.githubusercontent.com/"
-    private static let githubHost = "github.com"
-    private static let rawGithubHost = "raw.githubusercontent.com"
-    
-    /// Universally download files to the specified path (without splicing any directory structure)
+
+    /// 通用下载文件到指定路径（不做任何目录结构拼接）
     /// - Parameters:
-    ///   - urlString: download address (string form)
-    ///   - destinationURL: destination file path
-    ///   - expectedSha1: expected SHA1 value
-    /// - Returns: Downloaded local file URL
-    /// - Throws: GlobalError when the operation fails
+    ///   - urlString: 下载地址（字符串形式）
+    ///   - destinationURL: 目标文件路径
+    ///   - expectedSha1: 预期 SHA1 值
+    /// - Returns: 下载到的本地文件 URL
+    /// - Throws: GlobalError 当操作失败时
     static func downloadFile(
         urlString: String,
         destinationURL: URL,
         expectedSha1: String? = nil
     ) async throws -> URL {
-        // Optimization: Create URL first, then call internal method
-        let url: URL = try autoreleasepool {
-            guard let url = URL(string: urlString) else {
-                throw GlobalError.validation(
-                    i18nKey: "Invalid Download URL",
-                    level: .notification
-                )
-            }
-            return url
-        }
+        let url = try FileDownloadCore.parseURL(from: urlString)
         return try await downloadFile(url: url, destinationURL: destinationURL, expectedSha1: expectedSha1)
     }
-    
-    /// Universal download file to specified path (internal method, accepts URL object)
+
+    /// 通用下载文件到指定路径（内部方法，接受 URL 对象）
     /// - Parameters:
-    ///   - url: download address (URL object)
-    ///   - destinationURL: destination file path
-    ///   - expectedSha1: expected SHA1 value
-    /// - Returns: Downloaded local file URL
-    /// - Throws: GlobalError when the operation fails
+    ///   - url: 下载地址（URL 对象）
+    ///   - destinationURL: 目标文件路径
+    ///   - expectedSha1: 预期 SHA1 值
+    /// - Returns: 下载到的本地文件 URL
+    /// - Throws: GlobalError 当操作失败时
     private static func downloadFile(
         url: URL,
         destinationURL: URL,
         expectedSha1: String? = nil
     ) async throws -> URL {
-        // Optimization: Use autoreleasepool in the synchronization part to release temporary objects in time
-        // Optimization: Use URL directly to avoid storing String and URL at the same time (save memory)
-        let finalURL: URL = autoreleasepool {
-            // Optimization: Directly use the host attribute check of the URL to avoid conversion to String
-            let needsProxy: Bool
-            if let host = url.host {
-                needsProxy = host == githubHost || host == rawGithubHost
-            } else {
-                // If there is no host, check absoluteString (possibly a relative path)
-                let absoluteString = url.absoluteString
-                needsProxy = absoluteString.hasPrefix(githubPrefix) || absoluteString.hasPrefix(rawGithubPrefix)
-            }
-            
-            if needsProxy {
-                return URLConfig.applyGitProxyIfNeeded(url)
-            } else {
-                return url
-            }
-        }
-        
+        let finalURL = FileDownloadCore.normalizedDownloadURL(from: url)
+
         let fileManager = FileManager.default
-        
-        do {
-            try fileManager.createDirectory(at: destinationURL.deletingLastPathComponent(), withIntermediateDirectories: true)
-        } catch {
-            throw GlobalError.fileSystem(
-                i18nKey: "Download Directory Creation Failed",
-                level: .notification
-            )
+
+        try FileDownloadCore.ensureParentDirectory(for: destinationURL, fileManager: fileManager)
+
+        if FileDownloadCore.existingFileSizeIfReusable(
+            at: destinationURL,
+            expectedSha1: expectedSha1,
+            fileManager: fileManager
+        ) != nil {
+            return destinationURL
         }
-        
-        // Check if SHA1 verification is required
-        let shouldCheckSha1 = (expectedSha1?.isEmpty == false)
-        
-        // if the file already exists
-        let destinationPath = destinationURL.path
-        if fileManager.fileExists(atPath: destinationPath) {
-            if shouldCheckSha1, let expectedSha1 = expectedSha1 {
-                // Optimization: Use autoreleasepool to release temporary objects during SHA1 calculation
-                do {
-                    let actualSha1 = try autoreleasepool {
-                        try calculateFileSHA1(at: destinationURL)
-                    }
-                    if actualSha1 == expectedSha1 {
-                        return destinationURL
-                    }
-                    // If the verification fails, continue downloading (without returning, continue executing the download logic below)
-                } catch {
-                    // If there is an error in the verification, continue downloading (without interruption)
-                }
-            } else {
-                // Skip directly if there is no SHA1
-                return destinationURL
-            }
-        }
-        
-        // Download files to a temporary location (asynchronous operation outside autoreleasepool)
+
+        // 下载文件到临时位置（异步操作在 autoreleasepool 外部）
         do {
             let (tempFileURL, response) = try await URLSession.shared.download(from: finalURL)
             defer {
-                // Make sure temporary files are cleaned up
+                // 确保临时文件被清理
                 try? fileManager.removeItem(at: tempFileURL)
             }
-            
-            // Optimization: Check status codes directly and reduce intermediate variables
+
+            // 优化：直接检查状态码，减少中间变量
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 throw GlobalError.download(
-                    i18nKey: "HTTP Status Error",
+                    chineseMessage: "HTTP 请求失败",
+                    i18nKey: "error.download.http_status_error",
                     level: .notification
                 )
             }
-            
-            // SHA1 verification (optimized: use autoreleasepool)
-            if shouldCheckSha1, let expectedSha1 = expectedSha1 {
-                try autoreleasepool {
-                    let actualSha1 = try calculateFileSHA1(at: tempFileURL)
-                    if actualSha1 != expectedSha1 {
-                        throw GlobalError.validation(
-                            i18nKey: "SHA1 Check Failed",
-                            level: .notification
-                        )
-                    }
-                }
-            }
-            
-            // Move atomically to final position
-            if fileManager.fileExists(atPath: destinationURL.path) {
-                // Try to replace directly
-                try fileManager.replaceItem(at: destinationURL, withItemAt: tempFileURL, backupItemName: nil, options: [], resultingItemURL: nil)
-            } else {
-                try fileManager.moveItem(at: tempFileURL, to: destinationURL)
-            }
-            
+
+            try FileDownloadCore.validateSHA1IfNeeded(for: tempFileURL, expectedSha1: expectedSha1)
+            try FileDownloadCore.moveDownloadedFile(from: tempFileURL, to: destinationURL, fileManager: fileManager)
+
             return destinationURL
         } catch {
-            // Convert error to GlobalError
+            // 转换错误为 GlobalError
             if let globalError = error as? GlobalError {
                 throw globalError
             } else if error is URLError {
                 throw GlobalError.download(
-                    i18nKey: "Network Request Failed",
+                    chineseMessage: "网络请求失败",
+                    i18nKey: "error.download.network_request_failed",
                     level: .notification
                 )
             } else {
                 throw GlobalError.download(
-                    i18nKey: "General Failure",
+                    chineseMessage: "下载失败",
+                    i18nKey: "error.download.general_failure",
                     level: .notification
                 )
             }
         }
     }
-    
-    /// Calculate the SHA1 hash of a file
-    /// - Parameter url: file path
-    /// - Returns: SHA1 hash string
-    /// - Throws: GlobalError when the operation fails
+
+    /// 计算文件的 SHA1 哈希值
+    /// - Parameter url: 文件路径
+    /// - Returns: SHA1 哈希字符串
+    /// - Throws: GlobalError 当操作失败时
     static func calculateFileSHA1(at url: URL) throws -> String {
-        try SHA1Calculator.sha1(ofFileAt: url)
+        return try SHA1Calculator.sha1(ofFileAt: url)
+    }
+
+    /// 下载 URL 对应的原始数据
+    /// - Parameter url: 下载地址
+    /// - Returns: 下载到的数据
+    /// - Throws: GlobalError 当操作失败时
+    static func downloadData(from url: URL) async throws -> Data {
+        do {
+            let (data, response) = try await URLSession.shared.data(from: url)
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                throw GlobalError.download(
+                    chineseMessage: "HTTP 请求失败",
+                    i18nKey: "error.download.http_status_error",
+                    level: .notification
+                )
+            }
+            return data
+        } catch {
+            if let globalError = error as? GlobalError {
+                throw globalError
+            } else if error is URLError {
+                throw GlobalError.download(
+                    chineseMessage: "网络请求失败",
+                    i18nKey: "error.download.network_request_failed",
+                    level: .notification
+                )
+            } else {
+                throw GlobalError.download(
+                    chineseMessage: "下载失败",
+                    i18nKey: "error.download.general_failure",
+                    level: .notification
+                )
+            }
+        }
     }
 }

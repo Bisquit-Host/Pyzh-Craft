@@ -1,30 +1,30 @@
 import Foundation
 
 enum FabricLoaderService {
-    
-    /// Get all Loader versions (silent versions)
-    /// - Parameter minecraftVersion: Minecraft version
-    /// - Returns: loader version list, returns empty array on failure
+
+    /// 获取所有 Loader 版本（静默版本）
+    /// - Parameter minecraftVersion: Minecraft 版本
+    /// - Returns: 加载器版本列表，失败时返回空数组
     static func fetchAllLoaderVersions(for minecraftVersion: String) async -> [FabricLoader] {
         do {
             return try await fetchAllLoaderVersionsThrowing(for: minecraftVersion)
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Failed to get Fabric loader version: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("获取 Fabric 加载器版本失败: \(globalError.chineseMessage)")
+            AppServices.errorHandler.handle(globalError)
             return []
         }
     }
-    
-    /// Get all Loader versions (throw exception version)
-    /// - Parameter minecraftVersion: Minecraft version
-    /// - Returns: Loader version list
-    /// - Throws: GlobalError when the operation fails
+
+    /// 获取所有 Loader 版本（抛出异常版本）
+    /// - Parameter minecraftVersion: Minecraft 版本
+    /// - Returns: 加载器版本列表
+    /// - Throws: GlobalError 当操作失败时
     static func fetchAllLoaderVersionsThrowing(for minecraftVersion: String) async throws -> [FabricLoader] {
         let url = URLConfig.API.Fabric.loader.appendingPathComponent(minecraftVersion)
-        // Use a unified API client
+        // 使用统一的 API 客户端
         let data = try await APIClient.get(url: url)
-        
+
         var result: [FabricLoader] = []
         do {
             if let jsonArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
@@ -39,46 +39,47 @@ enum FabricLoaderService {
             return result
         } catch {
             throw GlobalError.validation(
-                i18nKey: "Fabric Loader Parse Failed",
+                chineseMessage: "解析 Fabric 加载器版本数据失败: \(error.localizedDescription)",
+                i18nKey: "error.validation.fabric_loader_parse_failed",
                 level: .notification
             )
         }
     }
-    
-    /// Get the specified version of Fabric Loader
+
+    /// 获取指定版本的 Fabric Loader
     /// - Parameters:
-    ///   - minecraftVersion: Minecraft version
-    ///   - loaderVersion: specified loader version
-    /// - Returns: Specified version of loader
-    /// - Throws: GlobalError when the operation fails
+    ///   - minecraftVersion: Minecraft 版本
+    ///   - loaderVersion: 指定的加载器版本
+    /// - Returns: 指定版本的加载器
+    /// - Throws: GlobalError 当操作失败时
     static func fetchSpecificLoaderVersion(for minecraftVersion: String, loaderVersion: String) async throws -> ModrinthLoader {
         let cacheKey = "\(minecraftVersion)-\(loaderVersion)"
-        
-        // 1. Check the global cache
-        if let cached = AppCacheManager.shared.get(namespace: "fabric", key: cacheKey, as: ModrinthLoader.self) {
+
+        // 1. 查全局缓存
+        if let cached = AppServices.appCacheManager.get(namespace: GameLoader.fabric.displayName, key: cacheKey, as: ModrinthLoader.self) {
             return cached
         }
-        
-        // 2. Directly download version.json of the specified version
-        // Use a unified API client
-        let url = URLConfig.API.Modrinth.loaderProfile(loader: "fabric", version: loaderVersion)
+
+        // 2. 直接下载指定版本的 version.json
+        // 使用统一的 API 客户端
+        let url = URLConfig.API.Modrinth.loaderProfile(loader: GameLoader.fabric.displayName, version: loaderVersion)
         let data = try await APIClient.get(url: url)
-        
+
         var result = try JSONDecoder().decode(ModrinthLoader.self, from: data)
         result.version = loaderVersion
         result = CommonService.processGameVersionPlaceholders(loader: result, gameVersion: minecraftVersion)
-        // 3. Save to cache
-        AppCacheManager.shared.setSilently(namespace: "fabric", key: cacheKey, value: result)
+        // 3. 存入缓存
+        AppServices.appCacheManager.setSilently(namespace: GameLoader.fabric.displayName, key: cacheKey, value: result)
         return result
     }
-    
-    /// Set the specified version of Fabric loader (silent version)
+
+    /// 设置指定版本的 Fabric 加载器（静默版本）
     /// - Parameters:
-    ///   - gameVersion: game version
-    ///   - loaderVersion: specified loader version
-    ///   - gameInfo: game information
-    ///   - onProgressUpdate: progress update callback
-    /// - Returns: Set the result, return nil on failure
+    ///   - gameVersion: 游戏版本
+    ///   - loaderVersion: 指定的加载器版本
+    ///   - gameInfo: 游戏信息
+    ///   - onProgressUpdate: 进度更新回调
+    /// - Returns: 设置结果，失败时返回 nil
     static func setupWithSpecificVersion(
         for gameVersion: String,
         loaderVersion: String,
@@ -94,40 +95,41 @@ enum FabricLoaderService {
             )
         } catch {
             let globalError = GlobalError.from(error)
-            Logger.shared.error("Fabric specified version setting failed: \(globalError.chineseMessage)")
-            GlobalErrorHandler.shared.handle(globalError)
+            Logger.shared.error("Fabric 指定版本设置失败: \(globalError.chineseMessage)")
+            AppServices.errorHandler.handle(globalError)
             return nil
         }
     }
-    
-    /// Set the specified version of the Fabric loader (throws exception version)
+
+    /// 设置指定版本的 Fabric 加载器（抛出异常版本）
     /// - Parameters:
-    ///   - gameVersion: game version
-    ///   - loaderVersion: specified loader version
-    ///   - gameInfo: game information
-    ///   - onProgressUpdate: progress update callback
-    /// - Returns: Set results
-    /// - Throws: GlobalError when the operation fails
+    ///   - gameVersion: 游戏版本
+    ///   - loaderVersion: 指定的加载器版本
+    ///   - gameInfo: 游戏信息
+    ///   - onProgressUpdate: 进度更新回调
+    /// - Returns: 设置结果
+    /// - Throws: GlobalError 当操作失败时
     static func setupWithSpecificVersionThrowing(
         for gameVersion: String,
         loaderVersion: String,
         gameInfo: GameVersionInfo,
         onProgressUpdate: @escaping (String, Int, Int) -> Void
     ) async throws -> (loaderVersion: String, classpath: String, mainClass: String) {
-        Logger.shared.info("Start setting up the Fabric loader for the specified version: \(loaderVersion)")
-        
+        Logger.shared.info("开始设置指定版本的 Fabric 加载器: \(loaderVersion)")
+
         let fabricProfile = try await fetchSpecificLoaderVersion(for: gameVersion, loaderVersion: loaderVersion)
         let librariesDirectory = AppPaths.librariesDirectory
         let fileManager = CommonFileManager(librariesDir: librariesDirectory)
         fileManager.onProgressUpdate = onProgressUpdate
-        
+
         await fileManager.downloadFabricJars(libraries: fabricProfile.libraries)
-        
+
         let classpathString = CommonService.generateFabricClasspath(from: fabricProfile, librariesDir: librariesDirectory)
         let mainClass = fabricProfile.mainClass
         guard let version = fabricProfile.version else {
             throw GlobalError.validation(
-                i18nKey: "Fabric loader version missing",
+                chineseMessage: "Fabric 加载器版本信息缺失",
+                i18nKey: "error.validation.fabric_loader_version_missing",
                 level: .notification
             )
         }

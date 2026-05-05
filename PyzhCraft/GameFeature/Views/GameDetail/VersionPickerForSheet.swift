@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - version selection block
+// MARK: - 版本选择区块
 struct VersionPickerForSheet: View {
     let project: ModrinthProject
     let resourceType: String
@@ -11,9 +11,9 @@ struct VersionPickerForSheet: View {
     var onVersionChange: ((ModrinthProjectDetailVersion?) -> Void)?
     @State private var isLoading = false
     @State private var error: GlobalError?
-    
+
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack {
             if isLoading {
                 ProgressView().controlSize(.small)
             } else if !availableVersions.isEmpty {
@@ -21,16 +21,17 @@ struct VersionPickerForSheet: View {
                     maxWidth: .infinity,
                     alignment: .leading
                 )
-                Picker(
-                    "Select Version",
+                CommonMenuPicker(
                     selection: $selectedVersion
                 ) {
+                    Text("global_resource.select_version".localized())
+                } content: {
                     ForEach(availableVersions, id: \.id) { version in
-                        if resourceType == "shader" {
+                        if resourceType == ResourceType.shader.rawValue {
                             let loaders = version.loaders.joined(
                                 separator: ", "
                             )
-                            Text("\(version.name) (\(loaders))").tag(
+                            Text(version.name + loaders).tag(
                                 Optional(version)
                             )
                         } else {
@@ -38,16 +39,15 @@ struct VersionPickerForSheet: View {
                         }
                     }
                 }
-                .pickerStyle(.menu)
             } else {
-                Text("No Version Available")
+                Text("global_resource.no_version_available".localized())
                     .foregroundColor(.secondary)
             }
         }
         .onAppear(perform: loadVersions)
         .onChange(of: selectedGame) { loadVersions() }
         .onChange(of: selectedVersion) { _, newValue in
-            // Update major version ID
+            // 更新主版本ID
             if let newValue = newValue {
                 mainVersionId = newValue.id
             } else {
@@ -56,7 +56,7 @@ struct VersionPickerForSheet: View {
             onVersionChange?(newValue)
         }
     }
-    
+
     private func loadVersions() {
         isLoading = true
         error = nil
@@ -72,15 +72,16 @@ struct VersionPickerForSheet: View {
             }
         }
     }
-    
+
     private func loadVersionsThrowing() async throws {
         guard !project.projectId.isEmpty else {
             throw GlobalError.validation(
-                i18nKey: "Project ID Empty",
+                chineseMessage: "项目ID不能为空",
+                i18nKey: "error.validation.project_id_empty",
                 level: .notification
             )
         }
-        
+
         guard let game = selectedGame else {
             _ = await MainActor.run {
                 availableVersions = []
@@ -90,19 +91,19 @@ struct VersionPickerForSheet: View {
             }
             return
         }
-        
-        // Use server-side filtering methods to reduce client-side filtering
+
+        // 使用服务端的过滤方法，减少客户端过滤
         let filtered = try await ModrinthService.fetchProjectVersionsFilter(
             id: project.projectId,
             selectedVersions: [game.gameVersion],
             selectedLoaders: [game.modLoader],
             type: resourceType
         )
-        
+
         _ = await MainActor.run {
             availableVersions = filtered
             selectedVersion = filtered.first
-            // Update major version ID
+            // 更新主版本ID
             if let firstVersion = filtered.first {
                 mainVersionId = firstVersion.id
             } else {

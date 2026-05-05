@@ -1,43 +1,42 @@
+//
+//  ModUpdateChecker.swift
+//  PyzhCraft
+//
+//  Created by su on 2025/1/1.
+//
+
 import Foundation
 
-/// Mod update detector
-/// Detect local mod updates
+/// Mod 更新检测器
+/// 检测本地 mod 更新
 enum ModUpdateChecker {
-    
-    /// Test results
+
+    /// 检测结果
     struct UpdateCheckResult {
-        /// Is there a new version
+        /// 是否有新版本
         let hasUpdate: Bool
-        /// Currently installed version hash
+        /// 当前安装的版本 hash
         let currentHash: String?
-        /// The latest version of hash
+        /// 最新版本的 hash
         let latestHash: String?
-        /// Latest version information
+        /// 最新版本信息
         let latestVersion: ModrinthProjectDetailVersion?
     }
-    
-    /// Check if a local mod has a new version
+
+    /// 检测本地 mod 是否有新版本
     /// - Parameters:
-    ///   - project: Modrinth project information
-    ///   - gameInfo: game information
-    ///   - resourceType: resource type (mod, datapack, shader, resourcepack)
-    /// - Returns: Update detection results
+    ///   - projectId: Modrinth 项目 ID
+    ///   - gameInfo: 游戏信息
+    ///   - resourceType: 资源类型（mod, datapack, shader, resourcepack）
+    ///   - installedFileName: 当前安装文件名（调用方维护）
+    /// - Returns: 更新检测结果
     static func checkForUpdate(
-        project: ModrinthProject,
+        projectId: String,
         gameInfo: GameVersionInfo,
-        resourceType: String
+        resourceType: String,
+        installedFileName: String? = nil
     ) async -> UpdateCheckResult {
-        // If it is a local file (projectId starts with "local_" or "file_"), updates are not detected
-        if project.projectId.hasPrefix("local_") || project.projectId.hasPrefix("file_") {
-            return UpdateCheckResult(
-                hasUpdate: false,
-                currentHash: nil,
-                latestHash: nil,
-                latestVersion: nil
-            )
-        }
-        
-        // 1. Get the hash of local file
+        // 1. 获取本地文件的 hash
         guard let resourceDir = AppPaths.resourceDirectory(
             for: resourceType,
             gameName: gameInfo.gameName
@@ -49,15 +48,15 @@ enum ModUpdateChecker {
                 latestVersion: nil
             )
         }
-        
-        // Get the currently installed file hash
+
+        // 获取当前安装的文件 hash
         let currentHash = await getCurrentInstalledHash(
-            project: project,
-            resourceDir: resourceDir
+            resourceDir: resourceDir,
+            installedFileName: installedFileName
         )
-        
+
         guard let currentHash = currentHash else {
-            // If the current hash cannot be obtained, it is considered that there is no update
+            // 如果无法获取当前 hash，认为没有更新
             return UpdateCheckResult(
                 hasUpdate: false,
                 currentHash: nil,
@@ -65,23 +64,23 @@ enum ModUpdateChecker {
                 latestVersion: nil
             )
         }
-        
-        // 2. Get the latest compatible version
+
+        // 2. 获取最新兼容版本
         let loaderFilters = [gameInfo.modLoader.lowercased()]
         let versionFilters = [gameInfo.gameVersion]
-        
+
         do {
             let versions = try await ModrinthService.fetchProjectVersionsFilter(
-                id: project.projectId,
+                id: projectId,
                 selectedVersions: versionFilters,
                 selectedLoaders: loaderFilters,
                 type: resourceType
             )
-            
-            // Get the latest version (the first version is usually the latest)
+
+            // 获取最新版本（第一个版本通常是最新的）
             guard let latestVersion = versions.first,
                   let primaryFile = ModrinthService.filterPrimaryFiles(
-                    from: latestVersion.files
+                      from: latestVersion.files
                   ) else {
                 return UpdateCheckResult(
                     hasUpdate: false,
@@ -90,12 +89,12 @@ enum ModUpdateChecker {
                     latestVersion: nil
                 )
             }
-            
+
             let latestHash = primaryFile.hashes.sha1
-            
-            // 3. Compare hashes
+
+            // 3. 比较 hash
             let hasUpdate = currentHash != latestHash
-            
+
             return UpdateCheckResult(
                 hasUpdate: hasUpdate,
                 currentHash: currentHash,
@@ -103,7 +102,7 @@ enum ModUpdateChecker {
                 latestVersion: latestVersion
             )
         } catch {
-            Logger.shared.error("Failed to detect mod updates: \(error.localizedDescription)")
+            Logger.shared.error("检测 mod 更新失败: \(error.localizedDescription)")
             return UpdateCheckResult(
                 hasUpdate: false,
                 currentHash: currentHash,
@@ -112,40 +111,22 @@ enum ModUpdateChecker {
             )
         }
     }
-    
-    /// Get the currently installed file hash
+
+    /// 获取当前安装的文件 hash
     /// - Parameters:
-    ///   - project: Modrinth project information
-    ///   - resourceDir: resource directory
-    /// - Returns: currently installed file hash, returns nil if not found
+    ///   - resourceDir: 资源目录
+    ///   - installedFileName: 当前安装文件名
+    /// - Returns: 当前安装的文件 hash，如果未找到则返回 nil
     private static func getCurrentInstalledHash(
-        project: ModrinthProject,
-        resourceDir: URL
+        resourceDir: URL,
+        installedFileName: String?
     ) async -> String? {
-        // Method 1: Search by file name (if the project has fileName)
-        if let fileName = project.fileName {
+        if let fileName = installedFileName {
             let fileURL = resourceDir.appendingPathComponent(fileName)
             if FileManager.default.fileExists(atPath: fileURL.path) {
                 return ModScanner.sha1Hash(of: fileURL)
             }
-            
-            // Also check the .disabled version
-            let disabledFileName = fileName + ".disabled"
-            let disabledFileURL = resourceDir.appendingPathComponent(disabledFileName)
-            if FileManager.default.fileExists(atPath: disabledFileURL.path) {
-                return ModScanner.sha1Hash(of: disabledFileURL)
-            }
         }
-        
-        // Method 2: Find by project ID (scan directory)
-        // If the project has a projectId, try to find matching files by scanning
-        if !project.projectId.isEmpty {
-            let localDetails = ModScanner.shared.localModDetails(in: resourceDir)
-            if let matchingDetail = localDetails.first(where: { $0.detail?.id == project.projectId }) {
-                return matchingDetail.hash
-            }
-        }
-        
         return nil
     }
 }

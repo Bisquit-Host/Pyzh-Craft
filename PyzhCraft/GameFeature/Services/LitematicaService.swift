@@ -1,16 +1,23 @@
+//
+//  LitematicaService.swift
+//  PyzhCraft
+//
+//  Created by su on 2025/1/20.
+//
+
 import Foundation
 
-/// Litematica Projection File Service
-/// Responsible for reading and parsing Litematica projection files
+/// Litematica 投影文件服务
+/// 负责读取和解析 Litematica 投影文件
 @MainActor
 class LitematicaService {
     static let shared = LitematicaService()
-    
+
     private init() {}
-    
-    /// Read the Litematica projection file list from the game directory
-    /// - Parameter gameName: game name
-    /// - Returns: Litematica projection file list
+
+    /// 从游戏目录读取 Litematica 投影文件列表
+    /// - Parameter gameName: 游戏名称
+    /// - Returns: Litematica 投影文件列表
     func loadLitematicaFiles(for gameName: String) async throws -> [LitematicaInfo] {
         let schematicsDir = AppPaths.schematicsDirectory(gameName: gameName)
         do {
@@ -18,39 +25,40 @@ class LitematicaService {
                 try loadLitematicaFilesSync(schematicsDir: schematicsDir)
             }.value
         } catch {
-            Logger.shared.error("Failed to read Litematica file list: \(error.localizedDescription)")
+            Logger.shared.error("读取 Litematica 文件列表失败: \(error.localizedDescription)")
             throw GlobalError.fileSystem(
-                i18nKey: "Failed to read Litematica file list",
+                chineseMessage: "读取 Litematica 文件列表失败",
+                i18nKey: "error.filesystem.litematica_list_read_failed",
                 level: .notification
             )
         }
     }
-    
-    /// Parse metadata of Litematica files (for list display)
-    /// - Parameter filePath: file path
-    /// - Returns: metadata information
+
+    /// 解析 Litematica 文件的元数据（用于列表显示）
+    /// - Parameter filePath: 文件路径
+    /// - Returns: 元数据信息
     private func parseLitematicaMetadata(filePath: URL) async throws -> LitematicaMetadata? {
         try await Task.detached(priority: .userInitiated) {
             try parseLitematicaMetadataSync(filePath: filePath)
         }.value
     }
-    
-    /// Read complete Litematica projection metadata
-    /// - Parameter filePath: file path
-    /// - Returns: complete metadata information
+
+    /// 读取完整的 Litematica 投影元数据
+    /// - Parameter filePath: 文件路径
+    /// - Returns: 完整的元数据信息
     func loadFullMetadata(filePath: URL) async throws -> LitematicMetadata? {
         do {
             return try await Task.detached(priority: .userInitiated) {
                 try loadFullMetadataSync(filePath: filePath)
             }.value
         } catch {
-            Logger.shared.error("Failed to parse Litematica file: \(filePath.lastPathComponent), error: \(error)")
+            Logger.shared.error("解析Litematica文件失败: \(filePath.lastPathComponent), 错误: \(error)")
             throw error
         }
     }
 }
 
-// MARK: - In-file synchronization assist (called in Task.detached to avoid main thread file I/O)
+// MARK: - 文件内同步辅助（在 Task.detached 中调用，避免主线程文件 I/O）
 private func parseLitematicaMetadataSync(filePath: URL) throws -> LitematicaMetadata? {
     let data = try Data(contentsOf: filePath)
     let parser = NBTParser(data: data)

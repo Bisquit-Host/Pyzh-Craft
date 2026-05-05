@@ -1,104 +1,110 @@
+//
+//  LauncherFileFilter.swift
+//  PyzhCraft
+//
+//
+
 import Foundation
 
-/// Launcher file filter
-/// Define file name rules that need to be filtered for each launcher (supports regular expressions)
+/// 启动器文件过滤器
+/// 为每个启动器定义需要过滤的文件名规则（支持正则表达式）
 enum LauncherFileFilter {
-    
-    /// Get the file filtering rules of the specified launcher
-    /// - Parameter launcherType: launcher type
-    /// - Returns: array of file name filtering rules (regular expression)
+
+    /// 获取指定启动器的文件过滤规则
+    /// - Parameter launcherType: 启动器类型
+    /// - Returns: 文件名过滤规则数组（正则表达式）
     static func getFilterPatterns(for launcherType: ImportLauncherType) -> [String] {
         switch launcherType {
         case .multiMC, .prismLauncher:
             return [
-                // MultiMC/PrismLauncher specific files
+                // MultiMC/PrismLauncher 特定文件
                 ".*\\.mmc-pack\\.json$",
                 ".*instance\\.cfg$",
                 ".*\\.log$",
                 "^pack\\.meta$",
             ]
-            
+
         case .gdLauncher:
             return [
-                // GDLauncher specific files
+                // GDLauncher 特定文件
                 ".*config\\.json$",
                 ".*\\.log$",
                 "^metadata\\.json$",
             ]
-            
+
         case .hmcl:
             return [
-                // HMCL specific files
+                // HMCL 特定文件
                 ".*config\\.json$",
                 ".*\\.log$",
                 "^hmclversion\\.json$",
                 "^hmclversion\\.cfg$",
                 "^usercache\\.json$",
             ]
-            
+
         case .sjmcLauncher:
             return [
-                // SJMCL specific files
+                // SJMCL 特定文件
                 ".*sjmclcfg\\.json$",
                 ".*\\.log$",
                 "^\\d+.*-.*\\.json$",
                 "^\\d+.*-.*\\.jar$",
             ]
-            
+
         case .xmcl:
             return [
-                // XMCL specific files
+                // XMCL 特定文件
                 ".*instance\\.json$",
                 ".*\\.log$",
                 "^metadata\\.json$",
             ]
         }
     }
-    
-    /// Check if the file should be filtered
+
+    /// 检查文件是否应该被过滤
     /// - Parameters:
-    ///   - fileName: file name (including relative path)
-    ///   - launcherType: launcher type
-    /// - Returns: true if the file should be filtered (not copied)
+    ///   - fileName: 文件名（包含相对路径）
+    ///   - launcherType: 启动器类型
+    /// - Returns: 如果文件应该被过滤（不复制），返回 true
     static func shouldFilter(fileName: String, launcherType: ImportLauncherType) -> Bool {
         let patterns = getFilterPatterns(for: launcherType)
-        
+
         for pattern in patterns {
             do {
                 let regex = try NSRegularExpression(pattern: pattern, options: [.caseInsensitive])
                 let range = NSRange(fileName.startIndex..<fileName.endIndex, in: fileName)
-                
+
                 if regex.firstMatch(in: fileName, options: [], range: range) != nil {
-                    Logger.shared.debug("Filter file: \(fileName) (matching rule: \(pattern))")
+                    Logger.shared.debug("过滤文件: \(fileName) (匹配规则: \(pattern))")
                     return true
                 }
             } catch {
-                Logger.shared.warning("Invalid regular expression pattern: \(pattern), error: \(error.localizedDescription)")
+                Logger.shared.warning("无效的正则表达式模式: \(pattern), 错误: \(error.localizedDescription)")
             }
         }
-        
+
         return false
     }
-    
-    /// Filter file list
+
+    /// 过滤文件列表
     /// - Parameters:
-    ///   - files: array of file URLs
-    ///   - sourceDirectory: source directory (used to calculate relative paths)
-    ///   - launcherType: launcher type
-    /// - Returns: filtered file URL array
+    ///   - files: 文件 URL 数组
+    ///   - sourceDirectory: 源目录（用于计算相对路径）
+    ///   - launcherType: 启动器类型
+    /// - Returns: 过滤后的文件 URL 数组
     static func filterFiles(
         _ files: [URL],
         sourceDirectory: URL,
         launcherType: ImportLauncherType
     ) -> [URL] {
         return files.filter { fileURL in
-            // Calculate relative paths
+            // 计算相对路径
             let relativePath = fileURL.path.replacingOccurrences(
                 of: sourceDirectory.path + "/",
                 with: ""
             )
-            
-            // Check if it should be filtered
+
+            // 检查是否应该过滤
             return !shouldFilter(fileName: relativePath, launcherType: launcherType)
         }
     }

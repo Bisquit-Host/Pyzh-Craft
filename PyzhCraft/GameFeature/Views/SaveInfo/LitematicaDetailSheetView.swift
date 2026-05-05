@@ -1,6 +1,13 @@
+//
+//  LitematicaDetailSheetView.swift
+//  PyzhCraft
+//
+//  Created by su on 2025/1/20.
+//
+
 import SwiftUI
 
-/// Litematica projection details view
+/// Litematica 投影详细信息视图
 struct LitematicaDetailSheetView: View {
     // MARK: - Properties
     let filePath: URL
@@ -12,6 +19,17 @@ struct LitematicaDetailSheetView: View {
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var showError = false
+    private let litematicaService: LitematicaService
+
+    init(
+        filePath: URL,
+        gameName: String,
+        litematicaService: LitematicaService = AppServices.litematicaService
+    ) {
+        self.filePath = filePath
+        self.gameName = gameName
+        self.litematicaService = litematicaService
+    }
 
     // MARK: - Body
     var body: some View {
@@ -24,8 +42,8 @@ struct LitematicaDetailSheetView: View {
         .task {
             await loadMetadata()
         }
-        .alert("Error", isPresented: $showError) {
-            Button("OK", role: .cancel) { }
+        .alert("common.error".localized(), isPresented: $showError) {
+            Button("common.ok".localized(), role: .cancel) { }
         } message: {
             if let errorMessage = errorMessage {
                 Text(errorMessage)
@@ -36,7 +54,7 @@ struct LitematicaDetailSheetView: View {
     // MARK: - Header View
     private var headerView: some View {
         HStack {
-            Text("Schematic Details")
+            Text("litematica.detail.title".localized())
                 .font(.headline)
             Spacer()
             ShareLink(item: filePath) {
@@ -73,7 +91,7 @@ struct LitematicaDetailSheetView: View {
             Image(systemName: "exclamationmark.triangle")
                 .font(.largeTitle)
                 .foregroundColor(.orange)
-            Text("Unable to load schematic information")
+            Text("litematica.detail.load_failed".localized())
                 .font(.headline)
             if let errorMessage = errorMessage {
                 Text(errorMessage)
@@ -90,76 +108,73 @@ struct LitematicaDetailSheetView: View {
         ScrollView {
             VStack {
                 HStack {
-                    infoSection(title: "Basic") {
-                        infoRow("Name", value: metadata.name)
-                        infoRow("Author", value: metadata.author.isEmpty ? String(localized: "Unknown") : metadata.author)
+                    // 基本信息
+                    infoSection(title: "litematica.detail.section.basic".localized()) {
+                        infoRow(label: "litematica.detail.field.name".localized(), value: metadata.name)
+                        infoRow(label: "litematica.detail.field.author".localized(), value: metadata.author.isEmpty ? "common.unknown".localized() : metadata.author)
                         if !metadata.description.isEmpty {
-                            infoRow("Description", value: metadata.description, isMultiline: true)
+                            infoRow(label: "litematica.detail.field.description".localized(), value: metadata.description, isMultiline: true)
                         }
                     }
 
-                    infoSection(title: "Time") {
+                    // 时间信息
+                    infoSection(title: "litematica.detail.section.time".localized()) {
                         VStack(alignment: .leading, spacing: 12) {
-                            infoRow("Created", value: formatTimestamp(metadata.timeCreated))
-                            infoRow("Modified", value: formatTimestamp(metadata.timeModified))
+                            infoRow(label: "litematica.detail.field.created".localized(), value: formatTimestamp(metadata.timeCreated))
+                            infoRow(label: "litematica.detail.field.modified".localized(), value: formatTimestamp(metadata.timeModified))
                         }
                     }
                 }
                 .padding(.vertical, 8)
                 .padding(.bottom, 20)
 
-                infoSection(title: "Size") {
+                // 尺寸信息
+                infoSection(title: "litematica.detail.section.size".localized()) {
                     VStack(alignment: .leading, spacing: 12) {
                         let hasSize = metadata.enclosingSize.x > 0 || metadata.enclosingSize.y > 0 || metadata.enclosingSize.z > 0
-                        
                         if hasSize {
                             infoRow(
-                                "Enclosing Size",
+                                label: "litematica.detail.field.enclosing_size".localized(),
                                 value: "\(metadata.enclosingSize.x) × \(metadata.enclosingSize.y) × \(metadata.enclosingSize.z)"
                             )
                         } else {
-                            infoRow("Enclosing Size", value: String(localized: "Unknown"))
+                            infoRow(label: "litematica.detail.field.enclosing_size".localized(), value: "common.unknown".localized())
                         }
 
                         if metadata.totalVolume > 0 {
-                            infoRow("Total Volume", value: formatNumber(Int(metadata.totalVolume)))
+                            infoRow(label: "litematica.detail.field.total_volume".localized(), value: formatNumber(Int(metadata.totalVolume)))
                         } else {
-                            infoRow("Total Volume", value: String(localized: "Unknown"))
+                            infoRow(label: "litematica.detail.field.total_volume".localized(), value: "common.unknown".localized())
                         }
 
                         if metadata.totalBlocks > 0 {
-                            infoRow("Total Blocks", value: formatNumber(Int(metadata.totalBlocks)))
+                            infoRow(label: "litematica.detail.field.total_blocks".localized(), value: formatNumber(Int(metadata.totalBlocks)))
                         } else {
-                            infoRow("Total Blocks", value: String(localized: "Unknown"))
+                            infoRow(label: "litematica.detail.field.total_blocks".localized(), value: "common.unknown".localized())
                         }
 
-                        infoRow("Regions", value: "\(metadata.regionCount)")
+                        infoRow(label: "litematica.detail.field.region_count".localized(), value: "\(metadata.regionCount)")
                     }
                 }
             }
         }
     }
 
-    private func infoSection<Content: View>(title: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {
+    private func infoSection<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.headline)
                 .foregroundColor(.primary)
                 .padding(.bottom, 10)
-
             content()
         }
     }
 
-    private func infoRow(_ label: LocalizedStringKey, value: String, isMultiline: Bool = false) -> some View {
+    private func infoRow(label: String, value: String, isMultiline: Bool = false) -> some View {
         HStack(alignment: isMultiline ? .top : .center, spacing: 12) {
-            HStack(spacing: 0) {
-                Text(label)
-                Text(":")
-            }
-            .font(.subheadline)
-            .foregroundColor(.secondary)
-
+            Text(label + ":")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
             if isMultiline {
                 Text(value)
                     .font(.subheadline)
@@ -177,10 +192,11 @@ struct LitematicaDetailSheetView: View {
     // MARK: - Footer View
     private var footerView: some View {
         HStack {
+
             Label {
                 Text(filePath.lastPathComponent)
                     .lineLimit(1)
-                    .truncationMode(.middle)
+                    .truncationMode(.middle) // 可选：中间省略，长路径更好看
             } icon: {
                 Image(systemName: "square.stack.3d.up")
             }
@@ -190,7 +206,7 @@ struct LitematicaDetailSheetView: View {
 
             Spacer()
 
-            Button("Close") {
+            Button("common.close".localized()) {
                 dismiss()
             }
             .keyboardShortcut(.defaultAction)
@@ -203,26 +219,23 @@ struct LitematicaDetailSheetView: View {
         errorMessage = nil
 
         do {
-            Logger.shared.debug("Start loading projection details: \(filePath.lastPathComponent)")
-            let loadedMetadata = try await LitematicaService.shared.loadFullMetadata(filePath: filePath)
-
+            Logger.shared.debug("开始加载投影详细信息: \(filePath.lastPathComponent)")
+            let loadedMetadata = try await litematicaService.loadFullMetadata(filePath: filePath)
             await MainActor.run {
                 if let metadata = loadedMetadata {
-                    Logger.shared.debug("Successfully loaded projection metadata: \(metadata.name)")
+                    Logger.shared.debug("成功加载投影元数据: \(metadata.name)")
                     self.metadata = metadata
                 } else {
-                    Logger.shared.warning("Projection metadata is nil: \(filePath.lastPathComponent)")
-                    self.errorMessage = String(localized: "Unable to parse schematic metadata. The file may be corrupted or in an unsupported format.")
+                    Logger.shared.warning("投影元数据为nil: \(filePath.lastPathComponent)")
+                    self.errorMessage = "litematica.detail.error.parse_failed".localized()
                 }
-
                 self.isLoading = false
             }
         } catch {
-            Logger.shared.error("Failed to load projection details: \(error.localizedDescription)")
-
+            Logger.shared.error("加载投影详细信息失败: \(error.localizedDescription)")
             await MainActor.run {
                 self.isLoading = false
-                self.errorMessage = String(format: String(localized: "Failed to load schematic information: \(error.localizedDescription)"))
+                self.errorMessage = String(format: "litematica.detail.error.load_failed".localized(), error.localizedDescription)
                 self.showError = true
             }
         }
@@ -236,7 +249,7 @@ struct LitematicaDetailSheetView: View {
 
     private func formatTimestamp(_ timestamp: Int64) -> String {
         guard timestamp > 0 else {
-            return String(localized: "Unknown")
+            return "common.unknown".localized()
         }
 
         let date = Date(timeIntervalSince1970: TimeInterval(timestamp) / 1000.0)
@@ -245,5 +258,15 @@ struct LitematicaDetailSheetView: View {
         formatter.timeStyle = .short
         formatter.locale = Locale(identifier: "zh_CN")
         return formatter.string(from: date)
+    }
+}
+
+// MARK: - Preview Helper
+struct MetadataContentViewPreview: View {
+    let metadata: LitematicMetadata
+
+    var body: some View {
+        let sheetView = LitematicaDetailSheetView(filePath: URL(fileURLWithPath: "/tmp/test.litematic"), gameName: "Test Game")
+        return sheetView.metadataContentView(metadata: metadata)
     }
 }

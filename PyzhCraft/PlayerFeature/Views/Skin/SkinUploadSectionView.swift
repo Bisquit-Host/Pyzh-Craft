@@ -1,11 +1,10 @@
+import Foundation
 import SwiftUI
 import UniformTypeIdentifiers
+import AppKit
 import SkinRenderKit
 
 struct SkinUploadSectionView: View {
-    @Environment(\.accessibilityReduceMotion)
-    private var reduceMotion
-    
     @Binding var currentModel: PlayerSkinService.PublicSkinInfo.SkinModel
     @Binding var showingFileImporter: Bool
     @Binding var selectedSkinImage: NSImage?
@@ -17,30 +16,95 @@ struct SkinUploadSectionView: View {
     @Binding var isCapeLoading: Bool
     @Binding var capeLoadCompleted: Bool
     @Binding var showingSkinPreview: Bool
-    
+    let showSkinLibrary: Bool
+    @State private var showingSkinLibraryPopover = false
+    @State private var skinLibraryItems: [SkinLibraryItem] = []
+    @State private var pendingDeletion: SkinLibraryItem?
+
     let onSkinDropped: (NSImage) -> Void
     let onDrop: ([NSItemProvider]) -> Bool
-    
+    let onSelectSkinLibraryItem: (SkinLibraryItem) -> Void
+    private let windowDataStore: WindowDataStore
+    private let windowManager: WindowManager
+    private let skinLibraryStore: SkinLibraryStore
+
+    init(
+        currentModel: Binding<PlayerSkinService.PublicSkinInfo.SkinModel>,
+        showingFileImporter: Binding<Bool>,
+        selectedSkinImage: Binding<NSImage?>,
+        selectedSkinPath: Binding<String?>,
+        currentSkinRenderImage: Binding<NSImage?>,
+        selectedCapeLocalPath: Binding<String?>,
+        selectedCapeImage: Binding<NSImage?>,
+        selectedCapeImageURL: Binding<String?>,
+        isCapeLoading: Binding<Bool>,
+        capeLoadCompleted: Binding<Bool>,
+        showingSkinPreview: Binding<Bool>,
+        showSkinLibrary: Bool,
+        onSkinDropped: @escaping (NSImage) -> Void,
+        onDrop: @escaping ([NSItemProvider]) -> Bool,
+        onSelectSkinLibraryItem: @escaping (SkinLibraryItem) -> Void,
+        windowDataStore: WindowDataStore = AppServices.windowDataStore,
+        windowManager: WindowManager = AppServices.windowManager,
+        skinLibraryStore: SkinLibraryStore = SkinLibraryStore()
+    ) {
+        _currentModel = currentModel
+        _showingFileImporter = showingFileImporter
+        _selectedSkinImage = selectedSkinImage
+        _selectedSkinPath = selectedSkinPath
+        _currentSkinRenderImage = currentSkinRenderImage
+        _selectedCapeLocalPath = selectedCapeLocalPath
+        _selectedCapeImage = selectedCapeImage
+        _selectedCapeImageURL = selectedCapeImageURL
+        _isCapeLoading = isCapeLoading
+        _capeLoadCompleted = capeLoadCompleted
+        _showingSkinPreview = showingSkinPreview
+        self.showSkinLibrary = showSkinLibrary
+        self.onSkinDropped = onSkinDropped
+        self.onDrop = onDrop
+        self.onSelectSkinLibraryItem = onSelectSkinLibraryItem
+        self.windowDataStore = windowDataStore
+        self.windowManager = windowManager
+        self.skinLibraryStore = skinLibraryStore
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Skin Upload")
+            Text("skin.upload".localized())
                 .font(.headline)
-            
+
             skinRenderArea
-            
+
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Drop skin file here or click to select")
                         .font(.caption)
-                    
+                        .foregroundColor(.secondary)
                     Text("PNG 64×64 or legacy 64×32")
                         .font(.caption2)
+                        .foregroundColor(.secondary)
                 }
-                .foregroundColor(.secondary)
                 .padding(.horizontal, 4)
-                
                 Spacer()
-                
+                if showSkinLibrary {
+                    Button("skin.library.title".localized()) {
+                        showingSkinLibraryPopover = true
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(skinLibraryItems.isEmpty)
+                    .popover(isPresented: $showingSkinLibraryPopover, arrowEdge: .trailing) {
+                        SkinLibraryPopoverContentView(
+                            items: skinLibraryItems,
+                            isPresented: $showingSkinLibraryPopover,
+                            onSelectItem: { item in
+                                onSelectSkinLibraryItem(item)
+                            },
+                            onDeleteItem: { item in
+                                pendingDeletion = item
+                            }
+                        )
+                    }
+                }
                 Button {
                     openSkinPreviewWindow()
                 } label: {
@@ -51,116 +115,111 @@ struct SkinUploadSectionView: View {
                 .disabled(selectedSkinImage == nil && currentSkinRenderImage == nil && selectedSkinPath == nil)
             }
         }
+        .onAppear {
+            if showSkinLibrary {
+                reloadSkinLibraryItems()
+            }
+        }
+        .confirmationDialog(
+            "skin.library.delete.history.title".localized(),
+            isPresented: Binding(
+                get: { pendingDeletion != nil },
+                set: { isPresented in
+                    if !isPresented {
+                        pendingDeletion = nil
+                    }
+                }
+            ),
+            titleVisibility: .visible,
+            presenting: pendingDeletion
+        ) { item in
+            Button("common.delete".localized(), role: .destructive) {
+                _ = skinLibraryStore.deleteItem(item)
+                pendingDeletion = nil
+                reloadSkinLibraryItems()
+            }
+            Button("skin.cancel".localized(), role: .cancel) {
+                pendingDeletion = nil
+            }
+        } message: { item in
+            Text(String(format: "skin.library.delete.history.message".localized(), item.displayName))
+        }
     }
-    
+
     private var skinRenderArea: some View {
         let playerModel = convertToPlayerModel(currentModel)
-        // Determine whether there is a SkinRenderView displayed (when there is a skin, SkinRenderView will handle dragging)
-        // Judgment based on whether there is skin data, does not rely on capeLoadCompleted
-        // Avoid mistakenly thinking that no view is rendered during cloak loading, causing the view structure to switch back and forth
         let hasSkinRenderView = (selectedSkinImage != nil || currentSkinRenderImage != nil || selectedSkinPath != nil)
-        
+
         return skinRenderContent(playerModel: playerModel)
             .frame(height: 220)
             .onTapGesture { showingFileImporter = true }
-            .conditionalDrop(isEnabled: reduceMotion || !hasSkinRenderView, perform: onDrop)
+            .conditionalDrop(isEnabled: !hasSkinRenderView, perform: onDrop)
     }
-    
+
     @ViewBuilder
     private func skinRenderContent(playerModel: PlayerModel) -> some View {
-        ZStack {
-            // The bottom layer always decides whether to render the character based on skin data
-            // No longer switch view types back and forth due to cloak loading status, preventing SceneKit views from being destroyed and rebuilt
-            Group {
-                if let image = selectedSkinImage ?? currentSkinRenderImage {
-                    if reduceMotion {
-                        StaticSkinRenderView(
-                            skinImage: image,
-                            capeImage: $selectedCapeImage,
-                            playerModel: playerModel,
-                            rotationDuration: 0,
-                            backgroundColor: NSColor.clear
-                        )
-                        .frame(minWidth: 400, minHeight: 300)
-                    } else {
-                        SkinRenderView(
-                            skinImage: image,
-                            // Cloak update process:
-                            // 1. selectedCapeImage @Binding change (user operation/initialization)
-                            // 2. SwiftUI body re-evaluates and creates/updates SceneKitCharacterViewRepresentable
-                            // 3. updateNSViewController is called
-                            // 4. Check whether capeImage exists and call updateCapeTexture(image:) or removeCapeTexture()
-                            // 5. applyCapeUpdate checks whether the instances are the same (!==), if different, updates and calls rebuildCharacter()
-                            // 6. Rebuild or incrementally update character nodes, including new cloak textures
-                            // 7. SceneKit renders new character model
-                            capeImage: $selectedCapeImage,
-                            playerModel: playerModel,
-                            rotationDuration: 0,
-                            backgroundColor: NSColor.clear,
-                            onSkinDropped: { dropped in
-                                onSkinDropped(dropped)
-                            },
-                            onCapeDropped: { _ in }
-                        )
-                    }
-                } else if let skinPath = selectedSkinPath {
-                    if reduceMotion {
-                        StaticSkinRenderView(
-                            texturePath: skinPath,
-                            capeImage: $selectedCapeImage,
-                            playerModel: playerModel,
-                            rotationDuration: 0,
-                            backgroundColor: NSColor.clear
-                        )
-                        .frame(minWidth: 400, minHeight: 300)
-                    } else {
-                        SkinRenderView(
-                            texturePath: skinPath,
-                            // The cape update process is the same as above: selectedCapeImage change → SwiftUI re-evaluation → SkinRenderView internal processing update
-                            capeImage: $selectedCapeImage,
-                            playerModel: playerModel,
-                            rotationDuration: 0,
-                            backgroundColor: NSColor.clear,
-                            onSkinDropped: { dropped in
-                                onSkinDropped(dropped)
-                            },
-                            onCapeDropped: { _ in }
-                        )
-                    }
-                } else {
-                    Color.clear
-                }
+        Group {
+            if let image = selectedSkinImage ?? currentSkinRenderImage {
+                SkinRenderView(
+                    skinImage: image,
+                    capeImage: $selectedCapeImage,
+                    playerModel: playerModel,
+                    rotationDuration: 0,
+                    backgroundColor: NSColor.clear,
+                    onSkinDropped: { dropped in
+                        onSkinDropped(dropped)
+                    },
+                    onCapeDropped: { _ in }
+                )
+            } else if let skinPath = selectedSkinPath {
+                SkinRenderView(
+                    texturePath: skinPath,
+                    capeImage: $selectedCapeImage,
+                    playerModel: playerModel,
+                    rotationDuration: 0,
+                    backgroundColor: NSColor.clear,
+                    onSkinDropped: { dropped in
+                        onSkinDropped(dropped)
+                    },
+                    onCapeDropped: { _ in }
+                )
+            } else {
+                Color.clear
             }
         }
     }
-    
+
     private func convertToPlayerModel(_ skinModel: PlayerSkinService.PublicSkinInfo.SkinModel) -> PlayerModel {
         switch skinModel {
-        case .classic: .steve
-        case .slim: .alex
+        case .classic:
+            return .steve
+        case .slim:
+            return .alex
         }
     }
-    
-    /// Open skin preview window
+
+    /// 打开皮肤预览窗口
     private func openSkinPreviewWindow() {
         let playerModel = convertToPlayerModel(currentModel)
-        
-        // Store to WindowDataStore
-        WindowDataStore.shared.skinPreviewData = SkinPreviewData(
+        // 存储到 WindowDataStore
+        windowDataStore.skinPreviewData = SkinPreviewData(
             skinImage: selectedSkinImage ?? currentSkinRenderImage,
             skinPath: selectedSkinPath,
             capeImage: selectedCapeImage,
             playerModel: playerModel
         )
-        
-        // open window
-        WindowManager.shared.openWindow(id: .skinPreview)
+        // 打开窗口
+        windowManager.openWindow(id: .skinPreview)
+    }
+
+    private func reloadSkinLibraryItems() {
+        skinLibraryItems = skinLibraryStore.loadItems()
     }
 }
 
 // MARK: - View Extension for Conditional Drop
 extension View {
-    /// Conditionally apply drag handling modifiers
+    /// 条件性地应用拖拽处理修饰符
     @ViewBuilder
     func conditionalDrop(isEnabled: Bool, perform: @escaping ([NSItemProvider]) -> Bool) -> some View {
         if isEnabled {

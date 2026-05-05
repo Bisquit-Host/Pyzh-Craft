@@ -1,13 +1,13 @@
 {
-  "originHash" : "9b87399fa77dedbf4ef9e64fdfc1ee244290e179e5b6eda72dbc9a7c326960ed",
+  "originHash" : "689c8027b9f471582b5f408135014821429676ce9ce1fb9fb83bf34747f7ebae",
   "pins" : [
     {
-      "identity" : "kingfisher",
+      "identity" : "cfmodrinthadapterkit",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/onevcat/Kingfisher.git",
+      "location" : "https://github.com/suhang12332/CFModrinthAdapterKit.git",
       "state" : {
-        "revision" : "c92b84898e34ab46ff0dad86c02a0acbe2d87008",
-        "version" : "8.8.0"
+        "branch" : "release",
+        "revision" : "d8ed652fa3459055a18e6aff0ecaf55486a6d97c"
       }
     },
     {
@@ -25,7 +25,7 @@
       "location" : "https://github.com/suhang12332/NSSkinRender.git",
       "state" : {
         "branch" : "release",
-        "revision" : "4443a5413b3638ef5141c7f0d0a8aff18d8925a6"
+        "revision" : "6177141260f167eb0fc42924edab0202452b24d0"
       }
     },
     {
@@ -33,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sparkle-project/Sparkle.git",
       "state" : {
-        "revision" : "21d8df80440b1ca3b65fa82e40782f1e5a9e6ba2",
-        "version" : "2.9.0"
+        "revision" : "df074165274afaa39539c05d57b0832620775b11",
+        "version" : "2.7.1"
       }
     },
     {
@@ -60,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SimplyDanny/SwiftLintPlugins",
       "state" : {
-        "revision" : "8a4640d14777685ba8f14e832373160498fbab92",
-        "version" : "0.63.2"
+        "revision" : "634ada2eee7eac4ca79bf1fc8943ddc91408eb06",
+        "version" : "0.60.0"
       }
     },
     {
@@ -69,8 +69,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/suhang12332/SwiftMarkDownUI.git",
       "state" : {
-        "branch" : "main",
-        "revision" : "d424a057c3d3fc88289ad38db7f1346f945548cc"
+        "branch" : "release",
+        "revision" : "08cb6f3138b9a38568e9a772a40dea9cb6492495"
       }
     },
     {
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/weichsel/ZIPFoundation.git",
       "state" : {
-        "revision" : "22787ffb59de99e5dc1fbfe80b19c97a904ad48d",
-        "version" : "0.9.20"
+        "revision" : "02b6abe5f6eef7e3cbd5f247c5cc24e246efcfe0",
+        "version" : "0.9.19"
       }
     }
   ],

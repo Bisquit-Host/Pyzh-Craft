@@ -1,57 +1,79 @@
 import SwiftUI
 
-// MARK: - Game resource installation sheet (preset game information, no need to select a game)
+// MARK: - 游戏资源安装 Sheet（预置游戏信息，无需选择游戏）
 struct GameResourceInstallSheet: View {
     let project: ModrinthProject
     let resourceType: String
-    let gameInfo: GameVersionInfo  // Preset game information
+    let gameInfo: GameVersionInfo  // 预置的游戏信息
     @Binding var isPresented: Bool
-    let preloadedDetail: ModrinthProjectDetail?  // Preloaded project details
-    var isUpdateMode = false  // Update mode: The footer displays "Download" and does not display dependencies
-    @EnvironmentObject var gameRepository: GameRepository
-    /// Download success callback, the parameters are (fileName, hash), only the downloadResource path will pass the value, downloadAllManual will pass (nil, nil)
+    let preloadedDetail: ModrinthProjectDetail?  // 预加载的项目详情
+    var isUpdateMode: Bool = false  // 更新模式：footer 显示「下载」、不显示依赖
+    @EnvironmentObject private var gameRepository: GameRepository
+    /// 下载成功回调，参数为 (fileName, hash)，仅 downloadResource 路径会传值，downloadAllManual 传 (nil, nil)
     var onDownloadSuccess: ((String?, String?) -> Void)?
 
-    @State private var selectedVersion: ModrinthProjectDetailVersion?
-    @State private var availableVersions: [ModrinthProjectDetailVersion] = []
-    @State private var dependencyState = DependencyState()
-    @State private var isDownloadingAll = false
-    @State private var mainVersionId = ""
+    @StateObject private var viewModel: GameResourceInstallSheetViewModel
+
+    init(
+        project: ModrinthProject,
+        resourceType: String,
+        gameInfo: GameVersionInfo,
+        isPresented: Binding<Bool>,
+        preloadedDetail: ModrinthProjectDetail?,
+        isUpdateMode: Bool = false,
+        onDownloadSuccess: ((String?, String?) -> Void)? = nil
+    ) {
+        self.project = project
+        self.resourceType = resourceType
+        self.gameInfo = gameInfo
+        self._isPresented = isPresented
+        self.preloadedDetail = preloadedDetail
+        self.isUpdateMode = isUpdateMode
+        self.onDownloadSuccess = onDownloadSuccess
+        _viewModel = StateObject(
+            wrappedValue: GameResourceInstallSheetViewModel(
+                project: project,
+                resourceType: resourceType,
+                gameInfo: gameInfo,
+                isUpdateMode: isUpdateMode
+            )
+        )
+    }
 
     var body: some View {
         CommonSheetView(
             header: {
-                Text("Add For Game \(gameInfo.gameName)")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }, body: {
+                Text(
+                    String(
+                        format: "global_resource.add_for_game".localized(),
+                        gameInfo.gameName
+                    )
+                )
+                .font(.headline)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            },
+            body: {
                 if let detail = preloadedDetail {
                     VStack {
                         ModrinthProjectTitleView(
                             projectDetail: detail
                         ).padding(.bottom, 18)
-
                         VersionPickerForSheet(
                             project: project,
                             resourceType: resourceType,
-                            selectedGame: .constant(gameInfo),
-                            selectedVersion: $selectedVersion,
-                            availableVersions: $availableVersions,
-                            mainVersionId: $mainVersionId
+                            selectedGame: .constant(gameInfo),  // 预置游戏信息
+                            selectedVersion: $viewModel.selectedVersion,
+                            availableVersions: $viewModel.availableVersions,
+                            mainVersionId: $viewModel.mainVersionId
                         ) { version in
-                            if resourceType == "mod",
-                               !isUpdateMode,
-                               let v = version {
-                                loadDependencies(for: v, game: gameInfo)
-                            } else {
-                                dependencyState = DependencyState()
-                            }
+                            viewModel.onVersionChanged(version)
                         }
-
-                        if resourceType == "mod", !isUpdateMode {
-                            if dependencyState.isLoading || !dependencyState.dependencies.isEmpty {
-                                spacerView()
-                                DependencySectionView(state: $dependencyState)
+                        if resourceType == ResourceType.mod.rawValue, !isUpdateMode {
+                            if viewModel.dependencyState.isLoading
+                                || !viewModel.dependencyState.dependencies.isEmpty {
+                                DependencySectionView(state: $viewModel.dependencyState)
                             }
                         }
                     }
@@ -59,86 +81,86 @@ struct GameResourceInstallSheet: View {
             },
             footer: {
                 GameResourceInstallFooter(
-                    project: project,
-                    resourceType: resourceType,
-                    isUpdateMode: isUpdateMode,
                     isPresented: $isPresented,
                     projectDetail: preloadedDetail,
-                    gameInfo: gameInfo,
-                    selectedVersion: selectedVersion,
-                    dependencyState: dependencyState,
-                    isDownloadingAll: $isDownloadingAll,
-                    gameRepository: gameRepository,
-                    loadDependencies: loadDependencies,
-                    mainVersionId: $mainVersionId,
+                    viewModel: viewModel,
                     onDownloadSuccess: onDownloadSuccess
                 )
             }
         )
-        .onDisappear {
-            selectedVersion = nil
-            availableVersions = []
-            dependencyState = DependencyState()
-            isDownloadingAll = false
-            mainVersionId = ""
-        }
+        .onAppear { viewModel.setDependencies(gameRepository: gameRepository) }
+        .onDisappear { viewModel.cleanup() }
     }
+}
 
-    private func loadDependencies(
-        for version: ModrinthProjectDetailVersion,
-        game: GameVersionInfo
-    ) {
-        dependencyState.isLoading = true
-        Task {
-            do {
-                try await loadDependenciesThrowing(for: version, game: game)
-            } catch {
-                let globalError = GlobalError.from(error)
-                Logger.shared.error("Failed to load dependencies: \(globalError.chineseMessage)")
-                GlobalErrorHandler.shared.handle(globalError)
-                _ = await MainActor.run {
-                    dependencyState = DependencyState()
+// MARK: - Footer 按钮区块
+struct GameResourceInstallFooter: View {
+    @Binding var isPresented: Bool
+    let projectDetail: ModrinthProjectDetail?
+    @ObservedObject var viewModel: GameResourceInstallSheetViewModel
+    /// 下载成功回调，参数为 (fileName, hash)，仅 downloadResource 路径会传值，downloadAllManual 传 (nil, nil)
+    var onDownloadSuccess: ((String?, String?) -> Void)?
+
+    var body: some View {
+        Group {
+            if projectDetail != nil {
+                HStack {
+                    Button("common.close".localized()) { isPresented = false }
+                    Spacer()
+                    if viewModel.resourceType == ResourceType.mod.rawValue,
+                        !viewModel.isUpdateMode {
+                        // 安装模式下的 mod：显示「下载全部」（含依赖）
+                        if !viewModel.dependencyState.isLoading {
+                            if viewModel.selectedVersion != nil {
+                                Button {
+                                    viewModel.downloadAllManual(
+                                        onSuccess: { fileName, hash in
+                                            onDownloadSuccess?(fileName, hash)
+                                        },
+                                        dismiss: { isPresented = false }
+                                    )
+                                } label: {
+                                    if viewModel.isDownloadingAll {
+                                        ProgressView().controlSize(.small)
+                                    } else {
+                                        Text(
+                                            "global_resource.download_all"
+                                                .localized()
+                                        )
+                                    }
+                                }
+                                .disabled(viewModel.isDownloadingAll)
+                                .keyboardShortcut(.defaultAction)
+                            }
+                        }
+                    } else {
+                        // 非 mod，或更新模式：显示「下载」（仅主资源）
+                        if viewModel.selectedVersion != nil {
+                            Button {
+                                viewModel.downloadResource(
+                                    onSuccess: { fileName, hash in
+                                        onDownloadSuccess?(fileName, hash)
+                                    },
+                                    dismiss: { isPresented = false }
+                                )
+                            } label: {
+                                if viewModel.isDownloadingAll {
+                                    ProgressView().controlSize(.small)
+                                } else {
+                                    Text("global_resource.download".localized())
+                                }
+                            }
+                            .disabled(viewModel.isDownloadingAll)
+                            .keyboardShortcut(.defaultAction)
+                        }
+                    }
+                }
+            } else {
+                HStack {
+                    Spacer()
+                    Button("common.close".localized()) { isPresented = false }
                 }
             }
-        }
-    }
-
-    private func loadDependenciesThrowing(
-        for version: ModrinthProjectDetailVersion,
-        game: GameVersionInfo
-    ) async throws {
-        guard !project.projectId.isEmpty else {
-            throw GlobalError.validation(
-                i18nKey: "Project ID Empty",
-                level: .notification
-            )
-        }
-
-        // Get missing dependencies (with version information)
-        let missingWithVersions =
-            await ModrinthDependencyDownloader
-            .getMissingDependenciesWithVersions(
-                for: project.projectId,
-                gameInfo: game
-            )
-
-        var depVersions: [String: [ModrinthProjectDetailVersion]] = [:]
-        var depSelected: [String: ModrinthProjectDetailVersion?] = [:]
-        var dependencies: [ModrinthProjectDetail] = []
-
-        for (detail, versions) in missingWithVersions {
-            dependencies.append(detail)
-            depVersions[detail.id] = versions
-            depSelected[detail.id] = versions.first
-        }
-
-        _ = await MainActor.run {
-            dependencyState = DependencyState(
-                dependencies: dependencies,
-                versions: depVersions,
-                selected: depSelected,
-                isLoading: false
-            )
         }
     }
 }

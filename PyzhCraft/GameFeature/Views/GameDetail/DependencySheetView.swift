@@ -5,15 +5,37 @@ struct DependencySheetView: View {
     @Binding var isDownloadingAllDependencies: Bool
     @Binding var isDownloadingMainResourceOnly: Bool
     let projectDetail: ModrinthProjectDetail
-    @State private var error: GlobalError?
-    
+    @StateObject private var actionViewModel: DependencySheetActionViewModel
+
     let onDownloadAll: () async -> Void
     let onDownloadMainOnly: () async -> Void
-    
+
+    init(
+        viewModel: DependencySheetViewModel,
+        isDownloadingAllDependencies: Binding<Bool>,
+        isDownloadingMainResourceOnly: Binding<Bool>,
+        projectDetail: ModrinthProjectDetail,
+        onDownloadAll: @escaping () async -> Void,
+        onDownloadMainOnly: @escaping () async -> Void
+    ) {
+        self.viewModel = viewModel
+        self._isDownloadingAllDependencies = isDownloadingAllDependencies
+        self._isDownloadingMainResourceOnly = isDownloadingMainResourceOnly
+        self.projectDetail = projectDetail
+        self.onDownloadAll = onDownloadAll
+        self.onDownloadMainOnly = onDownloadMainOnly
+        self._actionViewModel = StateObject(
+            wrappedValue: DependencySheetActionViewModel(
+                isDownloadingAllDependencies: isDownloadingAllDependencies,
+                isDownloadingMainResourceOnly: isDownloadingMainResourceOnly
+            )
+        )
+    }
+
     var body: some View {
         CommonSheetView(
             header: {
-                Text("Required Mods to Download")
+                Text("dependency.required_mods.title".localized())
                     .font(.headline)
                     .frame(maxWidth: .infinity, alignment: .leading)
             },
@@ -25,7 +47,7 @@ struct DependencySheetView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         ForEach(viewModel.missingDependencies, id: \.id) { dep in
                             let versions =
-                            viewModel.dependencyVersions[dep.id] ?? []
+                                viewModel.dependencyVersions[dep.id] ?? []
                             if !versions.isEmpty {
                                 VStack(alignment: .leading) {
                                     HStack(alignment: .center) {
@@ -33,15 +55,14 @@ struct DependencySheetView: View {
                                             .font(.headline)
                                         Spacer()
                                     }
-                                    Picker(
-                                        "Select Version:",
+                                    CommonMenuPicker(
                                         selection: Binding(
                                             get: {
                                                 viewModel
                                                     .selectedDependencyVersion[
                                                         dep.id
                                                     ]
-                                                ?? (versions.first?.id ?? "")
+                                                    ?? (versions.first?.id ?? "")
                                             },
                                             set: {
                                                 viewModel
@@ -51,11 +72,12 @@ struct DependencySheetView: View {
                                             }
                                         )
                                     ) {
+                                        Text("dependency.version.picker".localized())
+                                    } content: {
                                         ForEach(versions, id: \.id) { v in
                                             Text(v.name).tag(v.id)
                                         }
                                     }
-                                    .pickerStyle(.menu)
                                     .font(.subheadline)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                 }
@@ -68,77 +90,73 @@ struct DependencySheetView: View {
                 if viewModel.isLoadingDependencies {
                     HStack {
                         Spacer()
-                        Button("Close") {
+                        Button("common.close".localized()) {
                             viewModel.showDependenciesSheet = false
                         }
                     }
                 } else if !viewModel.missingDependencies.isEmpty {
                     HStack {
-                        Button("Close") {
+                        Button("common.close".localized()) {
                             viewModel.showDependenciesSheet = false
                         }
                         Spacer()
-                        
+
                         let hasDownloading = viewModel.missingDependencies
                             .contains {
                                 viewModel.dependencyDownloadStates[$0.id]
-                                == .downloading
+                                    == .downloading
                             }
                         Button {
-                            Task {
-                                await onDownloadMainOnly()
-                            }
+                            actionViewModel.downloadMainOnly(onDownloadMainOnly: onDownloadMainOnly)
                         } label: {
                             if isDownloadingMainResourceOnly {
                                 ProgressView().controlSize(.small)
                             } else {
-                                Text("Download Main Only")
+                                Text(
+                                    "global_resource.download_main_only"
+                                        .localized()
+                                )
                             }
                         }
                         .disabled(
                             isDownloadingAllDependencies
-                            || isDownloadingMainResourceOnly
+                                || isDownloadingMainResourceOnly
                         )
                         switch viewModel.overallDownloadState {
                         case .idle:
                             Button {
-                                isDownloadingAllDependencies = true
-                                Task {
-                                    await onDownloadAll()
-                                    isDownloadingAllDependencies = false
-                                }
+                                actionViewModel.downloadAll(onDownloadAll: onDownloadAll)
                             } label: {
                                 if isDownloadingAllDependencies || hasDownloading {
                                     ProgressView().controlSize(.small)
                                 } else {
-                                    Text("Download All And Continue")
+                                    Text(
+                                        "dependency.download_all_and_continue"
+                                            .localized()
+                                    )
                                 }
                             }
                             .keyboardShortcut(.defaultAction)
                             .disabled(
                                 isDownloadingAllDependencies || hasDownloading
                             )
-                            
+
                         case .failed:
                             Button {
-                                isDownloadingAllDependencies = true
-                                Task {
-                                    await onDownloadAll()
-                                    isDownloadingAllDependencies = false
-                                }
+                                actionViewModel.downloadAll(onDownloadAll: onDownloadAll)
                             } label: {
                                 if isDownloadingAllDependencies || hasDownloading {
                                     ProgressView().controlSize(.small)
                                 } else {
-                                    Text("Continue")
+                                    Text("common.continue".localized())
                                 }
                             }
                             .keyboardShortcut(.defaultAction)
                             .disabled(
                                 isDownloadingAllDependencies || hasDownloading
-                                || !viewModel.allDependenciesDownloaded
+                                    || !viewModel.allDependenciesDownloaded
                             )
-                            
+
                         case .retrying:
                             EmptyView()
                         }
@@ -146,31 +164,27 @@ struct DependencySheetView: View {
                 } else {
                     HStack {
                         Spacer()
-                        Button("Close") {
+                        Button("common.close".localized()) {
                             viewModel.showDependenciesSheet = false
                         }
                     }
                 }
             }
         )
-        .alert("Download Error", isPresented: .constant(error != nil)) {
-            Button("Close") {
-                error = nil
+        .alert(
+            "error.notification.download.title".localized(),
+            isPresented: Binding(
+                get: { actionViewModel.error != nil },
+                set: { if !$0 { actionViewModel.error = nil } }
+            )
+        ) {
+            Button("common.close".localized()) {
+                actionViewModel.error = nil
             }
         } message: {
-            if let error {
+            if let error = actionViewModel.error {
                 Text(error.chineseMessage)
             }
-        }
-    }
-    
-    private func handleDownloadError(_ error: Error) {
-        let globalError = GlobalError.from(error)
-        Logger.shared.error("Dependency download error: \(globalError.chineseMessage)")
-        GlobalErrorHandler.shared.handle(globalError)
-        
-        Task { @MainActor in
-            self.error = globalError
         }
     }
 }

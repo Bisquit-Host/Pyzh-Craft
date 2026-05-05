@@ -10,60 +10,83 @@ struct CustomVersionPicker: View {
     @Binding var selected: String
     let availableVersions: [String]
     @Binding var time: String
-    let onVersionSelected: (String) async -> String  // New: version selection callback, return time information
+    let onVersionSelected: (String) async -> String  // 新增：版本选择回调，返回时间信息
     @State private var showMenu = false
     @State private var error: GlobalError?
-    
+    private let errorHandler: GlobalErrorHandler
+
+    init(
+        selected: Binding<String>,
+        availableVersions: [String],
+        time: Binding<String>,
+        onVersionSelected: @escaping (String) async -> String,
+        errorHandler: GlobalErrorHandler = AppServices.errorHandler
+    ) {
+        _selected = selected
+        self.availableVersions = availableVersions
+        _time = time
+        self.onVersionSelected = onVersionSelected
+        self.errorHandler = errorHandler
+    }
+
     private var versionItems: [FilterItem] {
         availableVersions.map { FilterItem(id: $0, name: $0) }
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Version")
-                    .font(.subheadline)
+                Text("game.form.version".localized())
                     .foregroundColor(.primary)
                 Spacer()
-                Text(
-                    time.isEmpty ? "" : String(localized: "Released: ") + time
-                )
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+                if let articleURL = releaseArticleURL, !time.isEmpty {
+                    Link(
+                        "release.time.prefix".localized() + time,
+                        destination: articleURL
+                    )
+                    .font(.subheadline)
+                    .applyPointerHandIfAvailable()
+                    .help("release.view.details.hint".localized())
+                } else {
+                    ProgressView()
+                        .controlSize(.small)
+                        .scaleEffect(0.85)
+                }
             }
             versionInput
         }
-        .alert("Validation Error", isPresented: .constant(error != nil)) {
-            Button("Close") {
+        .alert(
+            "error.notification.validation.title".localized(),
+            isPresented: .constant(error != nil)
+        ) {
+            Button("common.close".localized()) {
                 error = nil
             }
         } message: {
-            if let error {
+            if let error = error {
                 Text(error.chineseMessage)
             }
         }
     }
-    
+
     private var versionInput: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 6)
-                .stroke(Color(.quaternaryLabelColor), lineWidth: 1)
-                .background(Color(.textBackgroundColor))
-            
+            TextField("", text: .constant(""))
+                .textFieldStyle(.roundedBorder)
+                .allowsHitTesting(false)
+                .focusable(false)
             HStack {
-                if selected.isEmpty {
-                    Text("Select game version")
-                        .foregroundColor(.primary)
-                        .padding(.horizontal, 8)
-                } else {
-                    Text(selected).foregroundColor(.primary)
-                        .padding(.horizontal, 8)
-                }
-                
+                Text(
+                    selected.isEmpty
+                        ? "game.form.version.placeholder".localized()
+                        : selected
+                )
+                .foregroundColor(.primary)
+                .padding(.horizontal, 6)
                 Spacer()
             }
+            .contentShape(Rectangle())
         }
-        .frame(height: 22)
         .onTapGesture {
             if !availableVersions.isEmpty {
                 showMenu.toggle()
@@ -75,7 +98,7 @@ struct CustomVersionPicker: View {
             versionPopoverContent
         }
     }
-    
+
     private var versionPopoverContent: some View {
         VersionGroupedView(
             items: versionItems,
@@ -85,7 +108,7 @@ struct CustomVersionPicker: View {
                     if let newValue = newValue {
                         selected = newValue
                         showMenu = false
-                        // Use version time mapping to set time information
+                        // 使用版本时间映射来设置时间信息
                         Task {
                             time = await onVersionSelected(newValue)
                         }
@@ -95,7 +118,7 @@ struct CustomVersionPicker: View {
         ) { version in
             selected = version
             showMenu = false
-            // Use version time mapping to set time information
+            // 使用版本时间映射来设置时间信息
             Task {
                 time = await onVersionSelected(version)
             }
@@ -107,21 +130,30 @@ struct CustomVersionPicker: View {
             maxHeight: Constants.versionPopoverMaxHeight
         )
     }
-    
+
+    private var releaseArticleURL: URL? {
+        guard !selected.isEmpty else { return nil }
+        if CommonUtil.isMinecraftSnapshotVersion(selected) {
+            return URLConfig.API.MinecraftNews.snapshot(version: selected)
+        }
+        return URLConfig.API.MinecraftNews.javaEditionRelease(version: selected)
+    }
+
     private func handleEmptyVersionsError() {
         let globalError = GlobalError.resource(
-            i18nKey: "No Versions Available",
+            chineseMessage: "没有可用的版本",
+            i18nKey: "error.resource.no_versions_available",
             level: .notification
         )
-        Logger.shared.error("Version selector error: \(globalError.chineseMessage)")
-        GlobalErrorHandler.shared.handle(globalError)
+        Logger.shared.error("版本选择器错误: \(globalError.chineseMessage)")
+        errorHandler.handle(globalError)
         error = globalError
     }
-    
+
     private func handleVersionSelectionError(_ error: Error) {
         let globalError = GlobalError.from(error)
-        Logger.shared.error("Wrong version selection: \(globalError.chineseMessage)")
-        GlobalErrorHandler.shared.handle(globalError)
+        Logger.shared.error("版本选择错误: \(globalError.chineseMessage)")
+        errorHandler.handle(globalError)
         self.error = globalError
     }
 }

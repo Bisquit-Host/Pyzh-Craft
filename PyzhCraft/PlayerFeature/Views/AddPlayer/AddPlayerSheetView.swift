@@ -6,118 +6,172 @@ struct AddPlayerSheetView: View {
     var onAdd: () -> Void
     var onCancel: () -> Void
     var onLogin: (MinecraftProfileResponse) -> Void
-    
+    var onYggdrasilLogin: ((YggdrasilProfile) -> Void)?
+
     enum PlayerProfile {
         case minecraft(MinecraftProfileResponse)
     }
-    
+
     @ObservedObject var playerListViewModel: PlayerListViewModel
-    
-    @State private var isPremium = false
+
+    @State private var isPremium: Bool = false
     @State private var authenticatedProfile: MinecraftProfileResponse?
-    @StateObject private var authService = MinecraftAuthService.shared
-    
+    @StateObject private var authService: MinecraftAuthService
+    @StateObject private var yggdrasilAuthService: YggdrasilAuthService
+    @StateObject private var playerSettings: PlayerSettingsManager
+    @StateObject private var viewModel = AddPlayerSheetViewModel()
+
     @Environment(\.openURL)
     private var openURL
-    @State private var selectedAuthType: AccountAuthType = .premium
     @FocusState private var isTextFieldFocused: Bool
-    @State private var showErrorPopover = false
-    
-    // Mark check status
-    @State private var isCheckingFlag = true  // Initially true, loading will be displayed directly when entering the page
-    // IP check results (only used if there is no genuine account in the list and there is no mark)
-    @State private var isForeignIP = false
-    
+    @State private var showErrorPopover: Bool = false
+
+    init(
+        playerName: Binding<String>,
+        isPlayerNameValid: Binding<Bool>,
+        onAdd: @escaping () -> Void,
+        onCancel: @escaping () -> Void,
+        onLogin: @escaping (MinecraftProfileResponse) -> Void,
+        onYggdrasilLogin: ((YggdrasilProfile) -> Void)? = nil,
+        playerListViewModel: PlayerListViewModel,
+        authService: MinecraftAuthService = AppServices.minecraftAuthService,
+        yggdrasilAuthService: YggdrasilAuthService = AppServices.yggdrasilAuthService,
+        playerSettings: PlayerSettingsManager = AppServices.playerSettingsManager
+    ) {
+        self._playerName = playerName
+        self._isPlayerNameValid = isPlayerNameValid
+        self.onAdd = onAdd
+        self.onCancel = onCancel
+        self.onLogin = onLogin
+        self.onYggdrasilLogin = onYggdrasilLogin
+        self.playerListViewModel = playerListViewModel
+        _authService = StateObject(wrappedValue: authService)
+        _yggdrasilAuthService = StateObject(wrappedValue: yggdrasilAuthService)
+        _playerSettings = StateObject(wrappedValue: playerSettings)
+    }
+
     var body: some View {
         CommonSheetView(
             header: {
                 HStack {
-                    Text("Add Account")
+                    Text("addplayer.title".localized())
                         .font(.headline)
-                    
+                    Image(systemName: viewModel.selectedAuthType.symbol.name)
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                        .symbolRenderingMode(viewModel.selectedAuthType.symbol.mode)
+                        .symbolVariant(.none)
+                    if viewModel.selectedAuthType == .yggdrasil,
+                       let serverName = yggdrasilAuthService.currentServer?.name {
+                        Text(serverName)
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
+                    }
                     Spacer()
-                    
-                    if isCheckingFlag {
+                    if viewModel.isCheckingFlag {
                         ProgressView()
                             .controlSize(.small)
-                            .frame(height: 20.5) // Set a fixed height consistent with Picker
+                            .frame(height: 20.5) // 设置固定高度，与 Picker 保持一致
                             .padding(.trailing, 10)
                     } else {
-                        Picker("", selection: $selectedAuthType) {
-                            ForEach(availableAuthTypes) {
-                                Text($0.displayName)
-                                    .tag($0)
+                        CommonMenuPicker(
+                            selection: $viewModel.selectedAuthType,
+                            hidesLabel: true
+                        ) {
+                        } content: {
+                            ForEach(viewModel.availableAuthTypes) { type in
+                                Text(type.displayName).tag(type)
                             }
                         }
-                        .pickerStyle(.menu)  // Use drop-down menu style
                         .labelStyle(.titleOnly)
                         .fixedSize()
                     }
                 }
-            }, body: {
-                switch selectedAuthType {
+            },
+            body: {
+                switch viewModel.selectedAuthType {
                 case .premium:
                     MinecraftAuthView(onLoginSuccess: onLogin)
-                    
+                case .yggdrasil:
+                    YggdrasilAuthView(onLoginSuccess: onYggdrasilLogin)
                 case .offline:
                     VStack(alignment: .leading) {
                         playerInfoSection
                             .padding(.bottom, 10)
-                        
                         playerNameInputSection
                     }
                 }
-            }, footer: {
+            },
+            footer: {
                 HStack {
                     Button(
-                        "Cancel"
+                        "common.cancel".localized()
                     ) {
                         authService.isLoading = false
+                        yggdrasilAuthService.logout()
                         onCancel()
                     }
-                    
                     Spacer()
-                    
-                    if selectedAuthType == .premium {
-                        // Show different buttons based on authentication status
+                    if viewModel.selectedAuthType == .premium {
+                        // 根据认证状态显示不同的按钮
                         switch authService.authState {
                         case .notAuthenticated:
-                            Button("Start Login") {
+                            Button("addplayer.auth.start_login".localized()) {
                                 Task {
-                                    await authService.startAuthentication()
+                                    await viewModel.startPremiumAuthentication(authService: authService)
                                 }
                             }
                             .keyboardShortcut(.defaultAction)
-                            
+
                         case .authenticated(let profile):
-                            
-                            Button("Add") {
+
+                            Button("addplayer.auth.add".localized()) {
                                 onLogin(profile)
                             }
                             .keyboardShortcut(.defaultAction)
-                            
+
                         case .error:
-                            Button("Retry") {
+                            Button("addplayer.auth.retry".localized()) {
                                 Task {
-                                    await authService.startAuthentication()
+                                    await viewModel.startPremiumAuthentication(authService: authService)
                                 }
                             }
                             .keyboardShortcut(.defaultAction)
-                            
+
                         default:
+                            ProgressView().controlSize(.small)
+                        }
+                    } else if viewModel.selectedAuthType == .yggdrasil {
+                        switch yggdrasilAuthService.authState {
+                        case .idle, .failed:
+                            Button("addplayer.auth.start_login".localized()) {
+                                Task {
+                                    await viewModel.startYggdrasilAuthentication(
+                                        yggdrasilAuthService: yggdrasilAuthService
+                                    )
+                                }
+                            }
+                            .keyboardShortcut(.defaultAction)
+                            .disabled(yggdrasilAuthService.currentServer == nil)
+                        case .authenticated(let profile):
+                            Button("addplayer.auth.add".localized()) {
+                                onYggdrasilLogin?(profile)
+                            }
+                            .keyboardShortcut(.defaultAction)
+                        case .waitingForBrowser, .exchangingCode:
                             ProgressView().controlSize(.small)
                         }
                     } else {
                         Button(
-                            "Purchase Minecraft"
+                            "addplayer.purchase.minecraft".localized()
                         ) {
                             openURL(URLConfig.Store.minecraftPurchase)
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(.accentColor)
-                        
+
                         Button(
-                            "Create account"
+                            "addplayer.create".localized()
                         ) {
                             authService.isLoading = false
                             onAdd()
@@ -129,119 +183,60 @@ struct AddPlayerSheetView: View {
             }
         )
         .task {
-            // Check mark
-            await checkPremiumAccountFlag()
+            // 检查标记
+            await viewModel.checkPremiumAccountFlag()
         }
         .onDisappear {
-            // Clear all data after closing the page
+            // 页面关闭后清除所有数据
             clearAllData()
         }
     }
-    
-    // MARK: - check logic
-    
-    /// Check if you can add an offline account
-    private func canAddOfflineAccount() -> Bool {
-        // Check the mark: If a genuine account has been added (the mark exists), you can add an offline account
-        let flagManager = PremiumAccountFlagManager.shared
-        if flagManager.hasAddedPremiumAccount() {
-            return true
-        }
-        
-        // If there is no tag, you need to check the IP geolocation
-        // If it is a foreign IP, adding an offline account is not allowed
-        // If it is a domestic IP (or the check fails), offline accounts are allowed to be added
-        return !isForeignIP
-    }
-    
-    /// Check genuine account mark
-    private func checkPremiumAccountFlag() async {
-        // Check mark
-        let flagManager = PremiumAccountFlagManager.shared
-        let hasFlag = flagManager.hasAddedPremiumAccount()
-        // If there is no tag, check the IP geolocation simultaneously
-        if !hasFlag {
-            // The loading status has been displayed and will continue to be displayed until the IP check is completed
-            let locationService = IPLocationService.shared
-            let foreign = await locationService.isForeignIP()
-            
-            await MainActor.run {
-                isForeignIP = foreign
-                isCheckingFlag = false
-                
-                // selectedAuthType falls among the available options
-                if !availableAuthTypes.contains(selectedAuthType) {
-                    selectedAuthType = .premium
-                }
-            }
-        } else {
-            // If marked, allow adding offline accounts
-            await MainActor.run {
-                isCheckingFlag = false
-            }
-        }
-    }
-    
-    /// Get a list of available authentication types
-    private var availableAuthTypes: [AccountAuthType] {
-        // If offline accounts can be added, show all options
-        if canAddOfflineAccount() {
-            return AccountAuthType.allCases
-        }
-        
-        // If it is a foreign IP and there is no genuine account in the list, only the genuine option will be displayed
-        return [.premium]
-    }
-    
-    // MARK: - clear data
-    /// Clear all data on the page
+
+    // MARK: - 清除数据
+    /// 清除页面所有数据
     private func clearAllData() {
-        // Clean up player names
+        // 清理玩家名称
         playerName = ""
         isPlayerNameValid = false
-        // Clear authentication status
+        // 清理认证状态
         authenticatedProfile = nil
         isPremium = false
-        // Reset authentication service status
+        // 重置认证服务状态
         authService.isLoading = false
-        // Reset focus state
+        // 重置焦点状态
         isTextFieldFocused = false
         showErrorPopover = false
-        // Reset authentication type
-        selectedAuthType = .premium
-        // Reset tag check status
-        isCheckingFlag = true
-        // Reset IP check results
-        isForeignIP = false
+        yggdrasilAuthService.logout()
+        viewModel.reset()
     }
-    
-    // Description area
+
+    // 说明区
     private var playerInfoSection: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Offline Account Information")
+            Text("addplayer.info.title".localized())
                 .font(.headline) .padding(.bottom, 4)
-            Text("• Offline accounts do not require network verification and can play games without an internet connection")
+            Text("addplayer.info.line1".localized())
                 .font(.subheadline)
                 .foregroundColor(.secondary)
-            Text("• The player name length is 1-16 characters, and can only contain letters, numbers, and underscores.")
+            Text("addplayer.info.line2".localized())
                 .font(.subheadline)
                 .foregroundColor(.secondary)
-            Text("• Offline accounts cannot be used on the official server.")
+            Text("addplayer.info.line3".localized())
                 .font(.subheadline)
                 .foregroundColor(.secondary)
-            Text("• Each player name can only create one offline account")
+            Text("addplayer.info.line4".localized())
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
     }
-    
-    // input area
+
+    // 输入区
     private var playerNameInputSection: some View {
         VStack(alignment: .leading) {
-            Text("Player Name")
+            Text("addplayer.name.label".localized())
                 .font(.headline.bold())
             TextField(
-                "Enter player name to be used as your display name in the game",
+                "addplayer.name.placeholder".localized(),
                 text: $playerName
             )
             .textFieldStyle(.roundedBorder)
@@ -263,57 +258,63 @@ struct AddPlayerSheetView: View {
             }
         }
     }
-    
-    // Determine border color based on input state and focus state
+
+    // 根据输入状态和焦点状态决定边框颜色
     private var borderColor: Color {
         if isTextFieldFocused {
-            .blue
+            return .blue
         } else {
-            .clear
+            return .clear
         }
     }
-    
-    // Get error information (only when illegal, excluding empty string)
+
+    // 获取错误信息（仅在不合法时，不包括空字符串）
     private var playerNameError: String? {
         let trimmedName = playerName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else { return nil }
         if playerListViewModel.playerExists(name: trimmedName) {
-            return String(localized: "Player name already exists")
+            return "addplayer.name.error.duplicate".localized()
         }
-        // Other verification rules can be added
+        // 可添加其他校验规则
         return nil
     }
-    
+
     private func checkPlayerName(_ name: String) {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        // Set status based on playerNameError and whether it is empty to avoid repeated checks
+        // 基于 playerNameError 和是否为空来设置状态，避免重复检查
         let hasError = playerNameError != nil
         isPlayerNameValid = !trimmedName.isEmpty && !hasError
         showErrorPopover = hasError
     }
 }
 
-// Assuming AccountAuthType is defined as:
 enum AccountAuthType: String, CaseIterable, Identifiable {
     var id: String { rawValue }
-    
-    case offline, premium
-    
+
+    case premium
+    case yggdrasil
+    case offline
+
     var displayName: String {
         switch self {
-        case .premium: String(localized: "Microsoft")
-        default: String(localized: "Offline")
+        case .premium:
+            return "addplayer.auth.microsoft".localized()
+        case .yggdrasil:
+            return "addplayer.auth.yggdrasil".localized()
+        case .offline:
+            return "addplayer.auth.offline".localized()
         }
     }
 }
 
-// 1. Extend a symbol configuration to AccountAuthType
 extension AccountAuthType {
     var symbol: (name: String, mode: SymbolRenderingMode) {
         switch self {
         case .premium:
             return ("person.crop.circle.badge.plus", .multicolor)
-        default:
+        case .yggdrasil:
+            return ("person.crop.circle.badge.questionmark.fill", .multicolor)
+        case .offline:
             return ("person.crop.circle.badge.minus", .multicolor)
         }
     }

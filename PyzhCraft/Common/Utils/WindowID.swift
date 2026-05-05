@@ -1,8 +1,20 @@
+//
+//  WindowID.swift
+//  PyzhCraft
+//
+//  Created by su on 2025/1/27.
+//
+
 import SwiftUI
 
-/// window identifier enum
+/// 窗口标识符枚举
 enum WindowID: String {
-    case contributors, acknowledgements, aiChat, javaDownload, skinPreview, serverSettings
+    case contributors = "contributors"
+    case main = "main"
+    case acknowledgements = "acknowledgements"
+    case aiChat = "aiChat"
+    case javaDownload = "javaDownload"
+    case skinPreview = "skinPreview"
 }
 
 extension WindowID: CaseIterable {}

@@ -1,8 +1,15 @@
+//
+//  ResourceDetailState.swift
+//  PyzhCraft
+//
+//  收拢当前选中的侧边栏项、游戏/资源类型、项目详情等状态，通过 @EnvironmentObject 向下提供，减少 @Binding 透传。
+//
+
 import SwiftUI
 
-/// Resource/game details and navigation related status (observable)
+/// 资源/游戏详情与导航相关状态（可观测）
 public final class ResourceDetailState: ObservableObject {
-    
+
     @Published public var selectedItem: SidebarItem
     @Published public var gameType: Bool  // false = local, true = server
     @Published public var gameId: String?
@@ -11,24 +18,22 @@ public final class ResourceDetailState: ObservableObject {
         didSet {
             if selectedProjectId != oldValue {
                 loadedProjectDetail = nil
-                showInstallSheet = false
-                currentProject = nil
-                compatibleGames = []
             }
         }
     }
     @Published public var loadedProjectDetail: ModrinthProjectDetail?
-    @Published public var showInstallSheet = false
+    @Published public var showInstallSheet: Bool = false
     @Published public var currentProject: ModrinthProject?
     @Published var compatibleGames: [GameVersionInfo] = []
-    
+
     public init(
         selectedItem: SidebarItem = .resource(.mod),
         gameType: Bool = true,
         gameId: String? = nil,
-        gameResourcesType: String = "mod",
+        gameResourcesType: String = ResourceType.mod.rawValue,
         selectedProjectId: String? = nil,
-        loadedProjectDetail: ModrinthProjectDetail? = nil
+        loadedProjectDetail: ModrinthProjectDetail? = nil,
+        loadedProjectDetailV3: ModrinthProjectDetailV3? = nil
     ) {
         self.selectedItem = selectedItem
         self.gameType = gameType
@@ -37,36 +42,33 @@ public final class ResourceDetailState: ObservableObject {
         self.selectedProjectId = selectedProjectId
         self.loadedProjectDetail = loadedProjectDetail
     }
-    
-    // MARK: - Convenience method
-    
+
+    // MARK: - 便捷方法
+
     public func selectGame(id: String?) {
         gameId = id
     }
-    
+
     public func selectResource(type: String) {
         gameResourcesType = type
     }
-    
-    /// Clear the project/game selected state (used to switch back to the list, etc.)
+
+    /// 清空项目/游戏选中状态（用于切换回列表等）
     public func clearSelection() {
         selectedProjectId = nil
         loadedProjectDetail = nil
-        showInstallSheet = false
-        currentProject = nil
-        compatibleGames = []
     }
-    
-    // MARK: - Bindings (for use by subviews, GameActionManager, etc.)
-    
+
+    // MARK: - Bindings（供子视图与 GameActionManager 等使用）
+
     public var selectedItemBinding: Binding<SidebarItem> {
         Binding(get: { [weak self] in self?.selectedItem ?? .resource(.mod) }, set: { [weak self] value in
             guard let self else { return }
             DispatchQueue.main.async { self.selectedItem = value }
         })
     }
-    
-    /// Used for APIs that require Optional such as List(selection:)
+
+    /// 用于 List(selection:) 等需要 Optional 的 API
     public var selectedItemOptionalBinding: Binding<SidebarItem?> {
         Binding(get: { [weak self] in self?.selectedItem }, set: { [weak self] value in
             guard let self else { return }
@@ -86,7 +88,7 @@ public final class ResourceDetailState: ObservableObject {
         })
     }
     public var gameResourcesTypeBinding: Binding<String> {
-        Binding(get: { [weak self] in self?.gameResourcesType ?? "mod" }, set: { [weak self] value in
+        Binding(get: { [weak self] in self?.gameResourcesType ?? ResourceType.mod.rawValue }, set: { [weak self] value in
             guard let self else { return }
             DispatchQueue.main.async { self.gameResourcesType = value }
         })
@@ -103,16 +105,10 @@ public final class ResourceDetailState: ObservableObject {
             DispatchQueue.main.async { self.loadedProjectDetail = value }
         })
     }
-    var currentProjectBinding: Binding<ModrinthProject?> {
-        Binding(get: { [weak self] in self?.currentProject }, set: { [weak self] value in
+    public var showInstallSheetBinding: Binding<Bool> {
+        Binding(get: { [weak self] in self?.showInstallSheet ?? false }, set: { [weak self] value in
             guard let self else { return }
-            DispatchQueue.main.async { self.currentProject = value }
-        })
-    }
-    var compatibleGamesBinding: Binding<[GameVersionInfo]> {
-        Binding(get: { [weak self] in self?.compatibleGames ?? [] }, set: { [weak self] value in
-            guard let self else { return }
-            DispatchQueue.main.async { self.compatibleGames = value }
+            DispatchQueue.main.async { self.showInstallSheet = value }
         })
     }
 }

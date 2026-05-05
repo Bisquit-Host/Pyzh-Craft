@@ -1,18 +1,24 @@
+//
+//  XMCLInstanceParser.swift
+//  PyzhCraft
+//
+//
+
 import Foundation
 
-/// XMCL instance parser
+/// XMCL 实例解析器
 struct XMCLInstanceParser: LauncherInstanceParser {
     let launcherType: ImportLauncherType = .xmcl
-    
+
     func isValidInstance(at instancePath: URL) -> Bool {
         let instanceJsonPath = instancePath.appendingPathComponent("instance.json")
         let fileManager = FileManager.default
-        
+
         guard fileManager.fileExists(atPath: instanceJsonPath.path) else {
             return false
         }
-        
-        // Verify that the JSON file can be parsed
+
+        // 验证 JSON 文件可以解析
         do {
             _ = try parseInstanceJson(at: instanceJsonPath)
             return true
@@ -20,20 +26,20 @@ struct XMCLInstanceParser: LauncherInstanceParser {
             return false
         }
     }
-    
+
     func parseInstance(at instancePath: URL, basePath: URL) throws -> ImportInstanceInfo? {
         let instanceJsonPath = instancePath.appendingPathComponent("instance.json")
         let instance = try parseInstanceJson(at: instanceJsonPath)
-        
-        // Extract game version
+
+        // 提取游戏版本
         let gameVersion = instance.runtime.minecraft
-        
-        // Extract Mod Loader Information
+
+        // 提取 Mod 加载器信息
         let (modLoader, modLoaderVersion) = extractModLoader(from: instance)
-        
-        // Extract game name
+
+        // 提取游戏名称
         let gameName = instance.name.isEmpty ? "XMCL-\(instancePath.lastPathComponent)" : instance.name
-        
+
         return ImportInstanceInfo(
             gameName: gameName,
             gameVersion: gameVersion,
@@ -45,30 +51,30 @@ struct XMCLInstanceParser: LauncherInstanceParser {
             launcherType: launcherType
         )
     }
-    
+
     // MARK: - Private Methods
-    
-    /// Parse instance.json file
+
+    /// 解析 instance.json 文件
     private func parseInstanceJson(at path: URL) throws -> XMCLInstance {
         let data = try Data(contentsOf: path)
         return try JSONDecoder().decode(XMCLInstance.self, from: data)
     }
-    
-    /// Extract Mod Loader information
+
+    /// 提取 Mod Loader 信息
     private func extractModLoader(from instance: XMCLInstance) -> (loader: String, version: String) {
         let runtime = instance.runtime
-        
-        // Check by priority: Forge -> NeoForged -> Fabric -> Quilt -> Vanilla
+
+        // 按优先级检查：Forge -> NeoForged -> Fabric -> Quilt -> Vanilla
         if !runtime.forge.isEmpty {
-            return ("forge", runtime.forge)
+            return (GameLoader.forge.displayName, runtime.forge)
         } else if !runtime.neoForged.isEmpty {
-            return ("neoforge", runtime.neoForged)
+            return (GameLoader.neoforge.displayName, runtime.neoForged)
         } else if !runtime.fabricLoader.isEmpty {
-            return ("fabric", runtime.fabricLoader)
+            return (GameLoader.fabric.displayName, runtime.fabricLoader)
         } else if !runtime.quiltLoader.isEmpty {
-            return ("quilt", runtime.quiltLoader)
+            return (GameLoader.quilt.rawValue, runtime.quiltLoader)
         } else {
-            return ("vanilla", "")
+            return (GameLoader.vanilla.displayName, "")
         }
     }
 }
@@ -107,5 +113,5 @@ private struct XMCLRuntime: Codable {
 }
 
 private struct XMCLServer: Codable {
-    // Server information, add fields if needed
+    // 服务器信息，如果需要可以添加字段
 }
