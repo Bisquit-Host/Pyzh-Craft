@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="SwiftCraftLauncher/Assets.xcassets/AppIcon.appiconset/mac512pt2x.png" alt="SwiftCraftLauncher" width="128" height="128">
+  <img src="PyzhCraft/Assets.xcassets/AppIcon.appiconset/mac512pt2x.png" alt="PyzhCraft" width="128" height="128">
   
   # 🚀 Swift Craft Launcher
   
@@ -38,10 +38,10 @@
 Swift Craft Launcher is a native macOS Minecraft launcher 🍎 built with SwiftUI, offering a streamlined and efficient gaming experience. Designed for modern macOS systems, it provides comprehensive mod loader support, Microsoft account authentication, and intuitive game management.
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/suhang12332/Swift-Craft-Launcher-Assets/refs/heads/main/imagebed/readme/screenshot2026-01-29-01.17.31.gif" alt="SwiftCraftLauncher Screenshot" width="800">
+  <img src="https://raw.githubusercontent.com/suhang12332/Swift-Craft-Launcher-Assets/refs/heads/main/imagebed/readme/screenshot2026-01-29-01.17.31.gif" alt="PyzhCraft Screenshot" width="800">
 </div>
 <div align="center">
-  <img src="https://raw.githubusercontent.com/suhang12332/Swift-Craft-Launcher-Assets/refs/heads/main/imagebed/readme/screenshot2026-01-29-01.14.06.gif" alt="SwiftCraftLauncher Screenshot" width="800">
+  <img src="https://raw.githubusercontent.com/suhang12332/Swift-Craft-Launcher-Assets/refs/heads/main/imagebed/readme/screenshot2026-01-29-01.14.06.gif" alt="PyzhCraft Screenshot" width="800">
 </div>
 
 ## ✨ Key Features
@@ -99,7 +99,7 @@ Please visit [FAQ](doc/FAQ.md)
 
 2. **🛠️ Open in Xcode**
    ```bash
-   open SwiftCraftLauncher.xcodeproj
+   open PyzhCraft.xcodeproj
    ```
 
 3. **🚀 Build and run** using Xcode (⌘R)

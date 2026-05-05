@@ -37,7 +37,7 @@ jobs:
       - name: Extract version info
         id: version
         run: |
-          MARKETING_VERSION_RAW=$(awk '/\/\* Release \*\/ = {/,/};/ {if ($0 ~ /MARKETING_VERSION/) print $0}' SwiftCraftLauncher.xcodeproj/project.pbxproj | head -1 | sed 's/.*= //' | sed 's/;//')
+          MARKETING_VERSION_RAW=$(awk '/\/\* Release \*\/ = {/,/};/ {if ($0 ~ /MARKETING_VERSION/) print $0}' PyzhCraft.xcodeproj/project.pbxproj | head -1 | sed 's/.*= //' | sed 's/;//')
           # 去除引号
           MARKETING_VERSION=$(echo "$MARKETING_VERSION_RAW" | sed 's/^"//' | sed 's/"$//')
           
@@ -56,7 +56,7 @@ jobs:
 
       - name: Replace AppConstants secrets
         run: |
-          TARGET_FILE="SwiftCraftLauncher/CommonFeature/Utilities/AppConstants.swift"
+          TARGET_FILE="PyzhCraft/Common/Utils/AppConstants.swift"
           for KEY in CLIENTID CURSEFORGE_API_KEY LITTLESKIN_CLIENT_SECRET MUA_CLIENT_SECRET ELYBY_CLIENT_SECRET; do
             # GitHub Secret 中应存放加密后的值
             VALUE="${!KEY}"
@@ -68,7 +68,7 @@ jobs:
       - name: Build app for ${{ matrix.arch }}
         run: |
           BUILD_DIR="build_${{ matrix.arch }}"
-          ARCHIVE_PATH="$BUILD_DIR/SwiftCraftLauncher.xcarchive"
+          ARCHIVE_PATH="$BUILD_DIR/PyzhCraft.xcarchive"
           
           # 设置要排除的架构（排除非目标架构）
           if [[ "${{ matrix.arch }}" == "arm64" ]]; then
@@ -77,8 +77,8 @@ jobs:
             EXCLUDED_ARCHS="arm64"
           fi
           
-          xcodebuild -project SwiftCraftLauncher.xcodeproj \
-            -scheme SwiftCraftLauncher \
+          xcodebuild -project PyzhCraft.xcodeproj \
+            -scheme PyzhCraft \
             -configuration Release \
             -destination "platform=macOS,arch=${{ matrix.arch }}" \
             -derivedDataPath "$BUILD_DIR" \
@@ -90,9 +90,9 @@ jobs:
 
       - name: Fetch help documentation
         run: |
-          ARCHIVE_PATH="build_${{ matrix.arch }}/SwiftCraftLauncher.xcarchive"
+          ARCHIVE_PATH="build_${{ matrix.arch }}/PyzhCraft.xcarchive"
           APP_PATH="$ARCHIVE_PATH/Products/Applications/Swift Craft Launcher.app"
-          HELP_TARGET_PATH="$APP_PATH/Contents/Resources/SwiftCraftLauncher.help"
+          HELP_TARGET_PATH="$APP_PATH/Contents/Resources/PyzhCraft.help"
           
           echo "📚 开始拉取帮助文档..."
           
@@ -105,7 +105,7 @@ jobs:
           git clone --depth 1 https://github.com/suhang12332/Swift-Craft-Launcher-Assets.git "$TEMP_DIR/assets"
           
           # 检查帮助文档目录是否存在
-          HELP_SOURCE_PATH="$TEMP_DIR/assets/help/SwiftCraftLauncher.help"
+          HELP_SOURCE_PATH="$TEMP_DIR/assets/help/PyzhCraft.help"
           if [[ ! -d "$HELP_SOURCE_PATH" ]]; then
             echo "❌ 未找到帮助文档目录: $HELP_SOURCE_PATH"
             exit 1
@@ -142,9 +142,9 @@ jobs:
 
       - name: Generate helpindex
         run: |
-          ARCHIVE_PATH="build_${{ matrix.arch }}/SwiftCraftLauncher.xcarchive"
+          ARCHIVE_PATH="build_${{ matrix.arch }}/PyzhCraft.xcarchive"
           APP_PATH="$ARCHIVE_PATH/Products/Applications/Swift Craft Launcher.app"
-          HELP_PATH="$APP_PATH/Contents/Resources/SwiftCraftLauncher.help"
+          HELP_PATH="$APP_PATH/Contents/Resources/PyzhCraft.help"
           
           if [[ ! -d "$HELP_PATH" ]]; then
             echo "❌ 未找到帮助文件夹: $HELP_PATH"
@@ -185,7 +185,7 @@ jobs:
             }
           
             # 生成标准 helpindex (LSM index)
-            HELPINDEX_PATH="SwiftCraftLauncher.helpindex"
+            HELPINDEX_PATH="PyzhCraft.helpindex"
             echo "  生成标准索引 (LSM): $HELPINDEX_PATH"
             hiutil -I lsm -Caf "$HELPINDEX_PATH" -vv .
           
@@ -198,7 +198,7 @@ jobs:
             fi
           
             # 生成 Core Spotlight helpindex
-            CSHELPINDEX_PATH="SwiftCraftLauncher.cshelpindex"
+            CSHELPINDEX_PATH="PyzhCraft.cshelpindex"
             echo "  生成 Core Spotlight 索引: $CSHELPINDEX_PATH"
             hiutil -I corespotlight -Caf "$CSHELPINDEX_PATH" -vv .
           
@@ -220,7 +220,7 @@ jobs:
 
       - name: Process app with archify
         run: |
-          ARCHIVE_PATH="build_${{ matrix.arch }}/SwiftCraftLauncher.xcarchive"
+          ARCHIVE_PATH="build_${{ matrix.arch }}/PyzhCraft.xcarchive"
           APP_PATH="$ARCHIVE_PATH/Products/Applications/Swift Craft Launcher.app"
           PROCESSED_DIR="processed_app_${{ matrix.arch }}"
           
@@ -275,7 +275,7 @@ jobs:
           mkdir -p dmg_background
           
           # Copy app icon for volume icon
-          cp "SwiftCraftLauncher/Assets.xcassets/AppIcon.appiconset/mac512pt2x.png" "dmg_background/volume_icon.png"
+          cp "PyzhCraft/Assets.xcassets/AppIcon.appiconset/mac512pt2x.png" "dmg_background/volume_icon.png"
           
           # Copy the existing background image (assuming it's in the project root)
           if [[ -f "dmg_background@2x.png" ]]; then
@@ -285,7 +285,7 @@ jobs:
           else
             echo "⚠️  未找到背景图片，将使用默认背景"
             # Fallback: use app icon as background
-            cp "SwiftCraftLauncher/Assets.xcassets/AppIcon.appiconset/mac512pt2x.png" "dmg_background/background@2x.png"
+            cp "PyzhCraft/Assets.xcassets/AppIcon.appiconset/mac512pt2x.png" "dmg_background/background@2x.png"
           fi
           
           echo "✅ DMG assets prepared"
@@ -293,7 +293,7 @@ jobs:
       - name: Create DMG
         id: create_dmg
         run: |
-          ARCHIVE_PATH="build_${{ matrix.arch }}/SwiftCraftLauncher.xcarchive"
+          ARCHIVE_PATH="build_${{ matrix.arch }}/PyzhCraft.xcarchive"
           APP_PATH="$ARCHIVE_PATH/Products/Applications/Swift Craft Launcher.app"
           DMG_DIR="dmg_temp_${{ matrix.arch }}"
           mkdir -p "$DMG_DIR"

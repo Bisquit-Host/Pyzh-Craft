@@ -41,7 +41,7 @@
 **禁止使用與本軟體相同或容易混淆的名稱**。基於本軟體建立的修改版本或衍生作品不得使用以下名稱：
 
 - "Swift Craft Launcher"
-- "SwiftCraftLauncher"
+- "PyzhCraft"
 - "Swift Craft"
 - 任何可能導致使用者混淆的相似名稱或變體
 

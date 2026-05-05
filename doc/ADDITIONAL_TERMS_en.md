@@ -41,7 +41,7 @@ The following situations are considered fair use and do not require additional m
 **The use of the same or confusingly similar names as this software is prohibited**. Modified versions or derivative works based on this software may not use the following names:
 
 - "Swift Craft Launcher"
-- "SwiftCraftLauncher"
+- "PyzhCraft"
 - "Swift Craft"
 - Any similar names or variants that may cause user confusion
 

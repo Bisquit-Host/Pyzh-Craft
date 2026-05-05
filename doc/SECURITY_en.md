@@ -1,7 +1,7 @@
 # Security Policy 🔒
 *[中文](../SECURITY.md)*
 
-Thank you for your interest in the security of **SwiftCraftLauncher**!
+Thank you for your interest in the security of **PyzhCraft**!
 Although this project is mainly for development and learning purposes, we still take security seriously.
 
 ---
@@ -34,7 +34,7 @@ To help us resolve the issue quickly, please provide as much of the following as
 
 1. **Vulnerability Description**: What the problem is and its potential impact
 2. **Steps to Reproduce**: How to trigger the vulnerability (stable reproduction is ideal)
-3. **Environment Details**: OS version, SwiftCraftLauncher version
+3. **Environment Details**: OS version, PyzhCraft version
 4. **Logs/Screenshots**: Any relevant information that may help us understand the issue
 
 ---
@@ -51,4 +51,4 @@ To help us resolve the issue quickly, please provide as much of the following as
 ## Acknowledgments 💖
 
 Security depends on the efforts of every user!
-Thank you for contributing to the security of SwiftCraftLauncher 🙏.
+Thank you for contributing to the security of PyzhCraft 🙏.
