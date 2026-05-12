@@ -29,57 +29,57 @@ enum ErrorLevel: String, CaseIterable {
 /// 全局错误类型枚举
 enum GlobalError: Error, LocalizedError, Identifiable {
     case network(
-        chineseMessage: String,
+        chineseMessage: String = "",
         i18nKey: String,
         level: ErrorLevel = .notification
     )
     case fileSystem(
-        chineseMessage: String,
+        chineseMessage: String = "",
         i18nKey: String,
         level: ErrorLevel = .notification
     )
     case authentication(
-        chineseMessage: String,
+        chineseMessage: String = "",
         i18nKey: String,
         level: ErrorLevel = .popup
     )
     case validation(
-        chineseMessage: String,
+        chineseMessage: String = "",
         i18nKey: String,
         level: ErrorLevel = .notification
     )
     case download(
-        chineseMessage: String,
+        chineseMessage: String = "",
         i18nKey: String,
         level: ErrorLevel = .notification
     )
     case installation(
-        chineseMessage: String,
+        chineseMessage: String = "",
         i18nKey: String,
         level: ErrorLevel = .notification
     )
     case gameLaunch(
-        chineseMessage: String,
+        chineseMessage: String = "",
         i18nKey: String,
         level: ErrorLevel = .popup
     )
     case resource(
-        chineseMessage: String,
+        chineseMessage: String = "",
         i18nKey: String,
         level: ErrorLevel = .notification
     )
     case player(
-        chineseMessage: String,
+        chineseMessage: String = "",
         i18nKey: String,
         level: ErrorLevel = .notification
     )
     case configuration(
-        chineseMessage: String,
+        chineseMessage: String = "",
         i18nKey: String,
         level: ErrorLevel = .notification
     )
     case unknown(
-        chineseMessage: String,
+        chineseMessage: String = "",
         i18nKey: String,
         level: ErrorLevel = .silent
     )

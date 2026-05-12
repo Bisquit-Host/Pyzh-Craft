@@ -35,6 +35,30 @@ struct MicrosoftOAuthErrorResponse: Codable {
     }
 }
 
+struct AuthorizationCodeResponse {
+    let code: String?
+    let error: String?
+    let errorDescription: String?
+
+    init?(from url: URL) {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return nil
+        }
+        let items = components.queryItems ?? []
+        code = items.first { $0.name == "code" }?.value
+        error = items.first { $0.name == "error" }?.value
+        errorDescription = items.first { $0.name == "error_description" }?.value
+    }
+
+    var isSuccess: Bool {
+        code?.isEmpty == false && error == nil
+    }
+
+    var isUserDenied: Bool {
+        error == "access_denied"
+    }
+}
+
 // MARK: - Token Response
 struct TokenResponse: Codable {
     let accessToken: String
