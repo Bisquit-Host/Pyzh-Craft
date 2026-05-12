@@ -235,7 +235,7 @@ extension Bundle {
         return "\(appVersion)-\(buildNumber)"
     }
     var appName: String {
-        return Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "Swift Craft Launcher"
+        return Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "PyzhCraft"
     }
     var copyright: String {
         return infoDictionary?["NSHumanReadableCopyright"] as? String ?? "Copyright © 2025 \(appName)"
